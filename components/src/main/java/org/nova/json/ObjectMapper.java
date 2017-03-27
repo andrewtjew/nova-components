@@ -607,11 +607,18 @@ public class ObjectMapper
 				for (;;)
 				{
 					next = lexer.getNextCharacter();
-					if (next != '{')
+					if (next == '{')
 					{
-						throw new Exception("String expected at " + lexer.getPosition());
+	                    list.add(readObject(lexer, componentType));
 					}
-					list.add(readObject(lexer, componentType));
+					else if (next=='[')
+					{
+					    list.add(readArray(lexer, componentType));
+					}
+					else
+					{
+                        throw new Exception("String expected at " + lexer.getPosition());
+					}
 					next = lexer.isCommaOrCloseArray();
 					if (next == ']')
 					{

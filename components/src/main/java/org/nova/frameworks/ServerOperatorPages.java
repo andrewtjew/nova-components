@@ -2256,7 +2256,7 @@ public class ServerOperatorPages
                 }
                 try (Trace trace = new Trace(this.serverApplication.getTraceManager(), parent, "Execute"))
                 {
-                    response = textClient.POST(trace, null, pathAndQuery.toString(), contentText, headers.toArray(new Header[headers.size()]));
+                    response = textClient.post(trace, null, pathAndQuery.toString(), contentText, headers.toArray(new Header[headers.size()]));
                     statusCode=response.getStatusCode();
                     duration = trace.getDuration();
                 }
@@ -2265,7 +2265,7 @@ public class ServerOperatorPages
             {
                 try (Trace trace = new Trace(this.serverApplication.getTraceManager(), parent, "Execute"))
                 {
-                    response = textClient.GET(trace, null, pathAndQuery.toString(), headers.toArray(new Header[headers.size()]));
+                    response = textClient.get(trace, null, pathAndQuery.toString(), headers.toArray(new Header[headers.size()]));
                     statusCode=response.getStatusCode();
                     duration = trace.getDuration();
                 }
@@ -2280,7 +2280,7 @@ public class ServerOperatorPages
                 }
                 try (Trace trace = new Trace(this.serverApplication.getTraceManager(), parent, "Execute"))
                 {
-                    statusCode=textClient.PUT(trace, null, pathAndQuery.toString(), contentText, headers.toArray(new Header[headers.size()]));
+                    statusCode=textClient.put(trace, null, pathAndQuery.toString(), contentText, headers.toArray(new Header[headers.size()]));
                     duration = trace.getDuration();
                 }
             }
@@ -2294,7 +2294,7 @@ public class ServerOperatorPages
                 }
                 try (Trace trace = new Trace(this.serverApplication.getTraceManager(), parent, "Execute"))
                 {
-                    statusCode=textClient.PATCH(trace, null, pathAndQuery.toString(), contentText, headers.toArray(new Header[headers.size()]));
+                    statusCode=textClient.patch(trace, null, pathAndQuery.toString(), contentText, headers.toArray(new Header[headers.size()]));
                     duration = trace.getDuration();
                 }
             }
@@ -2307,7 +2307,7 @@ public class ServerOperatorPages
                 }
                 try (Trace trace = new Trace(this.serverApplication.getTraceManager(), parent, "Execute"))
                 {
-                    statusCode=textClient.DELETE(trace, null, pathAndQuery.toString(), headers.toArray(new Header[headers.size()]));
+                    statusCode=textClient.delete(trace, null, pathAndQuery.toString(), headers.toArray(new Header[headers.size()]));
                     duration = trace.getDuration();
                 }
             }

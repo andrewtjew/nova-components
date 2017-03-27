@@ -22,7 +22,7 @@ import org.nova.tracing.TraceManager;
 //TODO: logging
 public class JSONClient
 {
-	final private TraceManager trace;
+	final private TraceManager traceManager;
 	final private Logger logger;
 	final private HttpClient client;
 	final private String endPoint;
@@ -30,9 +30,9 @@ public class JSONClient
 	final private String contentType;  
 	final private String patchType;  
 	
-	public JSONClient(TraceManager trace,Logger logger,String endPoint,HttpClient client,String contentType,String patchType,Header...headers)
+	public JSONClient(TraceManager traceManager,Logger logger,String endPoint,HttpClient client,String contentType,String patchType,Header...headers)
 	{
-		this.trace=trace;
+		this.traceManager=traceManager;
 		this.logger=logger;
 		this.endPoint=endPoint;
 		this.client=client;
@@ -51,14 +51,14 @@ public class JSONClient
 		return HttpClients.custom().setConnectionManager(connectionManager).build();
 	}
 	
-	public JSONClient(TraceManager parent,Logger logger,String endPoint)
+	public JSONClient(TraceManager traceManager,Logger logger,String endPoint)
 	{
-		this(parent,logger,endPoint,newDefaultClient(),"application/json","application/merge-patch+json");
+		this(traceManager,logger,endPoint,newDefaultClient(),"application/json","application/merge-patch+json");
 	}
 	
-	public <TYPE> JsonResponse<TYPE> GET(Trace parent,String traceCategoryOve,String pathAndQuery,Class<TYPE> responseContentType) throws Exception
+	public <TYPE> JSONResponse<TYPE> get(Trace parent,String traceCategoryOverride,String pathAndQuery,Class<TYPE> responseContentType) throws Exception
 	{
-		try (Trace trace=new Trace(this.trace, parent, traceCategoryOve!=null?traceCategoryOve:pathAndQuery))
+		try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
 		{
 			HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
 			get.setHeader("Accept",this.contentType);
@@ -75,9 +75,9 @@ public class JSONClient
 				int statusCode=response.getStatusLine().getStatusCode();
 				if (statusCode>=300)
 				{
-					return new JsonResponse<TYPE>(statusCode, null);
+					return new JSONResponse<TYPE>(statusCode, null);
 				}
-				return new JsonResponse<TYPE>(statusCode,ObjectMapper.read(response.getEntity().getContent(), responseContentType));
+				return new JSONResponse<TYPE>(statusCode,ObjectMapper.read(response.getEntity().getContent(), responseContentType));
 			}
 			finally
 			{
@@ -86,9 +86,9 @@ public class JSONClient
 		}		
 	}
 
-	public TextResponse GET(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Exception
+	public TextResponse get(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Exception
 	{
-		try (Trace trace=new Trace(this.trace, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
+		try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
 		{
 			HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
 			get.setHeader("Accept",this.contentType);
@@ -122,9 +122,9 @@ public class JSONClient
 		}		
 	}
 
-	public int DELETE(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Exception
+	public int delete(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Exception
 	{
-		try (Trace trace=new Trace(this.trace, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
+		try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
 		{
 			HttpDelete delete=new HttpDelete(this.endPoint+pathAndQuery);
 			if (this.headers!=null)
@@ -146,9 +146,9 @@ public class JSONClient
 		}		
 	}
 
-	public int PUT(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Exception
+	public int put(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Exception
 	{
-		try (Trace trace=new Trace(this.trace, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
+		try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
 		{
 			HttpPut put=new HttpPut(this.endPoint+pathAndQuery);
 			put.setHeader("Accept",this.contentType);
@@ -170,9 +170,9 @@ public class JSONClient
 		}		
 	}
 
-	public int PATCH(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Exception
+	public int patch(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Exception
 	{
-		try (Trace trace=new Trace(this.trace, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
+		try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
 		{
 			HttpPatch patch=new HttpPatch(this.endPoint+pathAndQuery);
 			patch.setHeader("Accept",this.contentType);
@@ -194,9 +194,9 @@ public class JSONClient
 		}		
 	}
 
-	public <TYPE> JsonResponse<TYPE> POST(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Class<TYPE> responseContentType) throws Exception
+	public <TYPE> JSONResponse<TYPE> post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Class<TYPE> responseContentType) throws Exception
 	{
-		try (Trace trace=new Trace(this.trace, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
+		try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
 		{
 			HttpPost post=new HttpPost(this.endPoint+pathAndQuery);
 			if (content!=null)
@@ -219,9 +219,9 @@ public class JSONClient
 				int statusCode=response.getStatusLine().getStatusCode();
 				if (statusCode>=300)
 				{
-					return new JsonResponse<TYPE>(statusCode, null);
+					return new JSONResponse<TYPE>(statusCode, null);
 				}
-				return new JsonResponse<TYPE>(statusCode,ObjectMapper.read(response.getEntity().getContent(), responseContentType));
+				return new JSONResponse<TYPE>(statusCode,ObjectMapper.read(response.getEntity().getContent(), responseContentType));
 			}
 			finally
 			{
@@ -230,9 +230,9 @@ public class JSONClient
 		}		
 	}
 
-	public TextResponse POST(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Exception
+	public TextResponse post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Exception
 	{
-		try (Trace trace=new Trace(this.trace, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
+		try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
 		{
 			HttpPost post=new HttpPost(this.endPoint+pathAndQuery);
 			if (content!=null)
@@ -270,5 +270,9 @@ public class JSONClient
 				response.getEntity().getContent().close();
 			}
 		}		
+	}
+	public String getEndPoint()
+	{
+	    return this.endPoint;
 	}
 }

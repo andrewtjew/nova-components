@@ -1,10 +1,10 @@
 package org.nova.http.client;
 
-public class JsonResponse<TYPE>
+public class JSONResponse<TYPE>
 {
 	private final int statusCode;
 	private final TYPE content;
-	public JsonResponse(int statusCode,TYPE content) 
+	public JSONResponse(int statusCode,TYPE content) 
 	{
 		this.statusCode=statusCode;
 		this.content=content;
