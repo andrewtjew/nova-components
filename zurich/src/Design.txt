@@ -1,0 +1,174 @@
+Full program compilation
+auto inlining: based on size of method
+
+
+Flow control
+ if, else if, else
+ do while
+ while
+ switch: switch does not fall-through.
+ continue g(t,5); //allows continuation style passing
+  
+ 
+ Iterate
+ for (range(1,5)=>a)
+ Iterator interface.
+ Returns disjunctive type containing boolean and value.
+ Compiler to optimize faster code from 'known' iterators e.g the equivalent of: for (int i=0;i<5;i++)
+ 
+ Type system
+ 
+ disjunctive type:
+ a:int|string;
+ 
+ The other type:
+ fn()=>(c:int|string|long)}{}
+ a:int|other;
+ a=fn(); //runtime type is other if fn() returns string or long;
+ other by itself is invalid. other must be part of a disjunctive type.
+ a:other; is an error.
+  
+ Switching on disjunctive types
+ a:int|string|other=function();
+ type switch (a)
+ case string:
+ {
+ 	b=a; //b is a string;
+ }
+ case int:
+ {
+ }
+ default:
+ {
+ }
+
+ structure (or record) type:
+ a:{a:int,b:string};
+ 
+modifiers:
+ mutable
+ All variables are not mutable by default.
+ public
+ All fields are not public by default
+ class Foo
+ {
+ 	public mutable value:int;
+ 	public bar(mutable a:int)=>string;
+ }
+ 
+ interfaces
+ Any class method without definition is an interface method.
+ Classes inherit interfaces including multiple interfaces.
+ Conflicts are not resolved automatically.
+ Pick winner to resolve field conflicts:
+ class B
+ {
+ 	public a:int;
+ 	public b:int;
+ 	public x:int;
+ 	fa(){}
+ 	fb(){}
+ 	fx(){}
+ }
+ class C
+ {
+ 	public a:int;
+ 	public b:int;
+ 	public y:int;
+ 	fa(){}
+ 	fb(){}
+ 	fy(){}
+ }
+ Conflicts from a,b,fa,fb must be resolved;
+ class A from B,C
+ {
+ 	public a:int=B.a;
+ 	public b:string; //totally hides B.b and C.b
+ 	fa()=B.fx();
+ 	fb(){B.fb();C.fb();}
+ }
+
+Resolved classes carries their behavior in base class method arguments using an inplace vtable 
+fn(c:C){}
+;
+fn(new A); //an inplace vtable is constructed such that in fn() c.a=A.a, c.b=A.b,c.fa()=A.fa(), c.fb()=A.fb(). c.y is still from C.
+     
+
+
+ 
+ 
+ 	
+ 
+ Assignment:
+ v=f(a,b);
+ v:t=f(arg2=5,arg1=5);
+ (v=res1,b=res2)=MultipleReturn(); //multiple return values
+  m=MultipleReturn(); //m is structure type;  
+ v:t1|t2|t2=f(); //disjunctive return types
+ v:t1|void=f(); //void is a return type
+ 
+ multiple return
+ return a,b;
+ a,b=f(c,d)
+ 
+ fn(mutable a:int,b)=>(c:int,d)
+ {
+ 	if (a==2)
+ 	{
+ 		return d=5,c=6;
+ 	}
+ 	else
+ 	{
+ 		return (5,99);
+ 	}
+ }
+ 
+ functions can return any types.
+ a:t,b=f(c,d);
+ a:t1|t2,b=f(c,d);
+ 
+ 
+ auto-dispose
+ using (a=fn(),b=fn())
+ {
+  ...
+ }
+ a and b are not accessible outside of using
+ 
+ 
+ Lambda
+ foo ( (a,b)=>(c){return c=a+b;}
+ Lambda variables are closures
+ 
+ 
+ try
+ a = try foo()
+ 
+  
+ 
+ parallel
+ result = parallel (5) ns
+ {
+ a=fn(1)
+ fn(2),
+ b=fn(3),
+ ...
+ }
+  catch (exception ex)
+ {
+ }
+ catch (TimeoutException t)
+ {
+ }
+ finally
+ {
+ }
+  t = result.a;
+  
+  non-mutable classes are threadsafe.
+  
+ 
+ Contracts
+ requires() executed before method execution
+ ensures() executed after method execution
+ 

@@ -1,0 +1,37 @@
+using System;
+using a=k.a;
+
+namespace ns.E
+{
+	namespace T
+	{
+	}
+	
+	class T
+	{
+		[a=2]
+//		public foo()=>{a:(int,b)=>e,b}
+		public foo()=>int
+		{
+			using (a=5,b=6)
+			{
+				a=5;
+			}
+	
+			try
+			{
+			}
+			catch (a:T,b:C)
+			{
+			}
+			finally
+			{
+			}
+					
+			t:(a,c)=>(d);
+			mutable v=a*f(2,3);
+			e=f(2);
+		}
+		public mutable c:string|int|{a:int,b,c:System.String|int}=2;
+	}
+}
