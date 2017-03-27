@@ -179,6 +179,10 @@ public class Configuration
 	    }
 		return ObjectMapper.read(getValue(name),type);
 	}
+    public <OBJECT> OBJECT getJSONValue(String name,Class<OBJECT> type,String defaultText) throws Exception
+    {
+        return ObjectMapper.read(getValue(name,defaultText),type);
+    }
 
 	public ConfigurationItem[] getConfigurationItemSnapshot()
 	{
