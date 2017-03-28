@@ -19,12 +19,13 @@
 *.exe
 *.class
 *.obj
+*.settings
+**/.metadata/*
+**/.recommenders/*
 **/obj/*
 **/bin/*
+**/target/*
+**/logs/*
 BuildLog.htm
-workspace/.*
-workspace/Geneva/target/*
-workspace/Geneva/bin
-workspace/Geneva/logs
-workspace/Geneva/.settings
+
 

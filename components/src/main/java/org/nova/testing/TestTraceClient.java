@@ -42,7 +42,7 @@ public class TestTraceClient
 				StackTraceElement element=thread.getStackTrace()[2];
 				String category=element.getClassName();
 				String source=thread.getName()+":"+element.getMethodName()+"("+element.getFileName()+":"+element.getLineNumber()+")";
-				this.client.PUT(null, null, printUrl, new PrintMessage(category,source,text));
+				this.client.put(null, null, printUrl, new PrintMessage(category,source,text));
 			}
 			catch (Exception e)
 			{
@@ -63,7 +63,7 @@ public class TestTraceClient
 				StackTraceElement element=thread.getStackTrace()[2];
 				String category=element.getClassName();
 				String source=thread.getName()+":"+element.getMethodName()+"("+element.getFileName()+":"+element.getLineNumber()+")";
-				client.client.PUT(null, null, client.printUrl, new PrintMessage(category,source,text));
+				client.client.put(null, null, client.printUrl, new PrintMessage(category,source,text));
 			}
 			catch (Exception e)
 			{
@@ -83,7 +83,7 @@ public class TestTraceClient
 				StackTraceElement element=thread.getStackTrace()[2];
 				String category=element.getClassName();
 				String source=thread.getName()+":"+element.getMethodName()+"("+element.getFileName()+":"+element.getLineNumber()+")";
-				client.client.PUT(null, null, client.printUrl, new PrintMessage(category,text+":"+source,Utils.toString(throwable)));
+				client.client.put(null, null, client.printUrl, new PrintMessage(category,text+":"+source,Utils.toString(throwable)));
 			}
 			catch (Exception e)
 			{
@@ -103,7 +103,7 @@ public class TestTraceClient
 				StackTraceElement element=thread.getStackTrace()[2];
 				String category=element.getClassName();
 				String source=thread.getName()+":"+element.getMethodName()+"("+element.getFileName()+":"+element.getLineNumber()+")";
-				client.client.PUT(null, null, client.printUrl, new PrintMessage(category,source,Utils.toString(throwable)));
+				client.client.put(null, null, client.printUrl, new PrintMessage(category,source,Utils.toString(throwable)));
 			}
 			catch (Exception e)
 			{
@@ -124,7 +124,7 @@ public class TestTraceClient
 				String category=element.getClassName();
 				String source=thread.getName()+":"+element.getMethodName()+"("+element.getFileName()+":"+element.getLineNumber()+")";
 				
-				client.client.PUT(null, null, client.printUrl, new PrintMessage(category,source,"MARK"));
+				client.client.put(null, null, client.printUrl, new PrintMessage(category,source,"MARK"));
 			}
 			catch (Exception e)
 			{

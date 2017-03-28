@@ -257,7 +257,7 @@ public class Lexer
 			{
 				if (this.reader.read()=='l')
 				{
-					if (this.reader.read()=='l')
+					if (this.reader.read()=='s')
 					{
 						if (this.reader.read()=='e')
 						{
@@ -294,6 +294,7 @@ public class Lexer
 				{
 					if (this.reader.read()=='e')
 					{
+	                    this.last=0;
 						return true;
 					}
 				}
@@ -305,10 +306,11 @@ public class Lexer
 			{
 				if (this.reader.read()=='l')
 				{
-					if (this.reader.read()=='l')
+					if (this.reader.read()=='s')
 					{
 						if (this.reader.read()=='e')
 						{
+		                    this.last=0;
 							return true;
 						}
 					}
@@ -358,7 +360,7 @@ public class Lexer
 	char isCloseArray() throws Exception
 	{
 		char character=skipWhiteSpace();
-		if (character=='}')
+		if (character==']')
 		{
 			this.last=0;
 			return character;

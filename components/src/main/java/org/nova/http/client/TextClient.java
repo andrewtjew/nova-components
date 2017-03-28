@@ -52,7 +52,7 @@ public class TextClient
 		this(traceManager,logger,endPoint,newDefaultClient());
 	}
 
-	public TextResponse GET(Trace parent,String traceCategoryOverride,String pathAndQuery,Header...headers) throws Exception
+	public TextResponse get(Trace parent,String traceCategoryOverride,String pathAndQuery,Header...headers) throws Exception
 	{
 		try (Trace trace=new Trace(this.trace, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
 		{
@@ -89,7 +89,7 @@ public class TextClient
 		}		
 	}
     
-	public TextResponse POST(Trace parent,String traceCategoryOverride,String pathAndQuery,String content,Header...headers) throws Exception
+	public TextResponse post(Trace parent,String traceCategoryOverride,String pathAndQuery,String content,Header...headers) throws Exception
     {
         try (Trace trace=new Trace(this.trace, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
         {
@@ -129,7 +129,7 @@ public class TextClient
         }       
     }
 
-	public int PUT(Trace parent,String traceCategoryOverride,String pathAndQuery,String content,Header...headers) throws Exception
+	public int put(Trace parent,String traceCategoryOverride,String pathAndQuery,String content,Header...headers) throws Exception
     {
         try (Trace trace=new Trace(this.trace, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
         {
@@ -162,7 +162,7 @@ public class TextClient
         }       
     }
 
-	public int PATCH(Trace parent,String traceCategoryOverride,String pathAndQuery,String content,Header...headers) throws Exception
+	public int patch(Trace parent,String traceCategoryOverride,String pathAndQuery,String content,Header...headers) throws Exception
     {
         try (Trace trace=new Trace(this.trace, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
         {
@@ -194,7 +194,7 @@ public class TextClient
             }
         }       
     }
-    public int DELETE(Trace parent,String traceCategoryOverride,String pathAndQuery,Header...headers) throws Exception
+    public int delete(Trace parent,String traceCategoryOverride,String pathAndQuery,Header...headers) throws Exception
     {
         try (Trace trace=new Trace(this.trace, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
         {

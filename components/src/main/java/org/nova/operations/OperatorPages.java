@@ -17,9 +17,9 @@ import org.nova.html.pages.AjaxQueryContentWriter;
 import org.nova.html.pages.AjaxQueryResult;
 import org.nova.html.pages.Attribute;
 import org.nova.html.pages.HtmlWriter;
-import org.nova.html.pages.Menu;
-import org.nova.html.pages.PageContentResult;
-import org.nova.html.pages.PageContentWriter;
+import org.nova.html.pages.operations.Menu;
+import org.nova.html.pages.operations.OperationContentResult;
+import org.nova.html.pages.operations.OperationContentWriter;
 import org.nova.http.server.Response;
 import org.nova.http.server.annotations.ContentWriters;
 import org.nova.http.server.annotations.DefaultValue;
@@ -34,7 +34,7 @@ import org.nova.operations.VariableInstance;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-@ContentWriters(PageContentWriter.class)
+@ContentWriters(OperationContentWriter.class)
 public class OperatorPages
 {
 	final private OperatorVariableManager variableManager;
@@ -54,7 +54,7 @@ public class OperatorPages
 	
 	@GET
 	@Path("/operator/variables/view")
-	public Response<PageContentResult> list() throws Throwable
+	public Response<OperationContentResult> list() throws Throwable
 	{
 		HtmlWriter writer=new HtmlWriter();
 
@@ -94,12 +94,12 @@ public class OperatorPages
 			writer.end_table();
 		}
 		
-		return PageContentResult.respond(writer, "View Operator Variables");
+		return OperationContentResult.respond(writer, "View Operator Variables");
 	}
 
 	@GET
 	@Path("/operator/variables/modify")
-	public Response<PageContentResult> modify() throws Throwable
+	public Response<OperationContentResult> modify() throws Throwable
 	{
 		HtmlWriter writer=new HtmlWriter();
 
@@ -216,7 +216,7 @@ public class OperatorPages
 			writer.end_table();
 		}
 		
-		return PageContentResult.respond(writer, "Modify Operator Variables");
+		return OperationContentResult.respond(writer, "Modify Operator Variables");
 	}
 	
 	private String formatStringOutput(String s)

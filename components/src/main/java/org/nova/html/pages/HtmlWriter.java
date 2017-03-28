@@ -257,9 +257,9 @@ public class HtmlWriter
 		return tag("th");
 	}
 	
-	public HtmlWriter tr(Object value)
+	public HtmlWriter tr(Object value,Attribute...attributes)
 	{
-		return tag("tr",value);
+		return tag("tr",value,attributes);
 	}
 	public HtmlWriter tr()
 	{
@@ -271,7 +271,7 @@ public class HtmlWriter
 		return tag("th",value,new Attribute("title",title));
 	}
 	
-	public HtmlWriter text(String text,Attribute...attributes)
+	public HtmlWriter text(Object text,Attribute...attributes)
 	{
 	    return tag("text",text,attributes);
 	}
@@ -374,6 +374,10 @@ public class HtmlWriter
     {
         return tag("button",display,attributes,new Attribute("id",idAndName),new Attribute("name",idAndName),new Attribute("value",value));
     }
+    public HtmlWriter button(Object display,Object value,Attribute...attributes)
+    {
+        return tag("button",display,attributes,new Attribute("value",value));
+    }
 
     public HtmlWriter input(Object value,Attribute...attributes)
     {
@@ -396,17 +400,21 @@ public class HtmlWriter
     {
         return tag("input",null,attributes,new Attribute("type","text"),new Attribute("id",idAndName),new Attribute("name",idAndName));
     }
-	public HtmlWriter input_submit(String value,Attribute...attributes)
-	{
-        return tag("input",null,attributes,new Attribute("type","submit"),new Attribute("value",value));
-	}
-	public HtmlWriter input_checkbox(String idAndName,String value,boolean checked,Attribute...attributes)
+    public HtmlWriter input_submit(Object value,String name,Attribute...attributes)
+    {
+        return tag("input",null,attributes,new Attribute("name",name),new Attribute("value",value),new Attribute("type","submit"));
+    }
+    public HtmlWriter input_submit(String name,Attribute...attributes)
+    {
+        return tag("input",null,attributes,new Attribute("name",name),new Attribute("type","submit"));
+    }
+	public HtmlWriter input_checkbox(String idAndName,Object value,boolean checked,Attribute...attributes)
 	{
 		if (checked)
 		{
-			return tag("input",null,attributes,new Attribute("type","checkbox"),new Attribute("id",idAndName),new Attribute("name",idAndName),new Attribute("value",value),new Attribute("checked","checked"));
+			return tag("input",value,attributes,new Attribute("type","checkbox"),new Attribute("id",idAndName),new Attribute("name",idAndName),new Attribute("checked"));
 		}
-        return tag("input",null,attributes,new Attribute("type","checkbox"),new Attribute("id",idAndName),new Attribute("name",idAndName),new Attribute("value",value));
+        return tag("input",value,attributes,new Attribute("type","checkbox"),new Attribute("id",idAndName),new Attribute("name",idAndName));
 	}
 
 	public HtmlWriter begin_sortableTable(int border)

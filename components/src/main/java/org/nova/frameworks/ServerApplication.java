@@ -13,12 +13,12 @@ import org.nova.collections.FileCache;
 import org.nova.configuration.Configuration;
 import org.nova.core.Utils;
 import org.nova.html.pages.AjaxQueryContentWriter;
-import org.nova.html.pages.Menu;
 import org.nova.html.pages.Page;
-import org.nova.html.pages.PageContentWriter;
 import org.nova.html.pages.PageManager;
 import org.nova.html.pages.PageWriter;
 import org.nova.html.pages.TypeMappings;
+import org.nova.html.pages.operations.Menu;
+import org.nova.html.pages.operations.OperationContentWriter;
 import org.nova.http.server.JettyServerFactory;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
@@ -44,7 +44,7 @@ public class ServerApplication extends CoreApplication
 	final private String baseDirectory;
 	final private TypeMappings typeMappings;
 	final private PageManager pageManager;
-	final private PageContentWriter pageContentWriter;
+	final private OperationContentWriter pageContentWriter;
 	final private Vault vault;
 	private long startTime;
 	final private String name;
@@ -110,7 +110,7 @@ public class ServerApplication extends CoreApplication
         Page menuPage=this.pageManager.get(menuHtml,null);
 
         //Admin http server
-        this.pageContentWriter=new PageContentWriter(menu, menuPage);
+        this.pageContentWriter=new OperationContentWriter(menu, menuPage);
 		int threads=configuration.getIntegerValue("HttpServer.operator.threads",10);
         int operatorPort=configuration.getIntegerValue("HttpServer.operator.port",10079);
 		this.operatorServer=new HttpServer(this.getTraceManager(), JettyServerFactory.createServer(threads, operatorPort));
@@ -262,7 +262,7 @@ public class ServerApplication extends CoreApplication
 	    return this.vault;
 	}
 	
-	public PageContentWriter getPageContentWriter()
+	public OperationContentWriter getPageContentWriter()
 	{
 	    return this.pageContentWriter;
 	}

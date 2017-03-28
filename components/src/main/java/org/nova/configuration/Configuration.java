@@ -165,15 +165,24 @@ public class Configuration
 		return (ENUM) Enum.valueOf((Class<Enum>)type, getValue(name,defaultValue.toString()));
 	}
 	
-	public <OBJECT> OBJECT getJsonValue(String name,Class<OBJECT> type) throws Exception
+	public <OBJECT> OBJECT getJSONValue(String name,Class<OBJECT> type) throws Exception
 	{
 		return ObjectMapper.read(getValue(name),type);
 	}
 
-	public <OBJECT> OBJECT getJsonValue(String name,String defaultValue,Class<OBJECT> type) throws Exception
+	public <OBJECT> OBJECT getJSONValue(String name,OBJECT defaultValue,Class<OBJECT> type) throws Exception
 	{
-		return ObjectMapper.read(getValue(name,defaultValue),type);
+	    ConfigurationItem item=getConfigurationItem(name);
+	    if (item==null)
+	    {
+	        return defaultValue;
+	    }
+		return ObjectMapper.read(getValue(name),type);
 	}
+    public <OBJECT> OBJECT getJSONValue(String name,Class<OBJECT> type,String defaultText) throws Exception
+    {
+        return ObjectMapper.read(getValue(name,defaultText),type);
+    }
 
 	public ConfigurationItem[] getConfigurationItemSnapshot()
 	{

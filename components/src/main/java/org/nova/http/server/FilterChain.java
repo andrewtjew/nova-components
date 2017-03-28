@@ -59,7 +59,7 @@ public class FilterChain
 		}
 		if (type==boolean.class)
 		{
-			return Boolean.parseBoolean(value);
+		    return !("false".equals(value));
 		}
 		if (type.isEnum())
 		{
