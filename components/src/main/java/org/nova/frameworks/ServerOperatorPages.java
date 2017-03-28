@@ -31,11 +31,11 @@ import org.nova.html.pages.AjaxQueryContentWriter;
 import org.nova.html.pages.AjaxQueryResult;
 import org.nova.html.pages.Attribute;
 import org.nova.html.pages.HtmlWriter;
-import org.nova.html.pages.Menu;
-import org.nova.html.pages.PageContentResult;
-import org.nova.html.pages.PageContentWriter;
 import org.nova.html.pages.Selection;
 import org.nova.html.pages.TableList;
+import org.nova.html.pages.operations.Menu;
+import org.nova.html.pages.operations.OperationContentResult;
+import org.nova.html.pages.operations.OperationContentWriter;
 import org.nova.http.Cookie;
 import org.nova.http.Header;
 import org.nova.http.client.QueryBuilder;
@@ -99,7 +99,7 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 @ContentDecoders(GzipContentDecoder.class)
 @ContentEncoders(GzipContentEncoder.class)
 @ContentReaders({ JSONContentReader.class, JSONPatchContentReader.class })
-@ContentWriters({PageContentWriter.class, TextContentWriter.class})
+@ContentWriters({OperationContentWriter.class, TextContentWriter.class})
 public class ServerOperatorPages
 {
     public final ServerApplication serverApplication;
@@ -171,7 +171,7 @@ public class ServerOperatorPages
 
     @GET
     @Path("/operator/process/configuration")
-    public Response<PageContentResult> configuration()
+    public Response<OperationContentResult> configuration()
     {
         HtmlWriter writer = new HtmlWriter();
         writer.begin_sortableTable(1);
@@ -181,12 +181,12 @@ public class ServerOperatorPages
             writer.tr(writer.inner().td(item.getName()).td(item.getValue()).td(item.getDescription()).td(item.getSource()).td(item.getSourceContext()));
         }
         writer.end_table();
-        return PageContentResult.respond(writer, "Configuration");
+        return OperationContentResult.respond(writer, "Configuration");
     }
 
     @GET
     @Path("/operator/process/futures")
-    public Response<PageContentResult> futures()
+    public Response<OperationContentResult> futures()
     {
         HtmlWriter writer = new HtmlWriter();
         Future<?>[] array = this.serverApplication.getFutureScheduler().getFutureSnapshot();
@@ -202,7 +202,7 @@ public class ServerOperatorPages
             }
             writer.end_table();
         }
-        return PageContentResult.respond(writer, "Futures");
+        return OperationContentResult.respond(writer, "Futures");
     }
 
     void write(HtmlWriter writer, Trace trace, Object family)
@@ -215,7 +215,7 @@ public class ServerOperatorPages
 
     @GET
     @Path("/operator/tracing/activeTrace/{number}")
-    public Response<PageContentResult> activeTrace(@PathParam("number") long number)
+    public Response<OperationContentResult> activeTrace(@PathParam("number") long number)
     {
         HtmlWriter writer = new HtmlWriter();
         Trace[] traces = this.serverApplication.getTraceManager().getActiveSnapshot();
@@ -275,12 +275,12 @@ public class ServerOperatorPages
         {
             writer.text("trace ended");
         }
-        return PageContentResult.respond(writer, "Active Trace");
+        return OperationContentResult.respond(writer, "Active Trace");
     }
 
     @GET
     @Path("/operator/tracing/activeStats")
-    public Response<PageContentResult> activeTraces(@QueryParam("hideWaiting") @DefaultValue("false") boolean hideWaiting)
+    public Response<OperationContentResult> activeTraces(@QueryParam("hideWaiting") @DefaultValue("false") boolean hideWaiting)
     {
         HtmlWriter writer = new HtmlWriter();
         Trace[] traces = this.serverApplication.getTraceManager().getActiveSnapshot();
@@ -312,12 +312,12 @@ public class ServerOperatorPages
             }
             writer.end_table();
         }
-        return PageContentResult.respond(writer, "Active Trace Stats");
+        return OperationContentResult.respond(writer, "Active Trace Stats");
     }
 
     @GET
     @Path("/operator/tracing/lastStats")
-    public Response<PageContentResult> lastStats() throws Exception
+    public Response<OperationContentResult> lastStats() throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         TraceStats[] array = this.serverApplication.getTraceManager().getStatsSnapshotAndReset();
@@ -335,7 +335,7 @@ public class ServerOperatorPages
             }
             writer.end_table();
         }
-        return PageContentResult.respond(writer, "Last Trace Stats");
+        return OperationContentResult.respond(writer, "Last Trace Stats");
     }
 
     private static DecimalFormat millisecondFormat = new DecimalFormat("#.###");
@@ -407,7 +407,7 @@ public class ServerOperatorPages
 
     @GET
     @Path("/operator/tracing/traceGraph")
-    public Response<PageContentResult> traceGraph() throws Exception
+    public Response<OperationContentResult> traceGraph() throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         Map<String, TraceNode> map = this.serverApplication.getTraceManager().getGraphSnapshot();
@@ -419,12 +419,12 @@ public class ServerOperatorPages
             writer.end_tr();
         }
         writer.end_table();
-        return PageContentResult.respond(writer, "Trace Graph");
+        return OperationContentResult.respond(writer, "Trace Graph");
     }
 
     @GET
     @Path("/operator/tracing/traceRoots")
-    public Response<PageContentResult> traceRoots() throws Exception
+    public Response<OperationContentResult> traceRoots() throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         Map<String, TraceNode> map = this.serverApplication.getTraceManager().getGraphSnapshot();
@@ -439,7 +439,7 @@ public class ServerOperatorPages
 
         }
         writer.end_table();
-        return PageContentResult.respond(writer, "Trace Roots");
+        return OperationContentResult.respond(writer, "Trace Roots");
     }
 
     boolean isChild(String category, Entry<String, TraceNode> entry)
@@ -465,7 +465,7 @@ public class ServerOperatorPages
 
     @GET
     @Path("/operator/tracing/trace")
-    public Response<PageContentResult> trace(@QueryParam("category") String category) throws Exception
+    public Response<OperationContentResult> trace(@QueryParam("category") String category) throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         writer.text("Subtree of category and path to root");
@@ -482,7 +482,7 @@ public class ServerOperatorPages
         }
         writer.end_table();
 
-        return PageContentResult.respond(writer, "Trace Category:" + category);
+        return OperationContentResult.respond(writer, "Trace Category:" + category);
     }
 
     void addToAll(HashMap<String, ArrayList<TraceNode>> all, Entry<String, TraceNode> entry)
@@ -506,7 +506,7 @@ public class ServerOperatorPages
 
     @GET
     @Path("/operator/tracing/allCategories")
-    public Response<PageContentResult> traceAllCategories() throws Exception
+    public Response<OperationContentResult> traceAllCategories() throws Exception
     {
         Map<String, TraceNode> map = this.serverApplication.getTraceManager().getGraphSnapshot();
         HashMap<String, ArrayList<TraceNode>> all = new HashMap<>();
@@ -537,7 +537,7 @@ public class ServerOperatorPages
         }
         writer.end_table();
 
-        return PageContentResult.respond(writer, "All Trace Categories");
+        return OperationContentResult.respond(writer, "All Trace Categories");
     }
 
     private String toString(StackTraceElement[] elements, int start)
@@ -613,34 +613,34 @@ public class ServerOperatorPages
 
     @GET
     @Path("/operator/tracing/lastTraces")
-    public Response<PageContentResult> lastTraces() throws Exception
+    public Response<OperationContentResult> lastTraces() throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         writeTraces(writer, this.serverApplication.getTraceManager().getLastTraces());
-        return PageContentResult.respond(writer, "Last Traces");
+        return OperationContentResult.respond(writer, "Last Traces");
     }
 
     @GET
     @Path("/operator/tracing/lastExceptions")
-    public Response<PageContentResult> lastExeptions() throws Exception
+    public Response<OperationContentResult> lastExeptions() throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         writeTraces(writer, this.serverApplication.getTraceManager().getLastExceptionTraces());
-        return PageContentResult.respond(writer, "Last Exception Traces");
+        return OperationContentResult.respond(writer, "Last Exception Traces");
     }
 
     @GET
     @Path("/operator/tracing/activeTraces")
-    public Response<PageContentResult> activeTraces() throws Exception
+    public Response<OperationContentResult> activeTraces() throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         writeTraces(writer, this.serverApplication.getTraceManager().getActiveSnapshot());
-        return PageContentResult.respond(writer, "Active Traces");
+        return OperationContentResult.respond(writer, "Active Traces");
     }
 
     @GET
     @Path("/operator/process/timers")
-    public Response<PageContentResult> timers()
+    public Response<OperationContentResult> timers()
     {
         HtmlWriter writer = new HtmlWriter();
         TimerTask[] timerTasks = this.serverApplication.getTimerScheduler().getTimerTaskSnapshot();
@@ -661,12 +661,12 @@ public class ServerOperatorPages
             }
             writer.end_table();
         }
-        return PageContentResult.respond(writer, "Timer Tasks");
+        return OperationContentResult.respond(writer, "Timer Tasks");
     }
 
     @GET
     @Path("/operator/process/meters/levelMeters")
-    public Response<PageContentResult> levelMeters(@QueryParam("interval") @DefaultValue("10") long interval)
+    public Response<OperationContentResult> levelMeters(@QueryParam("interval") @DefaultValue("10") long interval)
     {
         HtmlWriter writer = new HtmlWriter();
         LevelMeterBox[] boxes = this.serverApplication.getMeterManager().getSnapshot().getLevelMeterBoxes();
@@ -683,12 +683,12 @@ public class ServerOperatorPages
             }
             writer.end_table();
         }
-        return PageContentResult.respond(writer, "Level Meters");
+        return OperationContentResult.respond(writer, "Level Meters");
     }
 
     @GET
     @Path("/operator/process/meters/rateMeters")
-    public Response<PageContentResult> countMeters(@QueryParam("interval") @DefaultValue("10") long interval)
+    public Response<OperationContentResult> countMeters(@QueryParam("interval") @DefaultValue("10") long interval)
     {
         HtmlWriter writer = new HtmlWriter();
         RateMeterBox[] boxes = this.serverApplication.getMeterManager().getSnapshot().getRateMeterBoxes();
@@ -705,12 +705,12 @@ public class ServerOperatorPages
             }
             writer.end_table();
         }
-        return PageContentResult.respond(writer, "Rate Meters");
+        return OperationContentResult.respond(writer, "Rate Meters");
     }
 
     @GET
     @Path("/operator/process/meters/countMeters")
-    public Response<PageContentResult> countMeters()
+    public Response<OperationContentResult> countMeters()
     {
         HtmlWriter writer = new HtmlWriter();
         CountMeterBox[] boxes = this.serverApplication.getMeterManager().getSnapshot().getCountMeterBoxes();
@@ -726,12 +726,12 @@ public class ServerOperatorPages
             }
             writer.end_table();
         }
-        return PageContentResult.respond(writer, "Count Meters");
+        return OperationContentResult.respond(writer, "Count Meters");
     }
 
     @GET
     @Path("/operator/process/meters/countAverageRateMeters")
-    public Response<PageContentResult> countAverageRateMeters(@QueryParam("interval") @DefaultValue("10") long interval)
+    public Response<OperationContentResult> countAverageRateMeters(@QueryParam("interval") @DefaultValue("10") long interval)
     {
         HtmlWriter writer = new HtmlWriter();
         CountAverageRateMeterBox[] boxes = this.serverApplication.getMeterManager().getSnapshot().getCountAverageRateMeterBoxes();
@@ -751,12 +751,12 @@ public class ServerOperatorPages
             }
             writer.end_table();
         }
-        return PageContentResult.respond(writer, "Count Average Rate Meters");
+        return OperationContentResult.respond(writer, "Count Average Rate Meters");
     }
 
     @GET
     @Path("/operator/process/meters/categories")
-    public Response<PageContentResult> meterCategories() throws Exception
+    public Response<OperationContentResult> meterCategories() throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         String[] categories = this.serverApplication.getMeterManager().getSnapshot().getCategories();
@@ -771,12 +771,12 @@ public class ServerOperatorPages
             }
             writer.end_table();
         }
-        return PageContentResult.respond(writer, "Meter Categories");
+        return OperationContentResult.respond(writer, "Meter Categories");
     }
 
     @GET
     @Path("/operator/process/meters/category")
-    public Response<PageContentResult> meterCategory(@QueryParam("category") String category, @QueryParam("interval") @DefaultValue("10") long interval)
+    public Response<OperationContentResult> meterCategory(@QueryParam("category") String category, @QueryParam("interval") @DefaultValue("10") long interval)
     {
         HtmlWriter writer = new HtmlWriter();
 
@@ -849,12 +849,12 @@ public class ServerOperatorPages
             }
         }
 
-        return PageContentResult.respond(writer, "Meter Category: " + category);
+        return OperationContentResult.respond(writer, "Meter Category: " + category);
     }
 
     @GET
     @Path("/operator/httpServer/performance/{server}")
-    public Response<PageContentResult> performance(@PathParam("server")String server) throws Exception
+    public Response<OperationContentResult> performance(@PathParam("server")String server) throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=getHttpServer(server);
@@ -917,7 +917,7 @@ public class ServerOperatorPages
             }
             writer.end_table();
         }
-        return PageContentResult.respond(writer, "Performance: "+server);
+        return OperationContentResult.respond(writer, "Performance: "+server);
     }
 
     private void writeIfNotEmpty(HtmlWriter writer, String name, String value)
@@ -988,31 +988,31 @@ public class ServerOperatorPages
 
     @GET
     @Path("/operator/httpServer/lastRequests/{server}")
-    public Response<PageContentResult> lastRequests(@PathParam("server") String server) throws Exception
+    public Response<OperationContentResult> lastRequests(@PathParam("server") String server) throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=this.getHttpServer(server);
         RequestLogEntry[] entries = httpServer.getLastRequestLogEntries();
         writer.p("Preferred Port: "+httpServer.getPreferredPort()+", Count:" + entries.length);
         writeRequestLogEntries(writer, entries);
-        return PageContentResult.respond(writer, "Last Requests: "+server);
+        return OperationContentResult.respond(writer, "Last Requests: "+server);
     }
 
     @GET
     @Path("/operator/httpServer/lastExceptionRequests/{server}")
-    public Response<PageContentResult> lastExceptionRequests(@PathParam("server") String server) throws Exception
+    public Response<OperationContentResult> lastExceptionRequests(@PathParam("server") String server) throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=this.getHttpServer(server);
         RequestLogEntry[] entries = httpServer.getLastExceptionRequestLogEntries();
         writer.p("Preferred Port: "+httpServer.getPreferredPort()+", Count:" + entries.length);
         writeRequestLogEntries(writer, entries);
-        return PageContentResult.respond(writer, "Last Exception Requests: "+server);
+        return OperationContentResult.respond(writer, "Last Exception Requests: "+server);
     }
 
     @GET
     @Path("/operator/httpServer/lastNotFounds/{server}")
-    public Response<PageContentResult> lastNotFoundRequests(@PathParam("server") String server) throws Exception
+    public Response<OperationContentResult> lastNotFoundRequests(@PathParam("server") String server) throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=this.getHttpServer(server);
@@ -1031,12 +1031,12 @@ public class ServerOperatorPages
             writer.end_table();
             writeContent(writer, "Headers", entry.getRequestHeaders());
         }
-        return PageContentResult.respond(writer, "Last Not Founds: "+server);
+        return OperationContentResult.respond(writer, "Last Not Founds: "+server);
     }
 
     @GET
     @Path("/operator/httpServer/status/{server}")
-    public Response<PageContentResult> status(@PathParam("server") String server) throws Exception
+    public Response<OperationContentResult> status(@PathParam("server") String server) throws Exception
     {
         HttpServer httpServer=getHttpServer(server);
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
@@ -1077,7 +1077,7 @@ public class ServerOperatorPages
             }
             writer.end_table();
         }
-        return PageContentResult.respond(writer, "Performance: "+server);
+        return OperationContentResult.respond(writer, "Performance: "+server);
     }
 
     
@@ -1296,7 +1296,7 @@ public class ServerOperatorPages
     
     @GET
     @Path("/operator/httpServer/methods/{server}")
-    public Response<PageContentResult> methods(@PathParam("server") String server) throws Exception
+    public Response<OperationContentResult> methods(@PathParam("server") String server) throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=getHttpServer(server);
@@ -1345,7 +1345,7 @@ public class ServerOperatorPages
             }
             writer.end_table();
         }
-        return PageContentResult.respond(writer, "Methods: "+server);
+        return OperationContentResult.respond(writer, "Methods: "+server);
     }
 
     private String getDescription(Method method)
@@ -1539,7 +1539,7 @@ public class ServerOperatorPages
 
     @GET
     @Path("/operator/httpServer/info")
-    public Response<PageContentResult> info(@QueryParam("key") String key) throws Throwable
+    public Response<OperationContentResult> info(@QueryParam("key") String key) throws Throwable
     {
         HtmlWriter writer = new HtmlWriter();
         RequestHandler requestHandler = this.serverApplication.getOperatorServer().getRequestHandler(key);
@@ -1665,7 +1665,7 @@ public class ServerOperatorPages
         writer.end_tr();
         writer.end_table();
 
-        return PageContentResult.respond(writer, "Method: " + key);
+        return OperationContentResult.respond(writer, "Method: " + key);
     }
 
     static class ContentWriterList
@@ -1735,7 +1735,7 @@ public class ServerOperatorPages
 
     @GET
     @Path("/operator/httpServer/classDefinitions/{server}")
-    public Response<PageContentResult> classDefinitions(Context context,@PathParam("server") String server) throws Throwable
+    public Response<OperationContentResult> classDefinitions(Context context,@PathParam("server") String server) throws Throwable
     {
         HtmlWriter writer = new HtmlWriter();
         writer.begin_form("/operator/httpServer/classDefinitions/download/"+server, "get");
@@ -1776,7 +1776,7 @@ public class ServerOperatorPages
         writer.div(null, new Attribute("id", "result"));
         
 
-        return PageContentResult.respond(writer, "Generate Interop Classes: " + server);
+        return OperationContentResult.respond(writer, "Generate Interop Classes: " + server);
     }
     
     @POST
@@ -1823,7 +1823,7 @@ public class ServerOperatorPages
     @Description("Displays information and documentation of method.")
     @GET
     @Path("/operator/httpServer/method/{server}")
-    public Response<PageContentResult> method(Context context,@PathParam("server") String server,@QueryParam("key") String key) throws Throwable
+    public Response<OperationContentResult> method(Context context,@PathParam("server") String server,@QueryParam("key") String key) throws Throwable
     {
         HtmlWriter writer = new HtmlWriter();
         writer.h2("Method: "+key);
@@ -2163,7 +2163,7 @@ public class ServerOperatorPages
         writer.text("Schema: ");
         writer.a("JSON", "/operator/httpServer/api?key="+key);
 */
-        return PageContentResult.respond(writer, "Methods: " + server);
+        return OperationContentResult.respond(writer, "Methods: " + server);
     }
 
     @GET
@@ -2369,7 +2369,7 @@ public class ServerOperatorPages
 
     @GET
     @Path("/")
-    public Response<PageContentResult> main() throws Exception
+    public Response<OperationContentResult> main() throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         writer.begin_table(1);
@@ -2378,7 +2378,7 @@ public class ServerOperatorPages
         writer.tr().td("Current").td(Utils.millisToLocalDateTimeString(now));
         writer.tr().td("Uptime").td(Utils.millisToDurationString(now - this.serverApplication.getStartTime()));
         writer.end_table();
-        return PageContentResult.respond(writer, "Main");
+        return OperationContentResult.respond(writer, "Main");
     }
 
     private void writeSize(HtmlWriter writer, String label, long size)
@@ -2406,7 +2406,7 @@ public class ServerOperatorPages
 
     @GET
     @Path("/operator/logging/status")
-    public Response<PageContentResult> loggingStatus() throws Exception
+    public Response<OperationContentResult> loggingStatus() throws Exception
     {
         HtmlWriter writer = new HtmlWriter();
         LogDirectoryManager manager = this.serverApplication.getLogDirectoryManager();
@@ -2475,7 +2475,7 @@ public class ServerOperatorPages
             
             
         }
-        return PageContentResult.respond(writer, "Logging Status");
+        return OperationContentResult.respond(writer, "Logging Status");
     }
 
     @GET

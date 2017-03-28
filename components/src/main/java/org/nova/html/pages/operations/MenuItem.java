@@ -1,4 +1,4 @@
-package org.nova.html.pages;
+package org.nova.html.pages.operations;
 
 public class MenuItem
 {

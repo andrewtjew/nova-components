@@ -1,19 +1,21 @@
-package org.nova.html.pages;
+package org.nova.html.pages.operations;
 
 import java.io.OutputStream;
 import java.net.InetAddress;
 
 import org.nova.core.Utils;
+import org.nova.html.pages.KeyValueMap;
+import org.nova.html.pages.Page;
 import org.nova.http.server.ContentWriter;
 import org.nova.http.server.Context;
 
-public class PageContentWriter extends ContentWriter<PageContentResult>
+public class OperationContentWriter extends ContentWriter<OperationContentResult>
 {
 	final private Page page;
 	final private Menu menu;
 	final private String hostName;
 	
-	public PageContentWriter(Menu menu,Page page) throws Exception
+	public OperationContentWriter(Menu menu,Page page) throws Exception
 	{
 		this.menu=menu;
 		this.page=page;
@@ -27,7 +29,7 @@ public class PageContentWriter extends ContentWriter<PageContentResult>
 	}
 
 	@Override
-	public void write(Context context, OutputStream outputStream, PageContentResult result) throws Throwable
+	public void write(Context context, OutputStream outputStream, OperationContentResult result) throws Throwable
 	{
 		if (result!=null)
 		{

@@ -1,4 +1,4 @@
-package org.nova.html.pages;
+package org.nova.html.pages.operations;
 
 import java.util.ArrayList;
 import java.util.List;
