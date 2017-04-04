@@ -21,7 +21,7 @@ public class SessionService<SESSION extends Session> extends ServerApplication
         this.tokenGenerator=new TokenGenerator();
         
         String directoryServiceEndPoint=this.getConfiguration().getValue("SessionService.directoryServiceEndPoint", "http://"+Utils.getLocalHostName()+":"+this.getPublicServer().getPreferredPort());
-        String headerTokenKey=this.getConfiguration().getValue("SessionService.tokenKey.header", "x-Token");
+        String headerTokenKey=this.getConfiguration().getValue("SessionService.tokenKey.header", "X-Token");
         String queryTokenKey=this.getConfiguration().getValue("SessionService.tokenKey.query", "token");
         String cookieTokenKey=this.getConfiguration().getValue("SessionService.tokenKey.cookie", headerTokenKey);
         this.sessionFilter=new SessionFilter(this.sessionManager,directoryServiceEndPoint,headerTokenKey,queryTokenKey,cookieTokenKey,sessionRejectResponders);
@@ -31,7 +31,7 @@ public class SessionService<SESSION extends Session> extends ServerApplication
     public void onStart() throws Throwable
     {
         super.onStart();
-        this.getPageContentWriter().getMenu().add("Sessions|View All", "/operator/sessions");
+        this.getOperationContentWriter().getMenu().add("Sessions|View All", "/operator/sessions");
         
         this.getPublicServer().addFilters(this.sessionFilter);
         SessionOperatorPages<SESSION> sessionOperatorPages=new SessionOperatorPages<>(this.sessionManager);

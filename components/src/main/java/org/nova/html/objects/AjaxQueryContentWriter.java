@@ -1,4 +1,4 @@
-package org.nova.html.pages;
+package org.nova.html.objects;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;

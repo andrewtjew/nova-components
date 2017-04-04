@@ -7,11 +7,11 @@ import java.util.List;
 public class ParseContext
 {
 	final String baseDirectory;
-	final KeyValueMap parameters;
+	final ElementMap parameters;
     final ArrayList<Section> sections;
     StringBuilder sectionText;
 
-    public ParseContext(String baseDirectory,KeyValueMap templateParameterMap)    
+    public ParseContext(String baseDirectory,ElementMap templateParameterMap)    
     {
         this.sections=new ArrayList<>();
         this.parameters=templateParameterMap;

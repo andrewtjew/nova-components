@@ -1,6 +1,7 @@
 package org.nova.http.server;
 
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -61,10 +62,14 @@ public class FilterChain
 		{
 		    return !("false".equals(value));
 		}
-		if (type.isEnum())
-		{
-			return Enum.valueOf((Class<Enum>)type, value);
-		}
+        if (type.isEnum())
+        {
+            return Enum.valueOf((Class<Enum>)type, value);
+        }
+        if (type==BigDecimal.class)
+        {
+            return new BigDecimal(value);
+        }
 		return Double.parseDouble(value);
 	}
 

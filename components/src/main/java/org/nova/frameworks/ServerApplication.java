@@ -12,7 +12,7 @@ import org.eclipse.jetty.server.Server;
 import org.nova.collections.FileCache;
 import org.nova.configuration.Configuration;
 import org.nova.core.Utils;
-import org.nova.html.pages.AjaxQueryContentWriter;
+import org.nova.html.objects.AjaxQueryContentWriter;
 import org.nova.html.pages.Page;
 import org.nova.html.pages.PageManager;
 import org.nova.html.pages.PageWriter;
@@ -143,7 +143,7 @@ public class ServerApplication extends CoreApplication
         if (publicPort>0)
         {
             threads=configuration.getIntegerValue("HttpServer.public.threads",1000);
-            boolean https=configuration.getBooleanValue("httpServer.public.https",true);
+            boolean https=configuration.getBooleanValue("httpServer.public.https",false);
             if (https)
             {
                 String keyStorePassword=this.vault.get("Store.keyStore.password");
@@ -200,7 +200,7 @@ public class ServerApplication extends CoreApplication
 	{
         this.startTime=System.currentTimeMillis();
         this.operatorServer.register(new ServerOperatorPages(this));
-        this.operatorServer.register(new OperatorPages(this.operatorVariableManager, this.getPageContentWriter().getMenu()));
+        this.operatorServer.register(new OperatorPages(this.operatorVariableManager, this.getOperationContentWriter().getMenu()));
         onStart();
         startServer(this.operatorServer);
         startServer(this.privateServer);
@@ -262,7 +262,7 @@ public class ServerApplication extends CoreApplication
 	    return this.vault;
 	}
 	
-	public OperationContentWriter getPageContentWriter()
+	public OperationContentWriter getOperationContentWriter()
 	{
 	    return this.pageContentWriter;
 	}

@@ -1,10 +1,14 @@
-package org.nova.html.pages;
+package org.nova.html.objects;
 
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import org.nova.core.KeyValue;
+import org.nova.html.elements.Element;
+import org.nova.html.pages.Attribute;
 
-public class AjaxButton
+public class AjaxButton extends Element
 {
 	final private String id;
 	final private String text;
@@ -47,6 +51,8 @@ public class AjaxButton
 		this.queryInputs.add(new KeyValue<String, String>(parameterName, "':'"+value+"'"));
 		return this;
 	}
+
+	@Override
 	public String toString()
 	{
 		StringBuilder sb=new StringBuilder();
@@ -85,4 +91,10 @@ public class AjaxButton
 		sb.append(",success:function(data){$.each(data,function(key,value){$('#'+key).html(value);})} });});</script>");
 		return sb.toString();
 	}
+    @Override
+    public void write(OutputStream outputStream) throws Throwable
+    {
+        outputStream.write(toString().getBytes(StandardCharsets.UTF_8));
+        
+    }
 }

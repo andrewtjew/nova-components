@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -109,6 +110,95 @@ public class CSharpClassWriter
         }
     }
 
+    private String translateTypeName(Class<?> fieldType)
+    {
+        if (fieldType == boolean.class)
+        {
+            return "bool";
+        }
+        else if (fieldType == Boolean.class)
+        {
+            return "bool?";
+        }
+        else if (fieldType == Integer.class)
+        {
+            return "int?";
+        }
+        else if (fieldType == int.class)
+        {
+            return "int";
+        }
+        else if (fieldType == Short.class)
+        {
+            return "short?";
+        }
+        else if (fieldType == short.class)
+        {
+            return "short";
+        }
+        else if (fieldType == Long.class)
+        {
+            return "long?";
+        }
+        else if (fieldType == long.class)
+        {
+            return "long";
+        }
+        else if (fieldType == Float.class)
+        {
+            return "float?";
+        }
+        else if (fieldType == float.class)
+        {
+            return "float";
+        }
+        else if (fieldType == Double.class)
+        {
+            return "double?";
+        }
+        else if (fieldType == double.class)
+        {
+            return "double";
+        }
+        else if (fieldType == byte.class)
+        {
+            return "byte";
+        }
+        else if (fieldType == Byte.class)
+        {
+            return "byte?";
+            
+        }
+        else if (fieldType == char.class)
+        {
+            return "char";
+        }
+        else if (fieldType == Character.class)
+        {
+            return "char?";
+        }
+        else if (fieldType == String.class)
+        {
+            return "string";
+        }
+        else if (fieldType == BigDecimal.class)
+        {
+            return "decimal";
+        }
+        else
+        {
+            if (fieldType.isArray())
+            {
+                return translateTypeName(fieldType.getComponentType())+"[]";
+            }
+            else
+            {
+                return fieldType.getSimpleName();
+            }
+        }
+        
+    }
+    
     private void write(StringBuilder sb, Class<?> type, int indentLevel, int columns, InteropTarget target)
     {
         Description description = type.getAnnotation(Description.class);
@@ -116,7 +206,6 @@ public class CSharpClassWriter
         {
             writeComments(sb, indentLevel, description.value(), columns);
         }
-
         if (type.isEnum())
         {
             writeIndent(sb, indentLevel).append("public enum " + type.getSimpleName() + "\r\n");
@@ -141,7 +230,18 @@ public class CSharpClassWriter
                     writeComments(sb, indentLevel + 1, "// ***Application error***", columns);
                     writeComments(sb, indentLevel + 1, "// Unable to generate description for this field!", columns);
                 }
-                writeIndent(sb, indentLevel + 1).append(enumValue.toString()+",\r\n\r\n");
+                Enum e=(Enum)enumValue;
+                String name=e.name();
+                String toString=e.toString();
+                if (name.equals(toString))
+                {
+                    writeIndent(sb, indentLevel + 1).append(name+",\r\n\r\n");
+                }
+                else
+                {
+                    writeIndent(sb, indentLevel + 1).append(name+"="+toString+",\r\n\r\n");
+                    
+                }
             }
             writeIndent(sb, indentLevel).append("}\r\n");
 
@@ -179,89 +279,7 @@ public class CSharpClassWriter
                     writeIndent(sb, indentLevel + 1).append("[DataMember]\r\n");
                 }
                 writeIndent(sb, indentLevel + 1).append("public ");
-                if (fieldType == boolean.class)
-                {
-                    sb.append("bool");
-                }
-                else if (fieldType == Boolean.class)
-                {
-                    sb.append("bool?");
-                }
-                else if (fieldType == Integer.class)
-                {
-                    sb.append("int?");
-                }
-                else if (fieldType == int.class)
-                {
-                    sb.append("int");
-                }
-                else if (fieldType == Short.class)
-                {
-                    sb.append("short?");
-                }
-                else if (fieldType == short.class)
-                {
-                    sb.append("short");
-                }
-                else if (fieldType == Long.class)
-                {
-                    sb.append("long?");
-                }
-                else if (fieldType == long.class)
-                {
-                    sb.append("long");
-                }
-                else if (fieldType == Float.class)
-                {
-                    sb.append("float?");
-                }
-                else if (fieldType == float.class)
-                {
-                    sb.append("float");
-                }
-                else if (fieldType == Double.class)
-                {
-                    sb.append("double?");
-                }
-                else if (fieldType == double.class)
-                {
-                    sb.append("double");
-                }
-                else if (fieldType == byte.class)
-                {
-                    sb.append("byte");
-                }
-                else if (fieldType == Byte.class)
-                {
-                    sb.append("byte?");
-                }
-                else if (fieldType == char.class)
-                {
-                    sb.append("char");
-                }
-                else if (fieldType == Character.class)
-                {
-                    sb.append("char?");
-                }
-                else if (fieldType == String.class)
-                {
-                    sb.append("string");
-                }
-                else
-                {
-                    if (fieldType.isArray())
-                    {
-                        sb.append(fieldType.getComponentType().getSimpleName());
-                    }
-                    else
-                    {
-                        sb.append(fieldType.getSimpleName());
-                    }
-                }
-                if (field.getType().isArray())
-                {
-                    sb.append("[]");
-                }
+                sb.append(translateTypeName(fieldType));
                 sb.append(' ').append(field.getName()).append(";\r\n\r\n");
             }
             writeIndent(sb, indentLevel).append("}\r\n");
@@ -359,6 +377,10 @@ public class CSharpClassWriter
                 continue;
             }
             else if (fieldType == String.class)
+            {
+                continue;
+            }
+            else if (fieldType == BigDecimal.class)
             {
                 continue;
             }

@@ -13,7 +13,7 @@ public class Page
     	this.sections=sections;
     }
     
-    public void write(OutputStream outputStream,KeyValueMap parameters) throws Throwable
+    public void write(OutputStream outputStream,ElementMap parameters) throws Throwable
     {
     	for (Section section:this.sections)
     	{
@@ -21,7 +21,7 @@ public class Page
     	}
     }
     
-    public Page bind(KeyValueMap parameters) throws Exception
+    public Page bind(ElementMap parameters) throws Exception
     {
     	ByteArrayOutputStream byteStream=new ByteArrayOutputStream();
     	ArrayList<Section> sections=new ArrayList<>();

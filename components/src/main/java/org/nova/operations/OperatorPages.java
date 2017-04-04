@@ -12,9 +12,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.nova.html.pages.AjaxButton;
-import org.nova.html.pages.AjaxQueryContentWriter;
-import org.nova.html.pages.AjaxQueryResult;
+import org.nova.html.objects.AjaxButton;
+import org.nova.html.objects.AjaxQueryContentWriter;
+import org.nova.html.objects.AjaxQueryResult;
 import org.nova.html.pages.Attribute;
 import org.nova.html.pages.HtmlWriter;
 import org.nova.html.pages.operations.Menu;
@@ -158,7 +158,7 @@ public class OperatorPages
                     writer.end_td();
                     AjaxButton button=new AjaxButton(buttonKey, "Update", "/operator/variable/"+category+"/"+name);
                     button.async(false).val("value",name);
-                    writer.td(writer.inner().insert(button));
+                    writer.td(writer.inner().writeElement(button));
 				    
 				}
 				else if (type==boolean.class)
@@ -167,7 +167,7 @@ public class OperatorPages
 					writer.td(writer.inner().input_checkbox(name, null, (boolean)value));
 					AjaxButton button=new AjaxButton(buttonKey, "Update", "/operator/variable/"+category+"/"+name);
 					button.async(false).prop("value",name,"checked");
-					writer.td(writer.inner().insert(button));
+					writer.td(writer.inner().writeElement(button));
 				}
 				else if (type.isEnum())
 				{
@@ -183,7 +183,7 @@ public class OperatorPages
 					writer.end_td();
 					AjaxButton button=new AjaxButton(buttonKey, "Update", "/operator/variable/"+category+"/"+name);
 					button.async(false).val("value",name);
-					writer.td(writer.inner().insert(button));
+					writer.td(writer.inner().writeElement(button));
 				}
 				else if (type==String.class) 
 				{
@@ -200,7 +200,7 @@ public class OperatorPages
 					}
 					AjaxButton button=new AjaxButton(buttonKey, "Update", "/operator/variable/"+category+"/"+name);
 					button.async(false).val("value",name).prop("nullString","nullString","checked");
-					writer.td(writer.inner().insert(button));
+					writer.td(writer.inner().writeElement(button));
 				}
 				else
 				{
@@ -208,7 +208,7 @@ public class OperatorPages
 					writer.td(writer.inner().input_text(textSize,name, value==null?"":value.toString(),inputStyleAttribute));
 					AjaxButton button=new AjaxButton(buttonKey, "Update", "/operator/variable/"+category+"/"+name);
 					button.async(false).val("value",name);
-					writer.td(writer.inner().insert(button));
+					writer.td(writer.inner().writeElement(button));
 				}
 				writer.td(writer.inner().div(null, new Attribute("id",resultKey)));
 			}

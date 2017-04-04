@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.nova.core.NameObject;
 import org.nova.core.Utils;
-import org.nova.html.pages.AjaxQueryContentWriter;
+import org.nova.html.objects.AjaxQueryContentWriter;
 import org.nova.html.pages.HtmlWriter;
 import org.nova.html.pages.operations.OperationContentResult;
 import org.nova.html.pages.operations.OperationContentWriter;

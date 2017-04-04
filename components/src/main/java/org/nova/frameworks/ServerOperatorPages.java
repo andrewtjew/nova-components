@@ -26,13 +26,13 @@ import org.nova.concurrent.Future;
 import org.nova.concurrent.TimerTask;
 import org.nova.configuration.ConfigurationItem;
 import org.nova.core.Utils;
-import org.nova.html.pages.AjaxButton;
-import org.nova.html.pages.AjaxQueryContentWriter;
-import org.nova.html.pages.AjaxQueryResult;
+import org.nova.html.objects.AjaxButton;
+import org.nova.html.objects.AjaxQueryContentWriter;
+import org.nova.html.objects.AjaxQueryResult;
+import org.nova.html.objects.TableList;
 import org.nova.html.pages.Attribute;
 import org.nova.html.pages.HtmlWriter;
 import org.nova.html.pages.Selection;
-import org.nova.html.pages.TableList;
 import org.nova.html.pages.operations.Menu;
 import org.nova.html.pages.operations.OperationContentResult;
 import org.nova.html.pages.operations.OperationContentWriter;
@@ -120,7 +120,7 @@ public class ServerOperatorPages
         this.cacheControlValue = serverApplication.getConfiguration().getValue("ServerOperatorPages.cache.controlValue", "public");
         this.serverApplication = serverApplication;
 
-        Menu menu = serverApplication.getPageContentWriter().getMenu();
+        Menu menu = serverApplication.getOperationContentWriter().getMenu();
 
         menu.add("Process|Configuration", "/operator/process/configuration");
         menu.add("Process|Futures", "/operator/process/futures");
@@ -1744,7 +1744,7 @@ public class ServerOperatorPages
         writer.begin_td();
         Selection selection=new Selection("target",new Attribute("style", "width:100%;"));
         selection.options(InteropTarget.values());
-        writer.insert(selection);
+        writer.writeObject(selection);
         writer.end_td();
 
         writer.tr().td("Namespace").td(":");
@@ -1767,7 +1767,7 @@ public class ServerOperatorPages
         button.val("target", "target");
         button.val("columns", "columns");
         button.async(true);
-        writer.td(writer.inner().insert(button));
+        writer.td(writer.inner().writeElement(button));
         writer.end_td();
         writer.end_table();
         writer.end_form();
@@ -2120,7 +2120,7 @@ public class ServerOperatorPages
                     writer.tr();
                     writer.td("Accept").td(":");;
                     writer.begin_td();
-                    writer.begin_select("accept",new Attribute("style", "width:100%;"));
+                    writer.begin_select("accept",new Attribute("style", "width:300px;"));
                     for (String type:set)
                     {
                         writer.option(type);
@@ -2142,7 +2142,7 @@ public class ServerOperatorPages
                 writer.tr();
                 writer.td("Response Content-Type").td(":");
                 writer.begin_td();
-                writer.begin_select("contentType",new Attribute("style", "width:100%;"));
+                writer.begin_select("contentType",new Attribute("style", "width:300px;"));
                 for (String type:set)
                 {
                     writer.option(type);
@@ -2153,7 +2153,7 @@ public class ServerOperatorPages
             writer.end_table();
             
             writer.hr();
-            writer.insert(button);
+            writer.writeElement(button);
             writer.div(null, new Attribute("id", "result"));
 
         }
@@ -2328,7 +2328,7 @@ public class ServerOperatorPages
             tableList.row("Time",Utils.millisToLocalDateTimeString(System.currentTimeMillis()));
             tableList.row("Duration", duration * 1000 + " ms");
             tableList.row("Status Code",statusCode);
-            writer.insert(tableList);
+            writer.writeObject(tableList);
             if (response!=null)
             {
                 if (response.getHeaders().length > 0)
@@ -2339,7 +2339,7 @@ public class ServerOperatorPages
                     {
                         tableList.row(header.getName(),header.getValue());
                     }
-                    writer.insert(tableList);
+                    writer.writeObject(tableList);
                 }
                 if (response.getText().length() > 0)
                 {

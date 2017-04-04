@@ -14,7 +14,7 @@ class ContentSection extends Section
 		this.bytes=bytes;
 	}
 	@Override
-	public byte[] getBytes(KeyValueMap parameters)
+	public byte[] getBytes(ElementMap parameters)
 	{
 		return this.bytes;
 	}

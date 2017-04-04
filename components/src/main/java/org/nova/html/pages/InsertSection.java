@@ -13,7 +13,7 @@ public class InsertSection extends Section
 		this.key=key;
 	}
 	@Override
-	public byte[] getBytes(KeyValueMap parameters)
+	public byte[] getBytes(ElementMap parameters)
 	{
 	    if (parameters!=null)
 	    {
