@@ -7,8 +7,8 @@ import org.nova.http.server.Context;
 
 public class PageWriter extends ContentWriter<Page>
 {
-	final private KeyValueMap parameters;
-	public PageWriter(KeyValueMap parameter)
+	final private ElementMap parameters;
+	public PageWriter(ElementMap parameter)
 	{
 		this.parameters=parameter;
 	}

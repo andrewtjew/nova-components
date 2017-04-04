@@ -4,7 +4,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 
 import org.nova.core.Utils;
-import org.nova.html.pages.KeyValueMap;
+import org.nova.html.pages.ElementMap;
 import org.nova.html.pages.Page;
 import org.nova.http.server.ContentWriter;
 import org.nova.http.server.Context;
@@ -34,7 +34,7 @@ public class OperationContentWriter extends ContentWriter<OperationContentResult
 		if (result!=null)
 		{
             context.getHttpServletResponse().setContentType("text/html;charset=utf-8");
-			KeyValueMap parameters=new KeyValueMap();
+			ElementMap parameters=new ElementMap();
 			parameters.put("menu", this.menu.toString());
 			parameters.put("info", this.hostName+"<br/>"+Utils.nowToLocalDateTimeString());
 			parameters.put("title", result.getTitle());

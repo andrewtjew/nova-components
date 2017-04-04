@@ -13,6 +13,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -744,34 +745,18 @@ public class ObjectMapper
 	private <OBJECT> OBJECT readObject(Lexer lexer, Class<OBJECT> type) throws Exception
 	{
 		ReadTypeInfo typeInfo = getReadTypeInfo(type);
-		@SuppressWarnings("unchecked")
-
 		OBJECT object=(typeInfo.constructor==null)?type.newInstance():(OBJECT) typeInfo.constructor.newInstance(typeInfo.parameters);
-			/*
-			boolean accessible=typeInfo.constructor.isAccessible();
-			if (accessible==false)
-			{
-				typeInfo.constructor.setAccessible(true);
-			}
-			try
-			{
-				object=(OBJECT) typeInfo.constructor.newInstance(typeInfo.parameters);
-			}
-			finally
-			{
-				if (accessible==false)
-				{
-					typeInfo.constructor.setAccessible(false);
-				}
-			}
-			*/
 		char next = lexer.getNextCharacter();
 		for (;;)
 		{
-			if (next != '"')
-			{
-				throw new Exception("String or } expected at " + lexer.getPosition());
-			}
+            if (next != '"')
+            {
+                if (next=='}')
+                {
+                    break;
+                }
+                throw new Exception("String or } expected at " + lexer.getPosition());
+            }
 			String string = lexer.getJSONName();
 			Field field = typeInfo.fields.get(string);
 			Class<?> fieldType = field.getType();
@@ -860,15 +845,26 @@ public class ObjectMapper
 			{
 				field.set(object, lexer.getShort());
 			}
-			else if (fieldType.isEnum())
-			{
-				next = lexer.getNextCharacter();
-				if (next != '"')
-				{
-					throw new Exception("String expected at " + lexer.getPosition());
-				}
-				field.set(object, Enum.valueOf((Class<Enum>) fieldType, lexer.getString()));
-			}
+            else if (fieldType.isEnum())
+            {
+                next = lexer.getNextCharacter();
+                if (next != '"')
+                {
+                    throw new Exception("String expected at " + lexer.getPosition());
+                }
+                field.set(object, Enum.valueOf((Class<Enum>) fieldType, lexer.getString()));
+            }
+            else if (fieldType==java.lang.Enum.class)
+            {
+                int value=lexer.getPrimitiveInteger();
+                //this is not tested...
+                field.set(object, value);
+            }
+            else if (fieldType==BigDecimal.class)
+            {
+                next = lexer.getNextCharacter();
+                field.set(object, new BigDecimal(lexer.getValueText()));
+            }
 			else
 			{
 				next = lexer.getNextCharacter();
@@ -927,7 +923,7 @@ public class ObjectMapper
 			WriteTypeInfo typeInfo = this.writeObjectCache.get(type.getName());
 			if (typeInfo == null)
 			{
-				typeInfo = new WriteTypeInfo(type.getDeclaredFields());
+				//typeInfo = new WriteTypeInfo(type.getDeclaredFields());
 				HashMap<String, Field> fields = new HashMap<>();
 				for (Class<?> c = type; c != null; c = c.getSuperclass())
 				{
@@ -1748,6 +1744,42 @@ public class ObjectMapper
 					sb.append(((Short) value).shortValue());
 				}
 			}
+            else if (fieldType == java.lang.Enum.class)
+            {
+                Object value = field.get(object);
+                if (value != null)
+                {
+                    if (needComma == false)
+                    {
+                        needComma = true;
+                        sb.append(fieldInfo.jsonName);
+                    }
+                    else
+                    {
+                        sb.append(fieldInfo.commaJsonName);
+                    }
+                    sb.append(value);
+                }
+                
+            }
+            else if (fieldType == BigDecimal.class)
+            {
+                Object value = field.get(object);
+                if (value != null)
+                {
+                    if (needComma == false)
+                    {
+                        needComma = true;
+                        sb.append(fieldInfo.jsonName);
+                    }
+                    else
+                    {
+                        sb.append(fieldInfo.commaJsonName);
+                    }
+                    String text=value.toString();
+                    sb.append(text);
+                }
+            }
 			else
 			{
 				Object value = field.get(object);

@@ -246,6 +246,7 @@ public class Lexer
 				{
 					if (this.reader.read()=='e')
 					{
+                        this.last=0;
 						return true;
 					}
 				}
@@ -261,6 +262,7 @@ public class Lexer
 					{
 						if (this.reader.read()=='e')
 						{
+	                        this.last=0;
 							return true;
 						}
 					}
@@ -275,6 +277,7 @@ public class Lexer
 				{
 					if (this.reader.read()=='l')
 					{
+                        this.last=0;
 						return null;
 					}
 				}

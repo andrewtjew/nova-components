@@ -34,11 +34,6 @@ public class ObjectExample
 	private int fractionValue=1;
 	private void writeExample(StringBuilder sb,Class<?> type,int indentLevel)
 	{
-		if (this.shownClasses.contains(type.getName()))
-		{
-			sb.append("#"+type.getName());
-			return;
-		}
 		if ((type==Boolean.class)||(type==boolean.class))
 		{
 			sb.append("true");
@@ -57,12 +52,15 @@ public class ObjectExample
 		}
 		else if (type.isArray())
 		{
-			sb.append("[");
-			writeExample(sb,type.getComponentType(),indentLevel+1);
-			sb.append(",");
-			writeExample(sb,type.getComponentType(),indentLevel+1);
-			sb.append("\r\n");
-			writeIndent(sb, indentLevel).append("]");
+            if (this.shownClasses.contains(type.getComponentType().getName())==false)
+            {
+    			sb.append("[");
+    			writeExample(sb,type.getComponentType(),indentLevel+1);
+    			sb.append(",");
+    			writeExample(sb,type.getComponentType(),indentLevel+1);
+    			sb.append("\r\n");
+    			writeIndent(sb, indentLevel).append("]");
+            }
 		}
 		else
 		{
@@ -71,26 +69,29 @@ public class ObjectExample
 			boolean commaNeeded=false;
 			for (Field field: type.getDeclaredFields())
 			{
-				int modifiers = field.getModifiers();
-				if (Modifier.isTransient(modifiers))
-				{
-					continue;
-				}
-				if (Modifier.isStatic(modifiers))
-				{
-					continue;
-				}
-				if (commaNeeded)
-				{
-					sb.append(",\r\n");
-				}
-				else
-				{
-					commaNeeded=true;
-				}
-				writeIndent(sb, indentLevel+1).append("\""+field.getName()+"\": ");
-				Class<?> fieldType=field.getType();
-				writeExample(sb,fieldType,indentLevel+1);
+                Class<?> fieldType=field.getType();
+                if (this.shownClasses.contains(fieldType.getName())==false)
+                {
+    				int modifiers = field.getModifiers();
+    				if (Modifier.isTransient(modifiers))
+    				{
+    					continue;
+    				}
+    				if (Modifier.isStatic(modifiers))
+    				{
+    					continue;
+    				}
+    				if (commaNeeded)
+    				{
+    					sb.append(",\r\n");
+    				}
+    				else
+    				{
+    					commaNeeded=true;
+    				}
+	                writeIndent(sb, indentLevel+1).append("\""+field.getName()+"\": ");
+	                writeExample(sb,fieldType,indentLevel+1);
+		        }
 			}
 			sb.append("\r\n");
 			writeIndent(sb, indentLevel).append("}");

@@ -5,7 +5,7 @@ import java.util.Map;
 
 abstract class Section
 {
-	public void write(OutputStream outputStream, KeyValueMap parameters) throws Throwable
+	public void write(OutputStream outputStream, ElementMap parameters) throws Throwable
 	{
 		byte[] bytes=getBytes(parameters);
 		if (bytes!=null)
@@ -13,5 +13,5 @@ abstract class Section
 			outputStream.write(bytes);
 		}
 	}
-	public abstract byte[] getBytes(KeyValueMap parameters);
+	public abstract byte[] getBytes(ElementMap parameters);
 }

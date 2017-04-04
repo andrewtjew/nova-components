@@ -6,6 +6,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.jar.Attributes;
 
+import org.nova.html.elements.Element;
+
 public class HtmlWriter
 {
 	final private StringBuilder sb;
@@ -276,11 +278,16 @@ public class HtmlWriter
 	    return tag("text",text,attributes);
 	}
 	
-	public HtmlWriter insert(Object object)
+	public HtmlWriter writeElement(Element element)
 	{
-		sb.append(object);
+		sb.append(element);
 		return this;
 	}
+    public HtmlWriter writeObject(Object object)
+    {
+        sb.append(object);
+        return this;
+    }
 	public HtmlWriter textLine(String text)
 	{
 		sb.append(text).append("<br/>");

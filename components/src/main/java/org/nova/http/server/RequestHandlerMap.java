@@ -6,6 +6,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -119,7 +120,7 @@ class RequestHandlerMap
 		{
 		    if (Modifier.isPublic(classType.getModifiers())==false)
 		    {
-                throw new Exception("Class must be public. Site=" + classType.getCanonicalName());
+  //              throw new Exception("Class must be public. Site=" + classType.getCanonicalName());
 		    }
     		for (Annotation annotation : classType.getAnnotations())
     		{
@@ -161,7 +162,7 @@ class RequestHandlerMap
 	{
 		return (type == int.class) || (type == Integer.class) || (type == long.class) || (type == Long.class) || (type == short.class) || (type == short.class)
 				|| (type == float.class) || (type == Float.class) || (type == double.class) || (type == Double.class) || (type == boolean.class)
-				|| (type == Boolean.class) || (type == String.class) || type.isEnum();
+				|| (type == Boolean.class) || (type == String.class) || type.isEnum()||type==BigDecimal.class;
 	}
 
 	@SuppressWarnings(
@@ -210,6 +211,10 @@ class RequestHandlerMap
 			{
 				return default_.value();
 			}
+            else if (type == BigDecimal.class)
+            {
+                return new BigDecimal(0);
+            }
 			else if (type.isEnum())
 			{
 				return Enum.valueOf((Class<Enum>) type, default_.value());

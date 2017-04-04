@@ -1,8 +1,10 @@
-package org.nova.html.pages;
+package org.nova.html.objects;
 
 import java.util.ArrayList;
 
 import org.nova.core.KeyValue;
+import org.nova.html.pages.Attribute;
+import org.nova.html.pages.HtmlWriter;
 
 public class TableList
 {

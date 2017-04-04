@@ -2,9 +2,9 @@ package org.nova.test;
 
 public class Testing
 {
-    public static boolean ENABLED=false;
-    public static boolean PRINT=true;
-	public static boolean TEST_TRACE_SERVER_PRINT=false;
+    public final static boolean ENABLED=false;
+    public final static boolean PRINT=true;
+	public final static boolean TEST_TRACE_SERVER_PRINT=false;
 
     public static void println(String text)
     {

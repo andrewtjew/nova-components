@@ -21,7 +21,7 @@ public class PageManager
 		this.lockManager=new LockManager<String>(traceManager,this.getClass().getSimpleName());
 	}
 	
-	public Page get(String rootHtmlFile,KeyValueMap fileParameters) throws Throwable
+	public Page get(String rootHtmlFile,ElementMap fileParameters) throws Throwable
 	{
 		synchronized (this)
 		{
