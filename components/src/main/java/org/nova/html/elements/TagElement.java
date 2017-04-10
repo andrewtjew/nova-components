@@ -27,12 +27,12 @@ class TagElement<ELEMENT extends TagElement<ELEMENT>> extends Element
         return (ELEMENT)this;
     }
     @SuppressWarnings("unchecked")
-    ELEMENT attr(String name,Object value)
+    protected ELEMENT attr(String name,Object value)
     {
         sb.append(' ').append(name).append("=\"").append(value).append('"');
         return (ELEMENT) this;
     }
-    ELEMENT attr(String name)
+    protected ELEMENT attr(String name)
     {
         sb.append(' ').append(name);
         return (ELEMENT) this;

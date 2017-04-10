@@ -1,7 +1,9 @@
-package org.nova.html.elements;
+package org.nova.html.objects;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+
+import org.nova.html.elements.Element;
 
 public class Text extends Element
 {

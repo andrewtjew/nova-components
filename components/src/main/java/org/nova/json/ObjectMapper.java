@@ -759,6 +759,10 @@ public class ObjectMapper
             }
 			String string = lexer.getJSONName();
 			Field field = typeInfo.fields.get(string);
+			if (field==null)
+			{
+			    throw new Exception("No such field. Name="+string);
+			}
 			Class<?> fieldType = field.getType();
 			if (fieldType.isPrimitive())
 			{

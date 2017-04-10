@@ -1,4 +1,6 @@
-package org.nova.html.elements;
+package org.nova.html.tags;
+
+import org.nova.html.elements.InputElement;
 
 public class input_submit extends InputElement<input_submit>
 {

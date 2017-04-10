@@ -2,7 +2,7 @@ package org.nova.html.elements;
 
 public class InputElement<ELEMENT extends InputElement<ELEMENT>> extends GlobalEventTagElement<ELEMENT>
 {
-    InputElement()
+    protected InputElement()
     {
         super("input");
     }

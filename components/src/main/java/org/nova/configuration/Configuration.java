@@ -41,13 +41,17 @@ public class Configuration
 			this.map.put(configurationItem.getName(),configurationItem);
 		}
 	}
-	public void add(String name,String value,String description)
-	{
-		synchronized(this)
-		{
-			this.map.put(name,new ConfigurationItem(name, value, ConfigurationSource.CODE, getSource(Thread.currentThread().getStackTrace()[2]), description));
-		}
-	}
+    public void add(String name,String value,String description)
+    {
+        synchronized(this)
+        {
+            this.map.put(name,new ConfigurationItem(name, value, ConfigurationSource.CODE, getSource(Thread.currentThread().getStackTrace()[2]), description));
+        }
+    }
+    public void add(String name,String value)
+    {
+        add(name,value,null);
+    }
 	public ConfigurationItem getConfigurationItem(String name)
 	{
 		synchronized (this)

@@ -90,8 +90,14 @@ public class Utils
 		return new String(readFile(fileName),charset);
 	}
 
+	public static String toLocalFileName(String fileName)
+	{
+	    return fileName.replace('\\', File.separatorChar).replace('/',File.separatorChar);
+	}
+	
 	public static byte[] readFile(String fileName) throws Exception
 	{
+	    fileName=toLocalFileName(fileName);
 		File file=new File(fileName);
 		if (file.isDirectory()==true)
 		{
@@ -442,3 +448,4 @@ public class Utils
 	}
 	
 }
+
