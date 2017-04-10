@@ -1,4 +1,4 @@
-package org.nova.html.elements;
+package org.nova.html.tags;
 
 public enum rel
 {

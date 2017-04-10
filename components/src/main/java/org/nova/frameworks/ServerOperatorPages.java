@@ -36,6 +36,7 @@ import org.nova.html.pages.Selection;
 import org.nova.html.pages.operations.Menu;
 import org.nova.html.pages.operations.OperationContentResult;
 import org.nova.html.pages.operations.OperationContentWriter;
+import org.nova.html.tags.input_submit;
 import org.nova.http.Cookie;
 import org.nova.http.Header;
 import org.nova.http.client.QueryBuilder;
@@ -1759,8 +1760,8 @@ public class ServerOperatorPages
         writer.end_table();
         
         writer.begin_table();
-        writer.td(writer.inner().input_submit("Download"));
-        
+        writer.td(new input_submit().value("Download"));
+
         AjaxButton button = new AjaxButton("button", "Preview", "/operator/httpServer/classDefinitions/preview/"+server);
         button.type("post");
         button.val("namespace", "namespace");
@@ -1775,7 +1776,6 @@ public class ServerOperatorPages
         
         writer.div(null, new Attribute("id", "result"));
         
-
         return OperationContentResult.respond(writer, "Generate Interop Classes: " + server);
     }
     

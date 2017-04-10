@@ -2,7 +2,7 @@ package org.nova.html.elements;
 
 public class GlobalEventTagElement<ELEMENT extends TagElement<ELEMENT>> extends GlobalTagElement<ELEMENT>
 {
-    GlobalEventTagElement(String tag)
+    protected GlobalEventTagElement(String tag)
     {
         super(tag);
     }
