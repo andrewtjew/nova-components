@@ -22,6 +22,8 @@ import org.nova.html.pages.operations.OperationContentWriter;
 import org.nova.http.server.JettyServerFactory;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
+import org.nova.http.server.HtmlContentWriter;
+import org.nova.http.server.HtmlContentWriter;
 import org.nova.http.server.HttpServer;
 import org.nova.http.server.JSONContentReader;
 import org.nova.http.server.JSONContentWriter;
@@ -112,13 +114,13 @@ public class ServerApplication extends CoreApplication
         //Admin http server
         this.pageContentWriter=new OperationContentWriter(menu, menuPage);
 		int threads=configuration.getIntegerValue("HttpServer.operator.threads",10);
-        int operatorPort=configuration.getIntegerValue("HttpServer.operator.port",10079);
+        int operatorPort=configuration.getIntegerValue("HttpServer.operator.port",10051);
 		this.operatorServer=new HttpServer(this.getTraceManager(), JettyServerFactory.createServer(threads, operatorPort));
         this.operatorServer.addContentDecoders(new GzipContentDecoder());
         this.operatorServer.addContentEncoders(new GzipContentEncoder());
         this.operatorServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
         
-        this.operatorServer.addContentWriters(this.pageContentWriter,new TextContentWriter("text"),new JSONContentWriter(),new AjaxQueryContentWriter());
+        this.operatorServer.addContentWriters(this.pageContentWriter,new HtmlContentWriter(),new JSONContentWriter(),new AjaxQueryContentWriter());
         this.getMeterManager().register("HttpServer.operatorServer",this.operatorServer);
         System.out.println("admin endpoint: http://"+Utils.getLocalHostName()+":"+operatorPort);
 
@@ -143,16 +145,16 @@ public class ServerApplication extends CoreApplication
         if (publicPort>0)
         {
             threads=configuration.getIntegerValue("HttpServer.public.threads",1000);
-            boolean https=configuration.getBooleanValue("httpServer.public.https",false);
+            boolean https=configuration.getBooleanValue("HttpServer.public.https",false);
             if (https)
             {
-                String keyStorePassword=this.vault.get("Store.keyStore.password");
-                String trustStorePassword=this.vault.get("Store.trustStore.password");
-                String keyManagerPassword=this.vault.get("Manager.keyManagerPassword");
+                String serverCertificatePassword=this.vault.get("KeyStore.serverCertificate.password");
+                String clientCertificatePassword=this.vault.get("KeyStore.clientCertificate.password");
+                String keyManagerPassword=this.vault.get("KeyManager.password");
 
-                String keyStorePath=configuration.getValue("httpServer.public.keyStorePath",null);
-                String trustStorePath=configuration.getValue("httpServer.public.trustStorePath",null);
-                Server server=JettyServerFactory.createHttpsServer(threads, publicPort, keyStorePath, keyStorePassword,trustStorePath,trustStorePassword,keyManagerPassword);
+                String serverCertificateKeyStorePath=configuration.getValue("HttpServer.serverCertificate.keyStorePath",null);
+                String clientCertificateKeyStorePath=configuration.getValue("HttpServer.clientCertificate.keyStorePath",null);
+                Server server=JettyServerFactory.createHttpsServer(threads, publicPort, serverCertificateKeyStorePath, serverCertificatePassword,clientCertificateKeyStorePath,clientCertificatePassword,keyManagerPassword);
                 this.publicServer=new HttpServer(this.getTraceManager(), server);
             }
             else
@@ -162,7 +164,7 @@ public class ServerApplication extends CoreApplication
             this.publicServer.addContentDecoders(new GzipContentDecoder());
             this.publicServer.addContentEncoders(new GzipContentEncoder());
             this.publicServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
-            this.publicServer.addContentWriters(new JSONContentWriter());
+            this.publicServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter());
         }
         else
         {

@@ -15,6 +15,7 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
+import org.nova.core.Utils;
 
 public class JettyServerFactory
 {
@@ -34,34 +35,35 @@ public class JettyServerFactory
         return createServer(new ExecutorThreadPool(threads, threads, 0), port);
     }
 
-    static public Server createHttpsServer(int threads, int port, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword,String keyManagerPassword)
+    static public Server createHttpsServer(int threads, int port, String serverCertificateKeyStorePath, String serverCertificatePassword,String clientCertificateKeyStorePath,String clientCertificatePassword,String keyManagerPassword)
     {
         HttpConfiguration config=new HttpConfiguration();
         config.setOutputBufferSize(65536);
         config.setRequestHeaderSize(8192);
         config.setResponseHeaderSize(8192);
         config.setSecurePort(port);
-        return createHttpsServer(new ExecutorThreadPool(threads, threads, 0),config,keyStorePath,keyStorePassword,trustStorePath,trustStorePassword,keyManagerPassword);
+        return createHttpsServer(new ExecutorThreadPool(threads, threads, 0),config,serverCertificateKeyStorePath,serverCertificatePassword,clientCertificateKeyStorePath,clientCertificatePassword,keyManagerPassword);
     }
     
-    static public Server createHttpsServer(ThreadPool threadPool, HttpConfiguration config, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword,String keyManagerPassword)
+    static public Server createHttpsServer(ThreadPool threadPool, HttpConfiguration config, String serverCertificateKeyStorePath, String serverCertificateKeyPassword,String clientCertificateKeyStorePath,String clientCertificatePassword,String keyManagerPassword)
     {
         Server server = new Server(threadPool);
         config.addCustomizer(new SecureRequestCustomizer());
         SslContextFactory sslContextFactory = new SslContextFactory();
-        if (keyStorePath!=null)
+        if (serverCertificateKeyPassword!=null)
         {
-            sslContextFactory.setKeyStorePath(keyStorePath);
-            sslContextFactory.setKeyStorePassword(keyStorePassword);
+            sslContextFactory.setKeyStorePath(Utils.toLocalFileName(serverCertificateKeyStorePath));
+            sslContextFactory.setKeyStorePassword(serverCertificateKeyPassword);
         }
-        if (trustStorePath!=null)
+        if (clientCertificatePassword!=null)
         {
             sslContextFactory.setNeedClientAuth(true);
-            sslContextFactory.setTrustStorePath(trustStorePath);
-            sslContextFactory.setTrustStorePassword(trustStorePassword);
+            sslContextFactory.setTrustStorePath(Utils.toLocalFileName(clientCertificateKeyStorePath));
+            sslContextFactory.setTrustStorePassword(clientCertificatePassword);
         }
+        
         sslContextFactory.setKeyManagerPassword(keyManagerPassword);
- //       sslContextFactory.setTrustAll(true);
+  //      sslContextFactory.setTrustAll(true);
         sslContextFactory.setRenegotiationAllowed(false);
         ServerConnector sslConnector = new ServerConnector(server, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(config));
         sslConnector.setPort(config.getSecurePort());

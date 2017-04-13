@@ -37,19 +37,9 @@ public class TextClient
 		this.headers=headers;
 	}
 
-	static private HttpClient newDefaultClient()
-	{
-		RequestConfig config=RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
-		HttpClients.custom().setDefaultRequestConfig(config);
-		PoolingHttpClientConnectionManager connectionManager=new PoolingHttpClientConnectionManager();
-		connectionManager.setDefaultMaxPerRoute(10);
-		connectionManager.setMaxTotal(10);
-		return HttpClients.custom().setConnectionManager(connectionManager).build();
-	}
-	
 	public TextClient(TraceManager traceManager,Logger logger,String endPoint)
 	{
-		this(traceManager,logger,endPoint,newDefaultClient());
+		this(traceManager,logger,endPoint,HttpClientFactory.createDefaultClient());
 	}
 
 	public TextResponse get(Trace parent,String traceCategoryOverride,String pathAndQuery,Header...headers) throws Exception

@@ -801,11 +801,6 @@ public class ObjectMapper
 			}
 			else if (fieldType == String.class)
 			{
-				next = lexer.getNextCharacter();
-				if (next != '"')
-				{
-					throw new Exception("String expected at " + lexer.getPosition());
-				}
 				field.set(object, lexer.getString());
 			}
 			else if (fieldType.isArray())

@@ -75,7 +75,7 @@ public class SecureFileVault extends Vault
 			
 			Cipher AesCipher = Cipher.getInstance("AES");
 			AesCipher.init(Cipher.ENCRYPT_MODE, this.secretKey);
-			byte[] byteText = value.trim().getBytes();
+			byte[] byteText = value.getBytes();
 			byte[] byteCipherText = AesCipher.doFinal(byteText);
 			this.map.put(key, byteCipherText);
 		}

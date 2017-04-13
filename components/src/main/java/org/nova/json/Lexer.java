@@ -158,81 +158,102 @@ public class Lexer
 	
 	public String getString() throws Exception
 	{
-		StringBuilder sb=new StringBuilder();
-		char character;
-		for (;;)
-		{
-			character=this.reader.read();
-			if (character=='"')
-			{
-				return sb.toString();
-			}
-			else if (character=='\\')
-			{
-				int next=this.reader.read();
-				if (next=='"')
-				{
-					sb.append('"');
-				}
-				else if (next=='\\')
-				{
-					sb.append('\\');
-				}
-				else if (next=='/')
-				{
-					sb.append('/');
-				}
-				else if (next=='b')
-				{
-					sb.append('\b');
-				}
-				else if (next=='f')
-				{
-					sb.append('\f');
-				}
-				else if (next=='n')
-				{
-					sb.append('\n');
-				}
-				else if (next=='r')
-				{
-					sb.append('\r');
-				}
-				else if (next=='t')
-				{
-					sb.append('\t');
-				}
-				else if (next=='u')
-				{
-					char c=0;
-					for (int i=0;i<4;i++)
-					{
-						int digit=this.reader.read();
-						if ((digit>='0')&&(digit<='9'))
-						{
-							c=(char)(c*16+digit-'0');
-						}
-						else if ((digit>='A')&&(digit<='E'))
-						{
-							c=(char)(c*16+digit-'A'+10);
-						}
-						else if ((digit>='a')&&(digit<='e'))
-						{
-							c=(char)(c*16+digit-'a'+10);
-						}
-						else
-						{
-							throw new Exception("Invalid unicode escape at "+getPosition());
-						}
-					}
-					sb.append(c);
-				}
-			}
-			else
-			{
-				sb.append(character);
-			}
-		}
+	    
+		char character=skipWhiteSpace();
+        if (character=='"')
+        {
+            StringBuilder sb=new StringBuilder();
+    		for (;;)
+    		{
+    			character=this.reader.read();
+    			if (character=='"')
+    			{
+                    this.last=0;
+    				return sb.toString();
+    			}
+    			else if (character=='\\')
+    			{
+    				int next=this.reader.read();
+    				if (next=='"')
+    				{
+    					sb.append('"');
+    				}
+    				else if (next=='\\')
+    				{
+    					sb.append('\\');
+    				}
+    				else if (next=='/')
+    				{
+    					sb.append('/');
+    				}
+    				else if (next=='b')
+    				{
+    					sb.append('\b');
+    				}
+    				else if (next=='f')
+    				{
+    					sb.append('\f');
+    				}
+    				else if (next=='n')
+    				{
+    					sb.append('\n');
+    				}
+    				else if (next=='r')
+    				{
+    					sb.append('\r');
+    				}
+    				else if (next=='t')
+    				{
+    					sb.append('\t');
+    				}
+    				else if (next=='u')
+    				{
+    					char c=0;
+    					for (int i=0;i<4;i++)
+    					{
+    						int digit=this.reader.read();
+    						if ((digit>='0')&&(digit<='9'))
+    						{
+    							c=(char)(c*16+digit-'0');
+    						}
+    						else if ((digit>='A')&&(digit<='E'))
+    						{
+    							c=(char)(c*16+digit-'A'+10);
+    						}
+    						else if ((digit>='a')&&(digit<='e'))
+    						{
+    							c=(char)(c*16+digit-'a'+10);
+    						}
+    						else
+    						{
+    							throw new Exception("Invalid unicode escape at "+getPosition());
+    						}
+    					}
+    					sb.append(c);
+    				}
+    			}
+    			else
+    			{
+    				sb.append(character);
+    			}
+    		}
+        }
+        else if  (character=='n')
+        {
+            if (this.reader.read()=='u')
+            {
+                if (this.reader.read()=='l')
+                {
+                    if (this.reader.read()=='l')
+                    {
+                        this.last=0;
+                        return null;
+                    }
+                }
+            }
+        }
+        throw new Exception("String or null expected at "+getPosition());
+
 	}
 
 	public Boolean getBoolean() throws Exception
