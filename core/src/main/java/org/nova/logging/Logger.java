@@ -1,5 +1,7 @@
 package org.nova.logging;
 
+import java.util.ArrayList;
+
 import org.nova.metrics.CountMeter;
 import org.nova.tracing.Trace;
 
@@ -58,4 +60,8 @@ public abstract class Logger
 	}
 	abstract public void log(Trace trace,Level logLevel,String category,Throwable throwable,String message,Item[] items);
 	
+	public static Item[] toArray(ArrayList<Item> items)
+	{
+	    return items.toArray(new Item[items.size()]);
+	}
 }

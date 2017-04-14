@@ -20,10 +20,14 @@ import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.http.client.HttpClient;
 import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.server.Server;
 import org.nova.annotations.Description;
 import org.nova.concurrent.Future;
 import org.nova.concurrent.TimerTask;
+import org.nova.configuration.Configuration;
 import org.nova.configuration.ConfigurationItem;
 import org.nova.core.Utils;
 import org.nova.html.Attribute;
@@ -39,7 +43,9 @@ import org.nova.html.operations.OperationResultWriter;
 import org.nova.html.tags.input_submit;
 import org.nova.http.Cookie;
 import org.nova.http.Header;
-import org.nova.http.client.QueryBuilder;
+import org.nova.http.client.HttpClientConfiguration;
+import org.nova.http.client.HttpClientFactory;
+import org.nova.http.client.PathAndQueryBuilder;
 import org.nova.http.client.TextClient;
 import org.nova.http.client.TextResponse;
 import org.nova.http.server.CSharpClassWriter;
@@ -55,13 +61,14 @@ import org.nova.http.server.HttpServer;
 import org.nova.http.server.JSONContentReader;
 import org.nova.http.server.JSONContentWriter;
 import org.nova.http.server.JSONPatchContentReader;
+import org.nova.http.server.JettyServerFactory;
 import org.nova.http.server.ParameterInfo;
 import org.nova.http.server.ParameterSource;
 import org.nova.http.server.RequestHandler;
 import org.nova.http.server.RequestHandlerNotFoundLogEntry;
 import org.nova.http.server.RequestLogEntry;
 import org.nova.http.server.Response;
-import org.nova.http.server.TextContentWriter;
+import org.nova.http.server.HtmlContentWriter;
 import org.nova.http.server.annotations.ContentDecoders;
 import org.nova.http.server.annotations.ContentEncoders;
 import org.nova.http.server.annotations.ContentReaders;
@@ -72,7 +79,6 @@ import org.nova.http.server.annotations.POST;
 import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.PathParam;
 import org.nova.http.server.annotations.QueryParam;
-import org.nova.json.JSONString;
 import org.nova.logging.JSONBufferedLZ4Queue;
 import org.nova.logging.LogDirectoryInfo;
 import org.nova.logging.LogDirectoryManager;
@@ -87,6 +93,7 @@ import org.nova.metrics.LevelMeterBox;
 import org.nova.metrics.RateMeter;
 import org.nova.metrics.RateMeterBox;
 import org.nova.operations.OperatorVariable;
+import org.nova.security.Vault;
 import org.nova.test.Testing;
 import org.nova.testing.TestTraceClient;
 import org.nova.tracing.Trace;
@@ -94,13 +101,12 @@ import org.nova.tracing.TraceNode;
 import org.nova.tracing.TraceStats;
 
 import com.google.common.base.Strings;
-import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Description("Handlers for server operator pages")
 @ContentDecoders(GzipContentDecoder.class)
 @ContentEncoders(GzipContentEncoder.class)
 @ContentReaders({ JSONContentReader.class, JSONPatchContentReader.class })
-@ContentWriters({OperationResultWriter.class, TextContentWriter.class})
+@ContentWriters({OperationResultWriter.class, HtmlContentWriter.class})
 public class ServerOperatorPages
 {
     public final ServerApplication serverApplication;
@@ -331,7 +337,7 @@ public class ServerOperatorPages
             {
                 CountAverageRateMeter meter = item.getMeter();
                 AverageAndRate ar = meter.getMarkCountAverage(this.rateSamplingDuration);
-                writer.tr(writer.inner().td(writer.inner().a(item.getCategory(), new QueryBuilder("./trace").add("category", item.getCategory()).toString())).td(meter.getCount())
+                writer.tr(writer.inner().td(writer.inner().a(item.getCategory(), new PathAndQueryBuilder("./trace").addQuery("category", item.getCategory()).toString())).td(meter.getCount())
                         .td(nanoToDefaultFormat(ar.getAverage())).td(nanoToDefaultFormat(ar.getStandardDeviation())).td(nanoToDefaultFormat(meter.getTotal())));
             }
             writer.end_table();
@@ -350,7 +356,7 @@ public class ServerOperatorPages
     {
         TraceNode node = entry.getValue();
         writer.begin_td();
-        writer.a(entry.getKey(), new QueryBuilder("./trace").add("category", entry.getKey()).toString());
+        writer.a(entry.getKey(), new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString());
         writer.table(
                 writer.inner().tr(writer.inner().th("Count").th("Average", "Milliseconds").th("Duration", "Milliseconds").th("Wait", "Milliseconds")).td(node.getCount())
                         .td(nanoToDefaultFormat(node.getTotalDurationNs() / node.getCount())).td(nanoToDefaultFormat(node.getTotalDurationNs())).td(nanoToDefaultFormat(node.getTotalWaitNs())),
@@ -381,7 +387,7 @@ public class ServerOperatorPages
         }
         TraceNode node = entry.getValue();
         writer.begin_td();
-        writer.a(entry.getKey(), new QueryBuilder("./trace").add("category", entry.getKey()).toString());
+        writer.a(entry.getKey(), new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString());
         writer.table(
                 writer.inner().tr(writer.inner().th("Count").th("Average", "Milliseconds").th("Duration", "Milliseconds").th("Wait", "Milliseconds")).td(node.getCount())
                         .td(nanoToDefaultFormat(node.getTotalDurationNs() / node.getCount())).td(nanoToDefaultFormat(node.getTotalDurationNs())).td(nanoToDefaultFormat(node.getTotalWaitNs())),
@@ -435,7 +441,7 @@ public class ServerOperatorPages
         for (Entry<String, TraceNode> entry : map.entrySet())
         {
             TraceNode node = entry.getValue();
-            writer.tr().td(writer.inner().a(entry.getKey(), new QueryBuilder("./trace").add("category", entry.getKey()).toString()).td(node.getCount())
+            writer.tr().td(writer.inner().a(entry.getKey(), new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString()).td(node.getCount())
                     .td(nanoToDefaultFormat(node.getTotalDurationNs() / node.getCount())).td(nanoToDefaultFormat(node.getTotalDurationNs())).td(nanoToDefaultFormat(node.getTotalWaitNs())));
 
         }
@@ -532,7 +538,7 @@ public class ServerOperatorPages
                 totalWaitNs += item.getTotalWaitNs();
             }
 
-            writer.tr().td(writer.inner().a(entry.getKey(), new QueryBuilder("./trace").add("category", entry.getKey()).toString()).td(count).td(nanoToDefaultFormat(totalDurationNs))
+            writer.tr().td(writer.inner().a(entry.getKey(), new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString()).td(count).td(nanoToDefaultFormat(totalDurationNs))
                     .td(nanoToDefaultFormat(totalWaitNs)).td(list.size()).td(map.containsKey(entry.getKey())));
 
         }
@@ -768,7 +774,7 @@ public class ServerOperatorPages
             writer.tr(writer.inner().th("Categories"));
             for (String category : categories)
             {
-                writer.tr(writer.inner().td(writer.inner().a(category, new QueryBuilder("/operator/process/meters/category").add("category", category).toString())));
+                writer.tr(writer.inner().td(writer.inner().a(category, new PathAndQueryBuilder("/operator/process/meters/category").addQuery("category", category).toString())));
             }
             writer.end_table();
         }
@@ -910,7 +916,7 @@ public class ServerOperatorPages
                         .inner().td(
                                 writer.inner()
                                         .a(requestHandler.getHttpMethod() + " " + requestHandler.getPath(),
-                                                new QueryBuilder("/operator/httpServer/info").add("key", requestHandler.getKey()).toString())
+                                                new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).toString())
                                         .td(count).td(DOUBLE_FORMAT.format(countPercentage)).td(Utils.millisToDurationString((long) totalMilliseconds)).td(DOUBLE_FORMAT.format(totalPercentage))
                                         .td(count > 0 ? DOUBLE_FORMAT.format(total / (1.0e6 * count)) : 0).td(DOUBLE_FORMAT.format(rate)))
                         .td(count > 0 ? requestHandler.getRequestUncompressedContentSizeMeter().getTotal() / count : 0)
@@ -1073,7 +1079,7 @@ public class ServerOperatorPages
                         writer.inner()
                                 .td(writer.inner()
                                         .a(requestHandler.getHttpMethod() + " " + requestHandler.getPath(),
-                                                new QueryBuilder("/operator/httpServer/info").add("key", requestHandler.getKey()).toString())
+                                                new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).toString())
                                         .td(statusCodes.get(200)).td(statusCodes.get(300)).td(statusCodes.get(400)).td(statusCodes.get(500))));
             }
             writer.end_table();
@@ -1311,7 +1317,7 @@ public class ServerOperatorPages
             {
                 writer.begin_tr();
                 writer.td(writer.inner().a(requestHandler.getHttpMethod() + " " + requestHandler.getPath(),
-                        new QueryBuilder("/operator/httpServer/method/"+server).add("key", requestHandler.getKey()).toString()));
+                        new PathAndQueryBuilder("/operator/httpServer/method/"+server).addQuery("key", requestHandler.getKey()).toString()));
                 Method method = requestHandler.getMethod();
                 Description description = method.getAnnotation(Description.class);
                 if (description != null)
@@ -2166,6 +2172,45 @@ public class ServerOperatorPages
         return OperationResult.respond(writer, "Methods: " + server);
     }
 
+    static class HttpClientEndPoint
+    {
+        final HttpClient httpClient;
+        final String endPoint;
+        HttpClientEndPoint(HttpClient httpClient,String endPoint)
+        {
+            this.httpClient=httpClient;
+            this.endPoint=endPoint;
+        }
+    }
+    
+    private HttpClientEndPoint getExecuteClient(HttpServer httpServer,Context context) throws Throwable
+    {
+        String endPoint = context.getHttpServletRequest().getHeader("Referer");
+        int index=endPoint.lastIndexOf(':');
+        if (index>0)
+        {
+            endPoint=endPoint.substring(0,index);
+        }
+        endPoint=endPoint+":"+httpServer.getPreferredPort();
+        if (httpServer.getPreferredPort()==this.serverApplication.getPublicServer().getPreferredPort())
+        {
+            Configuration configuration=this.serverApplication.getConfiguration();
+            boolean https=configuration.getBooleanValue("HttpServer.public.https",false);
+            if (https)
+            {
+                Vault vault=this.serverApplication.getVault();
+                String serverCertificatePassword=vault.get("KeyStore.serverCertificate.password");
+                String clientCertificatePassword=vault.get("KeyStore.clientCertificate.password");
+                String serverCertificateKeyStorePath=configuration.getValue("HttpServer.serverCertificate.keyStorePath",null);
+                String clientCertificateKeyStorePath=configuration.getValue("HttpServer.clientCertificate.keyStorePath",null);
+                String clusterName=configuration.getValue("httpServer.public.clusterName","server");
+                endPoint=endPoint.replace("http", "https");
+                return new HttpClientEndPoint(HttpClientFactory.createSSLClient(new HttpClientConfiguration(), clientCertificateKeyStorePath, clientCertificatePassword, serverCertificateKeyStorePath, serverCertificatePassword, clusterName),endPoint);
+            }
+        }
+        HttpServletRequest request = context.getHttpServletRequest();
+        return new HttpClientEndPoint(HttpClientFactory.createDefaultClient(),endPoint);
+    }
     @GET
     @Path("/operator/httpServer/method/execute/{server}")
     @ContentWriters(AjaxQueryResultWriter.class)
@@ -2175,13 +2220,6 @@ public class ServerOperatorPages
         {
             HttpServer httpServer=getHttpServer(server);
             HttpServletRequest request = context.getHttpServletRequest();
-            String endPoint = request.getHeader("Referer");
-            int index=endPoint.lastIndexOf(':');
-            if (index>0)
-            {
-                endPoint=endPoint.substring(0,index);
-            }
-            endPoint=endPoint+":"+httpServer.getPreferredPort();
             ArrayList<Header> headers = new ArrayList<>();
             ArrayList<Cookie> cookies = new ArrayList<>();
             String[] methodSchema = Utils.split(key, ' ');
@@ -2242,7 +2280,8 @@ public class ServerOperatorPages
                 }
             }
 
-            TextClient textClient = new TextClient(this.serverApplication.getTraceManager(), this.serverApplication.getLogger(), endPoint);
+            HttpClientEndPoint httpClientEndPoint=getExecuteClient(httpServer,context);
+            TextClient textClient = new TextClient(this.serverApplication.getTraceManager(), this.serverApplication.getLogger(), httpClientEndPoint.endPoint,httpClientEndPoint.httpClient);
             int statusCode;
             TextResponse response=null;
             double duration = 0;

@@ -22,7 +22,7 @@ public class FieldMaps
 		HashMap<String,Field> map=new HashMap<>();
 		for (Field field:type.getDeclaredFields())
 		{
-			DatabaseAlias alias=(DatabaseAlias)field.getAnnotation(DatabaseAlias.class);
+			ColumnNameAlias alias=(ColumnNameAlias)field.getAnnotation(ColumnNameAlias.class);
 			String name=alias!=null?alias.value():field.getName();
 			field.setAccessible(true);
 			map.put(name, field);

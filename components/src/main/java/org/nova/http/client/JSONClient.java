@@ -1,9 +1,13 @@
 package org.nova.http.client;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
@@ -15,6 +19,9 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.nova.core.Utils;
 import org.nova.http.Header;
 import org.nova.json.ObjectMapper;
+import org.nova.logging.Item;
+import org.nova.logging.Level;
+import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
@@ -40,28 +47,26 @@ public class JSONClient
 		this.contentType=contentType;
 		this.patchType=patchType;
 	}
+    public JSONClient(TraceManager traceManager,Logger logger,String endPoint,HttpClient client)
+    {
+        this(traceManager,logger,endPoint,client,"application/json","application/merge-patch+json");
+    }
 
-	static private HttpClient newDefaultClient()
-	{
-		RequestConfig config=RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
-		HttpClients.custom().setDefaultRequestConfig(config);
-		PoolingHttpClientConnectionManager connectionManager=new PoolingHttpClientConnectionManager();
-		connectionManager.setDefaultMaxPerRoute(10);
-		connectionManager.setMaxTotal(10);
-		return HttpClients.custom().setConnectionManager(connectionManager).build();
-	}
-	
 	public JSONClient(TraceManager traceManager,Logger logger,String endPoint)
 	{
-		this(traceManager,logger,endPoint,newDefaultClient(),"application/json","application/merge-patch+json");
+		this(traceManager,logger,endPoint,HttpClientFactory.createDefaultClient(),"application/json","application/merge-patch+json");
 	}
 	
-	public <TYPE> JSONResponse<TYPE> get(Trace parent,String traceCategoryOverride,String pathAndQuery,Class<TYPE> responseContentType) throws Exception
+	public <TYPE> JSONResponse<TYPE> get(Trace parent,String traceCategoryOverride,String pathAndQuery,Class<TYPE> responseContentType) throws Throwable
 	{
-		try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
-		{
+        ArrayList<Item> items=new ArrayList<>();
+        Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery);
+        try 
+        {
 			HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
-			get.setHeader("Accept",this.contentType);
+            items.add(new Item("endPoint",this.endPoint));
+            items.add(new Item("pathAndQuery",pathAndQuery));
+
 			if (this.headers!=null)
 			{
 				for (Header header:this.headers)
@@ -69,74 +74,70 @@ public class JSONClient
 					get.setHeader(header.getName(),header.getValue());
 				}
 			}
-			HttpResponse response=this.client.execute(get);
+            get.setHeader("Accept",this.contentType);
+            for (org.apache.http.Header header:get.getAllHeaders())
+            {
+                items.add(new Item("requestHeader:"+header.getName(),header.getValue()));
+            }
+
+            trace.beginWait();
+            HttpResponse response=this.client.execute(get);
+            trace.endWait();
 			try
 			{
+                String json=processResponse(response, items);
 				int statusCode=response.getStatusLine().getStatusCode();
 				if (statusCode>=300)
 				{
 					return new JSONResponse<TYPE>(statusCode, null);
 				}
-				return new JSONResponse<TYPE>(statusCode,ObjectMapper.read(response.getEntity().getContent(), responseContentType));
+				return new JSONResponse<TYPE>(statusCode,ObjectMapper.read(json, responseContentType));
 			}
 			finally
 			{
 				response.getEntity().getContent().close();
 			}
 		}		
+        catch (Throwable t)
+        {
+            trace.close(t);
+            throw t;
+        }
+        finally
+        {
+            trace.close();
+            this.logger.log(trace,Level.NORMAL,"JSONClient:get",Logger.toArray(items));
+        }
 	}
 
-	public TextResponse get(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Exception
+	public int delete(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Throwable
 	{
-		try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
-		{
-			HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
-			get.setHeader("Accept",this.contentType);
-			if (this.headers!=null)
-			{
-				for (Header header:this.headers)
-				{
-					get.setHeader(header.getName(),header.getValue());
-				}
-			}
-			HttpResponse response=this.client.execute(get);
-			try
-			{
-				int statusCode=response.getStatusLine().getStatusCode();
-				if (statusCode>=300)
-				{
-					return new TextResponse(statusCode, null,null);
-				}
-                org.apache.http.Header[] responseHeaders=response.getAllHeaders();
-                Header[] textResponseHeaders=new Header[responseHeaders.length];
-                for (int i=0;i<responseHeaders.length;i++)
-                {
-                    textResponseHeaders[i]=new Header(responseHeaders[i].getName(),responseHeaders[i].getValue());
-                }
-				return new TextResponse(statusCode,Utils.readString(response.getEntity().getContent()),textResponseHeaders);
-			}
-			finally
-			{
-				response.getEntity().getContent().close();
-			}
-		}		
-	}
-
-	public int delete(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Exception
-	{
-		try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
-		{
+        ArrayList<Item> items=new ArrayList<>();
+        Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery);
+        try 
+        {
 			HttpDelete delete=new HttpDelete(this.endPoint+pathAndQuery);
-			if (this.headers!=null)
+            items.add(new Item("endPoint",this.endPoint));
+            items.add(new Item("pathAndQuery",pathAndQuery));
+
+            if (this.headers!=null)
 			{
 				for (Header header:this.headers)
 				{
 					delete.setHeader(header.getName(),header.getValue());
 				}
 			}
-			HttpResponse response=this.client.execute(delete);
+            for (org.apache.http.Header header:delete.getAllHeaders())
+            {
+                items.add(new Item("requestHeader:"+header.getName(),header.getValue()));
+            }
+
+            trace.beginWait();
+            HttpResponse response=this.client.execute(delete);
+            trace.endWait();
 			try
 			{
+			    processResponse(response, items);
 				return response.getStatusLine().getStatusCode();
 			}
 			finally
@@ -144,64 +145,145 @@ public class JSONClient
 				response.getEntity().getContent().close();
 			}
 		}		
+        catch (Throwable t)
+        {
+            trace.close(t);
+            throw t;
+        }
+        finally
+        {
+            trace.close();
+            this.logger.log(trace,Level.NORMAL,"JSONClient:delete",Logger.toArray(items));
+        }
 	}
 
-	public int put(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Exception
+	public int put(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Throwable
 	{
-		try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
+        ArrayList<Item> items=new ArrayList<>();
+        Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery);
+        try 
 		{
 			HttpPut put=new HttpPut(this.endPoint+pathAndQuery);
-			put.setHeader("Accept",this.contentType);
-			put.setHeader("Content-Type",this.contentType);
+            items.add(new Item("endPoint",this.endPoint));
+            items.add(new Item("pathAndQuery",pathAndQuery));
+
 			if (content!=null)
 			{
-				StringEntity entity=new StringEntity(ObjectMapper.write(content));
+                String jsonContent=ObjectMapper.write(content);
+                items.add(new Item("request",jsonContent));
+                StringEntity entity=new StringEntity(jsonContent);
 				put.setEntity(entity);
 			}
-			HttpResponse response=this.client.execute(put);
+            if (this.headers!=null)
+            {
+                for (Header header:this.headers)
+                {
+                    put.setHeader(header.getName(),header.getValue());
+                }
+            }
+            put.setHeader("Accept",this.contentType);
+            put.setHeader("Content-Type",this.contentType);
+            for (org.apache.http.Header header:put.getAllHeaders())
+            {
+                items.add(new Item("requestHeader:"+header.getName(),header.getValue()));
+            }
+
+            trace.beginWait();
+            HttpResponse response=this.client.execute(put);
+            trace.endWait();
 			try
 			{
-				return response.getStatusLine().getStatusCode();
+                processResponse(response, items);
+                return response.getStatusLine().getStatusCode();
 			}
 			finally
 			{
 				response.getEntity().getContent().close();
 			}
 		}		
+        catch (Throwable t)
+        {
+            trace.close(t);
+            throw t;
+        }
+        finally
+        {
+            trace.close();
+            this.logger.log(trace,Level.NORMAL,"JSONClient:put",Logger.toArray(items));
+        }
 	}
 
-	public int patch(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Exception
+	public int patch(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Throwable
 	{
-		try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
-		{
-			HttpPatch patch=new HttpPatch(this.endPoint+pathAndQuery);
-			patch.setHeader("Accept",this.contentType);
-			patch.setHeader("Content-Type",this.patchType);
-			if (content!=null)
-			{
-				StringEntity entity=new StringEntity(ObjectMapper.write(content));
-				patch.setEntity(entity);
-			}
-			HttpResponse response=this.client.execute(patch);
-			try
-			{
-				return response.getStatusLine().getStatusCode();
-			}
-			finally
-			{
-				response.getEntity().getContent().close();
-			}
-		}		
+        ArrayList<Item> items=new ArrayList<>();
+        Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery);
+        try 
+        {
+            HttpPatch patch=new HttpPatch(this.endPoint+pathAndQuery);
+            items.add(new Item("endPoint",this.endPoint));
+            items.add(new Item("pathAndQuery",pathAndQuery));
+
+            if (content!=null)
+            {
+                String jsonContent=ObjectMapper.write(content);
+                items.add(new Item("request",jsonContent));
+                StringEntity entity=new StringEntity(jsonContent);
+                patch.setEntity(entity);
+            }
+            if (this.headers!=null)
+            {
+                for (Header header:this.headers)
+                {
+                    patch.setHeader(header.getName(),header.getValue());
+                }
+            }
+            patch.setHeader("Accept",this.contentType);
+            patch.setHeader("Content-Type",this.patchType);
+            for (org.apache.http.Header header:patch.getAllHeaders())
+            {
+                items.add(new Item("requestHeader:"+header.getName(),header.getValue()));
+            }
+            
+            trace.beginWait();
+            HttpResponse response=this.client.execute(patch);
+            trace.endWait();
+            try
+            {
+                processResponse(response, items);
+                int statusCode=response.getStatusLine().getStatusCode();
+                return statusCode;
+            }
+            finally
+            {
+                response.getEntity().getContent().close();
+            }
+        }
+        catch (Throwable t)
+        {
+            trace.close(t);
+            throw t;
+        }
+        finally
+        {
+            trace.close();
+            this.logger.log(trace,Level.NORMAL,"JSONClient:patch",Logger.toArray(items));
+        }
 	}
 
-	public <TYPE> JSONResponse<TYPE> post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Class<TYPE> responseContentType) throws Exception
+	public <TYPE> JSONResponse<TYPE> post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Class<TYPE> responseContentType) throws Throwable
 	{
-		try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
+	    ArrayList<Item> items=new ArrayList<>();
+	    Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery);
+		try 
 		{
 			HttpPost post=new HttpPost(this.endPoint+pathAndQuery);
+            items.add(new Item("endPoint",this.endPoint));
+            items.add(new Item("pathAndQuery",pathAndQuery));
 			if (content!=null)
 			{
-				StringEntity entity=new StringEntity(ObjectMapper.write(content));
+			    String jsonContent=ObjectMapper.write(content);
+                items.add(new Item("request",jsonContent));
+				StringEntity entity=new StringEntity(jsonContent);
 				post.setEntity(entity);
 			}
 			if (this.headers!=null)
@@ -213,22 +295,90 @@ public class JSONClient
 			}
 			post.setHeader("Accept",this.contentType);
 			post.setHeader("Content-Type",this.contentType);
+            for (org.apache.http.Header header:post.getAllHeaders())
+            {
+                items.add(new Item("requestHeader:"+header.getName(),header.getValue()));
+            }
+            trace.beginWait();
 			HttpResponse response=this.client.execute(post);
+			trace.endWait();
 			try
 			{
-				int statusCode=response.getStatusLine().getStatusCode();
+                String json=processResponse(response,items);
+                int statusCode=response.getStatusLine().getStatusCode();
 				if (statusCode>=300)
 				{
 					return new JSONResponse<TYPE>(statusCode, null);
 				}
-				return new JSONResponse<TYPE>(statusCode,ObjectMapper.read(response.getEntity().getContent(), responseContentType));
+				return new JSONResponse<TYPE>(statusCode,ObjectMapper.read(json, responseContentType));
 			}
 			finally
 			{
-				response.getEntity().getContent().close();
+	            response.getEntity().getContent().close();
 			}
-		}		
+	    }
+		catch (Throwable t)
+		{
+            trace.close(t);
+            throw t;
+		}
+        finally
+        {
+            trace.close();
+            this.logger.log(trace,Level.NORMAL,"JSONClient:post",Logger.toArray(items));
+        }
 	}
+	
+	private String processResponse(HttpResponse response,ArrayList<Item> items) throws Throwable
+	{
+        for (org.apache.http.Header header:response.getAllHeaders())
+        {
+            items.add(new Item("responseHeader:"+header.getName(),header.getValue()));
+        }
+        String responseContent=Utils.readString(response.getEntity().getContent());
+        if (responseContent.length()>0)
+        {
+            items.add(new Item("response",responseContent));
+        }
+        return responseContent;
+	}
+	
+	/*
+    public TextResponse get(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Exception
+    {
+        try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
+        {
+            HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
+            get.setHeader("Accept",this.contentType);
+            if (this.headers!=null)
+            {
+                for (Header header:this.headers)
+                {
+                    get.setHeader(header.getName(),header.getValue());
+                }
+            }
+            HttpResponse response=this.client.execute(get);
+            try
+            {
+                int statusCode=response.getStatusLine().getStatusCode();
+                if (statusCode>=300)
+                {
+                    return new TextResponse(statusCode, null,null);
+                }
+                org.apache.http.Header[] responseHeaders=response.getAllHeaders();
+                Header[] textResponseHeaders=new Header[responseHeaders.length];
+                for (int i=0;i<responseHeaders.length;i++)
+                {
+                    textResponseHeaders[i]=new Header(responseHeaders[i].getName(),responseHeaders[i].getValue());
+                }
+                return new TextResponse(statusCode,Utils.readString(response.getEntity().getContent()),textResponseHeaders);
+            }
+            finally
+            {
+                response.getEntity().getContent().close();
+            }
+        }       
+    }
 
 	public TextResponse post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Exception
 	{
@@ -271,6 +421,7 @@ public class JSONClient
 			}
 		}		
 	}
+	*/
 	public String getEndPoint()
 	{
 	    return this.endPoint;

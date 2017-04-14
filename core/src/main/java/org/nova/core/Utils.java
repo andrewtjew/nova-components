@@ -34,6 +34,42 @@ public class Utils
         return a.compareTo(b);
     }
     
+    public static String[] splitUsingWhiteSpace(String string)
+    {
+        int count=0;
+        for (int i=0;i<string.length();i++)
+        {
+            if (Character.isWhitespace(string.charAt(i))==false)
+            {
+                count++;
+                for (i++;i<string.length();i++)
+                {
+                    if (Character.isWhitespace(string.charAt(i)))
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        String[] fragments=new String[count];
+        int index=0;
+        for (int i=0;i<string.length();i++)
+        {
+            if (Character.isWhitespace(string.charAt(i))==false)
+            {
+                int begin=i;
+                for (i++;i<string.length();i++)
+                {
+                    if (Character.isWhitespace(string.charAt(i)))
+                    {
+                        fragments[index++]=string.substring(begin,i);
+                        break;
+                    }
+                }
+            }
+        }
+        return fragments;
+    }
     
     public static String[] split(String string,char splitCharacter)
 	{
@@ -62,7 +98,6 @@ public class Utils
     public static String combine(Iterable<?> iterable,String seperator)
 	{
     	StringBuilder sb=new StringBuilder();
-    	ArrayList<?> list;
     	for (Object item:iterable)
     	{
     		if (sb.length()>0)

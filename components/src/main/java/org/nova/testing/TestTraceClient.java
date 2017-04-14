@@ -44,7 +44,7 @@ public class TestTraceClient
 				String source=thread.getName()+":"+element.getMethodName()+"("+element.getFileName()+":"+element.getLineNumber()+")";
 				this.client.put(null, null, printUrl, new PrintMessage(category,source,text));
 			}
-			catch (Exception e)
+			catch (Throwable e)
 			{
 				e.printStackTrace();
 			}
@@ -65,7 +65,7 @@ public class TestTraceClient
 				String source=thread.getName()+":"+element.getMethodName()+"("+element.getFileName()+":"+element.getLineNumber()+")";
 				client.client.put(null, null, client.printUrl, new PrintMessage(category,source,text));
 			}
-			catch (Exception e)
+			catch (Throwable e)
 			{
 				e.printStackTrace();
 			}
@@ -85,7 +85,7 @@ public class TestTraceClient
 				String source=thread.getName()+":"+element.getMethodName()+"("+element.getFileName()+":"+element.getLineNumber()+")";
 				client.client.put(null, null, client.printUrl, new PrintMessage(category,text+":"+source,Utils.toString(throwable)));
 			}
-			catch (Exception e)
+			catch (Throwable e)
 			{
 				e.printStackTrace();
 			}
@@ -105,7 +105,7 @@ public class TestTraceClient
 				String source=thread.getName()+":"+element.getMethodName()+"("+element.getFileName()+":"+element.getLineNumber()+")";
 				client.client.put(null, null, client.printUrl, new PrintMessage(category,source,Utils.toString(throwable)));
 			}
-			catch (Exception e)
+			catch (Throwable e)
 			{
 				e.printStackTrace();
 			}
@@ -126,7 +126,7 @@ public class TestTraceClient
 				
 				client.client.put(null, null, client.printUrl, new PrintMessage(category,source,"MARK"));
 			}
-			catch (Exception e)
+			catch (Throwable e)
 			{
 				e.printStackTrace();
 			}

@@ -17,38 +17,24 @@ public class Param
 	}
 	
 	final Object inValue;
-	final Direction direction;
 	final int sqlType;
+	final Direction direction;
 	
-	private Param(Direction direction,Object inValue) throws Exception
+	private Param(Direction direction,int sqlType,Object inValue) throws Exception
 	{
 		this.inValue=inValue;
 		this.direction=direction;
-		this.sqlType=getSqlOutType(inValue.getClass());
-	}
-
-	private Param(Direction direction,int outSqlType,Object inValue) throws Exception
-	{
-		this.inValue=inValue;
-		this.direction=direction;
-		this.sqlType=outSqlType;
-	}
-
-	private Param(Class<?> outType) throws Exception
-	{
-		this.inValue=null;
-		this.direction=Direction.OUT;
-		this.sqlType=getSqlOutType(outType);
-	}
-
-	private Param(int sqlType) throws Exception
-	{
-		this.inValue=null;
-		this.direction=Direction.OUT;
 		this.sqlType=sqlType;
 	}
-	
-	static int getSqlOutType(Class<?> type) throws Exception
+    private static int getSqlTypeFromObject(Object object) throws Exception
+    {
+        if (object==null)
+        {
+            return Types.NULL;
+        }
+        return getSqlType(object.getClass());
+    }
+	static int getSqlType(Class<?> type) throws Exception
 	{
 		if (type==String.class)
 		{
@@ -105,36 +91,52 @@ public class Param
 		throw new Exception("Incompatible type. Name of outType: "+type.getCanonicalName());
 	}
 	
-	public static Param In(Object inValue) throws Exception
-	{
-		return new Param(Direction.IN,inValue);
-	}
-	
+    public static Param In(Object inValue) throws Exception
+    {
+        return new Param(Direction.IN,getSqlTypeFromObject(inValue),inValue);
+    }
+    public static Param In(Class<?> type,Object inValue) throws Exception
+    {
+        int sqlType=getSqlType(type);
+        if (inValue!=null)
+        {
+            if (type!=inValue.getClass())
+            {
+                throw new Exception("type is not type of inValue");
+            }
+        }
+        return new Param(Direction.IN,sqlType,inValue);
+    }
+    public static Param In(int sqlType,Object inValue) throws Exception
+    {
+        return new Param(Direction.IN,sqlType,inValue);
+    }
 	public static Param InOut(Object inValue) throws Exception
 	{
-		return new Param(Direction.IN_OUT,inValue);
+		return new Param(Direction.IN_OUT,getSqlTypeFromObject(inValue),inValue);
 	}
+    public static Param InOut(Class<?> type,Object inValue) throws Exception
+    {
+        int sqlType=getSqlType(type);
+        if (inValue!=null)
+        {
+            if (type!=inValue.getClass())
+            {
+                throw new Exception("type is not type of inValue");
+            }
+        }
+        return new Param(Direction.IN_OUT,sqlType,inValue);
+    }
 	
-	public static Param InOut(int outSqlType,Object inValue) throws Exception
-	{
-		return new Param(Direction.IN_OUT,outSqlType,inValue);
-	}
-
-	public static Param InOut(Class<?> outType,Object inValue) throws Exception
-	{
-		return new Param(Direction.IN_OUT,getSqlOutType(outType),inValue);
-	}
-	
-	public static Param Out(int sqlType) throws Exception
-	{
-		return new Param(sqlType);
-	}
-
-	public static Param Out(Class<?> type) throws Exception
-	{
-		return new Param(getSqlOutType(type));
-	}
-
+    public static Param Out(Class<?> type) throws Exception
+    {
+        return new Param(Direction.OUT,getSqlType(type),null);
+    }
+    public static Param Out(int sqlType) throws Exception
+    {
+        return new Param(Direction.OUT,sqlType,null);
+    }
+/*
 	public static Param Return(int sqlType) throws Exception
 	{
 		return new Param(sqlType);
@@ -142,6 +144,7 @@ public class Param
 
 	public static Param Return(Class<?> type) throws Exception
 	{
-		return new Param(getSqlOutType(type));
+		return new Param(getSqlType(type));
 	}
+	*/
 }

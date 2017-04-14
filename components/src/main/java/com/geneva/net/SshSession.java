@@ -82,7 +82,7 @@ public class SshSession
 		{
 			if (line.contains(commandPattern))
 			{
-				String[] parts=Utils.split(line, ' ');
+                String[] parts=Utils.splitUsingWhiteSpace(line);
 				String id=parts[1];
 				exec("kill "+id);
 			}
