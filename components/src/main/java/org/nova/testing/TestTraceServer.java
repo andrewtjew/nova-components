@@ -3,7 +3,7 @@ package org.nova.testing;
 import java.util.LinkedList;
 
 import org.nova.core.Utils;
-import org.nova.html.pages.HtmlWriter;
+import org.nova.html.HtmlWriter;
 import org.nova.http.server.JettyServerFactory;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.HtmlContentWriter;

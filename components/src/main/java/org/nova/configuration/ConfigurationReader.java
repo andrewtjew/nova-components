@@ -43,7 +43,7 @@ public class ConfigurationReader
 	    String description=null;
 		for (;;)
 		{
-		    char character=lexer.beginWithNonWhiteSpaceCharacter();
+		    char character=lexer.skipWhiteSpaceAndBegin();
 			if (character==0)
 			{
 				return;
@@ -84,7 +84,7 @@ public class ConfigurationReader
                 checkError(lexeme);
     
                 String value=null;
-                character=lexer.beginWithNonWhiteSpaceCharacter();
+                character=lexer.skipWhiteSpaceAndBegin();
                 if (character==0)
                 {
                     LineAndColumn lc=new LineAndColumn(lexeme.getSnippet().getContext(), lexeme.getSnippet().getAbsolutePosition());
@@ -92,11 +92,11 @@ public class ConfigurationReader
                 }
                 if (character == '{')
                 {
-                    lexeme=lexer.produceJSONText('{', '}');
+                    lexeme=lexer.produceEnclosedJSONText('{', '}');
                 }
                 else if (character == '[')
                 {
-                    lexeme=lexer.produceJSONText('[', ']');
+                    lexeme=lexer.produceEnclosedJSONText('[', ']');
                 }
                 else
                 {

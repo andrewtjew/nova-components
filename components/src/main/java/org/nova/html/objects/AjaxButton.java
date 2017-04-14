@@ -5,8 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import org.nova.core.KeyValue;
+import org.nova.html.Attribute;
 import org.nova.html.elements.Element;
-import org.nova.html.pages.Attribute;
 
 public class AjaxButton extends Element
 {

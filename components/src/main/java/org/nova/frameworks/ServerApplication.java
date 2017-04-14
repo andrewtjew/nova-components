@@ -12,13 +12,12 @@ import org.eclipse.jetty.server.Server;
 import org.nova.collections.FileCache;
 import org.nova.configuration.Configuration;
 import org.nova.core.Utils;
-import org.nova.html.objects.AjaxQueryContentWriter;
-import org.nova.html.pages.Page;
-import org.nova.html.pages.PageManager;
-import org.nova.html.pages.PageWriter;
-import org.nova.html.pages.TypeMappings;
-import org.nova.html.pages.operations.Menu;
-import org.nova.html.pages.operations.OperationContentWriter;
+import org.nova.html.TypeMappings;
+import org.nova.html.objects.AjaxQueryResultWriter;
+import org.nova.html.objects.templates.Template;
+import org.nova.html.objects.templates.TemplateManager;
+import org.nova.html.operations.Menu;
+import org.nova.html.operations.OperationResultWriter;
 import org.nova.http.server.JettyServerFactory;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
@@ -32,6 +31,7 @@ import org.nova.operations.OperatorPages;
 import org.nova.operations.OperatorVariableManager;
 import org.nova.security.SecureFileVault;
 import org.nova.security.UnsecureFileVault;
+import org.nova.security.UnsecureVault;
 import org.nova.security.Vault;
 
 public class ServerApplication extends CoreApplication
@@ -43,8 +43,8 @@ public class ServerApplication extends CoreApplication
 	final private FileCache fileCache;
 	final private String baseDirectory;
 	final private TypeMappings typeMappings;
-	final private PageManager pageManager;
-	final private OperationContentWriter pageContentWriter;
+	final private TemplateManager pageManager;
+	final private OperationResultWriter pageContentWriter;
 	final private Vault vault;
 	private long startTime;
 	final private String name;
@@ -91,10 +91,17 @@ public class ServerApplication extends CoreApplication
         }
         else
         {
-            String unsecureVaultFile=configuration.getValue("System.vault.unsecureVaultFile","./resources/UnsecureVault.cnf");
-            this.vault=new UnsecureFileVault(unsecureVaultFile);
+            String unsecureVaultFile=configuration.getValue("System.vault.unsecureVaultFile");
+            if (unsecureVaultFile!=null)
+            {
+                this.vault=new UnsecureFileVault(unsecureVaultFile);
+                this.getLogger().log(Level.FATAL,"Using UnsecureVault");
+            }
+            else
+            {
+                this.vault=new UnsecureVault();
+            }
             printUnsecureVaultWarning(System.err);
-            this.getLogger().log(Level.FATAL,"Using UnsecureVault");
         }
         //Do not keep these vault information in configuration.
         configuration.remove("System.vault.secureVaultFile");
@@ -104,13 +111,13 @@ public class ServerApplication extends CoreApplication
 		this.typeMappings=TypeMappings.DefaultTypeMappings();
 		
         String pageDirectory=configuration.getValue("HttpServer.operator.pageDirectory","./resources/pages/");
-        this.pageManager=new PageManager(this.getTraceManager(), pageDirectory);
+        this.pageManager=new TemplateManager(this.getTraceManager(), pageDirectory);
         Menu menu=new Menu();
         String menuHtml=configuration.getValue("PageContentWriter.operator.main","operator/main.html");
-        Page menuPage=this.pageManager.get(menuHtml,null);
+        Template menuPage=this.pageManager.get(menuHtml);
 
         //Admin http server
-        this.pageContentWriter=new OperationContentWriter(menu, menuPage);
+        this.pageContentWriter=new OperationResultWriter(menu, menuPage);
 		int threads=configuration.getIntegerValue("HttpServer.operator.threads",10);
         int operatorPort=configuration.getIntegerValue("HttpServer.operator.port",10079);
 		this.operatorServer=new HttpServer(this.getTraceManager(), JettyServerFactory.createServer(threads, operatorPort));
@@ -118,7 +125,7 @@ public class ServerApplication extends CoreApplication
         this.operatorServer.addContentEncoders(new GzipContentEncoder());
         this.operatorServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
         
-        this.operatorServer.addContentWriters(this.pageContentWriter,new TextContentWriter("text"),new JSONContentWriter(),new AjaxQueryContentWriter());
+        this.operatorServer.addContentWriters(this.pageContentWriter,new TextContentWriter("text"),new JSONContentWriter(),new AjaxQueryResultWriter());
         this.getMeterManager().register("HttpServer.operatorServer",this.operatorServer);
         System.out.println("admin endpoint: http://"+Utils.getLocalHostName()+":"+operatorPort);
 
@@ -238,7 +245,7 @@ public class ServerApplication extends CoreApplication
 		return this.baseDirectory;
 	}
 
-	public PageManager getPageManager()
+	public TemplateManager getPageManager()
 	{
 	    return this.pageManager;
 	}
@@ -262,7 +269,7 @@ public class ServerApplication extends CoreApplication
 	    return this.vault;
 	}
 	
-	public OperationContentWriter getOperationContentWriter()
+	public OperationResultWriter getOperationContentWriter()
 	{
 	    return this.pageContentWriter;
 	}

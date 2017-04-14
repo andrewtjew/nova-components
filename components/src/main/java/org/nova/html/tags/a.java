@@ -1,6 +1,8 @@
 package org.nova.html.tags;
 
 import org.nova.html.elements.GlobalEventTagElement;
+import org.nova.html.enums.a_rel;
+import org.nova.html.enums.target;
 
 public class a extends GlobalEventTagElement<a>
 {
@@ -9,13 +11,13 @@ public class a extends GlobalEventTagElement<a>
         super("a");
     }
     
-    public a href(String URL)
-    {
-        return attr("href",URL);
-    }
     public a download(String filename)
     {
         return attr("download",filename);
+    }
+    public a href(String URL)
+    {
+        return attr("href",URL);
     }
     public a hreflang(String language_code)
     {
@@ -25,7 +27,7 @@ public class a extends GlobalEventTagElement<a>
     {
         return attr("media",media_query);
     }
-    public a rel(rel rel)
+    public a rel(a_rel rel)
     {
         return attr("rel",rel.toString());
     }

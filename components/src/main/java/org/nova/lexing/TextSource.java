@@ -70,9 +70,15 @@ public class TextSource extends Source
     }
 
     @Override
-    public TextSnippet end(int revert)
+    public void end(int revert)
     {
         this.index=this.index-revert;
+    }
+
+    @Override
+    public TextSnippet endAndGetSnippet(int revert)
+    {
+        end(revert);
         return new TextSnippet(this.text, this.beginIndex, this.index);
     }
 
@@ -91,6 +97,12 @@ public class TextSource extends Source
     public int getContextPosition()
     {
         return this.index;
+    }
+
+    @Override
+    public void revert()
+    {
+        this.index=this.beginIndex;
     }
 
 

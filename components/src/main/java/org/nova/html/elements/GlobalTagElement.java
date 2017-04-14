@@ -1,7 +1,7 @@
 package org.nova.html.elements;
 
-import org.nova.html.tags.dir;
-import org.nova.html.tags.dropzone;
+import org.nova.html.enums.dir;
+import org.nova.html.enums.dropzone;
 
 public class GlobalTagElement<ELEMENT extends TagElement<ELEMENT>> extends TagElement<ELEMENT>
 {

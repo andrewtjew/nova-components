@@ -8,10 +8,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.nova.core.NameObject;
 import org.nova.core.Utils;
-import org.nova.html.objects.AjaxQueryContentWriter;
-import org.nova.html.pages.HtmlWriter;
-import org.nova.html.pages.operations.OperationContentResult;
-import org.nova.html.pages.operations.OperationContentWriter;
+import org.nova.html.HtmlWriter;
+import org.nova.html.objects.AjaxQueryResultWriter;
+import org.nova.html.operations.OperationResult;
+import org.nova.html.operations.OperationResultWriter;
 import org.nova.http.server.Context;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
@@ -34,7 +34,7 @@ import com.google.common.base.Strings;
 @ContentDecoders(GzipContentDecoder.class)
 @ContentEncoders(GzipContentEncoder.class)
 @ContentReaders({JSONContentReader.class,JSONPatchContentReader.class})
-@ContentWriters({OperationContentWriter.class,JSONContentWriter.class,AjaxQueryContentWriter.class})
+@ContentWriters({OperationResultWriter.class,JSONContentWriter.class,AjaxQueryResultWriter.class})
 public class SessionOperatorPages<SESSION extends Session>
 {
     final SessionManager<SESSION> sessionManager;
@@ -45,7 +45,7 @@ public class SessionOperatorPages<SESSION extends Session>
     
     @GET
     @Path("/operator/sessions")
-    public Response<OperationContentResult> getAll(Trace parent) throws Exception, Throwable
+    public Response<OperationResult> getAll(Trace parent) throws Exception, Throwable
     {
         HtmlWriter writer=new HtmlWriter();
 
@@ -69,7 +69,7 @@ public class SessionOperatorPages<SESSION extends Session>
         });
         writer.end_table();
         writer.end_form();
-        return OperationContentResult.respond(writer, "All Sessions");
+        return OperationResult.respond(writer, "All Sessions");
     }   
 /*
 1-888-520-9090
@@ -79,7 +79,7 @@ X7W601LGWS
 
     @GET
     @Path("/operator/sessions/remove")
-    public Response<OperationContentResult> delete(Trace parent,Context context) throws Exception, Throwable
+    public Response<OperationResult> delete(Trace parent,Context context) throws Exception, Throwable
     {
         HtmlWriter writer=new HtmlWriter();
         HttpServletRequest request=context.getHttpServletRequest();
@@ -103,12 +103,12 @@ X7W601LGWS
         {
             writer.p("Failures: "+failures);
         }
-        return OperationContentResult.respond(writer, "Remove Sessions");
+        return OperationResult.respond(writer, "Remove Sessions");
     }   
 
     @GET
     @Path("/operator/session")
-    public Response<OperationContentResult> getSession(Trace parent,@QueryParam("token") String token) throws Exception, Throwable
+    public Response<OperationResult> getSession(Trace parent,@QueryParam("token") String token) throws Exception, Throwable
     {
         HtmlWriter writer=new HtmlWriter();
         SESSION session= this.sessionManager.getSessionByToken(token);
@@ -125,7 +125,7 @@ X7W601LGWS
         {
             writer.h3("Session not found");
         }
-        return OperationContentResult.respond(writer, "Session info");
+        return OperationResult.respond(writer, "Session info");
     }   
 
 }

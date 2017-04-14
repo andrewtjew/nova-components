@@ -2,7 +2,8 @@ package org.nova.http.server;
 
 import java.io.OutputStream;
 
-import org.nova.html.pages.HtmlWriter;
+import org.nova.html.HtmlWriter;
+
 
 public class HtmlContentWriter extends ContentWriter<HtmlWriter>
 {

@@ -17,22 +17,22 @@ public class Lexer
             {
                 if (t==c)
                 {
-                    Snippet snippet=this.source.end(1);
+                    Snippet snippet=this.source.endAndGetSnippet(1);
                     return new Lexeme(Token.TEXT, snippet.getTarget(),snippet);
                 }
             }
         }
-        Snippet snippet=this.source.end(1);
+        Snippet snippet=this.source.endAndGetSnippet(1);
         return new Lexeme(Token.STRING, snippet.getTarget(),snippet);
     }
     public Lexeme produceError(int revert)
     {
-        Snippet snippet=this.source.end(revert);
+        Snippet snippet=this.source.endAndGetSnippet(revert);
         return new Lexeme(Token.ERROR, snippet.getTarget(),snippet);
     }
     public Lexeme produceToken(Token token,int revert)
     {
-        Snippet snippet=this.source.end(revert);
+        Snippet snippet=this.source.endAndGetSnippet(revert);
         return new Lexeme(token, snippet.getTarget(),snippet);
     }
     public Lexeme produceJSONString() throws Throwable
@@ -53,11 +53,11 @@ public class Lexer
                 if (c == endCharacter)
                 {
                     this.source.end(0);
-                    return new Lexeme(Token.STRING, sb.toString(), this.source.end(0));
+                    return new Lexeme(Token.STRING, sb.toString(), this.source.endAndGetSnippet(0));
                 }
                 else if (c == '\n')
                 {
-                    return new Lexeme(Token.ERROR, "Invalid newline character in string.", this.source.end(1));
+                    return new Lexeme(Token.ERROR, "Invalid newline character in string.", this.source.endAndGetSnippet(1));
                 }
                 sb.append(c);
                 continue;
@@ -71,13 +71,13 @@ public class Lexer
                     c = this.source.next();
                     if (c==0)
                     {
-                        return new Lexeme(Token.ERROR, "Premature end of string.", this.source.end(0));
+                        return new Lexeme(Token.ERROR, "Premature end of string.", this.source.endAndGetSnippet(0));
                     }
                     if (Character.isDigit(c) || ((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F')))
                     {
                         unicode.append(c);
                     }
-                    return new Lexeme(Token.ERROR, "Invalid unicode escape character in string.", this.source.end(0));
+                    return new Lexeme(Token.ERROR, "Invalid unicode escape character in string.", this.source.endAndGetSnippet(0));
                 }
                 sb.append((char) Integer.parseInt(unicode.toString(), 16));
                 continue;
@@ -104,10 +104,10 @@ public class Lexer
             }
             else
             {
-                return new Lexeme(Token.ERROR, "Invalid escape character in string.", this.source.end(0));
+                return new Lexeme(Token.ERROR, "Invalid escape character in string.", this.source.endAndGetSnippet(0));
             }
         }
-        return new Lexeme(Token.ERROR, "Premature end of string.", this.source.end(0));
+        return new Lexeme(Token.ERROR, "Premature end of string.", this.source.endAndGetSnippet(0));
     }
     public Lexeme produceSimpleSimpleString(char endCharacter) throws Throwable
     {
@@ -118,11 +118,11 @@ public class Lexer
             {
                 if (c == endCharacter)
                 {
-                    return new Lexeme(Token.STRING, sb.toString(), this.source.end(0));
+                    return new Lexeme(Token.STRING, sb.toString(), this.source.endAndGetSnippet(0));
                 }
                 else if (c == '\n')
                 {
-                    return new Lexeme(Token.ERROR, "Invalid newline character in string.", this.source.end(1));
+                    return new Lexeme(Token.ERROR, "Invalid newline character in string.", this.source.endAndGetSnippet(1));
                 }
                 sb.append(c);
                 continue;
@@ -142,7 +142,7 @@ public class Lexer
                 sb.append(cc);
             }
         }
-        return new Lexeme(Token.ERROR, "Premature end of string.", this.source.end(0));
+        return new Lexeme(Token.ERROR, "Premature end of string.", this.source.endAndGetSnippet(0));
     }
 
     public Lexeme produceJavaSuffixNumber(boolean fraction) throws Throwable
@@ -164,9 +164,9 @@ public class Lexer
             {
                 if (base==false)
                 {
-                    return new Lexeme(Token.ERROR, "Invalid number.", this.source.end(1));
+                    return new Lexeme(Token.ERROR, "Invalid number.", this.source.endAndGetSnippet(1));
                 }
-                Snippet snippet=this.source.end(0);
+                Snippet snippet=this.source.endAndGetSnippet(0);
                 return new Lexeme(Token.NUMBER, snippet.getTarget(),new String(new char[]{c}),snippet);
             }
             else if ((c=='e')||(c=='E'))
@@ -178,11 +178,11 @@ public class Lexer
                 }
                 if (c==0)
                 {
-                    return new Lexeme(Token.ERROR, "Invalid number.", this.source.end(1));
+                    return new Lexeme(Token.ERROR, "Invalid number.", this.source.endAndGetSnippet(1));
                 }
                 if (Character.isDigit(c)==false)
                 {
-                    return new Lexeme(Token.ERROR, "Invalid number.", this.source.end(0));
+                    return new Lexeme(Token.ERROR, "Invalid number.", this.source.endAndGetSnippet(0));
                 }
                 for (c=this.source.next();Character.isDigit(c);c=this.source.next())
                 {
@@ -191,9 +191,9 @@ public class Lexer
                 {
                     if (base==false)
                     {
-                        return new Lexeme(Token.ERROR, "Invalid number.", this.source.end(0));
+                        return new Lexeme(Token.ERROR, "Invalid number.", this.source.endAndGetSnippet(0));
                     }
-                    Snippet snippet=this.source.end(0);
+                    Snippet snippet=this.source.endAndGetSnippet(0);
                     return new Lexeme(Token.NUMBER, snippet.getTarget(),new String(new char[]{c}),snippet);
                 }
             }
@@ -201,9 +201,9 @@ public class Lexer
         }
         if (base==false)
         {
-            return new Lexeme(Token.ERROR, "Invalid number.", this.source.end(1));
+            return new Lexeme(Token.ERROR, "Invalid number.", this.source.endAndGetSnippet(1));
         }
-        Snippet snippet=this.source.end(1);
+        Snippet snippet=this.source.endAndGetSnippet(1);
         return new Lexeme(Token.NUMBER, snippet.getTarget(),snippet);
     }
     
@@ -231,11 +231,11 @@ public class Lexer
                 }
                 if (c==0)
                 {
-                    return new Lexeme(Token.ERROR, "Invalid number.", this.source.end(1));
+                    return new Lexeme(Token.ERROR, "Invalid number.", this.source.endAndGetSnippet(1));
                 }
                 if (Character.isDigit(c)==false)
                 {
-                    return new Lexeme(Token.ERROR, "Invalid number.", this.source.end(0));
+                    return new Lexeme(Token.ERROR, "Invalid number.", this.source.endAndGetSnippet(0));
                 }
                 for (c=this.source.next();Character.isDigit(c);c=this.source.next())
                 {
@@ -245,22 +245,22 @@ public class Lexer
         }
         if (base==false)
         {
-            return new Lexeme(Token.ERROR, "Invalid number.", this.source.end(1));
+            return new Lexeme(Token.ERROR, "Invalid number.", this.source.endAndGetSnippet(1));
         }
-        Snippet snippet=this.source.end(1);
+        Snippet snippet=this.source.endAndGetSnippet(1);
         return new Lexeme(Token.NUMBER, snippet.getTarget(),snippet);
     }
     
     public Lexeme expectPunctuator(char punctuator) throws Throwable
     {
-        char c=beginWithNonWhiteSpaceCharacter();
+        char c=skipWhiteSpaceAndBegin();
         this.source.end(0);
         if (c==punctuator)
         {
-            Snippet snippet=this.source.end(0);
+            Snippet snippet=this.source.endAndGetSnippet(0);
             return new Lexeme(Token.PUNCTUATOR, snippet.getTarget(),snippet);
         }
-        Snippet snippet=this.source.end(0);
+        Snippet snippet=this.source.endAndGetSnippet(0);
         return new Lexeme(Token.ERROR, "Invalid punctuator",snippet);
     }
     
@@ -273,7 +273,7 @@ public class Lexer
                 break;
             }
         }
-        Snippet snippet=this.source.end(1);
+        Snippet snippet=this.source.endAndGetSnippet(1);
         return new Lexeme(Token.TEXT, snippet.getTarget(),snippet);
     }
     
@@ -287,11 +287,11 @@ public class Lexer
                 break;
             }
         }
-        Snippet snippet=this.source.end(1);
+        Snippet snippet=this.source.endAndGetSnippet(1);
         return new Lexeme(Token.TEXT, snippet.getTarget(),snippet);
     }
     
-    public Lexeme produceJSONText(char startCharacter,char endCharacter) throws Throwable
+    public Lexeme produceEnclosedJSONText(char startCharacter,char endCharacter) throws Throwable
     {
         int level = 0;
         boolean inString = false;
@@ -301,7 +301,7 @@ public class Lexer
             char c = this.source.next();
             if (c==0)
             {
-                return new Lexeme(Token.ERROR, "Invalid JSON.", this.source.end(1));
+                return new Lexeme(Token.ERROR, "Premature end-of-text.", this.source.endAndGetSnippet(1));
             }
             if (inString == true)
             {
@@ -332,10 +332,35 @@ public class Lexer
                 {
                     if (level == 0)
                     {
-                        Snippet snippet=this.source.end(0);
-                        return new Lexeme(Token.STRING, snippet.getTarget(),snippet);
+                        Snippet snippet=this.source.endAndGetSnippet(0);
+                        return new Lexeme(Token.TEXT, snippet.getTarget(),snippet);
                     }
                     level++;
+                }
+            }
+        }
+    }
+    
+    public Lexeme produceDelimitedText(char delimiter,boolean includeDelimiter) throws Throwable
+    {
+        for (;;)
+        {
+            char c = this.source.next();
+            if (c==0)
+            {
+                return new Lexeme(Token.ERROR, "Premature end-of-text", this.source.endAndGetSnippet(1));
+            }
+            if (c==delimiter)
+            {
+                if (includeDelimiter)
+                {
+                    Snippet snippet=this.source.endAndGetSnippet(0);
+                    return new Lexeme(Token.TEXT, snippet.getTarget(),snippet);
+                }
+                else
+                {
+                    Snippet snippet=this.source.endAndGetSnippet(1);
+                    return new Lexeme(Token.TEXT, snippet.getTarget(),snippet);
                 }
             }
         }
@@ -350,7 +375,7 @@ public class Lexer
                 break;
             }
         }
-        Snippet snippet=this.source.end(1);
+        Snippet snippet=this.source.endAndGetSnippet(1);
         return new Lexeme(Token.TEXT, snippet.getTarget(),snippet);
     }
     public Lexeme produceNestableSlashStarComment() throws Throwable
@@ -381,7 +406,7 @@ public class Lexer
                 {
                     if (level == 0)
                     {
-                        Snippet snippet=this.source.end(0);
+                        Snippet snippet=this.source.endAndGetSnippet(0);
                         String value=snippet.getTarget();
                         return new Lexeme(Token.TEXT, value.substring(2, value.length()-2),snippet);
                     }
@@ -397,8 +422,9 @@ public class Lexer
                 }
             }
         }
-        return new Lexeme(Token.ERROR, "Invalid comment.", this.source.end(1));
+        return new Lexeme(Token.ERROR, "Invalid comment.", this.source.endAndGetSnippet(1));
     }
+    
     public Lexeme produceJavaSlashStarComment() throws Throwable
     {
         for (char c=this.source.next();c!=0;c=this.source.next())
@@ -408,13 +434,13 @@ public class Lexer
                 c=this.source.next();
                 if (c == '/')
                 {
-                    Snippet snippet=this.source.end(0);
+                    Snippet snippet=this.source.endAndGetSnippet(0);
                     String value=snippet.getTarget();
                     return new Lexeme(Token.TEXT, value.substring(2, value.length()-2),snippet);
                 }
             }
         }
-        return new Lexeme(Token.ERROR, "Invalid comment.", this.source.end(1));
+        return new Lexeme(Token.ERROR, "Invalid comment.", this.source.endAndGetSnippet(1));
     }
 
     
@@ -430,7 +456,7 @@ public class Lexer
         }
     }
     
-    public char beginWithNonWhiteSpaceCharacter() throws Throwable
+    public char skipWhiteSpaceAndBegin() throws Throwable
     {
         for (char c=this.source.next();c!=0;c=this.source.next())
         {
@@ -447,8 +473,28 @@ public class Lexer
         this.source.begin(0);
         return this.source.next();
     }
+    
+    public void revert()
+    {
+        this.source.revert();
+    }
     public char read() throws Throwable
     {
         return this.source.next();
+    }
+    public char skipWhiteSpaceAndRead() throws Throwable
+    {
+        for (char c=this.source.next();c!=0;c=this.source.next())
+        {
+            if (Character.isWhitespace(c)==false)
+            {
+                return c;
+            }
+        }
+        return 0;
+    }
+    public Snippet end(int revert)
+    {
+        return this.source.endAndGetSnippet(revert);
     }
 }

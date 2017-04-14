@@ -6,12 +6,11 @@ public enum Token
     PUNCTUATOR,
     TERMINATOR,
     SEPERATOR,
+//    START,
+//    NONE,
     
-//    OPEN_ROUND,
-//    CLOSE_ROUND,
-
-    TEXT, //A word is any text between white space, terminatorss and seperators
-    STRING,
+    TEXT, //Any text that is not string, eg, keywords, delimited text, etc  
+    STRING, 
     CHARACTER,
     NUMBER,
 	//specials

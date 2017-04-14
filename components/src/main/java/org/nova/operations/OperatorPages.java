@@ -12,14 +12,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.nova.html.Attribute;
+import org.nova.html.HtmlWriter;
 import org.nova.html.objects.AjaxButton;
-import org.nova.html.objects.AjaxQueryContentWriter;
+import org.nova.html.objects.AjaxQueryResultWriter;
 import org.nova.html.objects.AjaxQueryResult;
-import org.nova.html.pages.Attribute;
-import org.nova.html.pages.HtmlWriter;
-import org.nova.html.pages.operations.Menu;
-import org.nova.html.pages.operations.OperationContentResult;
-import org.nova.html.pages.operations.OperationContentWriter;
+import org.nova.html.operations.Menu;
+import org.nova.html.operations.OperationResult;
+import org.nova.html.operations.OperationResultWriter;
 import org.nova.http.server.Response;
 import org.nova.http.server.annotations.ContentWriters;
 import org.nova.http.server.annotations.DefaultValue;
@@ -34,7 +34,7 @@ import org.nova.operations.VariableInstance;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-@ContentWriters(OperationContentWriter.class)
+@ContentWriters(OperationResultWriter.class)
 public class OperatorPages
 {
 	final private OperatorVariableManager variableManager;
@@ -54,7 +54,7 @@ public class OperatorPages
 	
 	@GET
 	@Path("/operator/variables/view")
-	public Response<OperationContentResult> list() throws Throwable
+	public Response<OperationResult> list() throws Throwable
 	{
 		HtmlWriter writer=new HtmlWriter();
 
@@ -94,12 +94,12 @@ public class OperatorPages
 			writer.end_table();
 		}
 		
-		return OperationContentResult.respond(writer, "View Operator Variables");
+		return OperationResult.respond(writer, "View Operator Variables");
 	}
 
 	@GET
 	@Path("/operator/variables/modify")
-	public Response<OperationContentResult> modify() throws Throwable
+	public Response<OperationResult> modify() throws Throwable
 	{
 		HtmlWriter writer=new HtmlWriter();
 
@@ -158,7 +158,7 @@ public class OperatorPages
                     writer.end_td();
                     AjaxButton button=new AjaxButton(buttonKey, "Update", "/operator/variable/"+category+"/"+name);
                     button.async(false).val("value",name);
-                    writer.td(writer.inner().writeElement(button));
+                    writer.td(writer.inner().writeObject(button));
 				    
 				}
 				else if (type==boolean.class)
@@ -167,7 +167,7 @@ public class OperatorPages
 					writer.td(writer.inner().input_checkbox(name, null, (boolean)value));
 					AjaxButton button=new AjaxButton(buttonKey, "Update", "/operator/variable/"+category+"/"+name);
 					button.async(false).prop("value",name,"checked");
-					writer.td(writer.inner().writeElement(button));
+					writer.td(writer.inner().writeObject(button));
 				}
 				else if (type.isEnum())
 				{
@@ -183,7 +183,7 @@ public class OperatorPages
 					writer.end_td();
 					AjaxButton button=new AjaxButton(buttonKey, "Update", "/operator/variable/"+category+"/"+name);
 					button.async(false).val("value",name);
-					writer.td(writer.inner().writeElement(button));
+					writer.td(writer.inner().writeObject(button));
 				}
 				else if (type==String.class) 
 				{
@@ -200,7 +200,7 @@ public class OperatorPages
 					}
 					AjaxButton button=new AjaxButton(buttonKey, "Update", "/operator/variable/"+category+"/"+name);
 					button.async(false).val("value",name).prop("nullString","nullString","checked");
-					writer.td(writer.inner().writeElement(button));
+					writer.td(writer.inner().writeObject(button));
 				}
 				else
 				{
@@ -208,7 +208,7 @@ public class OperatorPages
 					writer.td(writer.inner().input_text(textSize,name, value==null?"":value.toString(),inputStyleAttribute));
 					AjaxButton button=new AjaxButton(buttonKey, "Update", "/operator/variable/"+category+"/"+name);
 					button.async(false).val("value",name);
-					writer.td(writer.inner().writeElement(button));
+					writer.td(writer.inner().writeObject(button));
 				}
 				writer.td(writer.inner().div(null, new Attribute("id",resultKey)));
 			}
@@ -216,7 +216,7 @@ public class OperatorPages
 			writer.end_table();
 		}
 		
-		return OperationContentResult.respond(writer, "Modify Operator Variables");
+		return OperationResult.respond(writer, "Modify Operator Variables");
 	}
 	
 	private String formatStringOutput(String s)
@@ -231,7 +231,7 @@ public class OperatorPages
 	
 	@GET
 	@Path("/operator/variable/{category}/{name}")
-	@ContentWriters(AjaxQueryContentWriter.class)
+	@ContentWriters(AjaxQueryResultWriter.class)
 	public AjaxQueryResult update(@PathParam("category") String category,@PathParam("name") String name,@QueryParam("value") String value,@QueryParam("nullString") @DefaultValue("") String nullString) throws Throwable
 	{
 		VariableInstance instance=this.variableManager.getInstance(category, name);

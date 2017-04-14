@@ -81,9 +81,9 @@ public class InputElement<ELEMENT extends InputElement<ELEMENT>> extends GlobalE
     {
         return attr("formaction",URL);
     }
-    public input formenctype(String value) //submit, image
+    public input formenctype(enctype enctype) //submit, image
     {
-        return attr("formenctype",value);
+        return attr("formenctype",enctype.toString());
     }
     public input formmethod(String value) //submit, image
     {
@@ -101,13 +101,13 @@ public class InputElement<ELEMENT extends InputElement<ELEMENT>> extends GlobalE
         }
         return this;
     }
-    public input formtarget(boolean formnovalidate)
+    public input formtarget(target target)
     {
-        if (formnovalidate)
-        {
-            attr("formnovalidate");
-        }
-        return this;
+        return attr("target",target.toString());
+    }
+    public input formtarget(String framename)
+    {
+        return attr("target",framename);
     }
     public input height(String pixels) //image
     {

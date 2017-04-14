@@ -21,7 +21,7 @@ public class Disruptor implements Validator
     private long minLatency;
     
     @OperatorVariable(validator=Disruptor.class,options={"100","200","300"})
-    private long maxLatency;
+    private long maxLatency=100;
 
     private long deterministicExceptionCountdown; //set to zero to disable
     private long probabilityExceptionThreshold;

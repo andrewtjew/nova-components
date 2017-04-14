@@ -134,9 +134,15 @@ public class InputStreamReaderSource extends Source
     }
 
     @Override
-    public Snippet end(int revert)
+    public void end(int revert)
     {
         this.textBufferIndex-=revert;
+    }
+
+    @Override
+    public Snippet endAndGetSnippet(int revert)
+    {
+        end(revert);
         return new ReaderSnippet(this.textBuffer.get(), this.position, this.textBufferBeginIndex, this.textBufferIndex);
     }
 
@@ -172,5 +178,11 @@ public class InputStreamReaderSource extends Source
     public int getContextPosition()
     {
         return this.textBufferBeginIndex;
+    }
+
+    @Override
+    public void revert()
+    {
+        this.textBufferIndex=this.textBufferBeginIndex;
     }
 }
