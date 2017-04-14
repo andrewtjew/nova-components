@@ -558,7 +558,7 @@ public class Accessor extends Resource
 				{
 					if (offset==2)
 					{
-						int returnSqlType=Param.getSqlOutType(returnType);
+						int returnSqlType=Param.getSqlType(returnType);
 						statement.registerOutParameter(1,returnSqlType);
 					}
 					for (int i = 0; i < parameters.length; i++)
@@ -730,7 +730,7 @@ public class Accessor extends Resource
 				{
 					if (offset==2)
 					{
-						int returnSqlType=Param.getSqlOutType(returnType);
+						int returnSqlType=Param.getSqlType(returnType);
 						statement.registerOutParameter(1,returnSqlType);
 					}
 					for (int i = 0; i < parameters.length; i++)

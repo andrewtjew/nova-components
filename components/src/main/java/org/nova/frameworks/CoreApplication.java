@@ -18,11 +18,11 @@ import org.nova.tracing.TraceManager;
 
 public class CoreApplication
 {
-	final protected TimerScheduler timerScheduler;
-	final protected FutureScheduler futureScheduler;
-	final protected TraceManager traceManager;
-	final protected Configuration configuration;
-	final protected MeterManager meterManager;
+	final private TimerScheduler timerScheduler;
+	final private FutureScheduler futureScheduler;
+	final private TraceManager traceManager;
+	final private Configuration configuration;
+	final private MeterManager meterManager;
 	final private Logger logger;
 	final HashMap<String,SourceQueueLogger> loggers;
 	final SourceQueue<LogEntry> logQueue;

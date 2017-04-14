@@ -1,4 +1,4 @@
-package org.nova.annotations;
+package org.nova.validation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD,ElementType.PARAMETER})
-public @interface Maximum
+public @interface Max
 {
-    String value();
+    long value();
 }

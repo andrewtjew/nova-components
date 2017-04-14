@@ -74,7 +74,8 @@ public class SqlServerConnector extends Connector
 	@Override
 	protected Connection createConnection() throws Throwable
 	{
-		Connection connection = DriverManager.getConnection(buildConnectionString());
+	    String connectionString=buildConnectionString();
+		Connection connection = DriverManager.getConnection(connectionString);
 		this.openConnectionSuccesses.increment();
 		return connection;
 	}

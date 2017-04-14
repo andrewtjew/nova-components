@@ -1,7 +1,5 @@
 package org.nova.http.client;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLEncoder;
 
 public class PathAndQueryBuilder
