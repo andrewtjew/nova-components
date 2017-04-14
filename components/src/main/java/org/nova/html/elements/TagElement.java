@@ -3,6 +3,8 @@ package org.nova.html.elements;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.nova.html.objects.Text;
+
 class TagElement<ELEMENT extends TagElement<ELEMENT>> extends Element
 {
     final private StringBuilder sb;
@@ -24,6 +26,11 @@ class TagElement<ELEMENT extends TagElement<ELEMENT>> extends Element
     public ELEMENT inner(Element element)
     {
         this.inner=element;
+        return (ELEMENT)this;
+    }
+    public ELEMENT inner(String text)
+    {
+        this.inner=new Text(text);
         return (ELEMENT)this;
     }
     @SuppressWarnings("unchecked")

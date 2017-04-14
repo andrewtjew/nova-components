@@ -89,7 +89,7 @@ public class SshSession
 		}
 		if (delay>0)
 		{
-		    Thread.currentThread().sleep(delay);
+            Thread.sleep(delay);
 		}
 		String afterOutput=exec(command);
 		String[] afterLines=Utils.split(afterOutput, '\n');

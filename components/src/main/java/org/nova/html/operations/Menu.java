@@ -11,7 +11,8 @@ import org.nova.html.elements.Element;
 public class Menu extends Element
 {
 	final private ArrayList<MenuItem> items;
-	private byte[] bytes;
+    private byte[] bytes;
+    private String text;
 	
 	public Menu()
 	{
@@ -117,24 +118,39 @@ public class Menu extends Element
     @Override
     public void write(OutputStream outputStream) throws Throwable
     {
-        
-        byte[] bytes;
+        byte[] bytes=null;
         synchronized (this)
         {
-            if (this.bytes==null)
-            {
-                Node root=new Node("root");
-                for (MenuItem item:getItems())
-                {
-                    insertMenuItem(item,root,0,Utils.split(item.getNavigation(),'|'));
-                }
-                StringBuilder sb=new StringBuilder();
-                buildMenuText(sb,root);
-                this.bytes=sb.toString().getBytes(StandardCharsets.UTF_8);
-            }
+            build();
             bytes=this.bytes;
         }
-        outputStream.write(this.bytes);
+        outputStream.write(bytes);
+    }
+    
+    private void build()
+    {
+        if (this.bytes==null)
+        {
+            Node root=new Node("root");
+            for (MenuItem item:getItems())
+            {
+                insertMenuItem(item,root,0,Utils.split(item.getNavigation(),'|'));
+            }
+            StringBuilder sb=new StringBuilder();
+            buildMenuText(sb,root);
+            this.text=sb.toString();
+            this.bytes=this.text.getBytes(StandardCharsets.UTF_8);
+        }
+    }
+    
+    @Override
+    public String toString()
+    {
+        synchronized (this)
+        {
+            build();
+            return this.text;
+        }
     }
 	
 }

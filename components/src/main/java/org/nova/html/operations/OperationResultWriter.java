@@ -11,14 +11,14 @@ import org.nova.http.server.Context;
 
 public class OperationResultWriter extends ContentWriter<OperationResult>
 {
-	final private Template page;
+	final private Template template;
 	final private Menu menu;
 	final private String hostName;
 	
 	public OperationResultWriter(Menu menu,Template page) throws Exception
 	{
 		this.menu=menu;
-		this.page=page;
+		this.template=page;
 		this.hostName=InetAddress.getLocalHost().getHostName();
 	}
 	
@@ -33,12 +33,13 @@ public class OperationResultWriter extends ContentWriter<OperationResult>
 	{
 		if (result!=null)
 		{
+		    Template page=this.template.copy();
             context.getHttpServletResponse().setContentType("text/html;charset=utf-8");
-			this.page.insert("menu", this.menu);
-			this.page.insert("info", new Text(this.hostName+"<br/>"+Utils.nowToLocalDateTimeString()));
-			this.page.insert("title", new Text(result.getTitle()));
-			this.page.insert("content", result.getContent());
-			this.page.write(outputStream);
+			page.fill("menu", this.menu);
+			page.fill("info", new Text(this.hostName+"<br/>"+Utils.nowToLocalDateTimeString()));
+			page.fill("title", new Text(result.getTitle()));
+			page.fill("content", result.getContent());
+			page.write(outputStream);
 		}
 		
 	}

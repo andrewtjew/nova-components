@@ -28,4 +28,15 @@ public class Sequence extends Element
         }
     }
 
+    @Override
+    public String toString()
+    {
+        StringBuilder sb=new StringBuilder();
+        for (Element element:this.elements)
+        {
+            sb.append(element);
+        }
+        return sb.toString();
+    }
+
 }
