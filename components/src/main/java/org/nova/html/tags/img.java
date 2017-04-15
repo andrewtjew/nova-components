@@ -44,6 +44,10 @@ public class img extends GlobalEventTagElement<img>
     {
         return attr("longdesc",URL);
     }
+    public img sizes(String sizes)
+    {
+        return attr("sizes",sizes);
+    }
     public img src(String URL)
     {
         return attr("src",URL);
@@ -56,8 +60,6 @@ public class img extends GlobalEventTagElement<img>
     {
         return attr("usemap",mapname);
     }
-
-    
     public img width(int width)
     {
         return attr("width",width);

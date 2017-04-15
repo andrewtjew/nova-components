@@ -3,18 +3,18 @@ package org.nova.html.tags;
 import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.enums.preload;
 
-public class audio extends GlobalEventTagElement<audio>
+public class video extends GlobalEventTagElement<video>
 {
-    public audio()
+    public video()
     {
         super("audio");
     }
     
-    public audio autoplay()
+    public video autoplay()
     {
         return attr("autoplay");
     }
-    public audio autoplay(boolean autoplay)
+    public video autoplay(boolean autoplay)
     {
         if (autoplay)
         {
@@ -22,11 +22,11 @@ public class audio extends GlobalEventTagElement<audio>
         }
         return this;
     }
-    public audio controls()
+    public video controls()
     {
         return attr("controls");
     }
-    public audio controls(boolean controls)
+    public video controls(boolean controls)
     {
         if (controls)
         {
@@ -34,11 +34,15 @@ public class audio extends GlobalEventTagElement<audio>
         }
         return this;
     }
-    public audio loop()
+    public video height(String pixels)
+    {
+        return attr("height",pixels);
+    }
+    public video loop()
     {
         return attr("loop");
     }
-    public audio loop(boolean loop)
+    public video loop(boolean loop)
     {
         if (loop)
         {
@@ -46,11 +50,11 @@ public class audio extends GlobalEventTagElement<audio>
         }
         return this;
     }
-    public audio muted()
+    public video muted()
     {
         return attr("muted");
     }
-    public audio muted(boolean muted)
+    public video muted(boolean muted)
     {
         if (muted)
         {
@@ -58,13 +62,22 @@ public class audio extends GlobalEventTagElement<audio>
         }
         return this;
     }
-    public audio preload(preload preload)
+    public video poster(String URL)
+    {
+        return attr("poster",URL);
+    }
+    public video preload(preload preload)
     {
         return attr("preload",preload);
     }
-    public audio src(String URL)
+    public video src(String URL)
     {
         return attr("src",URL);
     }
+    public video width(String pixels)
+    {
+        return attr("width",pixels);
+    }
+    
 
 }

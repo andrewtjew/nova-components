@@ -1,6 +1,6 @@
 package org.nova.html.enums;
 
-public enum audio_preload
+public enum preload
 {
     auto,
     metadata,

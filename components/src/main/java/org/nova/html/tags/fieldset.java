@@ -1,7 +1,7 @@
 package org.nova.html.tags;
 
 import org.nova.html.elements.GlobalEventTagElement;
-import org.nova.html.enums.audio_preload;
+import org.nova.html.enums.preload;
 
 public class fieldset extends GlobalEventTagElement<fieldset>
 {
