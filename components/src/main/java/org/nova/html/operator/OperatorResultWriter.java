@@ -9,7 +9,7 @@ import org.nova.html.widgets.templates.Template;
 import org.nova.http.server.ContentWriter;
 import org.nova.http.server.Context;
 
-public class OperatorResultWriter extends ContentWriter<OperationResult>
+public class OperatorResultWriter extends ContentWriter<OperatorResult>
 {
 	final private Template template;
 	final private Menu menu;
@@ -29,7 +29,7 @@ public class OperatorResultWriter extends ContentWriter<OperationResult>
 	}
 
 	@Override
-	public void write(Context context, OutputStream outputStream, OperationResult result) throws Throwable
+	public void write(Context context, OutputStream outputStream, OperatorResult result) throws Throwable
 	{
 		if (result!=null)
 		{
