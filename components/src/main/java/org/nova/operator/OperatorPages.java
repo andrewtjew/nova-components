@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.nova.html.Attribute;
 import org.nova.html.HtmlWriter;
 import org.nova.html.operator.Menu;
-import org.nova.html.operator.OperationResult;
+import org.nova.html.operator.OperatorResult;
 import org.nova.html.operator.OperatorResultWriter;
 import org.nova.html.widgets.AjaxButton;
 import org.nova.html.widgets.AjaxQueryResult;
@@ -55,7 +55,7 @@ public class OperatorPages
 	
 	@GET
 	@Path("/operator/variables/view")
-	public Response<OperationResult> list() throws Throwable
+	public Response<OperatorResult> list() throws Throwable
 	{
 		HtmlWriter writer=new HtmlWriter();
 
@@ -95,12 +95,12 @@ public class OperatorPages
 			writer.end_table();
 		}
 		
-		return OperationResult.respond(writer, "View Operator Variables");
+		return OperatorResult.respond(writer, "View Operator Variables");
 	}
 
 	@GET
 	@Path("/operator/variables/modify")
-	public Response<OperationResult> modify() throws Throwable
+	public Response<OperatorResult> modify() throws Throwable
 	{
 		HtmlWriter writer=new HtmlWriter();
 
@@ -217,7 +217,7 @@ public class OperatorPages
 			writer.end_table();
 		}
 		
-		return OperationResult.respond(writer, "Modify Operator Variables");
+		return OperatorResult.respond(writer, "Modify Operator Variables");
 	}
 	
 	private String formatStringOutput(String s)

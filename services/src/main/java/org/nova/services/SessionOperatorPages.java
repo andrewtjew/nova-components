@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.nova.core.NameObject;
 import org.nova.core.Utils;
 import org.nova.html.HtmlWriter;
-import org.nova.html.operator.OperationResult;
+import org.nova.html.operator.OperatorResult;
 import org.nova.html.operator.OperatorResultWriter;
 import org.nova.html.widgets.AjaxQueryResultWriter;
 import org.nova.http.server.Context;
@@ -45,7 +45,7 @@ public class SessionOperatorPages<SESSION extends Session>
     
     @GET
     @Path("/operator/sessions")
-    public Response<OperationResult> getAll(Trace parent) throws Exception, Throwable
+    public Response<OperatorResult> getAll(Trace parent) throws Exception, Throwable
     {
         HtmlWriter writer=new HtmlWriter();
 
@@ -69,7 +69,7 @@ public class SessionOperatorPages<SESSION extends Session>
         });
         writer.end_table();
         writer.end_form();
-        return OperationResult.respond(writer, "All Sessions");
+        return OperatorResult.respond(writer, "All Sessions");
     }   
 /*
 1-888-520-9090
@@ -79,7 +79,7 @@ X7W601LGWS
 
     @GET
     @Path("/operator/sessions/remove")
-    public Response<OperationResult> delete(Trace parent,Context context) throws Exception, Throwable
+    public Response<OperatorResult> delete(Trace parent,Context context) throws Exception, Throwable
     {
         HtmlWriter writer=new HtmlWriter();
         HttpServletRequest request=context.getHttpServletRequest();
@@ -103,12 +103,12 @@ X7W601LGWS
         {
             writer.p("Failures: "+failures);
         }
-        return OperationResult.respond(writer, "Remove Sessions");
+        return OperatorResult.respond(writer, "Remove Sessions");
     }   
 
     @GET
     @Path("/operator/session")
-    public Response<OperationResult> getSession(Trace parent,@QueryParam("token") String token) throws Exception, Throwable
+    public Response<OperatorResult> getSession(Trace parent,@QueryParam("token") String token) throws Exception, Throwable
     {
         HtmlWriter writer=new HtmlWriter();
         SESSION session= this.sessionManager.getSessionByToken(token);
@@ -125,7 +125,7 @@ X7W601LGWS
         {
             writer.h3("Session not found");
         }
-        return OperationResult.respond(writer, "Session info");
+        return OperatorResult.respond(writer, "Session info");
     }   
 
 }

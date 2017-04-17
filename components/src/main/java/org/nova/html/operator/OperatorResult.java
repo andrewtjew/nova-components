@@ -4,22 +4,22 @@ import org.nova.html.HtmlWriter;
 import org.nova.html.elements.Element;
 import org.nova.http.server.Response;
 
-public class OperationResult
+public class OperatorResult
 {
-	static public Response<OperationResult> respond(HtmlWriter writer,String title)
+	static public Response<OperatorResult> respond(HtmlWriter writer,String title)
 	{
 		return response(200,writer,title);
 	}
 
-	static Response<OperationResult> response(int status,HtmlWriter writer,String title)
+	static Response<OperatorResult> response(int status,HtmlWriter writer,String title)
 	{
-		return new Response<OperationResult>(status,new OperationResult(writer,title));
+		return new Response<OperatorResult>(status,new OperatorResult(writer,title));
 	}
 	
 	final private Element content;
 	final private String title;
 	
-	OperationResult(Element content,String title)
+	OperatorResult(Element content,String title)
 	{
 		this.content=content;
 		this.title=title;
