@@ -3,7 +3,7 @@ package org.nova.html.elements;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.nova.html.objects.Text;
+import org.nova.html.widgets.Text;
 
 class TagElement<ELEMENT extends TagElement<ELEMENT>> extends Element
 {
@@ -30,13 +30,27 @@ class TagElement<ELEMENT extends TagElement<ELEMENT>> extends Element
     }
     public ELEMENT inner(String text)
     {
-        this.inner=new Text(text);
+        if (text!=null)
+        {
+            this.inner=new Text(text);
+        }
+        return (ELEMENT)this;
+    }
+    public ELEMENT inner(Object object)
+    {
+        if (object!=null)
+        {
+            this.inner=new Text(object.toString());
+        }
         return (ELEMENT)this;
     }
     @SuppressWarnings("unchecked")
     protected ELEMENT attr(String name,Object value)
     {
-        sb.append(' ').append(name).append("=\"").append(value).append('"');
+        if (value!=null)
+        {
+            sb.append(' ').append(name).append("=\"").append(value).append('"');
+        }
         return (ELEMENT) this;
     }
     protected ELEMENT attr(String name)
@@ -46,17 +60,18 @@ class TagElement<ELEMENT extends TagElement<ELEMENT>> extends Element
     }
     static byte[] CLOSE=new byte[]{'>'};
     static byte[] END_OPEN=new byte[]{'<','/'};
+    static byte[] INLINE_CLOSE=new byte[]{' ','/','>'};
     
     @Override
     public void write(OutputStream outputStream) throws Throwable
     {
         outputStream.write(this.sb.toString().getBytes(StandardCharsets.UTF_8));
-        if (inner==null)
+        outputStream.write(CLOSE);
+        if (inner!=null)
         {
-            outputStream.write(CLOSE);
-            return;
+            inner.write(outputStream);
         }
-        inner.write(outputStream);
+        
         outputStream.write(END_OPEN);
         outputStream.write(this.tag.getBytes(StandardCharsets.UTF_8));
         outputStream.write(CLOSE);
@@ -66,7 +81,7 @@ class TagElement<ELEMENT extends TagElement<ELEMENT>> extends Element
     {
         if (inner==null)
         {
-            return this.sb.toString()+">";
+            return this.sb+"></"+this.tag+">";
         }
         return this.sb+">"+inner.toString()+"</"+this.tag+">";
     }

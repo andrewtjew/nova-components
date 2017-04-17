@@ -20,7 +20,25 @@ import java.util.TimeZone;
 
 public class Utils
 {
-
+    static public List<Integer> toList(int[] values)
+    {
+        ArrayList<Integer> list=new ArrayList<>();
+        for (int value:values)
+        {
+            list.add(value);
+        }
+        return list;
+    }
+    static public List<Long> toList(long[] values)
+    {
+        ArrayList<Long> list=new ArrayList<>();
+        for (long value:values)
+        {
+            list.add(value);
+        }
+        return list;
+    }
+    
     static public int compare(String a,String b)
     {
         if ((a==null)&&(b==null))
@@ -125,14 +143,14 @@ public class Utils
 		return new String(readFile(fileName),charset);
 	}
 
-	public static String toLocalFileName(String fileName)
+	public static String toNativePath(String fileName)
 	{
 	    return fileName.replace('\\', File.separatorChar).replace('/',File.separatorChar);
 	}
 	
 	public static byte[] readFile(String fileName) throws Exception
 	{
-	    fileName=toLocalFileName(fileName);
+	    fileName=toNativePath(fileName);
 		File file=new File(fileName);
 		if (file.isDirectory()==true)
 		{

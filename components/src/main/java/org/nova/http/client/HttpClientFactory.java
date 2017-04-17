@@ -125,8 +125,8 @@ public class HttpClientFactory
     
     static public HttpClient createSSLClient(HttpClientConfiguration configuration,String clientCertficateStorePath, String clientCertficateStorePassword,String serverCertificateStorePath,String serverCertificateStorePassword,String clusterName) throws Throwable
     {
-        KeyStore clientCertficateStore=CertificateUtils.getKeyStore(new PathResource(new File(Utils.toLocalFileName(clientCertficateStorePath))), "JKS", null, clientCertficateStorePassword);
-        KeyStore serverCertificateStore=CertificateUtils.getKeyStore(new PathResource(new File(Utils.toLocalFileName(serverCertificateStorePath))), "JKS", null, serverCertificateStorePassword);
+        KeyStore clientCertficateStore=CertificateUtils.getKeyStore(new PathResource(new File(Utils.toNativePath(clientCertficateStorePath))), "JKS", null, clientCertficateStorePassword);
+        KeyStore serverCertificateStore=CertificateUtils.getKeyStore(new PathResource(new File(Utils.toNativePath(serverCertificateStorePath))), "JKS", null, serverCertificateStorePassword);
         SSLContextBuilder contextBuilder=new SSLContextBuilder().
                 loadKeyMaterial(clientCertficateStore,clientCertficateStorePassword.toCharArray()).  
                 loadTrustMaterial(serverCertificateStore,null);

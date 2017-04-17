@@ -53,13 +53,13 @@ public class JettyServerFactory
         SslContextFactory sslContextFactory = new SslContextFactory();
         if (serverCertificateKeyPassword!=null)
         {
-            sslContextFactory.setKeyStorePath(Utils.toLocalFileName(serverCertificateKeyStorePath));
+            sslContextFactory.setKeyStorePath(Utils.toNativePath(serverCertificateKeyStorePath));
             sslContextFactory.setKeyStorePassword(serverCertificateKeyPassword);
         }
         if (clientCertificatePassword!=null)
         {
             sslContextFactory.setNeedClientAuth(true);
-            sslContextFactory.setTrustStorePath(Utils.toLocalFileName(clientCertificateKeyStorePath));
+            sslContextFactory.setTrustStorePath(Utils.toNativePath(clientCertificateKeyStorePath));
             sslContextFactory.setTrustStorePassword(clientCertificatePassword);
         }
         

@@ -34,13 +34,13 @@ import org.nova.html.Attribute;
 import org.nova.html.HtmlWriter;
 import org.nova.html.Selection;
 import org.nova.html.TableList;
-import org.nova.html.objects.AjaxButton;
-import org.nova.html.objects.AjaxQueryResultWriter;
-import org.nova.html.objects.AjaxQueryResult;
-import org.nova.html.operations.Menu;
-import org.nova.html.operations.OperationResult;
-import org.nova.html.operations.OperationResultWriter;
+import org.nova.html.operator.Menu;
+import org.nova.html.operator.OperationResult;
+import org.nova.html.operator.OperatorResultWriter;
 import org.nova.html.tags.input_submit;
+import org.nova.html.widgets.AjaxButton;
+import org.nova.html.widgets.AjaxQueryResult;
+import org.nova.html.widgets.AjaxQueryResultWriter;
 import org.nova.http.Cookie;
 import org.nova.http.Header;
 import org.nova.http.client.HttpClientConfiguration;
@@ -106,7 +106,7 @@ import com.google.common.base.Strings;
 @ContentDecoders(GzipContentDecoder.class)
 @ContentEncoders(GzipContentEncoder.class)
 @ContentReaders({ JSONContentReader.class, JSONPatchContentReader.class })
-@ContentWriters({OperationResultWriter.class, HtmlContentWriter.class})
+@ContentWriters({OperatorResultWriter.class, HtmlContentWriter.class})
 public class ServerOperatorPages
 {
     public final ServerApplication serverApplication;
@@ -2543,7 +2543,7 @@ public class ServerOperatorPages
     }
 
     @GET
-    @Path("/cache/{+}")
+    @Path("/resources/{+}")
     public void cache(@PathParam(PathParam.AT_LEAST_ONE_SEGMENT) String file, Context context, Trace trace) throws Throwable
     {
         HttpServletResponse response = context.getHttpServletResponse();

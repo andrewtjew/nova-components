@@ -4,7 +4,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 
 import org.nova.core.Utils;
-import org.nova.html.objects.templates.Template;
+import org.nova.html.widgets.templates.Template;
 import org.nova.http.server.ContentWriter;
 import org.nova.http.server.Context;
 

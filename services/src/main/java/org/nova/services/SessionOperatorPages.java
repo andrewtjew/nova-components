@@ -9,9 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.nova.core.NameObject;
 import org.nova.core.Utils;
 import org.nova.html.HtmlWriter;
-import org.nova.html.objects.AjaxQueryResultWriter;
-import org.nova.html.operations.OperationResult;
-import org.nova.html.operations.OperationResultWriter;
+import org.nova.html.operator.OperationResult;
+import org.nova.html.operator.OperatorResultWriter;
+import org.nova.html.widgets.AjaxQueryResultWriter;
 import org.nova.http.server.Context;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
@@ -34,7 +34,7 @@ import com.google.common.base.Strings;
 @ContentDecoders(GzipContentDecoder.class)
 @ContentEncoders(GzipContentEncoder.class)
 @ContentReaders({JSONContentReader.class,JSONPatchContentReader.class})
-@ContentWriters({OperationResultWriter.class,JSONContentWriter.class,AjaxQueryResultWriter.class})
+@ContentWriters({OperatorResultWriter.class,JSONContentWriter.class,AjaxQueryResultWriter.class})
 public class SessionOperatorPages<SESSION extends Session>
 {
     final SessionManager<SESSION> sessionManager;

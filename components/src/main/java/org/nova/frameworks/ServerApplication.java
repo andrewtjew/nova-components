@@ -13,11 +13,12 @@ import org.nova.collections.FileCache;
 import org.nova.configuration.Configuration;
 import org.nova.core.Utils;
 import org.nova.html.TypeMappings;
-import org.nova.html.objects.templates.Template;
-import org.nova.html.objects.templates.TemplateManager;
-import org.nova.html.operations.Menu;
-import org.nova.html.operations.OperationResultWriter;
-import org.nova.html.objects.AjaxQueryResultWriter;
+import org.nova.html.elements.HtmlElementWriter;
+import org.nova.html.operator.Menu;
+import org.nova.html.operator.OperatorResultWriter;
+import org.nova.html.widgets.AjaxQueryResultWriter;
+import org.nova.html.widgets.templates.Template;
+import org.nova.html.widgets.templates.TemplateManager;
 import org.nova.http.server.JettyServerFactory;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
@@ -29,8 +30,8 @@ import org.nova.http.server.JSONContentWriter;
 import org.nova.http.server.JSONPatchContentReader;
 import org.nova.http.server.TextContentWriter;
 import org.nova.logging.Level;
-import org.nova.operations.OperatorPages;
 import org.nova.operations.OperatorVariableManager;
+import org.nova.operator.OperatorPages;
 import org.nova.security.SecureFileVault;
 import org.nova.security.UnsecureFileVault;
 import org.nova.security.UnsecureVault;
@@ -45,8 +46,8 @@ public class ServerApplication extends CoreApplication
 	final private FileCache fileCache;
 	final private String baseDirectory;
 	final private TypeMappings typeMappings;
-	final private TemplateManager pageManager;
-	final private OperationResultWriter pageContentWriter;
+	final private TemplateManager operationTemplateManager;
+	final private OperatorResultWriter operatorResultWriter;
 	final private Vault vault;
 	private long startTime;
 	final private String name;
@@ -112,22 +113,21 @@ public class ServerApplication extends CoreApplication
         this.operatorVariableManager=new OperatorVariableManager();
 		this.typeMappings=TypeMappings.DefaultTypeMappings();
 		
-        String pageDirectory=configuration.getValue("HttpServer.operator.pageDirectory","./resources/pages/");
-        this.pageManager=new TemplateManager(this.getTraceManager(), pageDirectory);
+        String operationTemplateDirectory=configuration.getValue("HttpServer.operator.templateDirectory","../resources/html/operator");
+        this.operationTemplateManager=new TemplateManager(this.getTraceManager(), operationTemplateDirectory);
         Menu menu=new Menu();
-        String menuHtml=configuration.getValue("PageContentWriter.operator.main","operator/main.html");
-        Template menuPage=this.pageManager.get(menuHtml);
+        String menuHtml=configuration.getValue("OperationResultWriter.template.main","./main.html");
+        Template menuTemplate=this.operationTemplateManager.get(menuHtml);
 
         //Admin http server
-        this.pageContentWriter=new OperationResultWriter(menu, menuPage);
+        this.operatorResultWriter=new OperatorResultWriter(menu, menuTemplate);
 		int threads=configuration.getIntegerValue("HttpServer.operator.threads",10);
         int operatorPort=configuration.getIntegerValue("HttpServer.operator.port",10051);
 		this.operatorServer=new HttpServer(this.getTraceManager(), JettyServerFactory.createServer(threads, operatorPort));
         this.operatorServer.addContentDecoders(new GzipContentDecoder());
         this.operatorServer.addContentEncoders(new GzipContentEncoder());
         this.operatorServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
-        
-        this.operatorServer.addContentWriters(this.pageContentWriter,new HtmlContentWriter(),new JSONContentWriter(),new AjaxQueryResultWriter());
+        this.operatorServer.addContentWriters(this.operatorResultWriter,new HtmlContentWriter(),new HtmlElementWriter(),new JSONContentWriter(),new AjaxQueryResultWriter());
         this.getMeterManager().register("HttpServer.operatorServer",this.operatorServer);
         System.out.println("admin endpoint: http://"+Utils.getLocalHostName()+":"+operatorPort);
 
@@ -178,15 +178,15 @@ public class ServerApplication extends CoreApplication
             this.publicServer=null;
         }
         
-		String fileCacheDirectory=configuration.getValue("FileCache.baseDirectory","./resources/pages/");
+		String fileCacheDirectory=configuration.getValue("FileCache.baseDirectory","../resources/");
 		long fileCacheMaxAge=configuration.getLongValue("FileCache.maxAge",Long.MAX_VALUE);
 		long fileCacheMaxSize=configuration.getLongValue("FileCache.maxSize",Long.MAX_VALUE);
 		int fileCacheCapacity=configuration.getIntegerValue("FileCache.capacity",10000);
 		this.fileCache=new FileCache(fileCacheDirectory,fileCacheCapacity,fileCacheMaxAge,fileCacheMaxSize);
 		
         this.getOperatorVariableManager().register("HttpServer.operator", this.operatorServer);
-        this.getOperatorVariableManager().register("HttpServer.Public", this.publicServer);
-        this.getOperatorVariableManager().register("HttpServer.Private", this.privateServer);
+        this.getOperatorVariableManager().register("HttpServer.public", this.publicServer);
+        this.getOperatorVariableManager().register("HttpServer.private", this.privateServer);
 	}
 	
 	private void printUnsecureVaultWarning(PrintStream stream)
@@ -247,9 +247,9 @@ public class ServerApplication extends CoreApplication
 		return this.baseDirectory;
 	}
 
-	public TemplateManager getPageManager()
+	public TemplateManager getOperatorTemplateManager()
 	{
-	    return this.pageManager;
+	    return this.operationTemplateManager;
 	}
 	public FileCache getFileCache()
 	{
@@ -271,9 +271,9 @@ public class ServerApplication extends CoreApplication
 	    return this.vault;
 	}
 	
-	public OperationResultWriter getOperationContentWriter()
+	public OperatorResultWriter getOperationContentWriter()
 	{
-	    return this.pageContentWriter;
+	    return this.operatorResultWriter;
 	}
 	public String getName()
 	{

@@ -13,7 +13,7 @@ public class FileCache extends ContentCache<String,byte[]>
 	public FileCache(String baseDirectory,int capacity,long maxAge,long maxSize) throws Exception
 	{
 		super(capacity,maxAge,maxSize);
-		this.baseDirectory=baseDirectory;
+		this.baseDirectory=Utils.toNativePath(baseDirectory);
 	}
 	
 	public void preload(Trace trace) throws Throwable
