@@ -335,7 +335,7 @@ public class Lexer
                         Snippet snippet=this.source.endAndGetSnippet(0);
                         return new Lexeme(Token.TEXT, snippet.getTarget(),snippet);
                     }
-                    level++;
+                    level--;
                 }
             }
         }

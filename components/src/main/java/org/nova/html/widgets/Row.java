@@ -3,38 +3,26 @@ package org.nova.html.widgets;
 import java.io.OutputStream;
 
 import org.nova.html.elements.Element;
+import org.nova.html.elements.InnerElement;
 import org.nova.html.tags.td;
 import org.nova.html.tags.tr;
 
-public class Row extends Element
+public class Row extends tr
 {
-    final ListSequence sequence;
-    final tr tr;
-    public Row()
+    public Row addItems(String...items)
     {
-        this.sequence=new ListSequence();
-        this.tr=new tr().inner(this.sequence);
-    }
-    
-    @Override
-    public void write(OutputStream outputStream) throws Throwable
-    {
-        this.tr.write(outputStream);
-    }
-
-    @Override
-    public String toString()
-    {
-        return this.tr.toString();
-    }
-    public Row td(td data)
-    {
-        this.sequence.add(data);
+        for (String item:items)
+        {
+            addInner(new td().addInner(item));
+        }
         return this;
     }
-    public Row td(Object object)
+    public Row addItems(Object...items)
     {
-        this.sequence.add(new td().inner(object));
+        for (Object item:items)
+        {
+            addInner(new td().addInner(item));
+        }
         return this;
     }
 }

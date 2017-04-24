@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -16,7 +17,6 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.nova.annotations.Description;
 import org.nova.collections.RingBuffer;
-import org.nova.http.Cookie;
 import org.nova.http.Header;
 import org.nova.metrics.RateMeter;
 import org.nova.operations.OperatorVariable;
@@ -40,16 +40,20 @@ public class HttpServer
 	final private RingBuffer<RequestLogEntry> lastRequestsLogEntries;
 	final private RingBuffer<RequestLogEntry> lastExceptionRequestsLogEntries;
 	final private RingBuffer<RequestHandlerNotFoundLogEntry> lastRequestHandlerNotFoundLogEntries;
+	final private int [] ports;
 	private Transformers transformers;
 	
 	@OperatorVariable()
 	private boolean debug;
-	private int preferredPort;
-	private AbstractHandler handler;
 	
-	public HttpServer(String categoryPrefix,TraceManager traceManager, int lastRequestLogEntryBufferSize,int lastExceptionRequestLogEntryBufferSize,int lastNotFoundBufferSize,int preferredPort,Server[] servers) throws Exception
+	public HttpServer(TraceManager traceManager, HttpServerConfiguration configuration,Server[] servers) throws Exception
 	{
-		this.categoryPrefix=categoryPrefix+"@";
+	    this.ports=new int[servers.length];
+	    for (int i=0;i<servers.length;i++)
+	    {
+	        this.ports[i]=((ServerConnector)((servers[i].getConnectors())[0])).getPort();
+	    }
+		this.categoryPrefix=configuration.categoryPrefix+"@";
 		this.requestHandlerMap = new RequestHandlerMap();
 		this.traceManager = traceManager;
 		this.servers = servers;
@@ -57,15 +61,14 @@ public class HttpServer
 		this.identityContentDecoder = new IdentityContentDecoder();
 		this.identityContentEncoder = new IdentityContentEncoder();
 		this.debug=true;
-		this.lastRequestsLogEntries=new RingBuffer<>(new RequestLogEntry[lastRequestLogEntryBufferSize]);
-		this.lastExceptionRequestsLogEntries=new RingBuffer<>(new RequestLogEntry[lastExceptionRequestLogEntryBufferSize]);
-		this.lastRequestHandlerNotFoundLogEntries=new RingBuffer<>(new RequestHandlerNotFoundLogEntry[lastNotFoundBufferSize]);
+		this.lastRequestsLogEntries=new RingBuffer<>(new RequestLogEntry[configuration.lastRequestLogEntryBufferSize]);
+		this.lastExceptionRequestsLogEntries=new RingBuffer<>(new RequestLogEntry[configuration.lastExceptionRequestLogEntryBufferSize]);
+		this.lastRequestHandlerNotFoundLogEntries=new RingBuffer<>(new RequestHandlerNotFoundLogEntry[configuration.lastNotFoundBufferSize]);
 		this.transformers=new Transformers();
-        this.preferredPort=preferredPort;
 	}
 	public HttpServer(String categoryPrefix,TraceManager traceManager, Server server) throws Exception
 	{
-		this(categoryPrefix,traceManager,100,100,100,((ServerConnector)server.getConnectors()[0]).getPort(),new Server[]{server});
+		this(traceManager,new HttpServerConfiguration(),new Server[]{server});
 	}
 
 	public HttpServer(TraceManager traceManager, Server server) throws Exception
@@ -75,17 +78,17 @@ public class HttpServer
 
 	public void start() throws Exception
 	{
-		this.handler=new AbstractHandler()
-		{
-			@Override
-			public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
-			{
-				handleRequest(target, baseRequest, request, response);
-			}
-		};
 		for (Server server:this.servers)
 		{
-			server.setHandler(this.handler);
+	        AbstractHandler handler=new AbstractHandler()
+	        {
+	            @Override
+	            public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+	            {
+	                handleRequest(target, baseRequest, request, response);
+	            }
+	        };
+			server.setHandler(handler);
 			server.start();
 		}
 	}
@@ -116,9 +119,9 @@ public class HttpServer
         this.transformers.add(filters);
     }
 
-    public int getPreferredPort()
+    public int[] getPorts()
     {
-        return this.preferredPort;
+        return this.ports;
     }
 	public Transformers getTransformers()
 	{

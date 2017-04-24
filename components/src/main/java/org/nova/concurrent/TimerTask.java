@@ -1,5 +1,7 @@
 package org.nova.concurrent;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Timer;
 
 import org.nova.concurrent.TimerScheduler.Key;
@@ -11,9 +13,9 @@ public class TimerTask
 	{
 		FIXED,
 		FREE,
-		SECOND,
 		MINUTE,
 		HOUR,
+		DAY,
 		WEEK,
 		MONTH,
 		YEAR,
@@ -23,7 +25,7 @@ public class TimerTask
 	final private TimerRunnable executable;
 	final private String category;
 	final private long period;
-	final private long delay;
+	final private long offset;
 	final private long number;
 	final private long created;
 	final TimeBase schedulingMode;
@@ -42,7 +44,7 @@ public class TimerTask
 	{
 		this.created=System.currentTimeMillis();
 		this.number=number;
-		this.delay=delay;
+		this.offset=delay;
 		this.category=category;
 		this.timerScheduler=timerScheduler;
 		this.executable=executable;
@@ -97,34 +99,104 @@ public class TimerTask
 					return null;
 				}
 				this.executeStatus=TaskStatus.READY;
-				
-				switch (this.schedulingMode)
-				{
-				case FIXED:
-				{
-					long now=System.currentTimeMillis();
-					long duration=now-this.due;
-					long misses=duration/period;
-					this.misses+=misses;
-					this.due=this.due+this.period*(misses+1);
-				}	
-					break;
-				case FREE:
-				{
-					long now=System.currentTimeMillis();
-					long duration=now-this.due;
-					this.misses+=duration/period;
-					this.due=now+this.period;
-				}	
-					break;
-				default:
-					//TODO implement the others
-					break;
-				}
-				this.key=new Key(this.due, this.number);
-				return this.key;
 			}
+			return getSchedule();
 		}
+	}
+	
+	Key getSchedule()
+	{
+        switch (this.schedulingMode)
+        {
+        case FIXED:
+        {
+            long now=System.currentTimeMillis();
+            long duration=now-this.due;
+            long misses=duration/period;
+            this.misses+=misses;
+            this.due=this.due+this.period*(misses+1);
+        }   
+            break;
+        
+        case FREE:
+        {
+            long now=System.currentTimeMillis();
+            long duration=now-this.due;
+            this.misses+=duration/period;
+            this.due=now+this.period;
+        }   
+            break;
+
+        case YEAR:
+        {
+           LocalDateTime now=LocalDateTime.now();
+           long currentTimeMillis=System.currentTimeMillis();
+           int days=now.getDayOfYear()+1;
+           LocalDateTime next=now.minusDays(days).minusHours(now.getHour()).minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusYears(1);
+           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
+           this.due=currentTimeMillis+millis+this.offset;
+        }
+           break;
+
+        case MONTH:
+        {
+           LocalDateTime now=LocalDateTime.now();
+           long currentTimeMillis=System.currentTimeMillis();
+           int days=now.getDayOfMonth()-1;
+           LocalDateTime next=now.minusDays(days).minusHours(now.getHour()).minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusMonths(1);
+           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
+           this.due=currentTimeMillis+millis+this.offset;
+        }
+           break;
+
+        case WEEK:
+        {
+           LocalDateTime now=LocalDateTime.now();
+           long currentTimeMillis=System.currentTimeMillis();
+           int day=now.getDayOfWeek().getValue();
+           LocalDateTime next=now.minusHours(now.getHour()).minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusDays(7-day);
+           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
+           this.due=currentTimeMillis+millis+this.offset;
+        }
+           break;
+
+        case DAY:
+        {
+           LocalDateTime now=LocalDateTime.now();
+           long currentTimeMillis=System.currentTimeMillis();
+           LocalDateTime next=now.minusHours(now.getHour()).minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusDays(1);
+           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
+           this.due=currentTimeMillis+millis+this.offset;
+        }
+           break;
+           
+        case HOUR:
+        {
+           LocalDateTime now=LocalDateTime.now();
+           long currentTimeMillis=System.currentTimeMillis();
+           LocalDateTime next=now.minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusHours(1);
+           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
+           this.due=currentTimeMillis+millis+this.offset;
+        }
+           break;
+           
+        case MINUTE:
+        {
+           LocalDateTime now=LocalDateTime.now();
+           long currentTimeMillis=System.currentTimeMillis();
+           LocalDateTime next=now.minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusMinutes(1);
+           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
+           this.due=currentTimeMillis+millis+this.offset;
+        }
+           break;
+           
+        default:
+            //TODO implement the others
+            break;
+        }
+        this.key=new Key(this.due, this.number);
+        return this.key;
+	    
 	}
 	
 	public void cancel()
@@ -167,7 +239,7 @@ public class TimerTask
 
 	public long getDelay()
 	{
-		return delay;
+		return offset;
 	}
 
 	public long getTotalDuration()

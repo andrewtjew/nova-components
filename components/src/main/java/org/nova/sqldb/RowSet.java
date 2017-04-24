@@ -34,6 +34,10 @@ public class RowSet
 	{
 		return this.rows[index];
 	}
+	public Row[] getRows()
+	{
+	    return this.rows;
+	}
 	public String getColumnName(int index)
 	{
 		return this.columnNames[index];

@@ -70,7 +70,6 @@ public class JettyServerFactory
         sslConnector.setPort(config.getSecurePort());
         server.setConnectors(new Connector[]{sslConnector});
         
-        
         return server;
     }
 }

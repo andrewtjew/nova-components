@@ -7,15 +7,24 @@ public class CallResult<ROW_TYPE,RETURN_TYPE>
 	final private ROW_TYPE[] results;
 	final private Map<Integer,Object> outputValues;
 	final private RETURN_TYPE returnValue;
+	final private int updateCount;
 	
-	CallResult(RETURN_TYPE returnValue,Map<Integer,Object> outValues,ROW_TYPE[] results)
+	CallResult(RETURN_TYPE returnValue,Map<Integer,Object> outValues,ROW_TYPE[] results,int updateCount)
 	{
 		this.outputValues=outValues;
 		this.results=results;
 		this.returnValue=returnValue;
+		this.updateCount=updateCount;
 	}
 	
-	public ROW_TYPE[] get()
+	
+	public int getUpdateCount()
+    {
+        return updateCount;
+    }
+
+
+    public ROW_TYPE[] get()
 	{
 		return results;
 	}

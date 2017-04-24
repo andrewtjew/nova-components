@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 
 import org.nova.core.Utils;
+import org.nova.html.elements.Element;
 import org.nova.html.widgets.Text;
 import org.nova.html.widgets.templates.Template;
 import org.nova.http.server.ContentWriter;
@@ -14,11 +15,13 @@ public class OperatorResultWriter extends ContentWriter<OperatorResult>
 	final private Template template;
 	final private Menu menu;
 	final private String hostName;
+	final private String name;
 	
-	public OperatorResultWriter(Menu menu,Template page) throws Exception
+	public OperatorResultWriter(String name,Menu menu,Template template) throws Exception
 	{
+	    this.name=name;
 		this.menu=menu;
-		this.template=page;
+		this.template=template;
 		this.hostName=InetAddress.getLocalHost().getHostName();
 	}
 	
@@ -33,10 +36,10 @@ public class OperatorResultWriter extends ContentWriter<OperatorResult>
 	{
 		if (result!=null)
 		{
-		    Template page=this.template.copy();
             context.getHttpServletResponse().setContentType("text/html;charset=utf-8");
+		    Template page=this.template.copy();
 			page.fill("menu", this.menu);
-			page.fill("info", new Text(this.hostName+"<br/>"+Utils.nowToLocalDateTimeString()));
+			page.fill("info", new Text(this.name+"@"+this.hostName+"<br/>"+Utils.nowToLocalDateTimeString()));
 			page.fill("title", new Text(result.getTitle()));
 			page.fill("content", result.getContent());
 			page.write(outputStream);
@@ -57,6 +60,14 @@ public class OperatorResultWriter extends ContentWriter<OperatorResult>
     public Menu getMenu()
     {
         return menu;
+    }
+    public Template getTemplate()
+    {
+        return this.template;
+    }
+    public OperatorResult respond(Element content,String title)
+    {
+        return new OperatorResult(content, title);
     }
 }
 

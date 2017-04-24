@@ -15,8 +15,11 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class Utils
 {
@@ -37,6 +40,24 @@ public class Utils
             list.add(value);
         }
         return list;
+    }
+    static public long[] longArray(List<Long> list)
+    {
+        long[] array=new long[list.size()];
+        for (int i=0;i<array.length;i++)
+        {
+            array[i]=list.get(i);
+        }
+        return array;
+    }
+    static public int[] intArray(List<Integer> list)
+    {
+        int[] array=new int[list.size()];
+        for (int i=0;i<array.length;i++)
+        {
+            array[i]=list.get(i);
+        }
+        return array;
     }
     
     static public int compare(String a,String b)
@@ -114,19 +135,41 @@ public class Utils
 		return fragments;
 	}
     public static String combine(Iterable<?> iterable,String seperator)
-	{
-    	StringBuilder sb=new StringBuilder();
-    	for (Object item:iterable)
-    	{
-    		if (sb.length()>0)
-    		{
-    			sb.append(seperator);
-    		}
-    		sb.append(item);
-    	}
-    	return sb.toString();
-	}
-	
+    {
+        StringBuilder sb=new StringBuilder();
+        for (Object item:iterable)
+        {
+            if (sb.length()>0)
+            {
+                sb.append(seperator);
+            }
+            sb.append(item);
+        }
+        return sb.toString();
+    }
+    
+    public static String combine(Iterable<?> iterable,String seperator,String pre,String post)
+    {
+        StringBuilder sb=new StringBuilder();
+        for (Object item:iterable)
+        {
+            if (sb.length()>0)
+            {
+                sb.append(seperator);
+            }
+            if (pre!=null)
+            {
+                sb.append(pre);
+            }
+            sb.append(item);
+            if (post!=null)
+            {
+                sb.append(post);
+            }
+        }
+        return sb.toString();
+    }
+    
 	public static String readTextFile(String fileName,String charset) throws Exception
 	{
 		return readTextFile(fileName, Charset.forName(charset));
@@ -499,6 +542,7 @@ public class Utils
 		}
 		return occurs;
 	}
+	
 	
 }
 

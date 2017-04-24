@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import org.nova.core.KeyValue;
 import org.nova.html.Attribute;
 import org.nova.html.elements.Element;
+import org.nova.html.elements.InnerElement;
 
-public class AjaxButton extends Element
+public class AjaxButton extends InnerElement<AjaxButton>
 {
 	final private String id;
 	final private String text;

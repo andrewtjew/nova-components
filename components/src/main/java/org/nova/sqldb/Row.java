@@ -58,14 +58,22 @@ public class Row
 	{
 		return getDECIMAL(this.mappings.get(columnName));
 	}
-	public boolean getTINYINT(int columnIndex)
+	public short getTINYINT(int columnIndex)
 	{
-		return (boolean)this.data[columnIndex];
+		return (short)this.data[columnIndex];
 	}
-	public boolean getTINYINT(String columnName)
+	public short getTINYINT(String columnName)
 	{
 		return getTINYINT(this.mappings.get(columnName));
 	}
+    public Short getNullableTINYINT(int columnIndex)
+    {
+        return (Short)this.data[columnIndex];
+    }
+    public Short getNullableTINYINT(String columnName)
+    {
+        return getNullableTINYINT(this.mappings.get(columnName));
+    }
 	public short getSMALLINT(int columnIndex)
 	{
 		return (short)this.data[columnIndex];
@@ -74,6 +82,14 @@ public class Row
 	{
 		return getSMALLINT(this.mappings.get(columnName));
 	}
+    public Short getNullableSMALLINT(int columnIndex)
+    {
+        return (Short)this.data[columnIndex];
+    }
+    public Short getNullableSMALLINT(String columnName)
+    {
+        return getNullableSMALLINT(this.mappings.get(columnName));
+    }
 	public int getINTEGER(int columnIndex)
 	{
 		return (int)this.data[columnIndex];
@@ -82,6 +98,14 @@ public class Row
 	{
 		return getINTEGER(this.mappings.get(columnName));
 	}
+    public Integer getNullableINTEGER(int columnIndex)
+    {
+        return (Integer)this.data[columnIndex];
+    }
+    public Integer getNullableINTEGER(String columnName)
+    {
+        return getNullableINTEGER(this.mappings.get(columnName));
+    }
 	public long getBIGINT(int columnIndex)
 	{
 		return (long)this.data[columnIndex];
@@ -90,6 +114,14 @@ public class Row
 	{
 		return getBIGINT(this.mappings.get(columnName));
 	}
+    public Long getNullableBIGINT(int columnIndex)
+    {
+        return (Long)this.data[columnIndex];
+    }
+    public Long getNullableBIGINT(String columnName)
+    {
+        return getNullableBIGINT(this.mappings.get(columnName));
+    }
 	public float getREAL(int columnIndex)
 	{
 		return (float)this.data[columnIndex];
@@ -98,6 +130,14 @@ public class Row
 	{
 		return getREAL(this.mappings.get(columnName));
 	}
+    public Float getNullableREAL(int columnIndex)
+    {
+        return (Float)this.data[columnIndex];
+    }
+    public Float getNullableREAL(String columnName)
+    {
+        return getNullableREAL(this.mappings.get(columnName));
+    }
 	public double getFLOAT(int columnIndex)
 	{
 		return (double)this.data[columnIndex];
@@ -106,6 +146,14 @@ public class Row
 	{
 		return getFLOAT(this.mappings.get(columnName));
 	}
+    public Double getNullableFLOAT(int columnIndex)
+    {
+        return (Double)this.data[columnIndex];
+    }
+    public Double getNullableFLOAT(String columnName)
+    {
+        return getNullableFLOAT(this.mappings.get(columnName));
+    }
 	public double getDOUBLE(int columnIndex)
 	{
 		return (double)this.data[columnIndex];
@@ -114,6 +162,14 @@ public class Row
 	{
 		return getDOUBLE(this.mappings.get(columnName));
 	}
+    public Double getNullableDOUBLE(int columnIndex)
+    {
+        return (Double)this.data[columnIndex];
+    }
+    public Double getNullableDOUBLE(String columnName)
+    {
+        return getNullableDOUBLE(this.mappings.get(columnName));
+    }
 	public byte[] getBINARY(int columnIndex)
 	{
 		return (byte[])this.data[columnIndex];

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,7 +42,6 @@ import org.nova.html.tags.input_submit;
 import org.nova.html.widgets.AjaxButton;
 import org.nova.html.widgets.AjaxQueryResult;
 import org.nova.html.widgets.AjaxQueryResultWriter;
-import org.nova.http.Cookie;
 import org.nova.http.Header;
 import org.nova.http.client.HttpClientConfiguration;
 import org.nova.http.client.HttpClientFactory;
@@ -127,7 +127,7 @@ public class ServerOperatorPages
         this.cacheControlValue = serverApplication.getConfiguration().getValue("ServerOperatorPages.cache.controlValue", "public");
         this.serverApplication = serverApplication;
 
-        Menu menu = serverApplication.getOperationContentWriter().getMenu();
+        Menu menu = serverApplication.getOperatorContentWriter().getMenu();
 
         menu.add("Process|Configuration", "/operator/process/configuration");
         menu.add("Process|Futures", "/operator/process/futures");
@@ -874,7 +874,7 @@ public class ServerOperatorPages
 
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
         writer.h2("Request Handlers");
-        writer.p("Preferred Port: "+httpServer.getPreferredPort()+", Count:" + requestHandlers.length);
+        writer.p("Ports: "+Utils.combine(Utils.toList(httpServer.getPorts()),",")+", Count:" + requestHandlers.length);
         if (requestHandlers.length > 0)
         {
             writer.begin_sortableTable(1);
@@ -1000,7 +1000,7 @@ public class ServerOperatorPages
         HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=this.getHttpServer(server);
         RequestLogEntry[] entries = httpServer.getLastRequestLogEntries();
-        writer.p("Preferred Port: "+httpServer.getPreferredPort()+", Count:" + entries.length);
+        writer.p("Ports: "+Utils.combine(Utils.toList(httpServer.getPorts()),",")+", Count:" + entries.length);
         writeRequestLogEntries(writer, entries);
         return OperatorResult.respond(writer, "Last Requests: "+server);
     }
@@ -1012,7 +1012,7 @@ public class ServerOperatorPages
         HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=this.getHttpServer(server);
         RequestLogEntry[] entries = httpServer.getLastExceptionRequestLogEntries();
-        writer.p("Preferred Port: "+httpServer.getPreferredPort()+", Count:" + entries.length);
+        writer.p("Ports: "+Utils.combine(Utils.toList(httpServer.getPorts()),",")+", Count:" + entries.length);
         writeRequestLogEntries(writer, entries);
         return OperatorResult.respond(writer, "Last Exception Requests: "+server);
     }
@@ -1024,7 +1024,7 @@ public class ServerOperatorPages
         HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=this.getHttpServer(server);
         RequestHandlerNotFoundLogEntry[] entries = httpServer.getRequestHandlerNotFoundLogEntries();
-        writer.p("Preferred Port: "+httpServer.getPreferredPort()+", Count:" + entries.length);
+        writer.p("Ports: "+Utils.combine(Utils.toList(httpServer.getPorts()),",")+", Count:" + entries.length);
         for (RequestHandlerNotFoundLogEntry entry : entries)
         {
             Trace trace = entry.getTrace();
@@ -1048,7 +1048,7 @@ public class ServerOperatorPages
         HttpServer httpServer=getHttpServer(server);
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
         HtmlWriter writer = new HtmlWriter();
-        writer.p("Preferred Port: "+httpServer.getPreferredPort()+", Total:" + requestHandlers.length);
+        writer.p("Ports: "+Utils.combine(Utils.toList(httpServer.getPorts()),",")+", Count:" + requestHandlers.length);
         if (requestHandlers.length > 0)
         {
             writer.begin_sortableTable(1);
@@ -1308,7 +1308,7 @@ public class ServerOperatorPages
         HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=getHttpServer(server);
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
-        writer.p("Preferred Port: "+httpServer.getPreferredPort()+", Total:" + requestHandlers.length);
+        writer.p("Ports: "+Utils.combine(Utils.toList(httpServer.getPorts()),",")+", Count:" + requestHandlers.length);
         if (requestHandlers.length > 0)
         {
             writer.begin_sortableTable(1);
@@ -1834,7 +1834,7 @@ public class ServerOperatorPages
         HtmlWriter writer = new HtmlWriter();
         writer.h2("Method: "+key);
         HttpServer httpServer=getHttpServer(server);
-        writer.p("Preferred Port: "+httpServer.getPreferredPort());
+        writer.p("Ports: "+Utils.combine(Utils.toList(httpServer.getPorts()),","));
         HttpServletRequest request=context.getHttpServletRequest();
         RequestHandler requestHandler = httpServer.getRequestHandler(key);
 
@@ -2191,8 +2191,9 @@ public class ServerOperatorPages
         {
             endPoint=endPoint.substring(0,index);
         }
-        endPoint=endPoint+":"+httpServer.getPreferredPort();
-        if (httpServer.getPreferredPort()==this.serverApplication.getPublicServer().getPreferredPort())
+        int[] ports=httpServer.getPorts();
+        endPoint=endPoint+":"+ports[0];
+        if (ports.length==2)
         {
             Configuration configuration=this.serverApplication.getConfiguration();
             boolean https=configuration.getBooleanValue("HttpServer.public.https",false);

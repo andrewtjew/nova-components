@@ -155,12 +155,12 @@ public class TimerScheduler
 			this.map.remove(key);
 		}
 	}
-	
-	
-	public TimerTask schedule(String traceCategory,TimerTask.TimeBase timeBase,long delay, long period, TimerRunnable executable) throws Exception
+
+	public TimerTask schedule(String traceCategory,TimerTask.TimeBase timeBase,long offset, long period, TimerRunnable executable) throws Exception
 	{
-		TimerTask timerTask = new TimerTask(this.number.getAndIncrement(),traceCategory, this, timeBase, delay, period,executable);
-		Key key=new Key(timerTask.getDue(),timerTask.getNumber());
+	    TimerTask timerTask = new TimerTask(this.number.getAndIncrement(),traceCategory, this, timeBase, offset, period,executable);
+	    
+	    Key key=timerTask.getSchedule();
 		synchronized(this)
 		{
 			this.map.put(key, timerTask);

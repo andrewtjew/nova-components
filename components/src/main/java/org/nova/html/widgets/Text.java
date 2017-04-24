@@ -4,14 +4,27 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.nova.html.elements.Element;
+import org.nova.html.elements.InnerElement;
 
-public class Text extends Element
+public class Text extends InnerElement<Text>
 {
     final private String text;
     public Text(String text)
     {
         super();
         this.text=text;
+    }
+    public Text(Object object)
+    {
+        super();
+        if (object!=null)
+        {
+            this.text=object.toString();
+        }
+        else
+        {
+            text=null;
+        }
     }
 
     @Override
@@ -23,6 +36,9 @@ public class Text extends Element
     @Override
     public void write(OutputStream outputStream) throws Throwable
     {
-        outputStream.write(this.text.getBytes(StandardCharsets.UTF_8));
+        if (this.text!=null)
+        {
+            outputStream.write(this.text.getBytes(StandardCharsets.UTF_8));
+        }
     }
 }

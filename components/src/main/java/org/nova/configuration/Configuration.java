@@ -1,7 +1,10 @@
 package org.nova.configuration;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 
+import org.nova.annotations.Alias;
 import org.nova.core.Utils;
 import org.nova.json.ObjectMapper;
 
@@ -90,7 +93,6 @@ public class Configuration
 		}
 		return item.getValue();
 	}
-	
 	public String getValue(String name,String defaultValue)
 	{
 		ConfigurationItem item=getConfigurationItem(name,defaultValue);
@@ -108,9 +110,31 @@ public class Configuration
 	}
 	public double getDoubleValue(String name,double defaultValue)
 	{
-		String value=getValue(name,Double.toString(defaultValue));
+		String value=getValue(name);
+		if (value==null)
+		{
+		    return defaultValue;
+		}
 		return Double.parseDouble(value);
 	}
+    public Double getNullableDoubleValue(String name)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return null;
+        }
+        return Double.parseDouble(value);
+    }
+    public Double getNulllableDoubleValue(String name,Double defaultValue)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return defaultValue;
+        }
+        return Double.parseDouble(value);
+    }
 	public float getFloatValue(String name)
 	{
 		String value=getValue(name);
@@ -118,9 +142,31 @@ public class Configuration
 	}
 	public float getFloatValue(String name,float defaultValue)
 	{
-		String value=getValue(name,Float.toString(defaultValue));
+		String value=getValue(name);
+        if (value==null)
+        {
+            return defaultValue;
+        }
 		return Float.parseFloat(value);
 	}
+    public Float getNullableFloatValue(String name)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return null;
+        }
+        return Float.parseFloat(value);
+    }
+    public Float getNullableFloatValue(String name,Float defaultValue)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return defaultValue;
+        }
+        return Float.parseFloat(value);
+    }
 	public long getLongValue(String name)
 	{
 		String value=getValue(name);
@@ -129,22 +175,138 @@ public class Configuration
 
 	public long getLongValue(String name,long defaultValue)
 	{
-		String value=getValue(name,Long.toString(defaultValue));
+        String value=getValue(name);
+        if (value==null)
+        {
+            return defaultValue;
+        }
 		return Long.parseLong(value);
 	}
+    public Long getNullableLongValue(String name)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return null;
+        }
+        return Long.parseLong(value);
+    }
+
+    public Long getNullableLongValue(String name,Long defaultValue)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return defaultValue;
+        }
+        return Long.parseLong(value);
+    }
 	
-	public int getIntegerValue(String name)
+    public int getIntegerValue(String name)
+    {
+        String value=getValue(name);
+        return Integer.parseInt(value);
+    }
+
+    public int getIntegerValue(String name,int defaultValue)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return defaultValue;
+        }
+        return Integer.parseInt(value);
+    }
+    public Integer getNullableIntegerValue(String name)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return null;
+        }
+        return Integer.parseInt(value);
+    }
+
+    public Integer getNullableIntegerValue(String name,Integer defaultValue)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return defaultValue;
+        }
+        return Integer.parseInt(value);
+    }
+    
+	public short getShortValue(String name)
 	{
 		String value=getValue(name);
-		return Integer.parseInt(value);
+		return Short.parseShort(value);
 	}
 
-	public int getIntegerValue(String name,int defaultValue)
+	public short getShortValue(String name,short defaultValue)
 	{
-		String value=getValue(name,Integer.toString(defaultValue));
-		return Integer.parseInt(value);
+        String value=getValue(name);
+        if (value==null)
+        {
+            return defaultValue;
+        }
+		return Short.parseShort(value);
 	}
+    public Short getNullableShortValue(String name)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return null;
+        }
+        return Short.parseShort(value);
+    }
+
+    public Short getNullableShortValue(String name,Short defaultValue)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return defaultValue;
+        }
+        return Short.parseShort(value);
+    }
 	
+    public byte getByteValue(String name)
+    {
+        String value=getValue(name);
+        return Byte.parseByte(value);
+    }
+
+    public byte getByteValue(String name,byte defaultValue)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return defaultValue;
+        }
+        return Byte.parseByte(value);
+    }
+    public Byte getNullableByteValue(String name)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return null;
+        }
+        return Byte.parseByte(value);
+    }
+
+    public Byte getNullableByteValue(String name,Byte defaultValue)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return defaultValue;
+        }
+        return Byte.parseByte(value);
+    }
+    
 	public boolean getBooleanValue(String name)
 	{
 		String value=getValue(name);
@@ -153,9 +315,32 @@ public class Configuration
 
 	public boolean getBooleanValue(String name,boolean defaultValue)
 	{
-		String value=getValue(name,Boolean.toString(defaultValue));
+        String value=getValue(name);
+        if (value==null)
+        {
+            return defaultValue;
+        }
 		return Boolean.parseBoolean(value);
 	}
+    public Boolean getNullableBooleanValue(String name)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return null;
+        }
+        return Boolean.parseBoolean(value);
+    }
+
+    public Boolean getNullableBooleanValue(String name,Boolean defaultValue)
+    {
+        String value=getValue(name);
+        if (value==null)
+        {
+            return defaultValue;
+        }
+        return Boolean.parseBoolean(value);
+    }
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <ENUM> ENUM getEnumValue(String name,Class<ENUM> type)
@@ -195,5 +380,88 @@ public class Configuration
 			return this.map.values().toArray(new ConfigurationItem[this.map.size()]);
 		}
 	}
+	
+	public <OBJECT> OBJECT getConfiguration(String namespace,Class<OBJECT> type) throws Exception
+	{
+	    OBJECT object=type.newInstance();
+	    for (Field field:type.getDeclaredFields())
+	    {
+	        Class<?> fieldType=field.getType();
+	        
+	        String key=namespace+"."+field.getName();
+            Alias alias=field.getDeclaredAnnotation(Alias.class);
+            if (alias!=null)
+            {
+                key=namespace+"."+alias.value();
+            }
+	        ConfigurationItem item=getConfigurationItem(key);
+	        if (item==null)
+	        {
+	            continue;
+	        }
+            if (fieldType==String.class)
+            {
+                field.set(object, getValue(key));
+            }
+            else if (fieldType==long.class)
+            {
+                field.setLong(object, getLongValue(key));
+            }
+            else if (fieldType==int.class)
+            {
+                field.setInt(object, getIntegerValue(key));
+            }
+            else if (fieldType==double.class)
+            {
+                field.setDouble(object, getDoubleValue(key));
+            }
+            else if (fieldType==float.class)
+            {
+                field.setFloat(object, getFloatValue(key));
+            }
+            else if (fieldType==short.class)
+            {
+                field.setShort(object, getShortValue(key));
+            }
+            else if (fieldType==byte.class)
+            {
+                field.setByte(object, getByteValue(key));
+            }
+            else if (fieldType==Long.class)
+            {
+                field.set(object, getNullableLongValue(key));
+            }
+            else if (fieldType==Integer.class)
+            {
+                field.set(object, getNullableIntegerValue(key));
+            }
+            else if (fieldType==Double.class)
+            {
+                field.set(object, getNullableDoubleValue(key));
+            }
+            else if (fieldType==Float.class)
+            {
+                field.set(object, getNullableFloatValue(key));
+            }
+            else if (fieldType==Short.class)
+            {
+                field.set(object, getNullableShortValue(key));
+            }
+            else if (fieldType==Byte.class)
+            {
+                field.set(object, getNullableByteValue(key));
+            }
+            else if (type.isEnum())
+            {
+                field.set(object, Enum.valueOf((Class<Enum>) fieldType, getValue(key)));
+            }
+            else 
+            {
+                field.set(object, ObjectMapper.read(getValue(key), fieldType));
+            }
+	    }
+	    return object;
+	}
+	
 	
 }

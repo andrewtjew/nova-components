@@ -20,7 +20,8 @@ public class SessionService<SESSION extends Session> extends ServerApplication
         this.getMeterManager().register("SessionManager", this.sessionManager);
         this.tokenGenerator=new TokenGenerator();
         
-        String directoryServiceEndPoint=this.getConfiguration().getValue("SessionService.directoryServiceEndPoint", "http://"+Utils.getLocalHostName()+":"+this.getPublicServer().getPreferredPort());
+        String directoryServiceEndPoint=this.getConfiguration().getValue("SessionService.directoryServiceEndPoint", "http://"+Utils.getLocalHostName()+":"+this.getPublicServer().getPorts()[0]);
+
         String headerTokenKey=this.getConfiguration().getValue("SessionService.tokenKey.header", "X-Token");
         String queryTokenKey=this.getConfiguration().getValue("SessionService.tokenKey.query", "token");
         String cookieTokenKey=this.getConfiguration().getValue("SessionService.tokenKey.cookie", headerTokenKey);
@@ -31,7 +32,7 @@ public class SessionService<SESSION extends Session> extends ServerApplication
     public void onStart() throws Throwable
     {
         super.onStart();
-        this.getOperationContentWriter().getMenu().add("Sessions|View All", "/operator/sessions");
+        this.getOperatorContentWriter().getMenu().add("Sessions|View All", "/operator/sessions");
         
         this.getPublicServer().addFilters(this.sessionFilter);
         SessionOperatorPages<SESSION> sessionOperatorPages=new SessionOperatorPages<>(this.sessionManager);

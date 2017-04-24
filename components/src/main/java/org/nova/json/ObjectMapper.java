@@ -97,6 +97,10 @@ public class ObjectMapper
 	@SuppressWarnings("unchecked")
 	public <OBJECT> OBJECT readObject(String text, Class<OBJECT> type) throws Exception
 	{
+	    if ((text==null)||(text.length()==0))
+	    {
+	        return null;
+	    }
 		Lexer lexer = new Lexer(text);
 		char objectOrArray = lexer.getNextCharacter();
 		if (objectOrArray == '[')
@@ -953,34 +957,39 @@ public class ObjectMapper
 
 	public static String write(Object object) throws Exception
 	{
-		return mapper.writeObject(object);
+		return mapper.writeObjectAsString(object);
 	}
 	public static void write(OutputStream outputStream,Object object) throws Exception
 	{
 		mapper.writeObject(outputStream,object);
 	}
 
-	public String writeObject(Object object) throws Exception
+	public String writeObjectAsString(Object object) throws Exception
 	{
-		if (object == null)
-		{
-			return "";
-		}
+	    if (object==null)
+	    {
+	        return "";
+	    }
 		StringBuilder sb = new StringBuilder();
-		Class<?> type = object.getClass();
-		if (type.isArray())
-		{
-			writeArray(sb, object, type.getComponentType());
-		}
-		else
-		{
-			writeObject(sb, object, type);
-		}
+		writeObjectOrArray(sb,object,object.getClass());
 		return sb.toString();
 	}
+	void writeObjectOrArray(StringBuilder sb,Object object,Class<?> type) throws Exception
+	{
+        if (type.isArray())
+        {
+            writeArray(sb, object, type.getComponentType());
+        }
+        else
+        {
+            writeObject(sb, object, type);
+        }
+	    
+	}
+	
 	public void writeObject(OutputStream outputStream,Object object) throws Exception
 	{
-		outputStream.write(writeObject(object).getBytes());
+		outputStream.write(writeObjectAsString(object).getBytes());
 		
 	}
 	
@@ -1462,7 +1471,7 @@ public class ObjectMapper
 					}
 					else
 					{
-						sb.append(COMMA_NULL_CHARS);
+                        sb.append(COMMA_NULL_CHARS);
 					}
 				}
 			}
@@ -1475,7 +1484,7 @@ public class ObjectMapper
 				Object value=Array.get(array, 0);
 				if (value!=null)
 				{
-					writeObject(sb,value,componentType);
+					writeObjectOrArray(sb,value,value.getClass());
 				}
 				else
 				{
@@ -1483,15 +1492,15 @@ public class ObjectMapper
 				}
 				for (int i = 1; i < length; i++)
 				{
-					sb.append(',');
 					value=Array.get(array, i);
 					if (value!=null)
 					{
-						writeObject(sb,value,componentType);
+	                    sb.append(',');
+						writeObjectOrArray(sb,value,value.getClass());
 					}
 					else
 					{
-						sb.append(NULL_CHARS);
+                        sb.append(COMMA_NULL_CHARS);
 					}
 				}
 			}
@@ -1793,7 +1802,7 @@ public class ObjectMapper
 					{
 						sb.append(fieldInfo.commaJsonName);
 					}
-					writeObject(sb, value, fieldType);
+					writeObjectOrArray(sb, value, fieldType);
 				}
 			}
 		}

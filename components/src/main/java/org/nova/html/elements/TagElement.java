@@ -2,14 +2,17 @@ package org.nova.html.elements;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.nova.html.widgets.Text;
 
-class TagElement<ELEMENT extends TagElement<ELEMENT>> extends Element
+public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElement<ELEMENT>
 {
     final private StringBuilder sb;
     final private String tag;
     private Element inner=null;
+    private ArrayList<Element> inners=null; 
     
     TagElement()
     {
@@ -21,28 +24,6 @@ class TagElement<ELEMENT extends TagElement<ELEMENT>> extends Element
         this.tag=tag;
         this.sb=new StringBuilder();
         this.sb.append("<"+tag);
-    }
-    @SuppressWarnings("unchecked")
-    public ELEMENT inner(Element element)
-    {
-        this.inner=element;
-        return (ELEMENT)this;
-    }
-    public ELEMENT inner(String text)
-    {
-        if (text!=null)
-        {
-            this.inner=new Text(text);
-        }
-        return (ELEMENT)this;
-    }
-    public ELEMENT inner(Object object)
-    {
-        if (object!=null)
-        {
-            this.inner=new Text(object.toString());
-        }
-        return (ELEMENT)this;
     }
     @SuppressWarnings("unchecked")
     protected ELEMENT attr(String name,Object value)
@@ -67,11 +48,7 @@ class TagElement<ELEMENT extends TagElement<ELEMENT>> extends Element
     {
         outputStream.write(this.sb.toString().getBytes(StandardCharsets.UTF_8));
         outputStream.write(CLOSE);
-        if (inner!=null)
-        {
-            inner.write(outputStream);
-        }
-        
+        super.write(outputStream);
         outputStream.write(END_OPEN);
         outputStream.write(this.tag.getBytes(StandardCharsets.UTF_8));
         outputStream.write(CLOSE);
@@ -79,10 +56,10 @@ class TagElement<ELEMENT extends TagElement<ELEMENT>> extends Element
     @Override
     public String toString()
     {
-        if (inner==null)
-        {
-            return this.sb+"></"+this.tag+">";
-        }
-        return this.sb+">"+inner.toString()+"</"+this.tag+">";
+        StringBuilder out=new StringBuilder(this.sb.toString());
+        out.append('>');
+        out.append(super.toString());
+        out.append("</").append(this.tag).append('>');
+        return out.toString();
     }
 }

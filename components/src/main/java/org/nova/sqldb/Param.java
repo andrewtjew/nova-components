@@ -5,8 +5,6 @@ import java.math.BigInteger;
 import java.sql.SQLType;
 import java.sql.Types;
 
-import org.nova.sqldb.Params.Type;
-
 public class Param
 {
 	enum Direction
@@ -136,15 +134,10 @@ public class Param
     {
         return new Param(Direction.OUT,sqlType,null);
     }
-/*
-	public static Param Return(int sqlType) throws Exception
-	{
-		return new Param(sqlType);
-	}
-
-	public static Param Return(Class<?> type) throws Exception
-	{
-		return new Param(getSqlType(type));
-	}
-	*/
+    
+    public static Param[] build(Param...params)
+    {
+        return params;
+    }
+    
 }

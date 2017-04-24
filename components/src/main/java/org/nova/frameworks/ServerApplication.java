@@ -25,11 +25,13 @@ import org.nova.http.server.GzipContentEncoder;
 import org.nova.http.server.HtmlContentWriter;
 import org.nova.http.server.HtmlContentWriter;
 import org.nova.http.server.HttpServer;
+import org.nova.http.server.HttpServerConfiguration;
 import org.nova.http.server.JSONContentReader;
 import org.nova.http.server.JSONContentWriter;
 import org.nova.http.server.JSONPatchContentReader;
 import org.nova.http.server.TextContentWriter;
 import org.nova.logging.Level;
+import org.nova.operations.OperatorVariable;
 import org.nova.operations.OperatorVariableManager;
 import org.nova.operator.OperatorPages;
 import org.nova.security.SecureFileVault;
@@ -52,6 +54,9 @@ public class ServerApplication extends CoreApplication
 	private long startTime;
 	final private String name;
 	
+	@OperatorVariable
+	boolean debug;
+	
 	
 	
 	public ServerApplication(String name,Configuration configuration) throws Throwable 
@@ -64,6 +69,8 @@ public class ServerApplication extends CoreApplication
         this.baseDirectory=baseDirectory.getCanonicalPath();
         configuration.add("System.baseDirectory",this.baseDirectory,"The base directory");
         System.out.println("base directory: "+this.baseDirectory);
+
+        this.debug=configuration.getBooleanValue("System.debug",false);
 
         //Setting up the vault
         String secureVaultFile=configuration.getValue("System.vault.secureVaultFile",null);
@@ -113,14 +120,14 @@ public class ServerApplication extends CoreApplication
         this.operatorVariableManager=new OperatorVariableManager();
 		this.typeMappings=TypeMappings.DefaultTypeMappings();
 		
-        String operationTemplateDirectory=configuration.getValue("HttpServer.operator.templateDirectory","../resources/html/operator");
+        String operationTemplateDirectory=configuration.getValue("HttpServer.operator.templateDirectory","../resources/html/operator/");
         this.operationTemplateManager=new TemplateManager(this.getTraceManager(), operationTemplateDirectory);
         Menu menu=new Menu();
         String menuHtml=configuration.getValue("OperationResultWriter.template.main","./main.html");
         Template menuTemplate=this.operationTemplateManager.get(menuHtml);
 
         //Admin http server
-        this.operatorResultWriter=new OperatorResultWriter(menu, menuTemplate);
+        this.operatorResultWriter=new OperatorResultWriter(this.getName(),menu, menuTemplate);
 		int threads=configuration.getIntegerValue("HttpServer.operator.threads",10);
         int operatorPort=configuration.getIntegerValue("HttpServer.operator.port",10051);
 		this.operatorServer=new HttpServer(this.getTraceManager(), JettyServerFactory.createServer(threads, operatorPort));
@@ -149,9 +156,17 @@ public class ServerApplication extends CoreApplication
         
         //Public http server
         int publicPort=configuration.getIntegerValue("HttpServer.public.port",operatorPort+2);
+        int testPort=configuration.getIntegerValue("HttpServer.test.port",operatorPort+3);
         if (publicPort>0)
         {
+            HttpServerConfiguration httpServerConfiguration=getConfiguration().getConfiguration("HttpServer.public", HttpServerConfiguration.class);
             threads=configuration.getIntegerValue("HttpServer.public.threads",1000);
+
+            Server[] servers=new Server[isDebug()?2:1];
+            if (isDebug())
+            {
+                servers[1]=JettyServerFactory.createServer(threads, testPort);
+            }
             boolean https=configuration.getBooleanValue("HttpServer.public.https",false);
             if (https)
             {
@@ -161,13 +176,15 @@ public class ServerApplication extends CoreApplication
 
                 String serverCertificateKeyStorePath=configuration.getValue("HttpServer.serverCertificate.keyStorePath",null);
                 String clientCertificateKeyStorePath=configuration.getValue("HttpServer.clientCertificate.keyStorePath",null);
-                Server server=JettyServerFactory.createHttpsServer(threads, publicPort, serverCertificateKeyStorePath, serverCertificatePassword,clientCertificateKeyStorePath,clientCertificatePassword,keyManagerPassword);
-                this.publicServer=new HttpServer(this.getTraceManager(), server);
+                servers[0]=JettyServerFactory.createHttpsServer(threads, publicPort, serverCertificateKeyStorePath, serverCertificatePassword,clientCertificateKeyStorePath,clientCertificatePassword,keyManagerPassword);
             }
             else
             {
-                this.publicServer=new HttpServer(this.getTraceManager(), JettyServerFactory.createServer(threads, publicPort));
+                servers[0]=JettyServerFactory.createServer(threads, publicPort);
             }
+            
+            this.publicServer=new HttpServer(this.getTraceManager(), httpServerConfiguration, servers);
+            
             this.publicServer.addContentDecoders(new GzipContentDecoder());
             this.publicServer.addContentEncoders(new GzipContentEncoder());
             this.publicServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
@@ -209,7 +226,7 @@ public class ServerApplication extends CoreApplication
 	{
         this.startTime=System.currentTimeMillis();
         this.operatorServer.register(new ServerOperatorPages(this));
-        this.operatorServer.register(new OperatorPages(this.operatorVariableManager, this.getOperationContentWriter().getMenu()));
+        this.operatorServer.register(new OperatorPages(this.operatorVariableManager, this.getOperatorContentWriter().getMenu()));
         onStart();
         startServer(this.operatorServer);
         startServer(this.privateServer);
@@ -271,12 +288,16 @@ public class ServerApplication extends CoreApplication
 	    return this.vault;
 	}
 	
-	public OperatorResultWriter getOperationContentWriter()
-	{
-	    return this.operatorResultWriter;
-	}
+    public OperatorResultWriter getOperatorContentWriter()
+    {
+        return this.operatorResultWriter;
+    }
 	public String getName()
 	{
 	    return this.name;
+	}
+	public boolean isDebug()
+	{
+	    return this.debug;
 	}
 }

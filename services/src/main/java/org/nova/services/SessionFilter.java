@@ -25,6 +25,8 @@ public class SessionFilter extends Filter
     final private String cookieTokenKey;
     final private DefaultSessionRejectResponder defaultResponder;
     final private HashMap<String,SessionRejectResponder> sessionRejectResponders;
+    private Session debugSession;
+    
     public SessionFilter(SessionManager<?> sessionManager,String directoryServiceEndPoint,String headerTokenKey,String queryTokenKey,String cookieTokenKey,SessionRejectResponder...sessionRejectResponders)
     {
         this.sessionManager=sessionManager;
@@ -38,6 +40,10 @@ public class SessionFilter extends Filter
         {
             this.sessionRejectResponders.put(responder.getAssociatedMediaType(), responder);
         }
+    }
+    public void setDebugSession(Session session)
+    {
+        this.debugSession=session;
     }
     
     private SessionRejectResponder getBestSessionRejectResponder(Context context)
@@ -85,8 +91,12 @@ public class SessionFilter extends Filter
         Session session=this.sessionManager.getSessionByToken(token);
         if (session==null)
         {
-            getBestSessionRejectResponder(context).respondToNoSession(this, context);
-            return null;
+            if (this.debugSession==null)
+            {
+                getBestSessionRejectResponder(context).respondToNoSession(this, context);
+                return null;
+            }
+            session=this.debugSession;
         }
         Lock<String> lock=sessionManager.waitForLock(session.getToken());
         if (lock==null)

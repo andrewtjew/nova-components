@@ -109,6 +109,54 @@ public class JSONClient
             this.logger.log(trace,Level.NORMAL,"JSONClient:get",Logger.toArray(items));
         }
 	}
+    public <TYPE> JSONResponse<TYPE> get(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Throwable
+    {
+        ArrayList<Item> items=new ArrayList<>();
+        Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery);
+        try 
+        {
+            HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
+            items.add(new Item("endPoint",this.endPoint));
+            items.add(new Item("pathAndQuery",pathAndQuery));
+
+            if (this.headers!=null)
+            {
+                for (Header header:this.headers)
+                {
+                    get.setHeader(header.getName(),header.getValue());
+                }
+            }
+            get.setHeader("Accept",this.contentType);
+            for (org.apache.http.Header header:get.getAllHeaders())
+            {
+                items.add(new Item("requestHeader:"+header.getName(),header.getValue()));
+            }
+
+            trace.beginWait();
+            HttpResponse response=this.client.execute(get);
+            trace.endWait();
+            try
+            {
+                processResponse(response, items);
+                int statusCode=response.getStatusLine().getStatusCode();
+                return new JSONResponse<TYPE>(statusCode, null);
+            }
+            finally
+            {
+                response.getEntity().getContent().close();
+            }
+        }       
+        catch (Throwable t)
+        {
+            trace.close(t);
+            throw t;
+        }
+        finally
+        {
+            trace.close();
+            this.logger.log(trace,Level.NORMAL,"JSONClient:get",Logger.toArray(items));
+        }
+    }
 
 	public int delete(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Throwable
 	{
@@ -328,7 +376,69 @@ public class JSONClient
             this.logger.log(trace,Level.NORMAL,"JSONClient:post",Logger.toArray(items));
         }
 	}
-	
+    public <TYPE> JSONResponse<TYPE> post(Trace parent,String traceCategoryOverride,String pathAndQuery,Class<TYPE> responseContentType) throws Throwable
+    {
+        return post(parent,traceCategoryOverride,pathAndQuery,null,responseContentType);
+    }
+    public <TYPE> JSONResponse<TYPE> post(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Throwable
+    {
+        return post(parent,traceCategoryOverride,pathAndQuery,null);
+    }	
+    public <TYPE> JSONResponse<TYPE> post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Throwable
+    {
+        ArrayList<Item> items=new ArrayList<>();
+        Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery);
+        try 
+        {
+            HttpPost post=new HttpPost(this.endPoint+pathAndQuery);
+            items.add(new Item("endPoint",this.endPoint));
+            items.add(new Item("pathAndQuery",pathAndQuery));
+            if (content!=null)
+            {
+                String jsonContent=ObjectMapper.write(content);
+                items.add(new Item("request",jsonContent));
+                StringEntity entity=new StringEntity(jsonContent);
+                post.setEntity(entity);
+            }
+            if (this.headers!=null)
+            {
+                for (Header header:this.headers)
+                {
+                    post.setHeader(header.getName(),header.getValue());
+                }
+            }
+            post.setHeader("Accept",this.contentType);
+            post.setHeader("Content-Type",this.contentType);
+            for (org.apache.http.Header header:post.getAllHeaders())
+            {
+                items.add(new Item("requestHeader:"+header.getName(),header.getValue()));
+            }
+            trace.beginWait();
+            HttpResponse response=this.client.execute(post);
+            trace.endWait();
+            try
+            {
+                processResponse(response,items);
+                int statusCode=response.getStatusLine().getStatusCode();
+                return new JSONResponse<TYPE>(statusCode,null);
+            }
+            finally
+            {
+                response.getEntity().getContent().close();
+            }
+        }
+        catch (Throwable t)
+        {
+            trace.close(t);
+            throw t;
+        }
+        finally
+        {
+            trace.close();
+            this.logger.log(trace,Level.NORMAL,"JSONClient:post",Logger.toArray(items));
+        }
+    }
+    
 	private String processResponse(HttpResponse response,ArrayList<Item> items) throws Throwable
 	{
         for (org.apache.http.Header header:response.getAllHeaders())

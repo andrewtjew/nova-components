@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import javax.xml.stream.events.Characters;
 
 import org.nova.html.elements.Element;
+import org.nova.html.elements.InnerElement;
 
-public class XYChart extends Element
+public class XYChart extends InnerElement<XYChart>
 {
 	final private String id;
 //	private int width=100;

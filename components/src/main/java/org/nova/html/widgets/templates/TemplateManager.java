@@ -48,6 +48,7 @@ public class TemplateManager
 				this.templates.put(htmlFile,sections);
 			}
 			return new Template(sections);
+
 		}
 	}
 	

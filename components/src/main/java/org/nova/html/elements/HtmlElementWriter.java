@@ -23,9 +23,9 @@ public class HtmlElementWriter extends ContentWriter<Element>
 	@Override
 	public void write(Context context, OutputStream outputStream, Element element) throws Throwable
 	{
+        context.getHttpServletResponse().setContentType("text/html;charset=utf-8");
 		if (element!=null)
 		{
-            context.getHttpServletResponse().setContentType("text/html;charset=utf-8");
             element.write(outputStream);
 		}
 	}
