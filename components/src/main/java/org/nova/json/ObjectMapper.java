@@ -366,11 +366,13 @@ public class ObjectMapper
 			{
 				for (;;)
 				{
+				    /*
 					next = lexer.getNextCharacter();
 					if (next != '"')
 					{
 						throw new Exception("String expected at " + lexer.getPosition());
 					}
+					*/
 					list.add(lexer.getString());
 					next = lexer.isCommaOrCloseArray();
 					if (next == ']')

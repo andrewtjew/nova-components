@@ -14,12 +14,13 @@ public class MultiException extends Exception
 		for (int j=0;j<throwables.length;j++)
 		{
 			Throwable t=throwables[j];			
+            list.add(new StackTraceElement(t.getClass().getName(),t.getMessage(),null,1));
 			StackTraceElement[] elements=t.getStackTrace();
 			for (int i=0;i<elements.length;i++)
 			{
 				list.add(elements[i]);
 			}
-			list.add(new StackTraceElement("index",Integer.toString(j),CLASSNAME+".java",1));
+            list.add(new StackTraceElement("index",Integer.toString(j),CLASSNAME+".java",1));
 		}
 		Exception e=new Exception();
 		e.setStackTrace(list.toArray(new StackTraceElement[list.size()]));

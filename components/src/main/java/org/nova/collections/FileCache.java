@@ -8,17 +8,17 @@ import org.nova.tracing.Trace;
 
 public class FileCache extends ContentCache<String,byte[]>
 {
-	final private String baseDirectory;
+	final private String cacheDirectory;
 
-	public FileCache(String baseDirectory,int capacity,long maxAge,long maxSize) throws Exception
+	public FileCache(FileCacheConfiguration configuration) throws Exception
 	{
-		super(capacity,maxAge,maxSize);
-		this.baseDirectory=Utils.toNativePath(baseDirectory);
+		super(configuration.capacity,configuration.maxAge,configuration.maxSize);
+		this.cacheDirectory=Utils.toNativePath(configuration.cacheDirectory);
 	}
 	
 	public void preload(Trace trace) throws Throwable
 	{
-		File directory=new File(baseDirectory);
+		File directory=new File(cacheDirectory);
 		for (String file:directory.list())
 		{
 			get(trace,file);
@@ -28,7 +28,7 @@ public class FileCache extends ContentCache<String,byte[]>
 	@Override
 	protected ValueSize<byte[]> load(Trace trace, String key) throws Throwable
 	{
-		byte[] bytes=Utils.readFile(this.baseDirectory+key);
+		byte[] bytes=Utils.readFile(this.cacheDirectory+key);
 		return new ValueSize<byte[]>(bytes,bytes.length);
 	}
 	

@@ -11,17 +11,15 @@ import org.nova.tracing.Trace;
 
 public class DataReader<TYPE> implements AutoCloseable
 {
-	private Accessor accessor;
-	final Trace trace;
+	private AccessorTraceContext traceContext;
 	final ResultSet resultSet;
 	private final Class<TYPE> type;
 	
-	DataReader(Accessor accessor,Trace trace,ResultSet resultSet,Class<TYPE> type)
+	DataReader(AccessorTraceContext traceContext,ResultSet resultSet,Class<TYPE> type)
 	{
 		this.type=type;
-		this.trace=trace;
 		this.resultSet=resultSet;
-		this.accessor=accessor;
+		this.traceContext=traceContext;
 	}
 
 	public ResultSet getResultSet()
@@ -36,7 +34,7 @@ public class DataReader<TYPE> implements AutoCloseable
 
 	public int read(TYPE[] array,int offset,int amount) throws Exception
 	{
-		this.trace.endWait();
+		this.traceContext.endWait();
 		try
 		{
 			ResultSetMetaData metaData=resultSet.getMetaData();
@@ -78,7 +76,7 @@ public class DataReader<TYPE> implements AutoCloseable
 		}
 		finally
 		{
-			this.trace.beginWait();
+			this.traceContext.beginWait();
 		}
 	}
 	
@@ -87,12 +85,12 @@ public class DataReader<TYPE> implements AutoCloseable
 	{
 		synchronized(this)
 		{
-			if (this.accessor!=null)
+			if (this.traceContext!=null)
 			{
 				this.resultSet.close();
 				this.resultSet.getStatement().close();
-				this.trace.close();
-				this.accessor=null;
+				this.traceContext.close();
+				this.traceContext=null;
 			}
 		}
 	}

@@ -2,42 +2,48 @@ package org.nova.sqldb;
 
 import java.util.Map;
 
-public class CallResult<ROW_TYPE,RETURN_TYPE>
+public class CallResult<RETURN_TYPE>
 {
-	final private ROW_TYPE[] results;
+	final private RowSet[] rowSets;
 	final private Map<Integer,Object> outputValues;
 	final private RETURN_TYPE returnValue;
-	final private int updateCount;
+	final private int[] updateCounts;
 	
-	CallResult(RETURN_TYPE returnValue,Map<Integer,Object> outValues,ROW_TYPE[] results,int updateCount)
+    CallResult(RETURN_TYPE returnValue,Map<Integer,Object> outputValues,RowSet[] rowSets,int[] updateCounts)
 	{
-		this.outputValues=outValues;
-		this.results=results;
 		this.returnValue=returnValue;
-		this.updateCount=updateCount;
+		this.outputValues=outputValues;
+		this.rowSets=rowSets;
+		this.updateCounts=updateCounts;
 	}
 	
-	
-	public int getUpdateCount()
+    public int[] getUpdateCounts()
     {
-        return updateCount;
+        return updateCounts;
     }
 
+    public RowSet[] getRowSets()
+    {
+        return rowSets;
+    }
 
-    public ROW_TYPE[] get()
+    public RowSet getRowSet(int index)
+    {
+        return this.rowSets[index];
+    }
+
+	public <TYPE> TYPE[] getArray(int index,Class<TYPE> type) throws Throwable
 	{
-		return results;
+	    return Accessor.convert(this.rowSets[index], type);
 	}
 	
 	public RETURN_TYPE getReturnValue()
 	{
 		return this.returnValue;
 	}
-	
 	@SuppressWarnings("unchecked")
 	public <TYPE> TYPE getOutValue(int index)
 	{
 		return (TYPE)this.outputValues.get(index);
 	}
-	
 }

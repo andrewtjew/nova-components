@@ -89,46 +89,28 @@ abstract public class ContentCache<KEY,VALUE>
 			if (node!=null)
 			{
 				long now=System.currentTimeMillis();
-				if (now-node.accessed>this.maxAge)
+				if (now-node.accessed<this.maxAge)
 				{
-					if (node.previous!=null)
-					{
-						node.previous.next=null;
-					}
-					this.last=node.previous;
-					if (this.first==node)
-					{
-						this.first=null;
-					}
-					int totalAged=0;
-					do
-					{
-						this.nodeMap.remove(node.key);
-						this.totalContentSize-=node.size;
-						totalAged++;
-						node=node.next;
-					}
-					while (node.next==null);
-					this.ageMisses.add(totalAged);
+    				if (node.previous!=null)
+    				{
+    					node.previous.next=node.next;
+    					node.previous=null;
+    					if (node.next!=null)
+    					{
+    						node.next.previous=node.previous;
+    					}
+    					else
+    					{
+    						this.last=node.previous;
+    					}
+    					node.next=this.first;
+    					this.first=node;
+    				}
+    				node.accessed=now;
+    				this.hits.increment();
+    				return node.value;
 				}
-				if (node.previous!=null)
-				{
-					node.previous.next=node.next;
-					node.previous=null;
-					if (node.next!=null)
-					{
-						node.next.previous=node.previous;
-					}
-					else
-					{
-						this.last=node.previous;
-					}
-					node.next=this.first;
-					this.first=node;
-				}
-				node.accessed=now;
-				this.hits.increment();
-				return node.value;
+				remove(key);
 			}
 		}
 		this.misses.increment();

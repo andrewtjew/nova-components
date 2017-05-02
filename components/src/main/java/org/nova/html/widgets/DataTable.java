@@ -78,17 +78,25 @@ public class DataTable extends Table
     final private String id;
     final private Objects objects;
     
+    public DataTable(String id)
+    {
+        this(id,"/resources/html");
+    }
     
-
-    public DataTable(String id,String class_)
+    private DataTable(String id,String sourcePath)
+    {
+        this(id,"display",sourcePath,"/DataTables/datatables.min.css");
+    }
+    public DataTable(String id,String class_,String sourcePath,String cssFile)
     {
         id(id);
         class_(class_);
         this.id=id;
         this.objects=new Objects(id);
-        this.addInner(new script().src("/resources/html/DataTables/datatables.min.js"));
+//        this.addInner(new script().src("/resources/html/DataTables/datatables.min.js"));
+        this.addInner(new script().src(sourcePath+"/DataTables/datatables.min.js"));
         this.addInner(new script().addInner(new ObjectContent(this.objects)));
-        this.addInner(new link().rel(link_rel.stylesheet).type("text/css").href("/resources/html/DataTables/datatables.min.css"));
+        this.addInner(new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
     }
 
     public DataTable lengthMenu(int...lengths)
@@ -119,8 +127,4 @@ public class DataTable extends Table
         return this;
     }
     
-    public DataTable(String id)
-    {
-        this(id,null);
-    }
 }

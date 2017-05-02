@@ -104,15 +104,15 @@ public class SessionFilter extends Filter
             getBestSessionRejectResponder(context).respondToNoLock(this, session, context);
             return null;
         }
-        if (session.isAccessDeniedForCurrentRequest(trace,context))
-        {
-            getBestSessionRejectResponder(context).respondToAccessDenied(this, session, context);
-            return null;
-        }
         session.update(lock);
-        context.setState(session);
         try
         {
+            if (session.isAccessDeniedForCurrentRequest(trace,context))
+            {
+                getBestSessionRejectResponder(context).respondToAccessDenied(this, session, context);
+                return null;
+            }
+            context.setState(session);
             return filterChain.next(trace, context);
         }
         finally

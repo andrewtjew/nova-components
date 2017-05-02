@@ -6,5 +6,4 @@ public class HttpServerConfiguration
     public int lastExceptionRequestLogEntryBufferSize=1000;
     public int lastNotFoundBufferSize=1000;
     public String categoryPrefix="HttpServer";
-    
 }

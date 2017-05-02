@@ -253,7 +253,13 @@ public class CSharpClassWriter
                 writeIndent(sb, indentLevel).append("[DataContract]\r\n");
             }
 
-            writeIndent(sb, indentLevel).append("public class " + type.getSimpleName() + "\r\n");
+            writeIndent(sb, indentLevel).append("public class " + type.getSimpleName());
+            Class<?> superClass=type.getSuperclass();
+            if ((superClass!=null)&&(superClass!=Object.class))
+            {
+                sb.append(":"+superClass.getSimpleName());
+            }
+            sb.append("\r\n");
             writeIndent(sb, indentLevel).append("{\r\n");
             for (Field field : type.getDeclaredFields())
             {
@@ -389,6 +395,11 @@ public class CSharpClassWriter
                 fieldType = fieldType.getComponentType();
             }
             discoverDependents(roots, dependents, fieldType);
+        }
+        Class<?> superClass=type.getSuperclass();
+        if ((superClass!=null)&&(superClass!=Object.class))
+        {
+            discoverDependents(roots, dependents, superClass);
         }
     }
 

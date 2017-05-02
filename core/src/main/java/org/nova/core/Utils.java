@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 public class Utils
 {
-    static public List<Integer> toList(int[] values)
+    static public List<Integer> intArrayToList(int[] values)
     {
         ArrayList<Integer> list=new ArrayList<>();
         for (int value:values)
@@ -32,7 +32,7 @@ public class Utils
         }
         return list;
     }
-    static public List<Long> toList(long[] values)
+    static public List<Long> longArrayToList(long[] values)
     {
         ArrayList<Long> list=new ArrayList<>();
         for (long value:values)
@@ -41,7 +41,7 @@ public class Utils
         }
         return list;
     }
-    static public long[] longArray(List<Long> list)
+    static public long[] longArrayFromList(List<Long> list)
     {
         long[] array=new long[list.size()];
         for (int i=0;i<array.length;i++)
@@ -50,7 +50,7 @@ public class Utils
         }
         return array;
     }
-    static public int[] intArray(List<Integer> list)
+    static public int[] intArrayFromList(List<Integer> list)
     {
         int[] array=new int[list.size()];
         for (int i=0;i<array.length;i++)
@@ -302,14 +302,6 @@ public class Utils
 		}
 	}
 	@SuppressWarnings("unchecked")
-	public static <T> T[] toArray(List<?> list,T[] array)
-	{
-		for (int index=0;index<array.length;index++)
-		{
-			array[index]=(T)list.get(index);
-		}
-		return array;
-	}
 	public static int simpleHash(byte[] array)
 	{
 		int hash=0x811c9dc5;

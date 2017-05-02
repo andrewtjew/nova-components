@@ -10,6 +10,7 @@ import java.nio.file.Path;
 
 import org.eclipse.jetty.server.Server;
 import org.nova.collections.FileCache;
+import org.nova.collections.FileCacheConfiguration;
 import org.nova.configuration.Configuration;
 import org.nova.core.Utils;
 import org.nova.html.TypeMappings;
@@ -39,6 +40,8 @@ import org.nova.security.UnsecureFileVault;
 import org.nova.security.UnsecureVault;
 import org.nova.security.Vault;
 
+import com.nova.disrupt.DisruptorManager;
+
 public class ServerApplication extends CoreApplication
 {
 	final private HttpServer publicServer;
@@ -50,14 +53,13 @@ public class ServerApplication extends CoreApplication
 	final private TypeMappings typeMappings;
 	final private TemplateManager operationTemplateManager;
 	final private OperatorResultWriter operatorResultWriter;
+	final private DisruptorManager disruptorManager;
 	final private Vault vault;
 	private long startTime;
 	final private String name;
 	
 	@OperatorVariable
 	boolean debug;
-	
-	
 	
 	public ServerApplication(String name,Configuration configuration) throws Throwable 
 	{
@@ -71,6 +73,7 @@ public class ServerApplication extends CoreApplication
         System.out.println("base directory: "+this.baseDirectory);
 
         this.debug=configuration.getBooleanValue("System.debug",false);
+        this.disruptorManager=new DisruptorManager();
 
         //Setting up the vault
         String secureVaultFile=configuration.getValue("System.vault.secureVaultFile",null);
@@ -155,17 +158,20 @@ public class ServerApplication extends CoreApplication
         }
         
         //Public http server
-        int publicPort=configuration.getIntegerValue("HttpServer.public.port",operatorPort+2);
-        int testPort=configuration.getIntegerValue("HttpServer.test.port",operatorPort+3);
+        HttpServerConfiguration publicServerConfiguration=getConfiguration().getConfiguration("HttpServer.public", HttpServerConfiguration.class);
+        int publicPort=configuration.getIntegerValue("HttpServer.public.port",-1);
+        if (publicPort<0)
+        {
+            publicPort=operatorPort+2;
+        }
         if (publicPort>0)
         {
-            HttpServerConfiguration httpServerConfiguration=getConfiguration().getConfiguration("HttpServer.public", HttpServerConfiguration.class);
-            threads=configuration.getIntegerValue("HttpServer.public.threads",1000);
-
-            Server[] servers=new Server[isDebug()?2:1];
-            if (isDebug())
+            threads=configuration.getIntegerValue("HttpServer.public.threads",100);
+            boolean useTestPort=isDebug();
+            Server[] servers=new Server[useTestPort?2:1];
+            if (useTestPort)
             {
-                servers[1]=JettyServerFactory.createServer(threads, testPort);
+                servers[1]=JettyServerFactory.createServer(threads, publicPort+1);
             }
             boolean https=configuration.getBooleanValue("HttpServer.public.https",false);
             if (https)
@@ -182,8 +188,7 @@ public class ServerApplication extends CoreApplication
             {
                 servers[0]=JettyServerFactory.createServer(threads, publicPort);
             }
-            
-            this.publicServer=new HttpServer(this.getTraceManager(), httpServerConfiguration, servers);
+            this.publicServer=new HttpServer(this.getTraceManager(), publicServerConfiguration, servers);
             
             this.publicServer.addContentDecoders(new GzipContentDecoder());
             this.publicServer.addContentEncoders(new GzipContentEncoder());
@@ -195,11 +200,8 @@ public class ServerApplication extends CoreApplication
             this.publicServer=null;
         }
         
-		String fileCacheDirectory=configuration.getValue("FileCache.baseDirectory","../resources/");
-		long fileCacheMaxAge=configuration.getLongValue("FileCache.maxAge",Long.MAX_VALUE);
-		long fileCacheMaxSize=configuration.getLongValue("FileCache.maxSize",Long.MAX_VALUE);
-		int fileCacheCapacity=configuration.getIntegerValue("FileCache.capacity",10000);
-		this.fileCache=new FileCache(fileCacheDirectory,fileCacheCapacity,fileCacheMaxAge,fileCacheMaxSize);
+        FileCacheConfiguration fileCacheConfiguration=configuration.getConfiguration("FileCache", FileCacheConfiguration.class);
+		this.fileCache=new FileCache(fileCacheConfiguration);
 		
         this.getOperatorVariableManager().register("HttpServer.operator", this.operatorServer);
         this.getOperatorVariableManager().register("HttpServer.public", this.publicServer);
@@ -235,6 +237,11 @@ public class ServerApplication extends CoreApplication
 		super.runForever();
 	}
 
+	public DisruptorManager getDisruptorManager()
+	{
+	    return this.disruptorManager;
+	}
+	
     public void onStart() throws Throwable
     {
         //for sub classes to overrride

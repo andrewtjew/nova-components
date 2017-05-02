@@ -124,14 +124,29 @@ public class Parser
         c=lexer.skipWhiteSpaceAndBegin();
         if ((c=='"')||(c=='\"'))
         {
-            lexeme=this.lexer.produceSimpleSimpleString(c);
+            lexeme=this.lexer.produceSimpleString(c);
             if ("key".equals(name))
             {
                 this.sections.add(new TextSection(this.sb.toString()));
                 this.sb=new StringBuilder();
                 this.sections.add(new InsertSection(lexeme.getValue()));
+
+                c=this.lexer.skipWhiteSpaceAndBegin();
+                if (c=='>')
+                {
+                    this.lexer.end(0);
+                    return;
+                }
+                else if (c=='/')
+                {
+                    c=this.lexer.skipWhiteSpaceAndBegin();
+                    if (c=='>')
+                    {
+                        this.lexer.end(0);
+                        return;
+                    }
+                }
             }
-            return;
         }
         parseInvalidText();
     }
@@ -143,6 +158,7 @@ public class Parser
         if ("<insert".equals(lexeme.getValue()))
         {
             parseInsert();
+            return;
         }
         this.sb.append(lexeme.getSnippet().getTarget());
         for (;;)
@@ -188,7 +204,7 @@ public class Parser
         c=lexer.skipWhiteSpaceAndBegin();
         if ((c=='"')||(c=='\"'))
         {
-            lexeme=this.lexer.produceSimpleSimpleString(c);
+            lexeme=this.lexer.produceSimpleString(c);
             this.sb.append(lexeme.getSnippet().getTarget());
             return;
         }

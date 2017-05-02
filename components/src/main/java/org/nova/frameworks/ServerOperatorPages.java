@@ -874,7 +874,7 @@ public class ServerOperatorPages
 
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
         writer.h2("Request Handlers");
-        writer.p("Ports: "+Utils.combine(Utils.toList(httpServer.getPorts()),",")+", Count:" + requestHandlers.length);
+        writer.p("Ports: "+Utils.combine(Utils.intArrayToList(httpServer.getPorts()),",")+", Count:" + requestHandlers.length);
         if (requestHandlers.length > 0)
         {
             writer.begin_sortableTable(1);
@@ -1000,7 +1000,7 @@ public class ServerOperatorPages
         HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=this.getHttpServer(server);
         RequestLogEntry[] entries = httpServer.getLastRequestLogEntries();
-        writer.p("Ports: "+Utils.combine(Utils.toList(httpServer.getPorts()),",")+", Count:" + entries.length);
+        writer.p("Ports: "+Utils.combine(Utils.intArrayToList(httpServer.getPorts()),",")+", Count:" + entries.length);
         writeRequestLogEntries(writer, entries);
         return OperatorResult.respond(writer, "Last Requests: "+server);
     }
@@ -1012,7 +1012,7 @@ public class ServerOperatorPages
         HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=this.getHttpServer(server);
         RequestLogEntry[] entries = httpServer.getLastExceptionRequestLogEntries();
-        writer.p("Ports: "+Utils.combine(Utils.toList(httpServer.getPorts()),",")+", Count:" + entries.length);
+        writer.p("Ports: "+Utils.combine(Utils.intArrayToList(httpServer.getPorts()),",")+", Count:" + entries.length);
         writeRequestLogEntries(writer, entries);
         return OperatorResult.respond(writer, "Last Exception Requests: "+server);
     }
@@ -1024,7 +1024,7 @@ public class ServerOperatorPages
         HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=this.getHttpServer(server);
         RequestHandlerNotFoundLogEntry[] entries = httpServer.getRequestHandlerNotFoundLogEntries();
-        writer.p("Ports: "+Utils.combine(Utils.toList(httpServer.getPorts()),",")+", Count:" + entries.length);
+        writer.p("Ports: "+Utils.combine(Utils.intArrayToList(httpServer.getPorts()),",")+", Count:" + entries.length);
         for (RequestHandlerNotFoundLogEntry entry : entries)
         {
             Trace trace = entry.getTrace();
@@ -1048,7 +1048,7 @@ public class ServerOperatorPages
         HttpServer httpServer=getHttpServer(server);
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
         HtmlWriter writer = new HtmlWriter();
-        writer.p("Ports: "+Utils.combine(Utils.toList(httpServer.getPorts()),",")+", Count:" + requestHandlers.length);
+        writer.p("Ports: "+Utils.combine(Utils.intArrayToList(httpServer.getPorts()),",")+", Count:" + requestHandlers.length);
         if (requestHandlers.length > 0)
         {
             writer.begin_sortableTable(1);
@@ -1308,7 +1308,7 @@ public class ServerOperatorPages
         HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=getHttpServer(server);
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
-        writer.p("Ports: "+Utils.combine(Utils.toList(httpServer.getPorts()),",")+", Count:" + requestHandlers.length);
+        writer.p("Ports: "+Utils.combine(Utils.intArrayToList(httpServer.getPorts()),",")+", Count:" + requestHandlers.length);
         if (requestHandlers.length > 0)
         {
             writer.begin_sortableTable(1);
@@ -1834,7 +1834,7 @@ public class ServerOperatorPages
         HtmlWriter writer = new HtmlWriter();
         writer.h2("Method: "+key);
         HttpServer httpServer=getHttpServer(server);
-        writer.p("Ports: "+Utils.combine(Utils.toList(httpServer.getPorts()),","));
+        writer.p("Ports: "+Utils.combine(Utils.intArrayToList(httpServer.getPorts()),","));
         HttpServletRequest request=context.getHttpServletRequest();
         RequestHandler requestHandler = httpServer.getRequestHandler(key);
 

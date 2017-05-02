@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD,ElementType.PARAMETER})
 public @interface Min
 {
-    long value();
+    String defaultValue();
+    String key() default "";
 }

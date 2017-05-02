@@ -9,4 +9,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD,ElementType.PARAMETER})
 public @interface Required
 {
+    boolean defaultValue() default true;
+    String key() default "";
 }

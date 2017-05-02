@@ -18,14 +18,16 @@ import java.util.Map;
 import org.nova.collections.Pool;
 import org.nova.collections.Resource;
 import org.nova.core.MultiException;
+import org.nova.core.Utils;
+import org.nova.logging.Item;
 import org.nova.sqldb.Param.Direction;
 import org.nova.tracing.Trace;
 
 public class Accessor extends Resource
 {
 	final private long connectionIdleTimeout;
-	final private Connector connector;
-	private Connection connection;
+	final Connector connector;
+	Connection connection;
 	private long lastExecute;
 	private Transaction transaction;
 
@@ -46,18 +48,21 @@ public class Accessor extends Resource
 			}
 			this.transaction = new Transaction(this, new Trace(this.connector.traceManager, parent, traceCategory));
 			this.connection.setAutoCommit(false);
+            this.connector.beginTransactionRate.increment();
 			return this.transaction;
 		}
 	}
 
 	private Throwable closeConnection(Throwable cause)
 	{
+        this.connection = null;
 		try
 		{
 			this.connection.close();
 		}
 		catch (Throwable t)
 		{
+            this.connector.logger.log(t);
 			return new MultiException(cause, t);
 		}
 		finally
@@ -76,11 +81,8 @@ public class Accessor extends Resource
 				try
 				{
 					this.connection.commit();
+                    this.connector.commitTransactionRate.increment();
 					this.connection.setAutoCommit(true);
-				}
-				catch (Throwable t)
-				{
-					throw closeConnection(t);
 				}
 				finally
 				{
@@ -97,11 +99,8 @@ public class Accessor extends Resource
 			try
 			{
 				this.connection.rollback();
+                this.connector.rollbackTransactionRate.increment();
 				this.connection.setAutoCommit(true);
-			}
-			catch (Throwable t)
-			{
-				throw closeConnection(t);
 			}
 			finally
 			{
@@ -126,7 +125,7 @@ public class Accessor extends Resource
 			}
 			catch (SQLException e)
 			{
-				// log too
+	            this.connector.logger.log(e,this.connector.getName()+":connection.close failed");
 				this.connector.closeConnectionExceptions.increment();
 			}
 			this.connection = null;
@@ -138,12 +137,21 @@ public class Accessor extends Resource
 		}
 		catch (Throwable e)
 		{
+            this.connector.logger.log(e,this.connector.getName()+":connector.createConnection failed");
 			this.connector.createConnectionExceptions.increment();
 			throw e;
 		}
 	}
+    private void setParameters(AccessorTraceContext context,PreparedStatement statement,Object[] parameters) throws SQLException
+    {
+        for (int i = 0; i < parameters.length; i++)
+        {
+            statement.setObject(i + 1, parameters[i]);
+            context.addLogItem(new Item("param"+i,parameters[i]));
+        }
+    }
 
-	@Override
+    @Override
 	protected void park() throws Throwable
 	{
 	}
@@ -157,23 +165,16 @@ public class Accessor extends Resource
     }
 	public int executeUpdate(Trace parent, String traceCategoryOverride, Object[] parameters,String sql) throws Throwable
 	{
-		if (traceCategoryOverride == null)
-		{
-			traceCategoryOverride = sql;
-		}
-		try (Trace trace = new Trace(this.connector.traceManager, parent, traceCategoryOverride))
+		try (AccessorTraceContext context = new AccessorTraceContext(this, parent, traceCategoryOverride,sql))
 		{
 			try
 			{
 				try (PreparedStatement statement = this.connection.prepareStatement(sql))
 				{
-					for (int i = 0; i < parameters.length; i++)
-					{
-						statement.setObject(i + 1, parameters[i]);
-					}
+				    setParameters(context,statement,parameters);
 					try
 					{
-						return statement.executeUpdate();
+                        return context.logRowsUpdated(statement.executeUpdate());
 					}
 					finally
 					{
@@ -181,12 +182,10 @@ public class Accessor extends Resource
 					}
 				}
 			}
-			catch (SQLException ex)
+			catch (Throwable ex)
 			{
-				trace.close(ex);
-				throw closeConnection(ex);
+			    throw context.handleThrowable(ex);
 			}
-
 		}
 	}
     public GeneratedKeys executeUpdateAndReturnGeneratedKeys(Trace parent, String traceCategoryOverride, String sql, Object... parameters) throws Throwable
@@ -199,32 +198,25 @@ public class Accessor extends Resource
     }
     public GeneratedKeys executeUpdateAndReturnGeneratedKeys(Trace parent, String traceCategoryOverride, Object[] parameters,String sql) throws Throwable
     {
-        if (traceCategoryOverride == null)
-        {
-            traceCategoryOverride = sql;
-        }
-        try (Trace trace = new Trace(this.connector.traceManager, parent, traceCategoryOverride))
+        try (AccessorTraceContext context= new AccessorTraceContext(this, parent, traceCategoryOverride,sql))
         {
             try
             {
                 try (PreparedStatement statement = this.connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS))
                 {
-                    for (int i = 0; i < parameters.length; i++)
-                    {
-                        statement.setObject(i + 1, parameters[i]);
-                    }
+                    setParameters(context,statement,parameters);
                     try
                     {
-                        int rowsAffected=statement.executeUpdate();
-                        if (rowsAffected<=0)
+                        int updated=context.logRowsUpdated(statement.executeUpdate());
+                        if (updated<=0)
                         {
                             return null;
                         }
                         ResultSet resultSet=statement.getGeneratedKeys();
-                        ArrayList<BigDecimal> list=new ArrayList<>();
+                        ArrayList<Object> list=new ArrayList<>();
                         while (resultSet.next())
                         {
-                            list.add((BigDecimal)resultSet.getObject(1));
+                            list.add(resultSet.getObject(1));
                         }
                         return new GeneratedKeys(list);
                     }
@@ -234,19 +226,13 @@ public class Accessor extends Resource
                     }
                 }
             }
-            catch (SQLException ex)
+            catch (Throwable ex)
             {
-                trace.close(ex);
-                throw closeConnection(ex);
+                throw context.handleThrowable(ex);
             }
-
         }
     }
-    public int[] executeBatchUpdate(Trace parent, String traceCategoryOverride, String sql,Object[]... batchParameters) throws Throwable
-    {
-        return executeBatchUpdate(parent, traceCategoryOverride, batchParameters, sql);
-    }    
-    public int[] executeBatchUpdate(Trace parent, String traceCategoryOverride,List<List<?>> batchParameters,String sql) throws Throwable
+    public int[] executeBatchUpdate(Trace parent, String traceCategoryOverride,List<List<Object>> batchParameters,String sql) throws Throwable
     {
         Object[][] arrays=new Object[batchParameters.size()][];
         for (int i=0;i<batchParameters.size();i++)
@@ -258,28 +244,34 @@ public class Accessor extends Resource
     }    
 	public int[] executeBatchUpdate(Trace parent, String traceCategoryOverride,Object[][] batchParameters,String sql) throws Throwable
     {
-        if (traceCategoryOverride == null)
-        {
-            traceCategoryOverride = sql;
-        }
-        try (Trace trace = new Trace(this.connector.traceManager, parent, traceCategoryOverride))
+        try (AccessorTraceContext context = new AccessorTraceContext(this, parent, traceCategoryOverride,sql))
         {
             try
             {
                 try (PreparedStatement statement = this.connection.prepareStatement(sql))
                 {
+                    int total=0;
                     for (int j = 0; j < batchParameters.length; j++)
                     {
                         Object[] parameters=batchParameters[j];
-                        for (int i = 0; i < parameters.length; i++)
+                        total+=parameters.length;
+                        if (j==0)
                         {
-                            statement.setObject(i + 1, parameters[i]);
+                            setParameters(context, statement, parameters);
+                        }
+                        else
+                        {
+                            for (int i = 0; i < parameters.length; i++)
+                            {
+                                statement.setObject(i + 1, parameters[i]);
+                            }
                         }
                         statement.addBatch();
                     }
+                    context.addLogItem(new Item("totalBatchParameters",total));
                     try
                     {
-                        return statement.executeBatch();
+                        return context.logRowsUpdated(statement.executeBatch());
                     }
                     finally
                     {
@@ -287,19 +279,55 @@ public class Accessor extends Resource
                     }
                 }
             }
-            catch (SQLException ex)
+            catch (Throwable ex)
             {
-                trace.close(ex);
-                throw closeConnection(ex);
+                throw context.handleThrowable(ex);
             }
-
         }
     }
-
 	
+    static <TYPE> TYPE[] convert(RowSet rowSet,Class<TYPE> type) throws Throwable
+    {
+        ArrayList<TYPE> list = new ArrayList<>();
+        int columns = rowSet.getColumns();
+        
+        Map<String,Field> map=FieldMaps.get(type);
+        Field[] fields=new Field[columns];
+        for (int columnIndex = 0; columnIndex < columns; columnIndex++)
+        {
+            String name = rowSet.getColumnName(columnIndex);
+            Field field=map.get(name);
+            fields[columnIndex]=field;
+        }       
+
+        for (Row row:rowSet.getRows())
+        {
+            TYPE item = type.newInstance();
+            list.add(item);
+            for (int columnIndex = 0; columnIndex < columns; columnIndex++)
+            {
+                Field field = fields[columnIndex];
+                if (field != null)
+                {
+                    field.set(item, row.get(columnIndex));
+                }
+            }
+        }
+        return list.toArray((TYPE[]) Array.newInstance(type, list.size()));
+    }
 	@SuppressWarnings("unchecked")
 	private <TYPE> TYPE[] convert(ResultSet resultSet,Class<TYPE> type) throws Throwable
 	{
+	    if (type==String.class)
+	    {
+	        ArrayList<String> list = new ArrayList<>();
+	        while (resultSet.next())
+	        {
+	            list.add(resultSet.getString(1));
+	        }
+	        return (TYPE[])list.toArray(new String[list.size()]);
+	    }
+	    //TODO: add rest
 		ArrayList<TYPE> list = new ArrayList<>();
 		ResultSetMetaData metaData = resultSet.getMetaData();
 		int columns = metaData.getColumnCount();
@@ -350,7 +378,7 @@ public class Accessor extends Resource
 		}
 		return null;
 	}
-	private RowSet convert(ResultSet resultSet) throws SQLException
+	static RowSet convert(ResultSet resultSet) throws SQLException
 	{
 		ResultSetMetaData metaData = resultSet.getMetaData();
 		int columns = metaData.getColumnCount();
@@ -382,36 +410,30 @@ public class Accessor extends Resource
     }
 	public RowSet executeQuery(Trace parent, String traceCategoryOverride, Object[] parameters, String sql) throws Throwable
 	{
-		if (traceCategoryOverride == null)
-		{
-			traceCategoryOverride = sql;
-		}
-		try (Trace trace = new Trace(this.connector.traceManager, parent, traceCategoryOverride))
+		try (AccessorTraceContext context = new AccessorTraceContext(this, parent, traceCategoryOverride,sql))
 		{
 			try
 			{
 				try (PreparedStatement statement = this.connection.prepareStatement(sql))
 				{
-					for (int i = 0; i < parameters.length; i++)
-					{
-						statement.setObject(i + 1, parameters[i]);
-					}
+				    setParameters(context, statement, parameters);
+                    this.connector.queryRate.increment();
 					if (statement.execute() == false)
 					{
 						return null;
 					}
 					try (ResultSet resultSet = statement.getResultSet())
 					{
-						return convert(resultSet);
+						RowSet rowSet=convert(resultSet);
+						context.logRowsQueried(rowSet.size());
+						return rowSet;
 					}
 				}
 			}
-			catch (SQLException ex)
+			catch (Throwable ex)
 			{
-				trace.close(ex);
-				throw closeConnection(ex);
+			    throw context.handleThrowable(ex);
 			}
-
 		}
 	}
 
@@ -425,24 +447,18 @@ public class Accessor extends Resource
     }   
 	public <TYPE> TYPE executeQuerySingle(Trace parent, String traceCategoryOverride, Class<TYPE> type, Object[] parameters, String sql) throws Throwable
 	{
-		if (traceCategoryOverride == null)
-		{
-			traceCategoryOverride = sql;
-		}
-		try (Trace trace = new Trace(this.connector.traceManager, parent, traceCategoryOverride))
+		try (AccessorTraceContext context = new AccessorTraceContext(this, parent, traceCategoryOverride,sql))
 		{
 			try
 			{
 				try (PreparedStatement statement = this.connection.prepareStatement(sql))
 				{
-					for (int i = 0; i < parameters.length; i++)
-					{
-						statement.setObject(i + 1, parameters[i]);
-					}
+				    setParameters(context,statement,parameters);
 					try
 					{
 						if (statement.execute() == false)
 						{
+						    context.logRowsQueried(0);
 							return null;
 						}
 					}
@@ -452,15 +468,15 @@ public class Accessor extends Resource
 					}
 					try (ResultSet resultSet = statement.getResultSet())
 					{
+                        context.logRowsQueried(1);
 						return convertSingle(resultSet,type);
 					}
 				}
 			}
-			catch (SQLException ex)
-			{
-				trace.close(ex);
-				throw closeConnection(ex);
-			}
+            catch (Throwable ex)
+            {
+                throw context.handleThrowable(ex);
+            }
 		}
 	}
 	public <TYPE> TYPE[] executeQuery(Trace parent, String traceCategoryOverride, Class<TYPE> type, String sql, Object... parameters) throws Throwable
@@ -473,24 +489,18 @@ public class Accessor extends Resource
     }
 	public <TYPE> TYPE[] executeQuery(Trace parent, String traceCategoryOverride, Class<TYPE> type, Object[] parameters, String sql) throws Throwable
 	{
-		if (traceCategoryOverride == null)
-		{
-			traceCategoryOverride = sql;
-		}
-		try (Trace trace = new Trace(this.connector.traceManager, parent, traceCategoryOverride))
+		try (AccessorTraceContext context = new AccessorTraceContext(this, parent, traceCategoryOverride,sql))
 		{
 			try
 			{
 				try (PreparedStatement statement = this.connection.prepareStatement(sql))
 				{
-					for (int i = 0; i < parameters.length; i++)
-					{
-						statement.setObject(i + 1, parameters[i]);
-					}
+                    setParameters(context,statement,parameters);
 					try
 					{
 						if (statement.execute() == false)
 						{
+                            context.logRowsQueried(0);
 							return null;
 						}
 					}
@@ -500,15 +510,16 @@ public class Accessor extends Resource
 					}
 					try (ResultSet resultSet = statement.getResultSet())
 					{
-						return convert(resultSet,type);
+						TYPE[] results=convert(resultSet,type);
+                        context.logRowsQueried(results.length);
+						return results;
 					}
 				}
 			}
-			catch (SQLException ex)
-			{
-				trace.close(ex);
-				throw closeConnection(ex);
-			}
+            catch (Throwable ex)
+            {
+                throw context.handleThrowable(ex);
+            }
 		}
 	}
 	public <TYPE> TYPE executeCallSingle(Trace parent, String traceCategoryOverride, Class<TYPE> type, String sql, Object... parameters) throws Throwable
@@ -521,24 +532,18 @@ public class Accessor extends Resource
     }
 	public <TYPE> TYPE executeCallSingle(Trace parent, String traceCategoryOverride, Class<TYPE> type, Object[] parameters, String sql) throws Throwable
 	{
-		if (traceCategoryOverride == null)
-		{
-			traceCategoryOverride = sql;
-		}
-		try (Trace trace = new Trace(this.connector.traceManager, parent, traceCategoryOverride))
-		{
+        try (AccessorTraceContext context = new AccessorTraceContext(this, parent, traceCategoryOverride,sql))
+ 		{
 			try
 			{
 				try (CallableStatement statement = this.connection.prepareCall(sql))
 				{
-					for (int i = 0; i < parameters.length; i++)
-					{
-						statement.setObject(i + 1, parameters[i]);
-					}
+                    setParameters(context,statement,parameters);
 					try
 					{
 						if (statement.execute() == false)
 						{
+                            context.logRowsQueried(0);
 							return null;
 						}
 					}
@@ -548,111 +553,60 @@ public class Accessor extends Resource
 					}
 					try (ResultSet resultSet = statement.getResultSet())
 					{
+                        context.logRowsQueried(1);
 						return convertSingle(resultSet,type);
 					}
 				}
 			}
-			catch (SQLException ex)
-			{
-				trace.close(ex);
-				throw closeConnection(ex);
-			}
-		}
+            catch (Throwable ex)
+            {
+                throw context.handleThrowable(ex);
+            }
+        }
 	}
 
-	public <TYPE> TYPE[] executeArrayQuery(Trace parent, String traceCategoryOverride, Class<TYPE> type, String sql, Object... parameters) throws Throwable
-	{
-		return executeArrayQuery(parent, traceCategoryOverride, type, parameters, sql);
-	}
-    public <TYPE> TYPE[] executeArrayQuery(Trace parent, String traceCategoryOverride, Class<TYPE> type, List<?> parameters, String sql) throws Throwable
-    {
-        return executeArrayQuery(parent, traceCategoryOverride, type, parameters.toArray(new Object[parameters.size()]), sql);
-    }
-	public <TYPE> TYPE[] executeArrayQuery(Trace parent, String traceCategoryOverride, Class<TYPE> type, Object[] parameters, String sql) throws Throwable
-	{
-		if (traceCategoryOverride == null)
-		{
-			traceCategoryOverride = sql;
-		}
-		try (Trace trace = new Trace(this.connector.traceManager, parent, traceCategoryOverride))
-		{
-			try
-			{
-				try (CallableStatement statement = this.connection.prepareCall(sql))
-				{
-					for (int i = 0; i < parameters.length; i++)
-					{
-						statement.setObject(i + 1, parameters[i]);
-					}
-					try
-					{
-						if (statement.execute() == false)
-						{
-							return null;
-						}
-					}
-					finally
-					{
-						this.lastExecute = System.currentTimeMillis();
-					}
-					try (ResultSet resultSet = statement.getResultSet())
-					{
-						return convert(resultSet,type);
-					}
-				}
-			}
-			catch (SQLException ex)
-			{
-				trace.close(ex);
-				throw closeConnection(ex);
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-    public <RETURN_TYPE> CallRowSetResult<RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<RETURN_TYPE> returnType,String name,Param...parameters) throws Throwable
+    public <RETURN_TYPE> CallResult<RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<RETURN_TYPE> returnType,String name,Param...parameters) throws Throwable
     {
         return executeCall(parent,traceCategoryOverride,returnType,parameters,name);
     }
-    public <RETURN_TYPE> CallRowSetResult<RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<RETURN_TYPE> returnType,List<Param> parameters,String name) throws Throwable
+    public <RETURN_TYPE> CallResult<RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<RETURN_TYPE> returnType,List<Param> parameters,String name) throws Throwable
     {
         return executeCall(parent,traceCategoryOverride,returnType,parameters.toArray(new Param[parameters.size()]),name);
     }
-    public <RETURN_TYPE> CallRowSetResult<RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<RETURN_TYPE> returnType,Param[] parameters,String name) throws Throwable
+    @SuppressWarnings("unchecked")
+    public <RETURN_TYPE> CallResult<RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<RETURN_TYPE> returnType,Param[] parameters,String name) throws Throwable
 	{
-		if (traceCategoryOverride == null)
-		{
-			traceCategoryOverride = name;
-		}
-		StringBuilder sb=new StringBuilder();
-		sb.append('{');
-		int offset=1;
-		if ((returnType!=Void.class)&&(returnType!=void.class))
-		{
-			offset=2;
-			sb.append("?=");
-		}
-		sb.append("call ").append(name);
-		if (parameters.length>0)
-		{
-			sb.append('(');
-			for (int i = 0; i < parameters.length; i++)
-			{
-				if (i>0)
-				{
-					sb.append(',');
-				}
-				sb.append('?');
-			}
-			sb.append(')');
-		}
-		sb.append('}');
-		String sql=sb.toString();
-		try (Trace trace = new Trace(this.connector.traceManager, parent, traceCategoryOverride))
-		{
-			try
-			{
-				try (CallableStatement statement = this.connection.prepareCall(sql))
+        try (AccessorTraceContext context = new AccessorTraceContext(this, parent, traceCategoryOverride,name))
+        {
+            try
+            {
+        		StringBuilder sb=new StringBuilder();
+        		sb.append('{');
+        		int offset=1;
+        		if ((returnType!=Void.class)&&(returnType!=void.class))
+        		{
+        			offset=2;
+        			sb.append("?=");
+        		}
+        		sb.append("call ").append(name);
+        		if (parameters.length>0)
+        		{
+        			sb.append('(');
+        			for (int i = 0; i < parameters.length; i++)
+        			{
+        				if (i>0)
+        				{
+        					sb.append(',');
+        				}
+        				sb.append('?');
+        			}
+        			sb.append(')');
+        		}
+        		sb.append('}');
+        		String call=sb.toString();
+        		context.addLogItem(new Item("Call",call));
+        		ArrayList<Integer> outIndexes=new ArrayList<>(); 
+				try (CallableStatement statement = this.connection.prepareCall(call))
 				{
 					if (offset==2)
 					{
@@ -664,255 +618,178 @@ public class Accessor extends Resource
 						Param param=parameters[i];
 						if ((param.direction==Direction.IN)||(param.direction==Direction.IN_OUT))
 						{
+                            context.addLogItem(new Item("param"+i,param.inValue));
 							statement.setObject(i + offset, parameters[i].inValue);
 						}
 						if ((param.direction==Direction.OUT)||(param.direction==Direction.IN_OUT))
 						{
 							statement.registerOutParameter(i+offset, param.sqlType);
+							outIndexes.add(i);
 						}
 					}
-					boolean executeResult=statement.execute();
-					int updateCount=0;
+					this.connector.callRate.increment();
+					boolean hasResultSet=statement.execute();
+                    ArrayList<RowSet> rowSetList=new ArrayList<>();
+					ArrayList<Integer> updateCounts=new ArrayList<>();
                     RETURN_TYPE returnValue=null;
                     HashMap<Integer,Object> outValues=new HashMap<>();
+                    for (;;)
+                    {
+                        if (hasResultSet)
+                        {
+                            try (ResultSet resultSet = statement.getResultSet())
+                            {
+                                RowSet rowSet=convert(resultSet);
+                                rowSetList.add(rowSet);
+                            }
+                            hasResultSet=statement.getMoreResults();
+                        }
+                        else
+                        {
+                            int updateCount=statement.getUpdateCount();
+                            if (updateCount==-1)
+                            {
+                                break;
+                            }
+                            updateCounts.add(updateCount);
+                            hasResultSet=statement.getMoreResults();
+                        }
+                    }
                     if (offset==2)
                     {
                         returnValue=(RETURN_TYPE)statement.getObject(1);
                     }
-
-                    if (executeResult == false)
-					{
-					    updateCount=statement.getUpdateCount();
-					    if (updateCount==0)
-					    {
-                            for (int i = 0; i < parameters.length; i++)
-                            {
-                                Param param=parameters[i];
-                                if ((param.direction==Direction.OUT)||(param.direction==Direction.IN_OUT))
-                                {
-                                    outValues.put(i, statement.getObject(i+offset));
-                                }
-                            }
-                            return new CallRowSetResult<RETURN_TYPE>(returnValue,outValues,null,updateCount);
-					    }
-                        boolean more=statement.getMoreResults();
-                        if (more==false)
-                        {
-                            return new CallRowSetResult<RETURN_TYPE>(returnValue,outValues,null,updateCount);
-                        }
-					}
-                    
-					try (ResultSet resultSet = statement.getResultSet())
-					{
-					    if (resultSet!=null)
-					    {
-    						RowSet results=convert(resultSet);
-    						for (int i = 0; i < parameters.length; i++)
-    						{
-    							Param param=parameters[i];
-    							if ((param.direction==Direction.OUT)||(param.direction==Direction.IN_OUT))
-    							{
-    								outValues.put(i, statement.getObject(i+offset));
-    							}
-    						}
-                            return new CallRowSetResult<RETURN_TYPE>(returnValue,outValues,results,updateCount);
-					    }
-                        return new CallRowSetResult<RETURN_TYPE>(returnValue,outValues,null,updateCount);
-					}
+                    for (int index:outIndexes)
+                    {
+                        outValues.put(index, statement.getObject(index+offset));
+                    }
+                    int[] updateCountArray=Utils.intArrayFromList(updateCounts);
+                    RowSet[] rowSetArray=rowSetList.toArray(new RowSet[rowSetList.size()]);
+                    context.logRowsUpdated(updateCountArray);
+                    context.logRowsQueried(rowSetArray);
+                    return new CallResult<RETURN_TYPE>(returnValue,outValues,rowSetArray,updateCountArray);
 					
 				}
 			}
-			catch (SQLException ex)
-			{
-				trace.close(ex);
-				throw closeConnection(ex);
-			}
+            catch (Throwable ex)
+            {
+                throw context.handleThrowable(ex);
+            }
 		}
 	}
-	/*
-	public <TYPE> CallResult<TYPE,Void> executeCall(Trace parent, String traceCategoryOverride, Class<TYPE> type,String name,Param...parameters) throws Throwable
-	{
-		if (traceCategoryOverride == null)
-		{
-			traceCategoryOverride = name;
-		}
-		StringBuilder sb=new StringBuilder();
-		sb.append("{call ").append(name);
-		if (parameters.length>0)
-		{
-			sb.append('(');
-			for (int i = 0; i < parameters.length; i++)
-			{
-				if (i>0)
-				{
-					sb.append(',');
-				}
-				sb.append('?');
-			}
-			sb.append(')');
-		}
-		sb.append('}');
-		String sql=sb.toString();
-		try (Trace trace = new Trace(this.connector.traceManager, parent, traceCategoryOverride))
-		{
-			try
-			{
-				try (CallableStatement statement = this.connection.prepareCall(sql))
-				{
-					for (int i = 0; i < parameters.length; i++)
-					{
-						Param param=parameters[i];
-						if ((param.direction==Direction.IN)||(param.direction==Direction.IN_OUT))
-						{
-							statement.setObject(i + offset, parameters[i].inValue);
-						}
-						if ((param.direction==Direction.OUT)||(param.direction==Direction.IN_OUT))
-						{
-							statement.registerOutParameter(i+offset, param.sqlType);
-						}
-					}
-					if (statement.execute() == false)
-					{
-						return null;
-					}
-					try (ResultSet resultSet = statement.getResultSet())
-					{
-						TYPE[] results=convert(resultSet,type);
-						HashMap<Integer,Object> outputMap=new HashMap<>();
-						for (int i = 0; i < parameters.length; i++)
-						{
-							Param param=parameters[i];
-							if ((param.direction==Direction.OUT)||(param.direction==Direction.IN_OUT))
-							{
-								outputMap.put(i, statement.getObject(i+1));
-							}
-						}
-						return new CallResult<TYPE,Void>(outputMap,results,Void.class);
-					}
-				}
-			}
-			catch (SQLException ex)
-			{
-				trace.close(ex);
-				throw closeConnection(ex);
-			}
-		}
-	}
-	*/
-    public <ROW_TYPE,RETURN_TYPE> CallResult<ROW_TYPE,RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<ROW_TYPE> rowType,Class<RETURN_TYPE> returnType,String name,Param...parameters) throws Throwable
-    {
-        return executeCall(parent, traceCategoryOverride, rowType, returnType, parameters,name);
-    }
-    public <ROW_TYPE,RETURN_TYPE> CallResult<ROW_TYPE,RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<ROW_TYPE> rowType,Class<RETURN_TYPE> returnType,List<Param> parameters,String name) throws Throwable
-    {
-        return executeCall(parent, traceCategoryOverride, rowType, returnType, parameters.toArray(new Param[parameters.size()]),name);
-    }
-	@SuppressWarnings("unchecked")
-	public <ROW_TYPE,RETURN_TYPE> CallResult<ROW_TYPE,RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<ROW_TYPE> rowType,Class<RETURN_TYPE> returnType,Param[] parameters,String name) throws Throwable
-	{
-		if (traceCategoryOverride == null)
-		{
-			traceCategoryOverride = name;
-		}
-		StringBuilder sb=new StringBuilder();
-		sb.append('{');
-		int offset=1;
-		if ((returnType!=Void.class)&&(returnType!=void.class))
-		{
-			offset=2;
-			sb.append("?=");
-		}
-		sb.append("call ").append(name);
-		if (parameters.length>0)
-		{
-			sb.append('(');
-			for (int i = 0; i < parameters.length; i++)
-			{
-				if (i>0)
-				{
-					sb.append(',');
-				}
-				sb.append('?');
-			}
-			sb.append(')');
-		}
-		sb.append('}');
-		String sql=sb.toString();
-		try (Trace trace = new Trace(this.connector.traceManager, parent, traceCategoryOverride))
-		{
-			try
-			{
-				try (CallableStatement statement = this.connection.prepareCall(sql))
-				{
-					if (offset==2)
-					{
-						int returnSqlType=Param.getSqlType(returnType);
-						statement.registerOutParameter(1,returnSqlType);
-					}
-					for (int i = 0; i < parameters.length; i++)
-					{
-						Param param=parameters[i];
-						if ((param.direction==Direction.OUT)||(param.direction==Direction.IN_OUT))
-						{
-							statement.registerOutParameter(i+offset, param.sqlType);
-						}
-                        if ((param.direction==Direction.IN)||(param.direction==Direction.IN_OUT))
-                        {
-                            statement.setObject(i + offset, parameters[i].inValue);
-                        }
-					}
-                    boolean executeResult=statement.execute();
-                    int updateCount=0;
-                    RETURN_TYPE returnValue=null;
-                    HashMap<Integer,Object> outValues=new HashMap<>();
-                    if (offset==2)
-                    {
-                        returnValue=(RETURN_TYPE)statement.getObject(1);
-                    }
 
-					if (executeResult == false)
-					{
-                        updateCount=statement.getUpdateCount();
-                        if (updateCount==0)
-                        {
-                            for (int i = 0; i < parameters.length; i++)
-                            {
-                                Param param=parameters[i];
-                                if ((param.direction==Direction.OUT)||(param.direction==Direction.IN_OUT))
-                                {
-                                    outValues.put(i, statement.getObject(i+offset));
-                                }
-                            }
-                            return new CallResult<ROW_TYPE,RETURN_TYPE>(returnValue,outValues,null,updateCount);
-                        }
-                        boolean more=statement.getMoreResults();
-                        if (more==false)
-                        {
-                            return new CallResult<ROW_TYPE,RETURN_TYPE>(returnValue,outValues,null,updateCount);
-                        }
-					}
-					try (ResultSet resultSet = statement.getResultSet())
-					{
-						ROW_TYPE[] results=convert(resultSet,rowType);
-						for (int i = 0; i < parameters.length; i++)
-						{
-							Param param=parameters[i];
-							if ((param.direction==Direction.OUT)||(param.direction==Direction.IN_OUT))
-							{
-								outValues.put(i, statement.getObject(i+offset));
-							}
-						}
-						return new CallResult<ROW_TYPE,RETURN_TYPE>(returnValue,outValues,results,updateCount);
-					}
-				}
-			}
-			catch (SQLException ex)
-			{
-				trace.close(ex);
-				throw closeConnection(ex);
-			}
-		}
-	}
+// No need.
+//    public <ROW_TYPE,RETURN_TYPE> CallResult2<ROW_TYPE,RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<ROW_TYPE> rowType,Class<RETURN_TYPE> returnType,String name,Param...parameters) throws Throwable
+//    {
+//        return executeCall(parent, traceCategoryOverride, rowType, returnType, parameters,name);
+//    }
+//    public <ROW_TYPE,RETURN_TYPE> CallResult2<ROW_TYPE,RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<ROW_TYPE> rowType,Class<RETURN_TYPE> returnType,List<Param> parameters,String name) throws Throwable
+//    {
+//        return executeCall(parent, traceCategoryOverride, rowType, returnType, parameters.toArray(new Param[parameters.size()]),name);
+//    }
+//	@SuppressWarnings("unchecked")
+//	public <ROW_TYPE,RETURN_TYPE> CallResult2<ROW_TYPE,RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<ROW_TYPE> rowType,Class<RETURN_TYPE> returnType,Param[] parameters,String name) throws Throwable
+//	{
+//        try (TraceContext context = new TraceContext(this, parent, traceCategoryOverride,name))
+//        {
+//            try
+//            {
+//        		StringBuilder sb=new StringBuilder();
+//        		sb.append('{');
+//        		int offset=1;
+//        		if ((returnType!=Void.class)&&(returnType!=void.class))
+//        		{
+//        			offset=2;
+//        			sb.append("?=");
+//        		}
+//        		sb.append("call ").append(name);
+//        		if (parameters.length>0)
+//        		{
+//        			sb.append('(');
+//        			for (int i = 0; i < parameters.length; i++)
+//        			{
+//        				if (i>0)
+//        				{
+//        					sb.append(',');
+//        				}
+//        				sb.append('?');
+//        			}
+//        			sb.append(')');
+//        		}
+//        		sb.append('}');
+//        		String call=sb.toString();
+//                context.logItems.add(new Item("Call",call));
+//                ArrayList<Integer> outIndexes=new ArrayList<>(); 
+//				try (CallableStatement statement = this.connection.prepareCall(call))
+//				{
+//					if (offset==2)
+//					{
+//						int returnSqlType=Param.getSqlType(returnType);
+//						statement.registerOutParameter(1,returnSqlType);
+//					}
+//					for (int i = 0; i < parameters.length; i++)
+//					{
+//						Param param=parameters[i];
+//						if ((param.direction==Direction.OUT)||(param.direction==Direction.IN_OUT))
+//						{
+//                            context.logItems.add(new Item("param"+i,param.inValue));
+//							statement.registerOutParameter(i+offset, param.sqlType);
+//						}
+//                        if ((param.direction==Direction.IN)||(param.direction==Direction.IN_OUT))
+//                        {
+//                            statement.setObject(i + offset, parameters[i].inValue);
+//                        }
+//					}
+//                    RETURN_TYPE returnValue=null;
+//                    HashMap<Integer,Object> outValues=new HashMap<>();
+//                    ROW_TYPE[] results=null;
+//                    ArrayList<Integer> updateCounts=new ArrayList<>();
+//                    this.connector.callRate.increment();
+//                    boolean hasResultSet=statement.execute();
+//                    for (;;)
+//                    {
+//                        if (hasResultSet)
+//                        {
+//                            try (ResultSet resultSet = statement.getResultSet())
+//                            {
+//                                results=convert(resultSet,rowType);
+//                            }
+//                            hasResultSet=statement.getMoreResults();
+//                        }
+//                        else
+//                        {
+//                            int updateCount=statement.getUpdateCount();
+//                            if (updateCount==-1)
+//                            {
+//                                break;
+//                            }
+//                            updateCounts.add(updateCount);
+//                            hasResultSet=statement.getMoreResults();
+//                        }
+//                    }
+//                    if (offset==2)
+//                    {
+//                        returnValue=(RETURN_TYPE)statement.getObject(1);
+//                    }
+//                    for (int index:outIndexes)
+//                    {
+//                        outValues.put(index, statement.getObject(index+offset));
+//                    }
+//                    if (results!=null)
+//                    {
+//                        context.logRowsQueried(results.length);
+//                    }
+//                    int[] updateCountArray=Utils.intArrayFromList(updateCounts);
+//                    context.logRowsUpdated(updateCountArray);
+//                    return new CallResult2<ROW_TYPE,RETURN_TYPE>(returnValue,outValues,results,updateCountArray);
+//				}
+//			}
+//            catch (Throwable ex)
+//            {
+//                throw context.close(ex);
+//            }
+//        }
+//	}
 	
 
 	@SuppressWarnings("unchecked")
@@ -924,43 +801,30 @@ public class Accessor extends Resource
     {
         return openQuery(parent, traceCategoryOverride, type, parameters.toArray(new Object[parameters.size()]),sql);
     }
+    
+    //TODO: add metrics and logging
 	public <TYPE> DataReader<TYPE> openQuery(Trace parent, String traceCategoryOverride, Class<TYPE> type, Object[] parameters, String sql) throws Throwable
 	{
-		if (traceCategoryOverride == null)
-		{
-			traceCategoryOverride = sql;
-		}
-		Trace trace = new Trace(this.connector.traceManager, parent, traceCategoryOverride, true);
-		try
-		{
-			PreparedStatement statement = this.connection.prepareStatement(sql);
-			try
-			{
-				for (int i = 0; i < parameters.length; i++)
-				{
-					statement.setObject(i + 1, parameters[i]);
-				}
-				return new DataReader<TYPE>(this, trace, statement.getResultSet(), type);
-			}
-			catch (Throwable t)
-			{
-				try
-				{
-					statement.close();
-				}
-				catch (Throwable tt)
-				{
-					trace.close(tt);
-					throw tt;
-				}
-				trace.close(t);
-				throw t;
-			}
-		}
-		catch (Throwable t)
-		{
-			trace.close(t);
-			throw closeConnection(t);
-		}
+        try (AccessorTraceContext context = new AccessorTraceContext(this, parent, traceCategoryOverride,sql))
+        {
+    		try
+    		{
+    			PreparedStatement statement = this.connection.prepareStatement(sql);
+    			try
+    			{
+    			    setParameters(context,statement,parameters);
+    				return new DataReader<TYPE>(context, statement.getResultSet(), type);
+    			}
+    			catch (Throwable t)
+    			{
+                    statement.close();
+                    throw t;
+    			}
+    		}
+    		catch (Throwable t)
+    		{
+    		    throw context.handleThrowable(t);
+    		}
+        }
 	}
 }

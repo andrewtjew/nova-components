@@ -42,23 +42,23 @@ public class FilterChain
 		{
 			return Integer.parseInt(value);
 		}
-		if ((type==long.class)||(type==long.class))
+		if ((type==long.class)||(type==Long.class))
 		{
 			return Long.parseLong(value);
 		}
-		if ((type==short.class)||(type==short.class))
+		if ((type==short.class)||(type==Short.class))
 		{
 			return Short.parseShort(value);
 		}
-		if (type==float.class)
+		if ((type==float.class)||(type==Float.class))
 		{
 			return Float.parseFloat(value);
 		}
-		if (type==double.class)
+		if ((type==double.class)||(type==Double.class))
 		{
 			return Double.parseDouble(value);
 		}
-		if (type==boolean.class)
+		if ((type==boolean.class)||(type==Boolean.class))
 		{
 		    return !("false".equals(value));
 		}
@@ -70,7 +70,7 @@ public class FilterChain
         {
             return new BigDecimal(value);
         }
-		return Double.parseDouble(value);
+        throw new Exception("Cannot parse parameter "+parameterInfo.getName());
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

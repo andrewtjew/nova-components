@@ -109,7 +109,7 @@ public class Lexer
         }
         return new Lexeme(Token.ERROR, "Premature end of string.", this.source.endAndGetSnippet(0));
     }
-    public Lexeme produceSimpleSimpleString(char endCharacter) throws Throwable
+    public Lexeme produceSimpleString(char endCharacter) throws Throwable
     {
         StringBuilder sb = new StringBuilder();
         for (char c=this.source.next();c!=0;c=this.source.next())

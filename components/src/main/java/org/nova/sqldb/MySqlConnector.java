@@ -4,11 +4,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.time.format.DateTimeFormatter;
 
+import org.nova.logging.Logger;
 import org.nova.security.UnsecureVault;
 import org.nova.security.Vault;
 import org.nova.tracing.TraceManager;
 
 import com.amazonaws.services.elasticmapreduce.util.BootstrapActions.ConfigFile;
+import com.nova.disrupt.Disruptor;
 
 public class MySqlConnector extends Connector
 {
@@ -36,16 +38,24 @@ public class MySqlConnector extends Connector
       return unsecuredVault;
     }
 
-    public MySqlConnector(TraceManager traceManager, String user, String password, boolean connect, MySqlConfiguration configuration)
+    public MySqlConnector(TraceManager traceManager,Logger logger, Disruptor disruptor,String user, String password, boolean connect, MySqlConfiguration configuration)
             throws Throwable
     {
-        this(traceManager,user,"password",buildUnsecuredVault(password),connect,configuration);
+        this(traceManager,logger,disruptor,user,"password",buildUnsecuredVault(password),connect,configuration);
         
     }
-    	
-	public MySqlConnector(TraceManager traceManager,String user,String passwordKey,Vault vault,boolean connect,MySqlConfiguration configuration) throws Throwable 
+    public MySqlConnector(TraceManager traceManager,Logger logger, String user, String password, boolean connect, MySqlConfiguration configuration)
+            throws Throwable
+    {
+        this(traceManager,logger,null,user,password,connect,configuration);
+    }
+    public MySqlConnector(TraceManager traceManager,Logger logger,String user,String passwordKey,Vault vault,boolean connect,MySqlConfiguration configuration) throws Throwable 
+    {
+        this(traceManager,logger,null,user,passwordKey,vault,connect,configuration);
+    }    	
+	public MySqlConnector(TraceManager traceManager,Logger logger,Disruptor disruptor,String user,String passwordKey,Vault vault,boolean connect,MySqlConfiguration configuration) throws Throwable 
 	{
-		super(traceManager,configuration.maximumRecentlyUsedCount);
+		super(traceManager,logger,disruptor,configuration.maximumRecentlyUsedCount);
 		Class.forName("com.mysql.jdbc.Driver");
 		this.user=user;
 		this.schema=configuration.schema;

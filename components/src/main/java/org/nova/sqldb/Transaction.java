@@ -1,7 +1,9 @@
 package org.nova.sqldb;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.nova.core.MultiException;
 import org.nova.tracing.Trace;
 
 public class Transaction implements AutoCloseable
@@ -15,6 +17,24 @@ public class Transaction implements AutoCloseable
 		this.accessor=accessor;
 	}
 	
+	private MultiException closeConnection(Throwable t)
+	{
+        MultiException ex=new MultiException(t);
+        try
+        {
+            Connection connection=this.accessor.connection;
+            this.accessor.connection=null;
+            connection.close();
+        }
+        catch (Throwable tt)
+        {
+            ex=new MultiException(tt,t);
+        }
+        this.accessor.connector.logger.log(this.trace,this.accessor.connector.getName());
+        this.trace.close(ex);
+        return ex;
+	}
+	
 	public void commit() throws Throwable
 	{
 		synchronized(this)
@@ -25,6 +45,11 @@ public class Transaction implements AutoCloseable
 				{
 					this.accessor.commit();
 				}
+                catch (Throwable t)
+                {
+                    this.accessor.connector.commitFailures.increment();
+                    throw closeConnection(t);
+                }
 				finally
 				{
 					this.trace.close();
@@ -44,9 +69,14 @@ public class Transaction implements AutoCloseable
 				{
 					this.accessor.rollback();
 				}
+				catch (Throwable t)
+				{
+                    this.accessor.connector.rollbackFailures.increment();
+                    throw closeConnection(t);
+				}
 				finally
 				{
-					this.trace.close();
+                    this.trace.close();
 					this.accessor=null;
 				}
 			}

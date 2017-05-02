@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD,ElementType.PARAMETER})
 public @interface Options
 {
-    String[] value();
+    String[] defaultValues();
+    String key() default "";
 }
