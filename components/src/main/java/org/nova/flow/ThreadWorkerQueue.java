@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.nova.concurrent.Condition;
+import org.nova.concurrent.Synchronization;
 import org.nova.metrics.CountMeter;
 import org.nova.metrics.LevelMeter;
 import org.nova.test.Testing;
@@ -100,7 +100,7 @@ public class ThreadWorkerQueue extends Receiver
 				{
                     Testing.oprintln("ThreadWorkerQueue="+this.id+":start wait");
                     this.threadInUseMeter.decrement();
-					Condition.waitForNoThrow(this.lock, ()->{return this.queue.size()>0||this.stop;});
+					Synchronization.waitForNoThrow(this.lock, ()->{return this.queue.size()>0||this.stop;});
                     this.threadInUseMeter.increment();
                     Testing.oprintln("ThreadWorkerQueue="+this.id+":end wait");
 					if (this.stop)

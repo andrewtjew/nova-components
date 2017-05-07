@@ -3,7 +3,7 @@ package org.nova.flow;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import org.nova.concurrent.Condition;
+import org.nova.concurrent.Synchronization;
 import org.nova.metrics.CountMeter;
 import org.nova.metrics.LevelMeter;
 import org.nova.test.Testing;
@@ -200,7 +200,7 @@ public class SourceQueue<ITEM>
                             }
                         }
                         Testing.oprintln("SourceQueue:start wait, timeout=" + timeout);
-                        if (Condition.waitForNoThrow(this.lock, () ->
+                        if (Synchronization.waitForNoThrow(this.lock, () ->
                         {
                             return this.waitingMeter.getLevel() > 0 || this.stop || this.noWait;
                         } , timeout))
@@ -213,7 +213,7 @@ public class SourceQueue<ITEM>
                                 {
                                     timeout = this.sendWait - waited;
                                     Testing.oprintln("SourceQueue:start wait for sendSizeThreshold, current queue size=" + waitingMeter.getLevel() + ", timeout=" + timeout);
-                                    Condition.waitForNoThrow(this.lock, () ->
+                                    Synchronization.waitForNoThrow(this.lock, () ->
                                     {
                                         return this.waitingMeter.getLevel() >= this.sendSizeThreshold || this.stop;
                                     } , timeout);

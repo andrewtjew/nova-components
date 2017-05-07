@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import org.nova.concurrent.Condition;
+import org.nova.concurrent.Synchronization;
 import org.nova.core.Utils;
 import org.nova.test.Testing;
 import org.nova.testing.TestTraceClient;
@@ -177,7 +177,7 @@ public class ClientConnection
 				return;
 			}
 			this.socket.close();
-			Condition.waitForNoThrow(this, ()->{return this.active==false;});
+			Synchronization.waitForNoThrow(this, ()->{return this.active==false;});
 		}
 	}
 	

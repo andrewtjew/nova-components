@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceCallable;
 import org.nova.tracing.TraceManager;
+import org.nova.tracing.TraceRunnable;
 
 public class FutureScheduler
 {
@@ -71,6 +72,23 @@ public class FutureScheduler
 		}
 		return future;
 	}
+
+	public Future<Void> schedule(Trace parent,String traceCategory,TraceRunnable...runnables)
+    {
+        Future<Void> future=null;
+        synchronized(this)
+        {
+            long number=this.number++;
+            future=new Future<Void>(this.traceManager,parent,traceCategory,number,runnables);
+            this.futures.put(number, future);
+        }
+        for (int i=0;i<runnables.length;i++)
+        {
+            this.executorService.submit(new Runner(future, future.getCallableTask(i)));
+        }
+        return future;
+    }
+
 
 	public Future<?>[] getFutureSnapshot()
 	{

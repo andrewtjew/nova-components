@@ -79,7 +79,7 @@ public class TimerScheduler
 			}
 			this.runState=RunState.STOPPING;
 			this.notifyAll();
-			Condition.waitForNoThrow(this, ()->{return this.runState==RunState.STOPPED;});
+			Synchronization.waitForNoThrow(this, ()->{return this.runState==RunState.STOPPED;});
 			this.thread.join(0);
 			this.thread=null;
 		}

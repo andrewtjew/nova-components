@@ -127,7 +127,7 @@ public class ServerOperatorPages
         this.cacheControlValue = serverApplication.getConfiguration().getValue("ServerOperatorPages.cache.controlValue", "public");
         this.serverApplication = serverApplication;
 
-        Menu menu = serverApplication.getOperatorContentWriter().getMenu();
+        Menu menu = serverApplication.getOperatorResultWriter().getMenu();
 
         menu.add("Process|Configuration", "/operator/process/configuration");
         menu.add("Process|Futures", "/operator/process/futures");
@@ -2193,11 +2193,11 @@ public class ServerOperatorPages
         }
         int[] ports=httpServer.getPorts();
         endPoint=endPoint+":"+ports[0];
-        if (ports.length==2)
+        Configuration configuration=this.serverApplication.getConfiguration();
+        boolean https=configuration.getBooleanValue("HttpServer.public.https",false);
+        if (https)
         {
-            Configuration configuration=this.serverApplication.getConfiguration();
-            boolean https=configuration.getBooleanValue("HttpServer.public.https",false);
-            if (https)
+            if (this.serverApplication.getPublicServer().getPorts()[0]==ports[0])
             {
                 Vault vault=this.serverApplication.getVault();
                 String serverCertificatePassword=vault.get("KeyStore.serverCertificate.password");

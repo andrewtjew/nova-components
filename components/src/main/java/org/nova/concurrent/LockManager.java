@@ -37,7 +37,7 @@ public class LockManager<KEY>
 			if (finalSlot.locked)
 			{
 				slot.waiting++;
-				Condition.waitForNoThrow(slot, ()->{return finalSlot.locked==false;});
+				Synchronization.waitForNoThrow(slot, ()->{return finalSlot.locked==false;});
 				slot.waiting--;
 			}
 			finalSlot.locked=true;
@@ -67,7 +67,7 @@ public class LockManager<KEY>
                 slot.waiting++;
                 try
                 {
-                    if (Condition.waitForNoThrow(slot, ()->{return finalSlot.locked==false;},timeoutMs)==false)
+                    if (Synchronization.waitForNoThrow(slot, ()->{return finalSlot.locked==false;},timeoutMs)==false)
                     {
                         trace.close();
                         return null;

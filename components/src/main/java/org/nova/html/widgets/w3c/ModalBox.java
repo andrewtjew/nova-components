@@ -40,9 +40,15 @@ public class ModalBox extends div
         }
     }
 
+    public ModalBox setWidth(int width)
+    {
+        this.box.style("width:"+width+"px");
+        return this;
+    }
+    
     public ModalBox setWidth(String width)
     {
-        this.box.style("width:"+width+";");
+        this.box.style("width:"+width);
         return this;
     }
     
@@ -51,9 +57,14 @@ public class ModalBox extends div
         return this.content;
     }
     
+    public div box()
+    {
+        return this.box;
+    }
+    
     public ModalBox(String id,String title,String footer)
     {
-        this(id,title,footer,"/resources/html","/w3c/Modal/modal.css");
+        this(id,title,footer,"/resources/html","/w3c/ModalBox/modal.css");
     }
     
     public ModalBox openBy(GlobalEventTagElement<? extends TagElement<?>> element)

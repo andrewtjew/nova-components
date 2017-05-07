@@ -99,28 +99,28 @@ public class Future<RESULT>
 	{
 		synchronized(this)
 		{
-			return Condition.waitForNoThrow(this, ()->{return this.executing==0;},timeout);
+			return Synchronization.waitForNoThrow(this, ()->{return this.executing==0;},timeout);
 		}
 	}
 	public void waitAll()
 	{
 		synchronized(this)
 		{
-			Condition.waitForNoThrow(this, ()->{return this.executing==0;});
+			Synchronization.waitForNoThrow(this, ()->{return this.executing==0;});
 		}
 	}
 	public boolean waitAtLeast(long timeout,int count)
 	{
 		synchronized(this)
 		{
-			return Condition.waitForNoThrow(this, ()->{return this.tasks.length-this.executing>=count;},timeout);
+			return Synchronization.waitForNoThrow(this, ()->{return this.tasks.length-this.executing>=count;},timeout);
 		}
 	}
 	public void waitAtLeast(int count)
 	{
 		synchronized(this)
 		{
-			Condition.waitForNoThrow(this, ()->{return this.tasks.length-this.executing>=count;});
+			Synchronization.waitForNoThrow(this, ()->{return this.tasks.length-this.executing>=count;});
 		}
 	}
 
@@ -128,14 +128,14 @@ public class Future<RESULT>
 	{
 		synchronized(this)
 		{
-			return Condition.waitForNoThrow(this, ()->{return this.executing<this.tasks.length;},timeout);
+			return Synchronization.waitForNoThrow(this, ()->{return this.executing<this.tasks.length;},timeout);
 		}
 	}
 	public void waitAny()
 	{
 		synchronized(this)
 		{
-			Condition.waitForNoThrow(this, ()->{return this.executing<this.tasks.length;});
+			Synchronization.waitForNoThrow(this, ()->{return this.executing<this.tasks.length;});
 		}
 	}
 

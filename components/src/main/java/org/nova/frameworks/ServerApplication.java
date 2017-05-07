@@ -173,7 +173,7 @@ public class ServerApplication extends CoreApplication
             {
                 servers[1]=JettyServerFactory.createServer(threads, publicPort+1);
             }
-            boolean https=configuration.getBooleanValue("HttpServer.public.https",false);
+            boolean https=configuration.getBooleanValue("HttpServer.public.https",true);
             if (https)
             {
                 String serverCertificatePassword=this.vault.get("KeyStore.serverCertificate.password");
@@ -193,7 +193,7 @@ public class ServerApplication extends CoreApplication
             this.publicServer.addContentDecoders(new GzipContentDecoder());
             this.publicServer.addContentEncoders(new GzipContentEncoder());
             this.publicServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
-            this.publicServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter());
+            this.publicServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter());
         }
         else
         {
@@ -228,7 +228,7 @@ public class ServerApplication extends CoreApplication
 	{
         this.startTime=System.currentTimeMillis();
         this.operatorServer.register(new ServerOperatorPages(this));
-        this.operatorServer.register(new OperatorPages(this.operatorVariableManager, this.getOperatorContentWriter().getMenu()));
+        this.operatorServer.register(new OperatorPages(this.operatorVariableManager, this.getOperatorResultWriter().getMenu()));
         onStart();
         startServer(this.operatorServer);
         startServer(this.privateServer);
@@ -295,7 +295,7 @@ public class ServerApplication extends CoreApplication
 	    return this.vault;
 	}
 	
-    public OperatorResultWriter getOperatorContentWriter()
+    public OperatorResultWriter getOperatorResultWriter()
     {
         return this.operatorResultWriter;
     }

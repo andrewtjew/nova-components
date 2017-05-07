@@ -32,7 +32,7 @@ public class SessionService<SESSION extends Session> extends ServerApplication
     public void onStart() throws Throwable
     {
         super.onStart();
-        this.getOperatorContentWriter().getMenu().add("Sessions|View All", "/operator/sessions");
+        this.getOperatorResultWriter().getMenu().add("Sessions|View All", "/operator/sessions");
         
         this.getPublicServer().addFilters(this.sessionFilter);
         SessionOperatorPages<SESSION> sessionOperatorPages=new SessionOperatorPages<>(this.sessionManager);

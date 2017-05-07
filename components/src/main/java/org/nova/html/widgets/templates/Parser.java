@@ -22,9 +22,13 @@ public class Parser
         this.sections=new ArrayList<>();
     }
     
-    public Section[] parse(String htmlFile) throws Throwable
+    Section[] parseFile(String htmlFile) throws Throwable
     {
-        String text = Utils.readTextFile(htmlFile, StandardCharsets.UTF_8);
+        return parseText(Utils.readTextFile(htmlFile, StandardCharsets.UTF_8));
+    }
+
+    Section[] parseText(String text) throws Throwable
+    {
         TextSource source=new TextSource(text);
         this.lexer = new Lexer(source);
         parse();

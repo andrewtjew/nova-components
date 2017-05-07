@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 
-import org.nova.concurrent.Condition;
+import org.nova.concurrent.Synchronization;
 import org.nova.core.Utils;
 import org.nova.metrics.CountAverageRateMeter;
 
@@ -104,7 +104,7 @@ public class TcpClient
 			
 			synchronized(waiter)
 			{
-				if (Condition.waitForNoThrow(waiter, ()->{return waiter.completed;},timeoutMs)==false)
+				if (Synchronization.waitForNoThrow(waiter, ()->{return waiter.completed;},timeoutMs)==false)
 				{
 					return new Response(Status.TIMEOUT,null);
 				}

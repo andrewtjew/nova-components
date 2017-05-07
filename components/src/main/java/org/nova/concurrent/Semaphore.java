@@ -25,7 +25,7 @@ public class Semaphore
 			if (this.running>=this.count)
 			{
 				this.waiters++;
-				Condition.waitForNoThrow(this.lock, ()->{return this.running<this.count;});
+				Synchronization.waitForNoThrow(this.lock, ()->{return this.running<this.count;});
 				this.waiters--;
 				this.meter.update(System.nanoTime()-start);
 			}

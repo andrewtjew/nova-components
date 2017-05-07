@@ -78,14 +78,14 @@ public class FutureTask<RESULT>
 	{
 		synchronized(this)
 		{
-			return Condition.waitForNoThrow(this, ()->{return this.status==TaskStatus.COMPLETED;},timeout);
+			return Synchronization.waitForNoThrow(this, ()->{return this.status==TaskStatus.COMPLETED;},timeout);
 		}
 	}
 	public void waitForCompletion()
 	{
 		synchronized(this)
 		{
-			Condition.waitForNoThrow(this, ()->{return this.status==TaskStatus.COMPLETED;});
+			Synchronization.waitForNoThrow(this, ()->{return this.status==TaskStatus.COMPLETED;});
 		}
 	}
 	

@@ -3,7 +3,7 @@ package org.nova.concurrent;
 import org.nova.core.NoThrowPredicate;
 import org.nova.core.Predicate;
 
-public class Condition
+public class Synchronization
 {
 	public static void waitFor(Object synchronizationObject,Predicate predicate)  throws Throwable
 	{

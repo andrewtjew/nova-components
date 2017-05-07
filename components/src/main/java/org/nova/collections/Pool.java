@@ -3,7 +3,7 @@ package org.nova.collections;
 import java.util.LinkedList;
 import java.util.Stack;
 
-import org.nova.concurrent.Condition;
+import org.nova.concurrent.Synchronization;
 import org.nova.metrics.CountMeter;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
@@ -37,7 +37,7 @@ public class Pool<RESOURCE extends Resource>
 			{
 				try
 				{
-					if (Condition.waitForNoThrow(this,()->{return container.size()>0;},timeout))
+					if (Synchronization.waitForNoThrow(this,()->{return container.size()>0;},timeout))
 					{
 						RESOURCE resource=container.pop();
 						this.inUseMeter.increment();
@@ -71,7 +71,7 @@ public class Pool<RESOURCE extends Resource>
 			{
 				try
 				{
-					Condition.waitForNoThrow(this,()->{return container.size()>0;});
+					Synchronization.waitForNoThrow(this,()->{return container.size()>0;});
 					RESOURCE resource=container.pop();
 					this.inUseMeter.increment();
 					resource.activate(trace);
