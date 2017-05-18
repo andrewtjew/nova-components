@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.nova.core.Utils;
+import org.nova.html.elements.Builder;
 import org.nova.html.elements.Element;
 
 public class Menu extends Element
@@ -116,7 +117,7 @@ public class Menu extends Element
 		}
 	}
     @Override
-    public void write(OutputStream outputStream) throws Throwable
+    public void build(Builder builder) throws Throwable
     {
         byte[] bytes=null;
         synchronized (this)
@@ -124,7 +125,7 @@ public class Menu extends Element
             build();
             bytes=this.bytes;
         }
-        outputStream.write(bytes);
+        builder.getOutputStream().write(bytes);
     }
     
     private void build()

@@ -6,11 +6,12 @@ import org.nova.html.tags.a;
 import org.nova.html.tags.div;
 import org.nova.html.tags.link;
 import org.nova.html.tags.span;
+import org.nova.html.widgets.Head;
 
 public class SideNavigationMenuButton extends div
 {
     final private span button;
-    public SideNavigationMenuButton(String id,int width,int height,String openStateText,String closeStateText,int sideNavWidth,String sourcePath,String cssFile)
+    public SideNavigationMenuButton(Head head,String id,int width,int height,String openStateText,String closeStateText,int sideNavWidth,String sourcePath,String cssFile)
     {
         int fontSize=(int)(height*0.9f)-1;
         this.button=returnAddInner(new span()).addInner(openStateText)                
@@ -18,20 +19,21 @@ public class SideNavigationMenuButton extends div
         .onclick("var d=document.getElementById('"+id+"');if (d.offsetWidth==0) {d.style.width='"+sideNavWidth+"px';this.innerHTML='"+closeStateText+"';} else {d.style.width='0px';this.innerHTML='"+openStateText+"';}");
 
         id(id).class_("sidenav")
-                .style("margin-top:"+height+"px;")
-                .addInner(new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
+                .style("margin-top:"+height+"px;");
+        
+        head.add(SideNavigationMenuButton.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
     }
-    public SideNavigationMenuButton(String id,int width,int height,String openStateText,String closeStateText,int sideNavWidth)
+    public SideNavigationMenuButton(Head head,String id,int width,int height,String openStateText,String closeStateText,int sideNavWidth)
     {
-        this(id,width,height,openStateText,closeStateText,sideNavWidth,"/resources/html","/w3c/SideNavigationMenu/sidenavbutton.css");
+        this(head,id,width,height,openStateText,closeStateText,sideNavWidth,"/resources/html","/w3c/SideNavigationMenu/sidenavbutton.css");
     }
-    public SideNavigationMenuButton(String id,int width,int height,int sideNavWidth)
+    public SideNavigationMenuButton(Head head,String id,int width,int height,int sideNavWidth)
     {
-        this(id,width,height,"&#8801;","&#xd7;",sideNavWidth,"/resources/html","/w3c/SideNavigationMenu/sidenavbutton.css");
+        this(head,id,width,height,"&#8801;","&#xd7;",sideNavWidth,"/resources/html","/w3c/SideNavigationMenu/sidenavbutton.css");
     }
-    public SideNavigationMenuButton(String id,int sideNavWidth)
+    public SideNavigationMenuButton(Head head,String id,int sideNavWidth)
     {
-        this(id,48,48,sideNavWidth);
+        this(head,id,48,48,sideNavWidth);
     }
     public SideNavigationMenuButton addMenuItem(String text,String URL)
     {

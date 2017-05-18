@@ -4,6 +4,6 @@ import java.io.OutputStream;
 
 public abstract class Element
 {
-    abstract public void write(OutputStream outputStream) throws Throwable;
+    abstract public void build(Builder builder) throws Throwable;
 
 }

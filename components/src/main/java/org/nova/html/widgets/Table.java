@@ -5,6 +5,7 @@ import org.nova.html.tags.thead;
 import org.nova.html.tags.tr;
 import org.nova.html.tags.tbody;
 import org.nova.html.tags.tfoot;
+import org.nova.html.tags.th;
 
 public class Table extends table
 {
@@ -41,7 +42,7 @@ public class Table extends table
     }
     public Table setHeadRowItems(Object...objects)
     {
-        this.thead.addInner(new Row().addItems(objects));
+        this.thead.addInner(new Row().add(objects));
         return this;
     }
     public Table setFootRow(tr tr)
@@ -51,7 +52,7 @@ public class Table extends table
     }
     public Table setFootRowItems(Object...objects)
     {
-        this.tfoot.addInner(new Row().addItems(objects));
+        this.tfoot.addInner(new Row().add(objects));
         return this;
     }
     public Table addBodyRow(tr tr)
@@ -61,7 +62,7 @@ public class Table extends table
     }
     public Table addBodyRowItems(Object...objects)
     {
-        this.tbody.addInner(new Row().addItems(objects));
+        this.tbody.addInner(new Row().add(objects));
         return this;
     }
     

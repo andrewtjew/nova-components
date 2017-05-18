@@ -5,11 +5,12 @@ import java.io.OutputStream;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
 import org.nova.html.tags.td;
+import org.nova.html.tags.th;
 import org.nova.html.tags.tr;
 
-public class Row extends tr
+public class HeadRow extends th
 {
-    public Row add(String...items)
+    public HeadRow addItems(String...items)
     {
         for (String item:items)
         {
@@ -17,7 +18,7 @@ public class Row extends tr
         }
         return this;
     }
-    public Row add(Object...items)
+    public HeadRow addItems(Object...items)
     {
         for (Object item:items)
         {
@@ -25,12 +26,12 @@ public class Row extends tr
         }
         return this;
     }
-    public Row addWithTitle(String item,String title)
+    public HeadRow addItem(String item,String title)
     {
         addInner(new td().addInner(item).title(title));
         return this;
     }
-    public Row onClickLocation(String URL)
+    public HeadRow onClickLocation(String URL)
     {
         onclick("window.location='"+URL+"'");
         return this;

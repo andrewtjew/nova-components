@@ -11,22 +11,23 @@ import org.nova.html.tags.div;
 import org.nova.html.tags.link;
 import org.nova.html.tags.script;
 import org.nova.html.tags.span;
+import org.nova.html.widgets.Head;
 
 public class SideNavigationMenu extends div
 {
     final private String id;
     final private int width;
-    public SideNavigationMenu(String id,int width)
+    public SideNavigationMenu(Head head,String id,int width)
     {
-        this(id,width,"/resources/html","/w3c/SideNavigationMenu/style.css");
+        this(head,id,width,"/resources/html","/w3c/SideNavigationMenu/style.css");
     }
-    public SideNavigationMenu(String id,int width,String sourcePath,String cssFile)
+    public SideNavigationMenu(Head head,String id,int width,String sourcePath,String cssFile)
     {
         this.id=id;
         this.width=width;
         id(id);
         class_("sidenav");
-        this.addInner(new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
+        head.add(SideNavigationMenu.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
         this.addInner(new a().href("javascript:void(0)").class_("closebtn").onclick("document.getElementById('"+id+"').style.width = '0';").addInner("&times;"));
     }
 

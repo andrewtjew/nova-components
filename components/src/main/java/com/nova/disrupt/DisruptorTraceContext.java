@@ -16,7 +16,7 @@ public class DisruptorTraceContext implements AutoCloseable
     final private Logger logger;
     final private Disruptor disruptor;
     final private ArrayList<Item> logItems;
-    private Exception exception;
+    private Throwable throwable;
     
     public DisruptorTraceContext(Trace parent,TraceManager traceManager,Logger logger,Disruptor disruptor,String traceCategory,String logMessage)
     {
@@ -50,19 +50,10 @@ public class DisruptorTraceContext implements AutoCloseable
     {
         this.trace.endWait();
     }
-    public Exception handleThrowable(Throwable throwable)
+    public Throwable handleThrowable(Throwable throwable)
     {
-        Exception ex=null;
-        if (throwable instanceof Exception)
-        {
-            ex=(Exception)throwable;
-        }
-        else
-        {
-            ex=new Exception(throwable);
-        }
-        this.exception=ex;
-        return ex;
+        this.throwable=throwable;
+        return throwable;
     }
     public void addLogItem(Item item)
     {
@@ -76,7 +67,7 @@ public class DisruptorTraceContext implements AutoCloseable
         {
             return;
         }
-        if (this.exception==null)
+        if (this.throwable==null)
         {
             if (this.disruptor!=null)
             {
@@ -94,12 +85,16 @@ public class DisruptorTraceContext implements AutoCloseable
                 }
             }
         }
-        this.trace.close(this.exception);
+        this.trace.close(this.throwable);
         this.logger.log(trace,this.logMessage,Logger.toArray(this.logItems));
         this.trace=null;
-        if (this.exception!=null)
+        if (this.throwable!=null)
         {
-            throw this.exception;
+            if (this.throwable instanceof Exception)
+            {
+                throw (Exception)this.throwable;
+            }
+            throw new Exception(this.throwable);
         }
     }
 

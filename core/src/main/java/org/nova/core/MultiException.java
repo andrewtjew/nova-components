@@ -5,27 +5,34 @@ import java.util.List;
 
 public class MultiException extends Exception
 {
-	private static final long serialVersionUID = 2803345797507011758L;
+    private static final long serialVersionUID = 2803345797507011758L;
 	private static final String CLASSNAME=MultiException.class.getSimpleName();
+	final private Throwable[] throwables;
 	
-	static Throwable chain(Throwable[] throwables)
-	{
-		ArrayList<StackTraceElement> list=new ArrayList<>();
-		for (int j=0;j<throwables.length;j++)
-		{
-			Throwable t=throwables[j];			
-            list.add(new StackTraceElement(t.getClass().getName(),t.getMessage(),null,1));
-			StackTraceElement[] elements=t.getStackTrace();
-			for (int i=0;i<elements.length;i++)
-			{
-				list.add(elements[i]);
-			}
-            list.add(new StackTraceElement("index",Integer.toString(j),CLASSNAME+".java",1));
-		}
-		Exception e=new Exception();
-		e.setStackTrace(list.toArray(new StackTraceElement[list.size()]));
-		return e;
-	}
+    static Throwable chain(Throwable[] throwables)
+    {
+        if (throwables.length==0)
+        {
+            return null;
+        }
+        NodeException[] nodeExceptions=new NodeException[throwables.length];
+        for (int i=0;i<throwables.length;i++)
+        {
+            nodeExceptions[i]=new NodeException(i, throwables[i]);
+        }
+        
+        for (int i=0;i<nodeExceptions.length-1;i++)
+        {
+            Throwable throwable=throwables[i];
+            while (throwable.getCause()!=null)
+            {
+                throwable=throwable.getCause();
+            }
+            throwable.initCause(nodeExceptions[i+1]);
+        }
+        return nodeExceptions[0];
+    }
+
 	
 	public MultiException(String message,List<Throwable> throwables)
 	{
@@ -35,12 +42,17 @@ public class MultiException extends Exception
 	{
 		this(throwables.toArray(new Throwable[throwables.size()]));
 	}
-	public MultiException(String message,Throwable[] throwables)
+	public MultiException(Throwable... throwables)
+	{
+	    this(null,throwables);
+	}
+	public MultiException(String message,Throwable...throwables)
 	{
 		super(message,chain(throwables));
+		this.throwables=throwables;
 	}
-	public MultiException(Throwable...throwables)
+	public Throwable[] getThrowables()
 	{
-		super(chain(throwables));
+	    return this.throwables;
 	}
 }

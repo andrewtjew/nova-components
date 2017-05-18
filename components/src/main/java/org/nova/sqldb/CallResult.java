@@ -34,7 +34,7 @@ public class CallResult<RETURN_TYPE>
 
 	public <TYPE> TYPE[] getArray(int index,Class<TYPE> type) throws Throwable
 	{
-	    return Accessor.convert(this.rowSets[index], type);
+	    return Accessor.map(this.rowSets[index], type);
 	}
 	
 	public RETURN_TYPE getReturnValue()

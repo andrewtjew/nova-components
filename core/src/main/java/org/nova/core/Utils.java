@@ -248,6 +248,10 @@ public class Utils
 
 	public static String millisToDurationString(long millis)
 	{
+	    if (millis==0)
+	    {
+	        return "0";
+	    }
 		StringBuilder sb=new StringBuilder();
 		long days=millis/(1000*3600*24);
 		long hours=(millis-days*1000*3600*24)/(1000*3600);

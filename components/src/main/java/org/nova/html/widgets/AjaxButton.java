@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import org.nova.core.KeyValue;
 import org.nova.html.Attribute;
+import org.nova.html.elements.Builder;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
 
@@ -93,9 +94,9 @@ public class AjaxButton extends InnerElement<AjaxButton>
 		return sb.toString();
 	}
     @Override
-    public void write(OutputStream outputStream) throws Throwable
+    public void build(Builder builder) throws Throwable
     {
-        outputStream.write(toString().getBytes(StandardCharsets.UTF_8));
+        builder.getOutputStream().write(toString().getBytes(StandardCharsets.UTF_8));
         
     }
 }

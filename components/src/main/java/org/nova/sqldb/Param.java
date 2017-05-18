@@ -7,16 +7,17 @@ import java.sql.Types;
 
 public class Param
 {
-	enum Direction
+	public enum Direction
 	{
 		IN,
 		OUT,
 		IN_OUT,
 	}
 	
-	final Object inValue;
-	final int sqlType;
-	final Direction direction;
+	public final Object inValue;
+	public final int sqlType;
+	public final Direction direction;
+	
 	
 	private Param(Direction direction,int sqlType,Object inValue) throws Exception
 	{
@@ -32,7 +33,7 @@ public class Param
         }
         return getSqlType(object.getClass());
     }
-	static int getSqlType(Class<?> type) throws Exception
+	public static int getSqlType(Class<?> type) throws Exception
 	{
 		if (type==String.class)
 		{
@@ -124,6 +125,10 @@ public class Param
             }
         }
         return new Param(Direction.IN_OUT,sqlType,inValue);
+    }
+    public static Param Object(Object inValue) throws Exception
+    {
+        return new Param(null,0,inValue);
     }
 	
     public static Param Out(Class<?> type) throws Exception

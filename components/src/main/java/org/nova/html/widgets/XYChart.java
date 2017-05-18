@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import javax.xml.stream.events.Characters;
 
+import org.nova.html.elements.Builder;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
 
@@ -84,9 +85,9 @@ public class XYChart extends InnerElement<XYChart>
 	}
 
     @Override
-    public void write(OutputStream outputStream) throws Throwable
+    public void build(Builder builder) throws Throwable
     {
-        outputStream.write(toString().getBytes(StandardCharsets.UTF_8));
+        builder.getOutputStream().write(toString().getBytes(StandardCharsets.UTF_8));
     }
 	
 	

@@ -14,10 +14,12 @@ import org.nova.collections.FileCacheConfiguration;
 import org.nova.configuration.Configuration;
 import org.nova.core.Utils;
 import org.nova.html.TypeMappings;
+import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.operator.Menu;
 import org.nova.html.operator.OperatorResultWriter;
 import org.nova.html.widgets.AjaxQueryResultWriter;
+import org.nova.html.widgets.MenuBar;
 import org.nova.html.widgets.templates.Template;
 import org.nova.html.widgets.templates.TemplateManager;
 import org.nova.http.server.JettyServerFactory;
@@ -57,7 +59,9 @@ public class ServerApplication extends CoreApplication
 	final private Vault vault;
 	private long startTime;
 	final private String name;
-	
+	final private MenuBar menuBar;
+	final private String hostName;
+	private Template template;
 	@OperatorVariable
 	boolean debug;
 	
@@ -65,6 +69,7 @@ public class ServerApplication extends CoreApplication
 	{
 		super(configuration);
 		this.name=name;
+		this.hostName=Utils.getLocalHostName();
 		
 		//Discover base directory. This is important to know for troubleshooting errors with file paths, so we output this info and we put this in the configuration. 
         File baseDirectory=new File(".");
@@ -206,6 +211,8 @@ public class ServerApplication extends CoreApplication
         this.getOperatorVariableManager().register("HttpServer.operator", this.operatorServer);
         this.getOperatorVariableManager().register("HttpServer.public", this.publicServer);
         this.getOperatorVariableManager().register("HttpServer.private", this.privateServer);
+
+        this.menuBar=new MenuBar();
 	}
 	
 	private void printUnsecureVaultWarning(PrintStream stream)
@@ -216,8 +223,9 @@ public class ServerApplication extends CoreApplication
         stream.println("**************************************");
 	}
 	
-	private void startServer(HttpServer server) throws Exception
+	private void startServer(HttpServer server) throws Throwable
 	{
+        this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName);
 		if (server!=null)
 		{
 			server.start();
@@ -299,6 +307,31 @@ public class ServerApplication extends CoreApplication
     {
         return this.operatorResultWriter;
     }
+    
+    public MenuBar getMenuBar()
+    {
+        return this.menuBar;
+    }
+    
+    public OperatorPage buildOperatorPage(String title) throws Throwable
+    {
+        if (this.debug)
+        {
+            Template template=new Template(OperatorPage.buildTemplate(this.menuBar, this.name, this.hostName));
+            template.fill("title", title);
+            template.fill("now", Utils.nowToLocalDateTimeString());
+            return new OperatorPage(template);
+        }
+        else
+        {
+            Template template=new Template(this.template);
+            template.fill("title", title);
+            template.fill("now", Utils.nowToLocalDateTimeString());
+            return new OperatorPage(template);
+            
+        }
+    }
+    
 	public String getName()
 	{
 	    return this.name;

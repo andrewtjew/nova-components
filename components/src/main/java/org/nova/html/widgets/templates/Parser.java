@@ -34,7 +34,7 @@ public class Parser
         parse();
         if (this.sb.length()>0)
         {
-            this.sections.add(new TextSection(this.sb.toString()));
+            this.sections.add(new StaticSection(this.sb.toString()));
         }
         return this.sections.toArray(new Section[this.sections.size()]);
     }
@@ -131,7 +131,7 @@ public class Parser
             lexeme=this.lexer.produceSimpleString(c);
             if ("key".equals(name))
             {
-                this.sections.add(new TextSection(this.sb.toString()));
+                this.sections.add(new StaticSection(this.sb.toString()));
                 this.sb=new StringBuilder();
                 this.sections.add(new InsertSection(lexeme.getValue()));
 

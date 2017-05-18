@@ -59,7 +59,7 @@ public class AccessorTraceContext extends DisruptorTraceContext
     }
     
     @Override
-    public Exception handleThrowable(Throwable throwable) 
+    public Throwable handleThrowable(Throwable throwable) 
     {
         try
         {
@@ -67,7 +67,7 @@ public class AccessorTraceContext extends DisruptorTraceContext
             Connection connection=this.accessor.connection;
             this.accessor.connection = null;
             connection.close();
-            return super.handleThrowable(new MultiException(throwable));
+            return super.handleThrowable(throwable);
         }
         catch (Throwable t)
         {

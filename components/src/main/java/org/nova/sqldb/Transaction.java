@@ -17,22 +17,21 @@ public class Transaction implements AutoCloseable
 		this.accessor=accessor;
 	}
 	
-	private MultiException closeConnection(Throwable t)
+	private Throwable closeConnection(Throwable throwable)
 	{
-        MultiException ex=new MultiException(t);
         try
         {
             Connection connection=this.accessor.connection;
             this.accessor.connection=null;
             connection.close();
         }
-        catch (Throwable tt)
+        catch (Throwable t)
         {
-            ex=new MultiException(tt,t);
+            throwable=new MultiException(t,throwable);
         }
         this.accessor.connector.logger.log(this.trace,this.accessor.connector.getName());
-        this.trace.close(ex);
-        return ex;
+        this.trace.close(throwable);
+        return throwable;
 	}
 	
 	public void commit() throws Throwable

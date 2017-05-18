@@ -5,6 +5,7 @@ import java.net.InetAddress;
 
 import org.nova.core.Utils;
 import org.nova.html.elements.Element;
+import org.nova.html.elements.OutputStreamBuilder;
 import org.nova.html.widgets.Text;
 import org.nova.html.widgets.templates.Template;
 import org.nova.http.server.ContentWriter;
@@ -42,7 +43,7 @@ public class OperatorResultWriter extends ContentWriter<OperatorResult>
 			page.fill("info", new Text(this.name+"@"+this.hostName+"<br/>"+Utils.nowToLocalDateTimeString()));
 			page.fill("title", new Text(result.getTitle()));
 			page.fill("content", result.getContent());
-			page.write(outputStream);
+			page.build(new OutputStreamBuilder(outputStream));
 		}
 		
 	}

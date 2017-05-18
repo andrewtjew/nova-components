@@ -1,19 +1,23 @@
 package org.nova.html.widgets;
 import org.nova.html.tags.html;
 import org.nova.html.tags.head;
+
+import java.io.OutputStream;
+
+import org.nova.html.elements.Element;
 import org.nova.html.tags.body;
 
 public class BasicPage extends Content
 {
     final private html html;
-    final private head head;
+    final private Head head;
     final private body body;
     
     public BasicPage(String docType)
     {
-        this.addInner(new DocType(docType));
-        this.html=this.returnAddInner(new html());
-        this.head=this.html.returnAddInner(new head());
+        addInner(new DocType(docType));
+        this.html=returnAddInner(new html());
+        this.head=this.html.returnAddInner(new Head());
         this.body=this.html.returnAddInner(new body());
     }
     public BasicPage()
@@ -21,7 +25,7 @@ public class BasicPage extends Content
         this("html");
     }
     
-    public head head()
+    public Head getHead()
     {
         return this.head;
     }

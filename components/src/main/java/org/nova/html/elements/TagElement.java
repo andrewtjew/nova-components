@@ -1,5 +1,6 @@
 package org.nova.html.elements;
 
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -44,11 +45,13 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
     static byte[] INLINE_CLOSE=new byte[]{' ','/','>'};
     
     @Override
-    public void write(OutputStream outputStream) throws Throwable
+    public void build(Builder builder) throws Throwable
     {
+        OutputStream outputStream=builder.getOutputStream();
         outputStream.write(this.sb.toString().getBytes(StandardCharsets.UTF_8));
         outputStream.write(CLOSE);
-        super.write(outputStream);
+        super.build(builder);
+        outputStream=builder.getOutputStream();
         outputStream.write(END_OPEN);
         outputStream.write(this.tag.getBytes(StandardCharsets.UTF_8));
         outputStream.write(CLOSE);
@@ -56,10 +59,20 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
     @Override
     public String toString()
     {
-        StringBuilder out=new StringBuilder(this.sb.toString());
-        out.append('>');
-        out.append(super.toString());
-        out.append("</").append(this.tag).append('>');
-        return out.toString();
+        try
+        {
+            try (ByteArrayOutputStream outputStream=new ByteArrayOutputStream())
+            {
+                OutputStreamBuilder builder=new OutputStreamBuilder(outputStream);
+                build(builder);
+                outputStream.close();
+                return outputStream.toString();
+            }            
+        }
+        catch (Throwable e)
+        {
+            return e.getMessage();
+        }
+        
     }
 }

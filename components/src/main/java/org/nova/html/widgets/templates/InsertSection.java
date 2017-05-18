@@ -4,7 +4,9 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.nova.core.Utils;
+import org.nova.html.elements.Builder;
 import org.nova.html.elements.Element;
+import org.nova.html.elements.OutputStreamBuilder;
 
 public class InsertSection extends Section
 {
@@ -19,7 +21,7 @@ public class InsertSection extends Section
         Element element=map.get(this.key);
         if (element!=null)
         {
-            element.write(outputStream);
+            element.build(new OutputStreamBuilder(outputStream));
         }
     }
 	

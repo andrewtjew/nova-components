@@ -267,7 +267,7 @@ public class TraceManager
 			}
 		}
 	}
-	public Map<String,TraceNode> getGraphSnapshot()
+	public Map<String,TraceNode> getTraceRootSnapshot()
 	{
 		HashMap<String,TraceNode> traceRoots=new HashMap<>();
 		synchronized (this.traceRoots)

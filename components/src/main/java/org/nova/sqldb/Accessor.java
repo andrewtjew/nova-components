@@ -23,6 +23,8 @@ import org.nova.logging.Item;
 import org.nova.sqldb.Param.Direction;
 import org.nova.tracing.Trace;
 
+import com.microsoft.sqlserver.jdbc.SQLServerException;
+
 public class Accessor extends Resource
 {
 	final private long connectionIdleTimeout;
@@ -286,7 +288,7 @@ public class Accessor extends Resource
         }
     }
 	
-    static <TYPE> TYPE[] convert(RowSet rowSet,Class<TYPE> type) throws Throwable
+    public static <TYPE> TYPE[] map(RowSet rowSet,Class<TYPE> type) throws Throwable
     {
         ArrayList<TYPE> list = new ArrayList<>();
         int columns = rowSet.getColumns();
@@ -619,7 +621,7 @@ public class Accessor extends Resource
 						if ((param.direction==Direction.IN)||(param.direction==Direction.IN_OUT))
 						{
                             context.addLogItem(new Item("param"+i,param.inValue));
-							statement.setObject(i + offset, parameters[i].inValue);
+							statement.setObject(i + offset, param.inValue);
 						}
 						if ((param.direction==Direction.OUT)||(param.direction==Direction.IN_OUT))
 						{
@@ -673,6 +675,8 @@ public class Accessor extends Resource
 			}
             catch (Throwable ex)
             {
+//                SQLServerException sql=(SQLServerException)ex;
+//                System.out.println(sql.getSQLState());
                 throw context.handleThrowable(ex);
             }
 		}

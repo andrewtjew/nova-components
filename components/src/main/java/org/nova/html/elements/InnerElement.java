@@ -68,18 +68,18 @@ public abstract class InnerElement<ELEMENT extends InnerElement<ELEMENT>> extend
     }
 
     @Override
-    public void write(OutputStream outputStream) throws Throwable
+    public void build(Builder builder) throws Throwable
     {
         if (this.inners!=null)
         {
             for (Element inner:this.inners)
             {
-                inner.write(outputStream);
+                inner.build(builder);
             }
         }
         else if (inner!=null)
         {
-            inner.write(outputStream);
+            inner.build(builder);
         }
     }
     @Override
