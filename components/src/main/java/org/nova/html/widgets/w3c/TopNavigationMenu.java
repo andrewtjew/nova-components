@@ -11,6 +11,11 @@ public class TopNavigationMenu extends div
 {
     public TopNavigationMenu(Head head,String id,String sourcePath,String cssFile)
     {
+        if (id==null)
+        {
+            id=Integer.toString(this.hashCode());
+        }
+
         id(id).class_("topnav");
         if (head!=null)
         {

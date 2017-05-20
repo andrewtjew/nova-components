@@ -57,11 +57,12 @@ public class OperatorResultWriter extends ContentWriter<OperatorResult>
 	public void writeExample(OutputStream outputStream, Class<?> contentType) throws Throwable
 	{
 	}
-
+/*
     public Menu getMenu()
     {
         return menu;
     }
+    */
     public Template getTemplate()
     {
         return this.template;

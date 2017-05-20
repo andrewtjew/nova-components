@@ -236,7 +236,7 @@ public class ServerApplication extends CoreApplication
 	{
         this.startTime=System.currentTimeMillis();
         this.operatorServer.register(new ServerOperatorPages(this));
-        this.operatorServer.register(new OperatorPages(this.operatorVariableManager, this.getOperatorResultWriter().getMenu()));
+        this.operatorServer.register(new OperatorPages(this.operatorVariableManager, this.getMenuBar()));
         onStart();
         startServer(this.operatorServer);
         startServer(this.privateServer);

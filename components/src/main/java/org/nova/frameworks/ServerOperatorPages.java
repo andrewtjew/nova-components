@@ -30,29 +30,20 @@ import org.nova.concurrent.TimerTask;
 import org.nova.configuration.Configuration;
 import org.nova.configuration.ConfigurationItem;
 import org.nova.core.Utils;
-import org.nova.html.Attribute;
-import org.nova.html.HtmlWriter;
-import org.nova.html.Selection;
-import org.nova.html.TableList;
 import org.nova.html.operator.Menu;
-import org.nova.html.operator.OperatorResult;
 import org.nova.html.operator.OperatorResultWriter;
 import org.nova.html.tags.a;
-import org.nova.html.tags.area;
 import org.nova.html.tags.div;
 import org.nova.html.tags.fieldset;
 import org.nova.html.tags.form_get;
 import org.nova.html.tags.form_post;
-import org.nova.html.tags.h3;
 import org.nova.html.tags.hr;
 import org.nova.html.tags.input_checkbox;
 import org.nova.html.tags.input_number;
 import org.nova.html.tags.input_submit;
 import org.nova.html.tags.input_text;
 import org.nova.html.tags.legend;
-import org.nova.html.tags.link;
 import org.nova.html.tags.p;
-import org.nova.html.tags.span;
 import org.nova.html.tags.style;
 import org.nova.html.tags.td;
 import org.nova.html.tags.textarea;
@@ -99,8 +90,6 @@ import org.nova.http.server.Response;
 import org.nova.http.server.HtmlContentWriter;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
-import org.nova.html.elements.InnerElement;
-import org.nova.html.enums.link_rel;
 import org.nova.http.server.annotations.ContentDecoders;
 import org.nova.http.server.annotations.ContentEncoders;
 import org.nova.http.server.annotations.ContentReaders;
@@ -134,7 +123,6 @@ import org.nova.tracing.TraceNode;
 import org.nova.tracing.TraceStats;
 
 import com.google.common.base.Strings;
-import com.mysql.fabric.xmlrpc.base.Data;
 
 @Description("Handlers for server operator pages")
 @ContentDecoders(GzipContentDecoder.class)
@@ -256,51 +244,6 @@ public class ServerOperatorPages
         menuBar.add("/operator/httpServer/methods/operator","Servers","Operator","Methods");
         menuBar.add("/operator/httpServer/classDefinitions/operator","Servers","Operator","Class Definitions");
 
-        Menu menu = serverApplication.getOperatorResultWriter().getMenu();
-
-        menu.add("Process|Configuration", "/operator/application/configuration");
-        menu.add("Process|Futures", "/operator/application/futures");
-        menu.add("Process|Timer Tasks", "/operator/application/timers");
-        menu.add("Process|Meters|Categories", "/operator/meters/categories");
-        menu.add("Process|Meters|Level Meters", "/operator/meters/levelMeters");
-        menu.add("Process|Meters|Rate Meters", "/operator/meters/rateMeters");
-        menu.add("Process|Meters|Count Meters", "/operator/meters/countMeters");
-        menu.add("Process|Meters|CountAverageRate Meters", "/operator/meters/countAverageRateMeters");
-
-        menu.add("Tracing|Active Trace Stats", "/operator/tracing/activeStats");
-        menu.add("Tracing|Last Trace Stats", "/operator/tracing/lastStats");
-        menu.add("Tracing|Trace Graph", "/operator/tracing/traceGraph");
-        menu.add("Tracing|Root Categories", "/operator/tracing/traceRoots");
-        menu.add("Tracing|All Categories", "/operator/tracing/allCategories");
-        menu.add("Tracing|Active Traces", "/operator/tracing/activeTraces");
-        menu.add("Tracing|Last Traces", "/operator/tracing/lastTraces");
-        menu.add("Tracing|Last Exception Traces", "/operator/tracing/lastExceptions");
-
-        menu.add("Logging|Status", "/operator/logging/status");
-
-        menu.add("Servers|Public|Performance", "/operator/httpServer/performance/public");
-        menu.add("Servers|Public|Status", "/operator/httpServer/status/public");
-        menu.add("Servers|Public|Last Requests", "/operator/httpServer/lastRequests/public");
-        menu.add("Servers|Public|Last Not Founds (404s)", "/operator/httpServer/lastNotFounds/public");
-        menu.add("Servers|Public|Last Exception Requests", "/operator/httpServer/lastExceptionRequests/public");
-        menu.add("Servers|Public|Methods", "/operator/httpServer/methods/public");
-        menu.add("Servers|Public|Class Definitions", "/operator/httpServer/classDefinitions/public");
-
-        menu.add("Servers|Private|Status", "/operator/httpServer/status/private");
-        menu.add("Servers|Private|Performance", "/operator/httpServer/performance/private");
-        menu.add("Servers|Private|Last Requests", "/operator/httpServer/lastRequests/private");
-        menu.add("Servers|Private|Last Not Founds (404s)", "/operator/httpServer/lastNotFounds/private");
-        menu.add("Servers|Private|Last Exception Requests", "/operator/httpServer/lastExceptionRequests/private");
-        menu.add("Servers|Private|Methods", "/operator/httpServer/methods/private");
-        menu.add("Servers|Private|Class Definitions", "/operator/httpServer/classDefinitions/private");
-        
-        menu.add("Servers|Operator|Status", "/operator/httpServer/status/operator");
-        menu.add("Servers|Operator|Performance", "/operator/httpServer/performance/operator");
-        menu.add("Servers|Operator|Last Requests", "/operator/httpServer/lastRequests/operator");
-        menu.add("Servers|Operator|Last Not Founds (404s)", "/operator/httpServer/lastNotFounds/operator");
-        menu.add("Servers|Operator|Last Exception Requests", "/operator/httpServer/lastExceptionRequests/operator");
-        menu.add("Servers|Operator|Methods", "/operator/httpServer/methods/operator");
-        menu.add("Servers|Operator|Class Definitions", "/operator/httpServer/classDefinitions/operator");
         serverApplication.getOperatorVariableManager().register(serverApplication.getTraceManager());
         serverApplication.getOperatorVariableManager().register(this);
     }
@@ -551,20 +494,29 @@ public class ServerOperatorPages
         return page;
     }
     
-    //--- old
-    void write(HtmlWriter writer, Trace trace, Object family)
+
+    void write(Table table, Trace trace, Object family) throws Exception
     {
-        writer.tr(writer.inner().td(family).td(writer.inner().a(trace.getCategory(), "./activeTrace/" + trace.getNumber())).td(trace.getNumber())
-                .td(Utils.millisToLocalDateTime(trace.getCreated())).td(trace.getActiveNs() / 1000000).td(trace.getWaitNs() / 1000000).td(trace.getDurationNs() / 1000000)
-                .td(trace.isWaiting()).td(trace.getDetails()).td(trace.getThread().getName()));
+        table.addBodyRow(new Row()
+                .add(family,trace.getCategory()
+                ,trace.getNumber()
+                ,Utils.millisToLocalDateTime(trace.getCreated())
+                ,trace.getActiveNs() / 1000000
+                ,trace.getWaitNs() / 1000000
+                ,trace.getDurationNs() / 1000000
+                ,trace.isWaiting()
+                ,trace.getDetails()
+                ,trace.getThread().getName()
+                ).onclick("window.location='"+new PathAndQueryBuilder("./activeTrace").addQuery("number", trace.getNumber()).toString()+"'")
+                );
 
     }
 
     @GET
     @Path("/operator/tracing/activeTrace")
-    public Response<OperatorResult> activeTrace(@QueryParam("number") long number)
+    public Element activeTrace(@QueryParam("number") long number) throws Throwable
     {
-        HtmlWriter writer = new HtmlWriter();
+        OperatorPage page=this.serverApplication.buildOperatorPage("Active Trace");
         Trace[] traces = this.serverApplication.getTraceManager().getActiveSnapshot();
         Trace found = null;
         for (Trace trace : traces)
@@ -577,9 +529,15 @@ public class ServerOperatorPages
         }
         if (found != null)
         {
-            writer.begin_table(1);
-            writer.tr(writer.inner().th("T", "*=target trace, A=ancestor, number=child number").th("Category").th("Number").th("Created").th("Active", "(ms)").th("Wait", "(ms)")
-                    .th("Duration", "Active+Wait (ms)").th("Waiting").th("Details").th("thread"));
+            
+            WideTable table=page.content().returnAddInner(new WideTable(page.head()));
+            table.setHeadRow(new Row()
+                    .addWithTitle("T", "*=target trace, A=ancestor, C:n=Child")
+                    .add("Category","Number","Created")
+                    .addWithTitle("Active", "(ms)")
+                    .addWithTitle("Wait", "(ms)")
+                    .addWithTitle("Duration", "Active+Wait (ms)")
+                    .add("Waiting","Details","thread"));
 
             ArrayList<ArrayList<Trace>> childeren = new ArrayList<>();
             for (Trace trace : traces)
@@ -601,28 +559,26 @@ public class ServerOperatorPages
             {
                 for (Trace trace : list)
                 {
-                    write(writer, trace, index);
+                    write(table, trace, "C:"+index);
                 }
                 index++;
             }
             Trace trace = found;
-            write(writer, trace, "*");
+            write(table, trace, "*");
             for (trace = found.getParent(); trace != null; trace = trace.getParent())
             {
-                write(writer, trace, "A");
+                write(table, trace, "A");
             }
-            writer.end_table();
-            writer.br();
-            writer.p("Stack");
+            Accordion accordion=new Accordion(page.head(), null, true, "Stack Trace");
             StackTraceElement[] stackTrace = found.getThread().getStackTrace();
-            writer.textarea(Utils.toString(stackTrace), true, stackTrace.length + 1, 160);
+            accordion.content().addInner(toString(stackTrace, 0));
 
         }
         else
         {
-            writer.text("trace ended");
+            page.content().addInner("trace ended");
         }
-        return OperatorResult.respond(writer, "Active Trace");
+        return page;
     }
 
     @GET
@@ -946,95 +902,6 @@ public class ServerOperatorPages
     }
 
 
-    @GET
-    @Path("/operator/meters/levelMeters")
-    public Response<OperatorResult> levelMeters(@QueryParam("interval") @DefaultValue("10") long interval)
-    {
-        HtmlWriter writer = new HtmlWriter();
-        LevelMeterBox[] boxes = this.serverApplication.getMeterManager().getSnapshot().getLevelMeterBoxes();
-        writer.p("Total:" + boxes.length);
-        if (boxes.length > 0)
-        {
-            writer.begin_sortableTable(1);
-            writer.tr(writer.inner().th("Category").th("Name").th("Level", "Highest").th("Highest TimeStamp").th("Description"));
-            for (LevelMeterBox box : boxes)
-            {
-                LevelMeter meter = box.getMeter();
-                writer.tr(writer.inner().td(box.getCategory()).td(box.getName()).td(meter.getLevel()).td(meter.getMaximumLevel())
-                        .td(Utils.millisToLocalDateTimeString(meter.getHighestLevelTimeStamp())).td(box.getDescription()));
-            }
-            writer.end_table();
-        }
-        return OperatorResult.respond(writer, "Level Meters");
-    }
-
-    @GET
-    @Path("/operator/meters/rateMeters")
-    public Response<OperatorResult> countMeters(@QueryParam("interval") @DefaultValue("10") long interval)
-    {
-        HtmlWriter writer = new HtmlWriter();
-        RateMeterBox[] boxes = this.serverApplication.getMeterManager().getSnapshot().getRateMeterBoxes();
-        writer.p("Total:" + boxes.length);
-        if (boxes.length > 0)
-        {
-            writer.begin_sortableTable(1);
-            writer.tr(writer.inner().th("Category").th("Name").th("Rate", "per second").th("Count").th("Average").th("Description"));
-            for (RateMeterBox box : boxes)
-            {
-                RateMeter meter = box.getMeter();
-                writer.tr(writer.inner().td(box.getCategory()).td(box.getName()).td(String.format("%.4f", meter.sampleRate(interval))).td(meter.getCount())
-                        .td(String.format("%.4f", meter.sampleRate(interval))).td(box.getDescription()));
-            }
-            writer.end_table();
-        }
-        return OperatorResult.respond(writer, "Rate Meters");
-    }
-
-    @GET
-    @Path("/operator/meters/countMeters")
-    public Response<OperatorResult> countMeters()
-    {
-        HtmlWriter writer = new HtmlWriter();
-        CountMeterBox[] boxes = this.serverApplication.getMeterManager().getSnapshot().getCountMeterBoxes();
-        writer.p("Total:" + boxes.length);
-        if (boxes.length > 0)
-        {
-            writer.begin_sortableTable(1);
-            writer.tr(writer.inner().th("Category").th("Name").th("Count").th("Description"));
-            for (CountMeterBox box : boxes)
-            {
-                CountMeter meter = box.getMeter();
-                writer.tr(writer.inner().td(box.getCategory()).td(box.getName()).td(meter.getCount()).td(box.getDescription()));
-            }
-            writer.end_table();
-        }
-        return OperatorResult.respond(writer, "Count Meters");
-    }
-
-    @GET
-    @Path("/operator/meters/countAverageRateMeters")
-    public Response<OperatorResult> countAverageRateMeters(@QueryParam("interval") @DefaultValue("10") long interval)
-    {
-        HtmlWriter writer = new HtmlWriter();
-        CountAverageRateMeterBox[] boxes = this.serverApplication.getMeterManager().getSnapshot().getCountAverageRateMeterBoxes();
-        writer.p("Total:" + boxes.length);
-        if (boxes.length > 0)
-        {
-            writer.begin_sortableTable(1);
-            writer.tr(writer.inner().th("Category").th("Name").th("Average").th("StdDev", "Standard Deviation").th("Rate", "per second").th("Count").th("Total").th("Description"));
-            for (CountAverageRateMeterBox box : boxes)
-            {
-                CountAverageRateMeter meter = box.getMeter();
-
-                AverageAndRate averageAndRate = meter.getCountAverageRate(interval);
-                writer.tr(writer.inner().td(box.getCategory()).td(box.getName()).td(String.format("%.4f", averageAndRate != null ? averageAndRate.getAverage() : "-"))
-                        .td(String.format("%.4f", averageAndRate != null ? averageAndRate.getStandardDeviation() : "-"))
-                        .td(String.format("%.4f", averageAndRate != null ? averageAndRate.getRate() : "-")).td(meter.getCount()).td(meter.getTotal()).td(box.getDescription()));
-            }
-            writer.end_table();
-        }
-        return OperatorResult.respond(writer, "Count Average Rate Meters");
-    }
 
     @GET
     @Path("/operator/httpServer/performance/{server}")
@@ -1112,138 +979,6 @@ public class ServerOperatorPages
         return page;
     }
 
-//    @GET
-//    @Path("/operator/httpServer/performance/{server}")
-//    public Response<OperatorResult> performance(@PathParam("server")String server) throws Exception
-//    {
-//        HtmlWriter writer = new HtmlWriter();
-//        HttpServer httpServer=getHttpServer(server);
-//        RateMeter requestRateMeter = httpServer.getRequestRateMeter();
-//        double requestRate = requestRateMeter.sampleRate(this.rateSamplingDuration);
-//        writer.begin_table(0);
-//        writer.tableList("Request Rate", DOUBLE_FORMAT.format(requestRate));
-//        writer.tableList("Total Requests", requestRateMeter.getCount());
-//        writer.end_table();
-//
-//        RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
-//        writer.h2("Request Handlers");
-//        writer.p("Ports: "+Utils.combine(Utils.intArrayToList(httpServer.getPorts()),",")+", Count:" + requestHandlers.length);
-//        if (requestHandlers.length > 0)
-//        {
-//            writer.begin_sortableTable(1);
-//            writer.tr(writer.inner().th("Method").th("Count", "Count of total requests").th("% Count", "Count percentage")
-//                    .th("Duration", "Total duration in method in days hours:minutes:seconds.milliseconds").th("% Dur", "Percentage Duration")
-//                    .th("Ave Dur", "Average duration of request in milliseconds").th("Rate", "Request rate per second").th("ReqSize", "Average uncompressed size of request content in bytes")
-//                    .th("RespSize", "Average uncompressed size of response content in bytes"));
-//            double totalAll = 0;
-//            long totalCount = 0;
-//            for (RequestHandler requestHandler : requestHandlers)
-//            {
-//                Map<Integer, CountAverageRateMeter> meters = requestHandler.getStatusMeters();
-//                for (CountAverageRateMeter meter : meters.values())
-//                {
-//                    totalAll += meter.getTotal();
-//                    totalCount += meter.getCount();
-//                }
-//            }
-//            for (RequestHandler requestHandler : requestHandlers)
-//            {
-//                Map<Integer, CountAverageRateMeter> meters = requestHandler.getStatusMeters();
-//                long total = 0;
-//                long count = 0;
-//                double rate = 0;
-//                for (CountAverageRateMeter meter : meters.values())
-//                {
-//                    total += meter.getTotal();
-//                    count += meter.getCount();
-//                    AverageAndRate averageAndRate = meter.getCountAverageRate(this.rateSamplingDuration);
-//                    if (averageAndRate != null)
-//                    {
-//                        rate += averageAndRate.getRate();
-//                    }
-//                }
-//                double countPercentage = totalCount > 0 ? (100.0 * count) / totalCount : 0;
-//                double totalMilliseconds = total / 1.0e6;
-//                double totalPercentage = totalAll > 0 ? 100.0 * total / totalAll : 0;
-//                writer.tr(writer
-//                        .inner().td(
-//                                writer.inner()
-//                                        .a(requestHandler.getHttpMethod() + " " + requestHandler.getPath(),
-//                                                new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).toString())
-//                                        .td(count).td(DOUBLE_FORMAT.format(countPercentage)).td(Utils.millisToDurationString((long) totalMilliseconds)).td(DOUBLE_FORMAT.format(totalPercentage))
-//                                        .td(count > 0 ? DOUBLE_FORMAT.format(total / (1.0e6 * count)) : 0).td(DOUBLE_FORMAT.format(rate)))
-//                        .td(count > 0 ? requestHandler.getRequestUncompressedContentSizeMeter().getTotal() / count : 0)
-//                        .td(count > 0 ? requestHandler.getResponseUncompressedContentSizeMeter().getTotal() / count : 0));
-//            }
-//            writer.end_table();
-//        }
-//        return OperatorResult.respond(writer, "Performance: "+server);
-//    }
-    private void writeIfNotEmpty(HtmlWriter writer, String name, String value)
-    {
-        if ((value != null) && (value.length() > 0))
-        {
-            writer.tr(writer.inner().td(name).td(value));
-        }
-    }
-
-    private void writeContent(HtmlWriter writer, String name, String value)
-    {
-        if ((value != null) && (value.length() > 0))
-        {
-            int rows = Utils.occurs(value, "\r") + 1;
-            if (rows > 25)
-            {
-                rows = 25;
-            }
-            int cols = 160;
-            writer.text(name);
-            writer.textarea(value, new Attribute("style", "width:98%"), new Attribute("cols", cols), new Attribute("rows", rows), new Attribute("readonly", true));
-        }
-    }
-
-    private void writeNonNull(HtmlWriter writer, String name, Object value)
-    {
-        if (value != null)
-        {
-            writer.tr(writer.inner().td(name).td(value));
-        }
-    }
-
-    private void writeRequestLogEntries(HtmlWriter writer, RequestLogEntry[] entries) throws Exception
-    {
-        for (RequestLogEntry entry : entries)
-        {
-            writer.h2(entry.getRequestHandler().getKey());
-            Trace trace = entry.getTrace();
-            writer.begin_table(1);
-            writer.tr(writer.inner().th("Number", "Trace number").th("Created").th("Duration", "milliseconds").th("Wait", "Amount of time spent waiting in milliseconds").th("FromLink"));
-            writer.tr(writer.inner().td(trace.getNumber()).td(Utils.millisToLocalDateTimeString(trace.getCreated())).td(DOUBLE_FORMAT.format(trace.getDuration() * 1000.0))
-                    .td(DOUBLE_FORMAT.format(trace.getWait() * 1000.0)).td(trace.getFromLink()));
-            writer.end_table();
-            if (trace.getThrowable() != null)
-            {
-                writeContent(writer, "Exception", Utils.toString(trace.getThrowable()));
-            }
-
-            writer.h3("Request");
-
-            writer.begin_table(1);
-            writeIfNotEmpty(writer, "Request", entry.getRequest());
-            writeIfNotEmpty(writer, "Remote", entry.getRemoteEndPoint());
-            writeIfNotEmpty(writer, "Query String", entry.getQueryString());
-            writer.end_table();
-            writeContent(writer, "Headers", entry.getRequestHeaders());
-            writeContent(writer, "Content", entry.getRequestContentText());
-
-            writer.h3("Response");
-            writer.begin_table(1);
-            writeNonNull(writer, "Status Code", entry.getStatusCode());
-            writer.end_table();
-            writeContent(writer, "Headers", entry.getResponseHeaders());
-            writeContent(writer, "Content", entry.getResponseContentText());
-        }
-    }
 
     private void writeTrace(Head head,Panel panel,Trace trace)
     {
@@ -1855,43 +1590,13 @@ public class ServerOperatorPages
         fieldset.addInner(new p());
     }
 
-    private void writeParameterInfos(HtmlWriter writer, String heading, RequestHandler handler, ParameterSource filter)
-    {
-        if (Arrays.stream(handler.getParameterInfos()).filter(info ->
-        {
-            return info.getSource() == filter;
-        }).count() == 0)
-        {
-            return;
-        }
-
-        writer.h4(heading);
-        Method method = handler.getMethod();
-        writer.begin_table(1);
-        writer.tr().th("Name").th("Type").th("Default").th("Description");
-        for (ParameterInfo info : handler.getParameterInfos())
-        {
-            if (info.getSource() == filter)
-            {
-                Parameter parameter = method.getParameters()[info.getIndex()];
-                writer.tr();
-                writer.td(info.getName());
-                writer.td(parameter.getType().getName());
-                writer.td(info.getDefaultValue());
-                writer.td(getDescription(parameter));
-                ;
-            }
-        }
-        writer.end_table();
-    }
-
     private ParameterInfo findContentParameter(RequestHandler requestHandler)
     {
         for (ParameterInfo info : requestHandler.getParameterInfos())
         {
             if (info.getSource() == ParameterSource.CONTENT)
             {
-                Method method = requestHandler.getMethod();
+//                Method method = requestHandler.getMethod();
                 return info;
             }
         }
@@ -2172,137 +1877,6 @@ public class ServerOperatorPages
         }
         return page;
     }
-//    @GET
-//    @Path("/operator/httpServer/info")
-//    public Response<OperatorResult> info(@QueryParam("key") String key,@QueryParam("server") String server) throws Throwable
-//    {
-//        HtmlWriter writer = new HtmlWriter();
-//        HttpServer httpServer=getHttpServer(server);
-//        RequestHandler requestHandler = httpServer.getRequestHandler(key);
-//
-//        Map<Integer, CountAverageRateMeter> meters = requestHandler.getStatusMeters();
-//        if (meters.size() > 0)
-//        {
-//            writer.h3("Durations");
-//            writer.begin_table(1);
-//            writer.tr(writer.inner().th("Code", "Status Code").th("Count").th("Rate", "per second").th("Average", "Milliseconds").th("StdDev", "Standard Deviation").th("Total",
-//                    "Total duration in milliseconds"));
-//            for (Entry<Integer, CountAverageRateMeter> entry : meters.entrySet())
-//            {
-//                CountAverageRateMeter meter = entry.getValue();
-//                AverageAndRate averageAndRate = meter.getCountAverageRate(this.rateSamplingDuration);
-//                if (averageAndRate != null)
-//                {
-//                    writer.tr(writer.inner().td(entry.getKey()).td(meter.getCount()).td(DOUBLE_FORMAT.format(averageAndRate.getRate())).td(DOUBLE_FORMAT.format(averageAndRate.getAverage() / 1.0e6))
-//                            .td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation() / 1.0e6)).td(DOUBLE_FORMAT.format(meter.getTotal() / 1.0e6)));
-//                }
-//                else
-//                {
-//                    writer.tr(writer.inner().td(entry.getKey()).td(meter.getCount()).td(0).td(0).td(0).td(DOUBLE_FORMAT.format(meter.getTotal() / 1.0e6)));
-//
-//                }
-//            }
-//            writer.end_table();
-//        }
-//
-//        long requestUncompressed = 0;
-//        long requestCompressed = 0;
-//        long responseUncompressed = 0;
-//        long responseCompressed = 0;
-//
-//        writer.h3("Content Sizes");
-//        writer.begin_table(1);
-//        writer.tr(writer.inner().th().th("Average", "Average bytes").th("StDev", "Standard Deviation").th("Total Bytes").th("KB").th("MB").th("GB").th("TB"));
-//        CountAverageRateMeter requestMeter = requestHandler.getRequestUncompressedContentSizeMeter();
-//        AverageAndRate averageAndRate = requestMeter.getCountAverageRate(this.rateSamplingDuration);
-//        if (averageAndRate != null)
-//        {
-//            long total = requestUncompressed = requestMeter.getTotal();
-//            writer.tr(writer.inner().td("Request uncompressed content").td(DOUBLE_FORMAT.format(averageAndRate.getAverage())).td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())).td(total)
-//                    .td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024).td(total / 1024 / 1024 / 1024 / 1024));
-//        }
-//        else
-//        {
-//            long total = requestUncompressed = requestMeter.getTotal();
-//            writer.tr(writer.inner().td("Request uncompressed content").td(0).td(0).td(total).td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024)
-//                    .td(total / 1024 / 1024 / 1024 / 1024));
-//
-//        }
-//
-//        CountAverageRateMeter compressedRequestMeter = requestHandler.getRequestCompressedContentSizeMeter();
-//        averageAndRate = compressedRequestMeter.getCountAverageRate(this.rateSamplingDuration);
-//        if (averageAndRate != null)
-//        {
-//            long total = requestCompressed = compressedRequestMeter.getTotal();
-//            writer.tr(writer.inner().td("Request compressed content").td(DOUBLE_FORMAT.format(averageAndRate.getAverage())).td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())).td(total)
-//                    .td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024).td(total / 1024 / 1024 / 1024 / 1024));
-//        }
-//        else
-//        {
-//            long total = requestCompressed = compressedRequestMeter.getTotal();
-//            writer.tr(writer.inner().td("Request compressed content").td(0).td(0).td(total).td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024)
-//                    .td(total / 1024 / 1024 / 1024 / 1024));
-//
-//        }
-//
-//        CountAverageRateMeter responseMeter = requestHandler.getResponseUncompressedContentSizeMeter();
-//        averageAndRate = responseMeter.getCountAverageRate(this.rateSamplingDuration);
-//        if (averageAndRate != null)
-//        {
-//            long total = responseUncompressed = responseMeter.getTotal();
-//            writer.tr(writer.inner().td("Response uncompressed content").td(DOUBLE_FORMAT.format(averageAndRate.getAverage())).td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())).td(total)
-//                    .td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024).td(total / 1024 / 1024 / 1024 / 1024));
-//        }
-//        else
-//        {
-//            long total = responseUncompressed = responseMeter.getTotal();
-//            writer.tr(writer.inner().td("Response uncompressed content").td(0).td(0).td(total).td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024)
-//                    .td(total / 1024 / 1024 / 1024 / 1024));
-//
-//        }
-//
-//        CountAverageRateMeter compressedResponseMeter = requestHandler.getResponseCompressedContentSizeMeter();
-//        averageAndRate = compressedResponseMeter.getCountAverageRate(this.rateSamplingDuration);
-//        if (averageAndRate != null)
-//        {
-//            long total = responseCompressed = compressedResponseMeter.getTotal();
-//            writer.tr(writer.inner().td("Response compressed content").td(DOUBLE_FORMAT.format(averageAndRate.getAverage())).td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())).td(total)
-//                    .td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024).td(total / 1024 / 1024 / 1024 / 1024));
-//        }
-//        else
-//        {
-//            long total = responseCompressed = compressedResponseMeter.getTotal();
-//            writer.tr(writer.inner().td("Response compressed content").td(0).td(0).td(total).td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024)
-//                    .td(total / 1024 / 1024 / 1024 / 1024));
-//
-//        }
-//        writer.end_table();
-//
-//        writer.h3("Compression");
-//        writer.begin_table(1);
-//        writer.tr(writer.inner().th("Request").th("Response"));
-//        writer.begin_tr();
-//        if (requestUncompressed != 0)
-//        {
-//            writer.td(DOUBLE_FORMAT.format((double) requestCompressed / requestUncompressed));
-//        }
-//        else
-//        {
-//            writer.td("-");
-//        }
-//        if (responseUncompressed != 0)
-//        {
-//            writer.td(DOUBLE_FORMAT.format((double) responseCompressed / responseUncompressed));
-//        }
-//        else
-//        {
-//            writer.td("-");
-//        }
-//        writer.end_tr();
-//        writer.end_table();
-//
-//        return OperatorResult.respond(writer, "Method: " + key);
-//    }
 
     static class ContentWriterList
     {
@@ -2401,51 +1975,6 @@ public class ServerOperatorPages
         return page;
     }
     
-//    @GET
-//    @Path("/operator/httpServer/classDefinitions/{server}")
-//    public Response<OperatorResult> classDefinitions(Context context,@PathParam("server") String server) throws Throwable
-//    {
-//        HtmlWriter writer = new HtmlWriter();
-//        writer.begin_form("/operator/httpServer/classDefinitions/download/"+server, "get");
-//        writer.begin_table();
-//        writer.tr().td("Target").td(":");
-//        writer.begin_td();
-//        Selection selection=new Selection("target",new Attribute("style", "width:100%;"));
-//        selection.options(InteropTarget.values());
-//        writer.writeObject(selection);
-//        writer.end_td();
-//
-//        writer.tr().td("Namespace").td(":");
-//        writer.begin_td();
-//        writer.input_text(40,"namespace", this.serverApplication.getName());
-//        writer.end_td();
-//
-//        writer.tr().td("Columns").td(":");
-//        writer.begin_td();
-//        writer.input_text(40,"columns", "120");
-//        writer.end_td();
-//        writer.end_table();
-//        
-//        writer.begin_table();
-//        writer.td(new input_submit().value("Download"));
-//
-//        AjaxButton button = new AjaxButton("button", "Preview", "/operator/httpServer/classDefinitions/preview/"+server);
-//        button.type("post");
-//        button.val("namespace", "namespace");
-//        button.val("target", "target");
-//        button.val("columns", "columns");
-//        button.async(true);
-//        writer.td(writer.inner().writeObject(button));
-//        writer.end_td();
-//        writer.end_table();
-//        writer.end_form();
-//        writer.hr();
-//        
-//        writer.div(null, new Attribute("id", "result"));
-//        
-//        return OperatorResult.respond(writer, "Generate Interop Classes: " + server);
-//    }
-    
     @POST
     @Path("/operator/httpServer/classDefinitions/preview/{server}")
     @ContentWriters(AjaxQueryResultWriter.class)
@@ -2487,7 +2016,6 @@ public class ServerOperatorPages
     {
         OperatorPage page=buildServerOperatorPage("Method: "+key,server);
         HttpServer httpServer=getHttpServer(server);
-        HttpServletRequest request=context.getHttpServletRequest();
         RequestHandler requestHandler = httpServer.getRequestHandler(key);
         Method method = requestHandler.getMethod();
         String text = getDescription(method);
@@ -2779,7 +2307,6 @@ public class ServerOperatorPages
                 return new HttpClientEndPoint(HttpClientFactory.createSSLClient(new HttpClientConfiguration(), clientCertificateKeyStorePath, clientCertificatePassword, serverCertificateKeyStorePath, serverCertificatePassword, clusterName),endPoint);
             }
         }
-        HttpServletRequest request = context.getHttpServletRequest();
         return new HttpClientEndPoint(HttpClientFactory.createDefaultClient(),endPoint);
     }
     @GET

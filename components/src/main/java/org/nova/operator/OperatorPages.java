@@ -20,6 +20,7 @@ import org.nova.html.operator.OperatorResultWriter;
 import org.nova.html.widgets.AjaxButton;
 import org.nova.html.widgets.AjaxQueryResult;
 import org.nova.html.widgets.AjaxQueryResultWriter;
+import org.nova.html.widgets.MenuBar;
 import org.nova.http.server.Response;
 import org.nova.http.server.annotations.ContentWriters;
 import org.nova.http.server.annotations.DefaultValue;
@@ -46,11 +47,11 @@ public class OperatorPages
 		return LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), TimeZone.getDefault().toZoneId()).format(DATETIME_FORMAT);
 	}
 	
-	public OperatorPages(OperatorVariableManager container,Menu menu) throws Exception
+	public OperatorPages(OperatorVariableManager container,MenuBar menuBar) throws Exception
 	{
 		this.variableManager=container;
-		menu.add("Variables|View","/operator/variables/view");
-		menu.add("Variables|Modify","/operator/variables/modify");
+		menuBar.add("/operator/variables/view","Variables","View");
+		menuBar.add("/operator/variables/modify","Variables","Modify");
 	}
 	
 	@GET

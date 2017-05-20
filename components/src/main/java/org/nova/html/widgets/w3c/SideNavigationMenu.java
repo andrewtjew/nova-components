@@ -17,18 +17,33 @@ public class SideNavigationMenu extends div
 {
     final private String id;
     final private int width;
-    public SideNavigationMenu(Head head,String id,int width)
-    {
-        this(head,id,width,"/resources/html","/w3c/SideNavigationMenu/style.css");
-    }
     public SideNavigationMenu(Head head,String id,int width,String sourcePath,String cssFile)
     {
+        if (id==null)
+        {
+            id=Integer.toString(this.hashCode());
+        }
+        if (head!=null)
+        {
+            head.add(SideNavigationMenu.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
+        }
         this.id=id;
         this.width=width;
         id(id);
         class_("sidenav");
-        head.add(SideNavigationMenu.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
         this.addInner(new a().href("javascript:void(0)").class_("closebtn").onclick("document.getElementById('"+id+"').style.width = '0';").addInner("&times;"));
+    }
+    public SideNavigationMenu(Head head,String id,int width)
+    {
+        this(head,id,width,"/resources/html","/w3c/SideNavigationMenu/style.css");
+    }
+    public SideNavigationMenu(Head head,int width)
+    {
+        this(head,null,width);
+    }
+    public SideNavigationMenu(int width)
+    {
+        this(null,width);
     }
 
     public SideNavigationMenu addMenuItem(a a)

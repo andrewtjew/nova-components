@@ -13,7 +13,11 @@ public class SideNavigationMenuButton extends div
     final private span button;
     public SideNavigationMenuButton(Head head,String id,int width,int height,String openStateText,String closeStateText,int sideNavWidth,String sourcePath,String cssFile)
     {
-        int fontSize=(int)(height*0.9f)-1;
+        if (id==null)
+        {
+            id=Integer.toString(this.hashCode());
+        }
+       int fontSize=(int)(height*0.9f)-1;
         this.button=returnAddInner(new span()).addInner(openStateText)                
             .style("vertical-align:middle;text-align:center;color:#e1e1e1;background-color: #000;cursor:pointer;position:fixed;z-index:200;top:0;left:0;width:"+width+"px;height:"+height+"px;font-size:"+fontSize+"px;")
         .onclick("var d=document.getElementById('"+id+"');if (d.offsetWidth==0) {d.style.width='"+sideNavWidth+"px';this.innerHTML='"+closeStateText+"';} else {d.style.width='0px';this.innerHTML='"+openStateText+"';}");

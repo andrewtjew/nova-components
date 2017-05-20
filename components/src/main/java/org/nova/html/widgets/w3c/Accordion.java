@@ -13,6 +13,10 @@ public class Accordion extends Content
     final private div content;
     public Accordion(Head head,String id,boolean opened,String sourcePath,String cssFile,String heading)
     {
+        if (id==null)
+        {
+            id=Integer.toString(this.hashCode());
+        }
         if (head!=null)
         {
             head.add(Accordion.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
@@ -37,6 +41,10 @@ public class Accordion extends Content
     public Accordion(Head head,String id,boolean opened,String heading)
     {
         this(head,id, opened, "/resources/html","/w3c/Accordion/style.css",heading);
+    }
+    public Accordion(Head head,boolean opened,String heading)
+    {
+        this(head,null, opened, heading);
     }
     public button_button button()
     {

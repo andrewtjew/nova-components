@@ -11,6 +11,10 @@ public class VerticalMenu extends div
 {
     public VerticalMenu(Head head,String id,String sourcePath,String cssFile)
     {
+        if (id==null)
+        {
+            id=Integer.toString(this.hashCode());
+        }
         id(id).class_("verticalmenu");
         if (head!=null)
         {

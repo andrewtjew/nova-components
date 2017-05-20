@@ -20,10 +20,17 @@ public class ModalBox extends div
     final private div footer;
     public ModalBox(Head head,String id,String header,String footer,String sourcePath,String cssFile)
     {
+        if (id==null)
+        {
+            id=Integer.toString(this.hashCode());
+        }
         this.id=id;
         id(id);
         class_("modal");
-        head.add(ModalBox.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
+        if (head!=null)
+        {
+            head.add(ModalBox.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
+        }
         this.addInner(new script().addInner("window.onclick=function(event){if (event.target==document.getElementById('"+id+"')){getElementById('"+id+"').style.display='none';}}"));
         this.box=this.returnAddInner(new div()).class_("modal-content");
         this.header=this.box.returnAddInner(new div()).class_("modal-header");
@@ -38,6 +45,15 @@ public class ModalBox extends div
         {
             this.footer=null;
         }
+    }
+    public ModalBox(Head head,String id,String title,String footer)
+    {
+        this(head,id,title,footer,"/resources/html","/w3c/ModalBox/modal.css");
+    }
+    
+    public ModalBox(Head head,String title,String footer)
+    {
+        this(head,null,title,footer);
     }
 
     public ModalBox setWidth(int width)
@@ -60,11 +76,6 @@ public class ModalBox extends div
     public div box()
     {
         return this.box;
-    }
-    
-    public ModalBox(Head head,String id,String title,String footer)
-    {
-        this(head,id,title,footer,"/resources/html","/w3c/ModalBox/modal.css");
     }
     
     public ModalBox openBy(GlobalEventTagElement<? extends TagElement<?>> element)
