@@ -41,6 +41,7 @@ public class Trace implements AutoCloseable
 			this.number=number;
 			this.createStackTrace=null;
 		}
+        this.details="Hello";
 	}
 	public Trace(TraceManager traceManager,Trace parent,String category,boolean waiting)
 	{

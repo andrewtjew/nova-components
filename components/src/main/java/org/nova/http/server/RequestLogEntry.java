@@ -1,11 +1,13 @@
 package org.nova.http.server;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.nova.http.Header;
 import org.nova.tracing.Trace;
 
 public class RequestLogEntry
@@ -15,9 +17,9 @@ public class RequestLogEntry
 	final String requestContentText;
 	final String responseContentText;
 	final RequestHandler requestHandler;
-	final String requestHeaders;
-	final String responseHeaders;
 	final private String queryString;
+    final String requestHeaders;
+    final String responseHeaders;
 	final int statusCode;
 	final String remoteEndPoint;
 	final String request;
@@ -47,12 +49,12 @@ public class RequestLogEntry
 			this.responseContentText=null;
 		}
 		this.requestHandler=requestHandler;
-		this.requestHeaders=WsUtils.getRequestHeaders(request);
-		this.responseHeaders=WsUtils.getResponseHeaders(response);
 		this.queryString=request.getQueryString();
 		this.statusCode=response.getStatus();
 		this.request=request.getMethod()+" "+request.getRequestURI();
 		this.remoteEndPoint=request.getRemoteHost()+":"+request.getRemotePort();
+        this.requestHeaders=WsUtils.getRequestHeaders(request);
+        this.responseHeaders=WsUtils.getResponseHeaders(response);
 	}
 
 	public Trace getTrace()
@@ -75,15 +77,6 @@ public class RequestLogEntry
 		return requestHandler;
 	}
 
-	public String getRequestHeaders()
-	{
-		return requestHeaders;
-	}
-
-	public String getResponseHeaders()
-	{
-		return responseHeaders;
-	}
 
 	public int getStatusCode()
 	{
@@ -102,6 +95,16 @@ public class RequestLogEntry
 	{
 		return this.request;
 	}
+
+    public String getRequestHeaders()
+    {
+        return requestHeaders;
+    }
+
+    public String getResponseHeaders()
+    {
+        return responseHeaders;
+    }
 	
 
 }

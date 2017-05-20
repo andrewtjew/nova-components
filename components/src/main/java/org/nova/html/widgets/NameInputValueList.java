@@ -8,18 +8,18 @@ import org.nova.html.elements.Element;
 import org.nova.html.tags.div;
 import org.nova.html.tags.span;
 
-public class NameValueList extends div
+public class NameInputValueList extends div
 {
     final private ArrayList<NameValue<Element>> list;
     private int longest;
 
-    public NameValueList()
+    public NameInputValueList()
     {
         style("display:block;");
         this.list=new ArrayList<>();
         this.longest=0;
     }
-    public NameValueList add(String name,Element element)
+    public NameInputValueList add(String name,Element element)
     {
         this.list.add(new NameValue<Element>(name,element));
         if (name!=null)
@@ -31,7 +31,7 @@ public class NameValueList extends div
         }
         return this;
     }
-    public NameValueList add(String name,Object value)
+    public NameInputValueList add(String name,Object value)
     {
         if (value!=null)
         {
@@ -47,21 +47,14 @@ public class NameValueList extends div
        {
            NameValue<Element> item=this.list.get(i);
 
-           div line=returnAddInner(new div());
-           if (i<this.list.size()-1)
-           {
-               line.style("display:flex;text-align:right;width:100%;border-bottom:1px solid #888;");
-           }
-           else
-           {
-               line.style("display:flex;text-align:right;width:100%;");
-           }
+           div line=returnAddInner(new div().style("display:flex;text-align:right;width:100%;margin:2px;"));
            String label=item.getName();
            if (label==null)
            {
                label="";
            }
-           line.addInner(new div().style("width:"+width+"em;border-right:1px solid #888;padding-right:4px;margin-right:4px;").addInner(label));
+           label+=" :";
+           line.addInner(new div().style("width:"+width+"em;padding-right:4px;margin-right:4px;").addInner(label));
            line.addInner(new div().style("width:100%;text-align:left;").addInner(item.getValue()));
        }
        super.build(builder);

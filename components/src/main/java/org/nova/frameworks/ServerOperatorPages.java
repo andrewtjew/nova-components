@@ -41,13 +41,16 @@ import org.nova.html.tags.a;
 import org.nova.html.tags.area;
 import org.nova.html.tags.div;
 import org.nova.html.tags.fieldset;
+import org.nova.html.tags.form_get;
 import org.nova.html.tags.form_post;
 import org.nova.html.tags.h3;
 import org.nova.html.tags.hr;
 import org.nova.html.tags.input_checkbox;
+import org.nova.html.tags.input_number;
 import org.nova.html.tags.input_submit;
 import org.nova.html.tags.input_text;
 import org.nova.html.tags.legend;
+import org.nova.html.tags.link;
 import org.nova.html.tags.p;
 import org.nova.html.tags.span;
 import org.nova.html.tags.style;
@@ -60,6 +63,7 @@ import org.nova.html.widgets.AjaxQueryResultWriter;
 import org.nova.html.widgets.DataTable;
 import org.nova.html.widgets.Head;
 import org.nova.html.widgets.MenuBar;
+import org.nova.html.widgets.NameInputValueList;
 import org.nova.html.widgets.NameValueList;
 import org.nova.html.widgets.Panel;
 import org.nova.html.widgets.Row;
@@ -96,6 +100,7 @@ import org.nova.http.server.HtmlContentWriter;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.elements.InnerElement;
+import org.nova.html.enums.link_rel;
 import org.nova.http.server.annotations.ContentDecoders;
 import org.nova.http.server.annotations.ContentEncoders;
 import org.nova.http.server.annotations.ContentReaders;
@@ -138,40 +143,56 @@ import com.mysql.fabric.xmlrpc.base.Data;
 @ContentWriters({OperatorResultWriter.class, HtmlContentWriter.class, HtmlElementWriter.class})
 public class ServerOperatorPages
 {
-    static class WideTable extends Table
+    static class OperatorTable extends DataTable
     {
-        public WideTable()
+        public OperatorTable(Head head)
         {
-            super();
-            addInner(new style().addInner("thead {background-color:#eee;} td {border:1px solid #888;padding:4px;} table{border-collapse:collapse;width:100%;} "));
-            thead().style("background-color:#eee");
+            super(head,null);
+            this.lengthMenu(-1,16,32,64);
         }
     }
-    static class Panel1 extends Panel
+
+    static class WideTable extends Table
     {
-        public Panel1(Head head,String title)
+        public WideTable(Head head)
+        {
+            super();
+            
+//            head.add(WideTable.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").addInner(".widetable thead {background-color:#eee;} .widetable td {border:1px solid #888;padding:4px;} .widetable table{border-collapse:collapse;width:100%;} }"));
+//            head.add(WideTable.class.getCanonicalName(),new style().addInner("thead.widetable {background-color:#eee;} td.widetable {border:1px solid #888;padding:4px;} table.widetable {border-collapse:collapse;width:100%;}"));
+            head.add(WideTable.class.getCanonicalName(),new style().addInner("table.widetable {border-collapse:collapse;width:100%;} .widetable thead {background-color:#eee;} .widetable td{border:1px solid #888;padding:4px;} "));
+            class_("widetable");
+//            addInner(new style().addInner("thead {background-color:#eee;} td {border:1px solid #888;padding:4px;} table{border-collapse:collapse;width:100%;} "));
+//            style("thead {background-color:#eee;};td {border:1px solid #888;padding:4px;}; table{border-collapse:collapse;width:100%;}");
+//            thead().style("background-color:#eee");
+        }
+    }
+    static class Level1Panel extends Panel
+    {
+        public Level1Panel(Head head,String title)
         {
             super(head,null,title);
         }
     }
-    static class Panel2 extends Panel1
+    static class Level2Panel extends Level1Panel
     {
-        public Panel2(Head head,String title)
+        public Level2Panel(Head head,String title)
         {
             super(head,title);
             style("padding:4px;");
-            this.heading().style("background-color:#ddd;color:#000;text-align:left;padding:2px 2px 2px 8px;");
+            this.heading().style("background-color:#ddd;color:#000;text-align:left;padding:2px 2px 2px 4px;");
             this.content().style("padding:0px;");
         }
     }
-    static class Panel3 extends Panel1
+    static class Level3Panel extends Level1Panel
     {
-        public Panel3(Head head,String title)
+        public Level3Panel(Head head,String title)
         {
             super(head,title);
+            //top right bottom left
             style("padding:4px;");
-            this.heading().style("background-color:#fff;color:#000;text-align:left;font-weight:normal;padding:2px 2px 2px 8px;");
-            this.content().style("padding:4px;");
+            this.heading().style("background-color:#fff;color:#000;text-align:left;font-weight:normal;padding:2px 2px 2px 2px;");
+            this.content().style("padding:2px 2px 2px 2px;");
         }
     }
     
@@ -284,19 +305,13 @@ public class ServerOperatorPages
         serverApplication.getOperatorVariableManager().register(this);
     }
 
-    private DataTable createStandardTable(Head head,String id)
-    {
-        DataTable table=new DataTable(head,id);
-        table.lengthMenu(-1,16,32,64);
-        return table;
-    }
     
     @GET
     @Path("/operator/application/configuration")
     public Element configuration() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Configuration"); 
-        DataTable table=page.content().returnAddInner(createStandardTable(page.head(),null));
+        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         
         table.setHeadRowItems("Name","Value","Description","Source","Source Context");
         for (ConfigurationItem item : this.serverApplication.getConfiguration().getConfigurationItemSnapshot())
@@ -311,7 +326,7 @@ public class ServerOperatorPages
     public Element futures() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Futures");
-        DataTable table=page.content().returnAddInner(createStandardTable(page.head(),null));
+        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
 
         table.setHeadRowItems("Category","Number","Duration (ms)","Executing","Ended");
         Future<?>[] array = this.serverApplication.getFutureScheduler().getFutureSnapshot();
@@ -328,7 +343,7 @@ public class ServerOperatorPages
     public Element timers() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Timers");
-        DataTable table=page.content().returnAddInner(createStandardTable(page.head(),null));
+        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         table.setHeadRow(new Row().add("Category")
                 .addWithTitle("#", "Number")
                 .add("Created","Status","Due","Countdown","Duration")
@@ -381,12 +396,11 @@ public class ServerOperatorPages
         options.onchange("window.location='./all?interval='+(this.value);");
         
         page.content().addInner(new p());
-        boolean open=true;
         LevelMeterBox[] levelBoxes = snapshot.getLevelMeterBoxes();
         if (levelBoxes.length>0)
         {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, open,"Level Meters"));
-            DataTable table=accordion.panel().returnAddInner(createStandardTable(page.head(),null));
+            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"Level Meters"));
+            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
             table.setHeadRow(new Row().add("Category","Name","Level", "Highest","Highest TimeStamp","Description"));
         
             for (LevelMeterBox box : levelBoxes)
@@ -395,13 +409,12 @@ public class ServerOperatorPages
                 table.addBodyRowItems(box.getCategory(),box.getName(),meter.getLevel(),meter.getMaximumLevel()
                         ,Utils.millisToLocalDateTimeString(meter.getHighestLevelTimeStamp()),box.getDescription());
             }
-            open=false;
         } 
         RateMeterBox[] rateBoxes = snapshot.getRateMeterBoxes();
         if (rateBoxes.length>0)
         {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, open,"Rate Meters"));
-            DataTable table=accordion.panel().returnAddInner(createStandardTable(page.head(),null));
+            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"Rate Meters"));
+            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
             table.setHeadRow(new Row().add("Name","Rate","Count","Average","Description"));
             for (RateMeterBox box : rateBoxes)
             {
@@ -409,26 +422,24 @@ public class ServerOperatorPages
                 table.addBodyRowItems(box.getName(),String.format("%.4f", meter.sampleRate(interval))
                 ,meter.getCount(),String.format("%.4f", meter.sampleRate(interval)),(box.getDescription()));
             }
-            open=false;
         }
         CountMeterBox[] countBoxes = snapshot.getCountMeterBoxes();
         if (countBoxes.length>0)
         {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, open,"Count Meters"));
-            DataTable table=accordion.panel().returnAddInner(createStandardTable(page.head(),null));
+            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"Count Meters"));
+            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
             table.setHeadRow(new Row().add("Name","Count","Description"));
             for (CountMeterBox box : countBoxes)
             {
                 CountMeter meter = box.getMeter();
                 table.addBodyRowItems(box.getName(),meter.getCount(),box.getDescription());
             }
-            open=false;
         }
         CountAverageRateMeterBox[] countAverageRateBoxes = snapshot.getCountAverageRateMeterBoxes();
         if (countAverageRateBoxes.length>0)
         {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, open,"CountAverageRate Meters"));
-            DataTable table=accordion.panel().returnAddInner(createStandardTable(page.head(),null));
+            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"CountAverageRate Meters"));
+            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
             table.setHeadRow(new Row().add("Name","Average")
                     .addWithTitle("StdDev", "Standard Deviation")
                     .addWithTitle("Rate", "per second")
@@ -442,7 +453,6 @@ public class ServerOperatorPages
                         ,String.format("%.4f", averageAndRate != null ? averageAndRate.getRate() : "-")
                         ,meter.getCount(),meter.getTotal(),box.getDescription());
             }
-            open=false;
         }
         return page;
     }
@@ -463,12 +473,11 @@ public class ServerOperatorPages
         options.onchange("window.location='./all?interval='+(this.value);");
         page.content().addInner(new p());
         CategoryMeters categories = this.serverApplication.getMeterManager().getSnapshot().getMeterBoxes(category);
-        boolean open=true;
         LevelMeterBox[] levelBoxes = categories.getLevelMeterBoxes();
         if (levelBoxes.length>0)
         {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, open,"Level Meters"));
-            DataTable table=accordion.panel().returnAddInner(createStandardTable(page.head(),null));
+            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"Level Meters"));
+            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
             table.setHeadRow(new Row().add("Category","Name","Level", "Highest","Highest TimeStamp","Description"));
         
             for (LevelMeterBox box : levelBoxes)
@@ -477,14 +486,13 @@ public class ServerOperatorPages
                 table.addBodyRowItems(box.getCategory(),box.getName(),meter.getLevel(),meter.getMaximumLevel()
                         ,Utils.millisToLocalDateTimeString(meter.getHighestLevelTimeStamp()),box.getDescription());
             }
-            open=false;
         }        
         RateMeterBox[] rateBoxes = categories.getRateMeterBoxes();
         if (rateBoxes.length>0)
         {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, open,"Rate Meters"));
+            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"Rate Meters"));
             accordion.button().addInner("Rate Meters");
-            DataTable table=accordion.panel().returnAddInner(createStandardTable(page.head(),null));
+            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
             table.setHeadRow(new Row().add("Name","Rate","Count","Average","Description"));
             for (RateMeterBox box : rateBoxes)
             {
@@ -492,27 +500,25 @@ public class ServerOperatorPages
                 table.addBodyRowItems(box.getName(),String.format("%.4f", meter.sampleRate(interval))
                 ,meter.getCount(),String.format("%.4f", meter.sampleRate(interval)),(box.getDescription()));
             }
-            open=false;
         }
 
         CountMeterBox[] countBoxes = categories.getCountMeterBoxes();
         if (countBoxes.length>0)
         {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null,open,"Count Meters"));
-            DataTable table=accordion.panel().returnAddInner(createStandardTable(page.head(),null));
+            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null,true,"Count Meters"));
+            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
             table.setHeadRow(new Row().add("Name","Count","Description"));
             for (CountMeterBox box : countBoxes)
             {
                 CountMeter meter = box.getMeter();
                 table.addBodyRowItems(box.getName(),meter.getCount(),box.getDescription());
             }
-            open=false;
         }
         CountAverageRateMeterBox[] countAverageRateBoxes = categories.getCountAverageMeterBoxes();
         if (countAverageRateBoxes.length>0)
         {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, open,"CountAverageRate Meters"));
-            DataTable table=accordion.panel().returnAddInner(createStandardTable(page.head(),null));
+            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"CountAverageRate Meters"));
+            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
             table.setHeadRow(new Row().add("Name","Average")
                     .addWithTitle("StdDev", "Standard Deviation")
                     .addWithTitle("Rate", "per second")
@@ -526,7 +532,6 @@ public class ServerOperatorPages
                         ,String.format("%.4f", averageAndRate != null ? averageAndRate.getRate() : "-")
                         ,meter.getCount(),meter.getTotal(),box.getDescription());
             }
-            open=false;
         }
         return page;
     }
@@ -536,7 +541,7 @@ public class ServerOperatorPages
     public Element meterCategories() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Meter Categories");
-        Panel panel=page.content().returnAddInner(new Panel(page.head(),"panel","Categories"));
+        Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Categories"));
         String[] categories = this.serverApplication.getMeterManager().getSnapshot().getCategories();
         VerticalMenu menu=panel.content().returnAddInner(new VerticalMenu(page.head(), "menu"));
         for (String category:categories)
@@ -626,7 +631,7 @@ public class ServerOperatorPages
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Active Trace Stats");
         Trace[] traces = this.serverApplication.getTraceManager().getActiveSnapshot();
-        DataTable table=page.content().returnAddInner(createStandardTable(page.head(),null));
+        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         table.setHeadRow(new Row().add("Category","Number").addWithTitle("Active", "milliseconds").addWithTitle("Wait", "milliseconds").addWithTitle("Duration", "milliseconds").add("Waiting","Details","Created"));
         for (Trace trace : traces)
         {
@@ -644,7 +649,7 @@ public class ServerOperatorPages
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Active Trace Stats");
         TraceStats[] array = this.serverApplication.getTraceManager().getStatsSnapshotAndReset();
-        DataTable table=page.content().returnAddInner(createStandardTable(page.head(),null));
+        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
 
         table.setHeadRow(new Row().add("Category","Count")
                 .addWithTitle("Average", "milliseconds")
@@ -696,7 +701,7 @@ public class ServerOperatorPages
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Trace Roots");
         Map<String, TraceNode> map = this.serverApplication.getTraceManager().getTraceRootSnapshot();
-        DataTable table=page.content().returnAddInner(this.createStandardTable(page.head(), null));
+        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         table.setHeadRow(new Row().add("Category","Count")
                 .addWithTitle("Average", "Milliseconds")
                 .addWithTitle("Duration", "Milliseconds")
@@ -773,9 +778,7 @@ public class ServerOperatorPages
           td td=tr.returnAddInner(new td());
           td.style(this.getTraceBoxStyle());
           
-//          writer.a(entry.getKey(), new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString());
-//          tr.onclick("window.location='"+new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString()+"'");
-          Panel panel=td.returnAddInner(new Panel(head,null,null));
+          Panel panel=td.returnAddInner(new Level2Panel(head,null));
           panel.heading().addInner(new a().href(new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString()).addInner(entry.getKey()));
 
           writeNode(panel,node);
@@ -800,16 +803,11 @@ public class ServerOperatorPages
 
       private void writeNode(Panel panel,TraceNode node)
       {
-          div twoPanel=panel.content().returnAddInner(new div()).style("display:flex;");
-          NameValueList left=twoPanel.returnAddInner(new NameValueList(": "));
-          left.style("width:200px;");
-          left.add("Count", node.getCount());
-          left.add("Average", nanoToDefaultFormat(node.getTotalDurationNs() / node.getCount()));  //Milliseconds
-          twoPanel.returnAddInner(new div().style("width:10px;"));
-          NameValueList right=twoPanel.returnAddInner(new NameValueList(": "));
-          right.style("width:200px;");
-          right.add("Duration", nanoToDefaultFormat(node.getTotalDurationNs()));
-          right.add("Wait", nanoToDefaultFormat(node.getTotalWaitNs()));
+          NameValueList list=panel.content().returnAddInner(new NameValueList());
+          list.add("Count", node.getCount());
+          list.add("Average", nanoToDefaultFormat(node.getTotalDurationNs() / node.getCount()));  //Milliseconds
+          list.add("Duration", nanoToDefaultFormat(node.getTotalDurationNs()));
+          list.add("Wait", nanoToDefaultFormat(node.getTotalWaitNs()));
       }
       
       private void writeTraceGraphNode(Head head,tr tr, Entry<String, TraceNode> entry, int level) throws Exception
@@ -817,7 +815,7 @@ public class ServerOperatorPages
           TraceNode node = entry.getValue();
           td td=tr.returnAddInner(new td());
           td.style(this.getTraceBoxStyle());
-          Panel panel=td.returnAddInner(new Panel(head,null,null));
+          Panel panel=td.returnAddInner(new Level2Panel(head,null));
           panel.heading().addInner(new a().href(new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString()).addInner(entry.getKey()));
 
           writeNode(panel,node);
@@ -864,7 +862,7 @@ public class ServerOperatorPages
     public Element traceAllCategories() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("All Trace Categories");
-        DataTable table=page.content().returnAddInner(createStandardTable(page.head(),null));
+        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         Map<String, TraceNode> map = this.serverApplication.getTraceManager().getTraceRootSnapshot();
         HashMap<String, ArrayList<TraceNode>> all = new HashMap<>();
         for (Entry<String, TraceNode> entry : map.entrySet())
@@ -941,93 +939,9 @@ public class ServerOperatorPages
         page.content().addInner(new p().addInner("Count: " + traces.length));
         for (int i = traces.length - 1; i >= 0; i--)
         {
-            page.content().addInner(new p());
             Trace trace = traces[i];
-            Panel panel=page.content().returnAddInner(new Panel(page.head(), null, trace.getCategory()));
-            Table table=panel.content().returnAddInner(new Table());
-            int width=100/9;
-            table.addInner(new style().addInner("thead {background-color:#afa;} td {border:1px solid #888;padding:4px;width:auto;} table{border-collapse:collapse;width:100%;} "));
-            Row headRow=new Row();
-//            headRow.addInner(new td().style("width:12em;").addInner("Created"));
-            headRow.add("Created");
-            headRow.addWithTitle("Number", "Sequence number")
-                .addWithTitle("Parent", "Parent sequence number if trace has parent")
-                .addWithTitle("Duration", "Milliseconds")
-                .addWithTitle("Wait", "Milliseconds")
-                .add("Waiting","Closed","Thread","ThreadId");
-            table.setHeadRow(headRow);
-            panel.content().addInner(new p());
-            
-            tr tr=new tr();
-            Row row=new Row().add(Utils.millisToLocalDateTimeString(trace.getCreated())
-                    ,trace.getNumber()
-                    ,trace.getParent() == null ? "" : trace.getParent().getNumber()
-                    ,nanoToDefaultFormat(trace.getActiveNs())
-                    ,nanoToDefaultFormat(trace.getWaitNs())
-                    ,trace.isWaiting()
-                    ,trace.isClosed()
-                    ,trace.getThread().getName()
-                    ,trace.getThread().getId());
-            table.addBodyRow(row);
-
-            NameValueList list=null;
-            String details = trace.getDetails();
-            if (details != null)
-            {
-                if (list==null)
-                {
-                    list=panel.content().returnAddInner(new NameValueList(": "));
-                }
-                list.add("Details",details);
-            }
-
-            String fromLink = trace.getFromLink();
-            if (fromLink != null)
-            {
-                if (list==null)
-                {
-                    list=panel.content().returnAddInner(new NameValueList(": "));
-                }
-                list.add("FromLink",fromLink);
-            }
-
-            String toLink = trace.getToLink();
-            if (toLink != null)
-            {
-                if (list==null)
-                {
-                    list=panel.content().returnAddInner(new NameValueList(": "));
-                }
-                list.add("ToLink",toLink);
-            }
-
-            StackTraceElement[] currentStackTrace = trace.getThread().getStackTrace();
-            if (currentStackTrace != null)
-            {
-                Accordion accordion=panel.content().returnAddInner(new Accordion(page.head(), null, false, "Current Stack Trace"));
-                accordion.panel().addInner(toString(currentStackTrace, 0));
-            }
-
-            StackTraceElement[] createStackTrace = trace.getCreateStackTrace();
-            if (createStackTrace != null)
-            {
-                Accordion accordion=panel.content().returnAddInner(new Accordion(page.head(), null, false, "Create Stack Trace"));
-                accordion.panel().addInner(toString(createStackTrace, 0));
-            }
-
-            StackTraceElement[] closeStackTrace = trace.getCloseStackTrace();
-            if (closeStackTrace != null)
-            {
-                Accordion accordion=panel.content().returnAddInner(new Accordion(page.head(), null, false, "Close Stack Trace"));
-                accordion.panel().addInner(toString(closeStackTrace, 0));
-            }
-
-            Throwable exception = trace.getThrowable();
-            if (exception != null)
-            {
-                Accordion accordion=panel.content().returnAddInner(new Accordion(page.head(), null, true, "Exception"));
-                accordion.panel().addInner(Utils.toString(exception));
-            }
+            Panel panel=page.content().returnAddInner(new Level2Panel(page.head(), trace.getCategory()));
+            writeTrace(page.head(),panel,trace);
         }
     }
 
@@ -1126,20 +1040,17 @@ public class ServerOperatorPages
     @Path("/operator/httpServer/performance/{server}")
     public Element performance(@PathParam("server")String server) throws Throwable
     {
-        OperatorPage page=this.serverApplication.buildOperatorPage("Server Performance: "+server);
-        
+        OperatorPage page=buildServerOperatorPage("Performance: ",server);
         HttpServer httpServer=getHttpServer(server);
         RateMeter requestRateMeter = httpServer.getRequestRateMeter();
         double requestRate = requestRateMeter.sampleRate(this.rateSamplingDuration);
-        Table infoTable=page.content().returnAddInner(new Table());
-        infoTable.addInner(new style().addInner("thead {background-color:#eee;} td {border:1px solid #888;padding:4px;width:auto;} table{border-collapse:collapse;width:100%;} "));
-        infoTable.setHeadRowItems("Request Rate","Total Requests","Ports");
-        infoTable.addBodyRowItems(DOUBLE_FORMAT.format(requestRate),requestRateMeter.getCount(),Utils.combine(Utils.intArrayToList(httpServer.getPorts()),","));
+        WideTable infoTable=page.content().returnAddInner(new WideTable(page.head()));
+        infoTable.setHeadRowItems("Request Rate","Total Requests");
+        infoTable.addBodyRowItems(DOUBLE_FORMAT.format(requestRate),requestRateMeter.getCount());
         
         page.content().addInner(new p());
-        Panel requestHandlerPanel=page.content().returnAddInner(new Panel(page.head(),null,"RequestHandlers"));
-        DataTable table=requestHandlerPanel.returnAddInner(createStandardTable(page.head(), null));
-        RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
+        Panel requestHandlerPanel=page.content().returnAddInner(new Level1Panel(page.head(),"RequestHandlers"));
+        DataTable table=requestHandlerPanel.returnAddInner(new OperatorTable(page.head()));
         Row row=new Row();
         row.add("Method")
             .addWithTitle("Count", "Count of total requests")
@@ -1154,6 +1065,7 @@ public class ServerOperatorPages
 
         double totalAll = 0;
         long totalCount = 0;
+        RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
         for (RequestHandler requestHandler : requestHandlers)
         {
             Map<Integer, CountAverageRateMeter> meters = requestHandler.getStatusMeters();
@@ -1333,28 +1245,177 @@ public class ServerOperatorPages
         }
     }
 
+    private void writeTrace(Head head,Panel panel,Trace trace)
+    {
+        WideTable table=panel.content().returnAddInner(new WideTable(head));
+        Row headRow=new Row()
+            .add("Created")
+            .addWithTitle("Number", "Sequence number")
+            .addWithTitle("Parent", "Parent sequence number if trace has parent")
+            .addWithTitle("Duration", "Milliseconds")
+            .addWithTitle("Wait", "Milliseconds")
+            .add("Waiting","Closed","Thread","ThreadId")
+            ;
+        table.setHeadRow(headRow);
+        Row row=new Row()
+                .add(Utils.millisToLocalDateTimeString(trace.getCreated())
+                ,trace.getNumber()
+                ,trace.getParent() == null ? "" : trace.getParent().getNumber()
+                ,nanoToDefaultFormat(trace.getActiveNs())
+                ,nanoToDefaultFormat(trace.getWaitNs())
+                ,trace.isWaiting()
+                ,trace.isClosed()
+                ,trace.getThread().getName()
+                ,trace.getThread().getId());
+        table.addBodyRow(row);
+
+        NameValueList list=null;
+        String details = trace.getDetails();
+        if (details != null)
+        {
+            if (list==null)
+            {
+                list=new NameValueList();
+            }
+            list.add("Details",details);
+        }
+
+        String fromLink = trace.getFromLink();
+        if (fromLink != null)
+        {
+            if (list==null)
+            {
+                list=new NameValueList();
+            }
+            list.add("FromLink",fromLink);
+        }
+
+        String toLink = trace.getToLink();
+        if (toLink != null)
+        {
+            if (list==null)
+            {
+                list=new NameValueList();
+            }
+            list.add("ToLink",toLink);
+        }
+        if (list!=null)
+        {
+            Panel listPanel=panel.content().returnAddInner(new Level3Panel(head,"Additional Trace Info"));
+            listPanel.content().addInner(list);
+        }
+
+        panel.content().addInner(new p());
+        if (trace.getThrowable() != null)
+        {
+            Accordion accordion=panel.content().returnAddInner(new Accordion(head, null, true, "Exception: "+trace.getThrowable().getMessage()));
+            accordion.content().addInner(Utils.toString(trace.getThrowable()));
+            panel.content().addInner(new p());
+        }
+        StackTraceElement[] currentStackTrace = trace.getThread().getStackTrace();
+        if (currentStackTrace != null)
+        {
+            Accordion accordion=panel.content().returnAddInner(new Accordion(head, null, false, "Current Stack Trace"));
+            accordion.content().addInner(toString(currentStackTrace, 0));
+        }
+        StackTraceElement[] createStackTrace = trace.getCreateStackTrace();
+        if (createStackTrace != null)
+        {
+            Accordion accordion=panel.content().returnAddInner(new Accordion(head, null, false, "Create Stack Trace"));
+            accordion.content().addInner(toString(createStackTrace, 0));
+        }
+        StackTraceElement[] closeStackTrace = trace.getCloseStackTrace();
+        if (closeStackTrace != null)
+        {
+            Accordion accordion=panel.content().returnAddInner(new Accordion(head, null, false, "Close Stack Trace"));
+            accordion.content().addInner(toString(closeStackTrace, 0));
+        }
+    }
+    
+    private void writeHeaders(Head head,Panel panel,String headers)
+    {
+        if (headers==null)
+        {
+            return;
+        }
+        panel.content().addInner(new p());
+        String[] array=Utils.split(headers, '\r');
+        Accordion accordion=panel.content().returnAddInner(new Accordion(head,null,false, "Headers (Count: "+(array.length-1)+")"));
+        NameValueList list=accordion.content().returnAddInner(new NameValueList());
+        for (String item:array)
+        {
+            int index=item.indexOf(':');
+            if (index<0)
+            {
+                continue;
+            }
+            String name=item.substring(0, index);
+            String value=item.substring(index+1);
+            list.add(name,value);
+        }
+    }    
+    
+    private void writeContent(Head head,Panel panel,String text)
+    {
+        if (text==null)
+        {
+            return;
+        }
+        panel.content().addInner(new p());
+        Panel textpanel=panel.content().returnAddInner(new Level3Panel(head,"Request Content (Length: "+text.length()+")"));
+        textpanel.addInner(new textarea().readonly().addInner(text));
+    }
+    
+    private void writeRequest(OperatorPage page,RequestLogEntry entry)
+    {
+        Head head=page.head();
+        Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),entry.getRequestHandler().getKey()));
+        Level2Panel tracePanel=panel.content().returnAddInner(new Level2Panel(head,"Trace"));
+        writeTrace(head,tracePanel,entry.getTrace());
+        
+        panel.content().addInner(new p());
+        Panel requestPanel=panel.content().returnAddInner(new Level2Panel(head,"Request"));
+        WideTable table=requestPanel.content().returnAddInner(new WideTable(head));
+        table.setHeadRow(new Row().add("Request","Query","Remote"));
+        table.addBodyRow(new Row().add(entry.getRequest(),entry.getQueryString(),entry.getRemoteEndPoint()));
+        writeHeaders(head,requestPanel,entry.getRequestHeaders());
+        writeContent(head,requestPanel,entry.getRequestContentText());
+
+        panel.content().addInner(new p());
+        Panel responsePanel=panel.content().returnAddInner(new Level2Panel(head,"Response - Status Code: "+entry.getStatusCode()));
+        writeHeaders(head,responsePanel,entry.getResponseHeaders());
+        writeContent(head, responsePanel, entry.getResponseContentText());
+    }    
+    
+    private void writeRequestLogEntries(OperatorPage page, RequestLogEntry[] entries) throws Exception
+    {
+        for (RequestLogEntry entry : entries)
+        {
+            writeRequest(page, entry);
+            page.content().addInner(new p());
+        }
+    }
+
     @GET
     @Path("/operator/httpServer/lastRequests/{server}")
-    public Response<OperatorResult> lastRequests(@PathParam("server") String server) throws Exception
+    public Element lastRequests(@PathParam("server") String server) throws Throwable
     {
-        HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=this.getHttpServer(server);
+        OperatorPage page=buildServerOperatorPage("Last Requests", server);
         RequestLogEntry[] entries = httpServer.getLastRequestLogEntries();
-        writer.p("Ports: "+Utils.combine(Utils.intArrayToList(httpServer.getPorts()),",")+", Count:" + entries.length);
-        writeRequestLogEntries(writer, entries);
-        return OperatorResult.respond(writer, "Last Requests: "+server);
+        writeRequestLogEntries(page, entries);
+        return page;
     }
 
     @GET
     @Path("/operator/httpServer/lastExceptionRequests/{server}")
-    public Response<OperatorResult> lastExceptionRequests(@PathParam("server") String server) throws Exception
+    public Element lastExceptionRequests(@PathParam("server") String server) throws Throwable
     {
-        HtmlWriter writer = new HtmlWriter();
         HttpServer httpServer=this.getHttpServer(server);
+        OperatorPage page=buildServerOperatorPage("Last Exception Requests", server);
         RequestLogEntry[] entries = httpServer.getLastExceptionRequestLogEntries();
-        writer.p("Ports: "+Utils.combine(Utils.intArrayToList(httpServer.getPorts()),",")+", Count:" + entries.length);
-        writeRequestLogEntries(writer, entries);
-        return OperatorResult.respond(writer, "Last Exception Requests: "+server);
+        writeRequestLogEntries(page, entries);
+        return page;
     }
 
 
@@ -1370,35 +1431,15 @@ public class ServerOperatorPages
         {
             Trace trace = entry.getTrace();
             String title= entry.getMethod() + " " + entry.getURI();
-            Panel panel=page.content().returnAddInner(new Panel(page.head(),null,title));
-            Table table=panel.content().returnAddInner(new Table());
-            table.addInner(new style().addInner("thead {background-color:#eee;} td {border:1px solid #888;padding:4px;width:auto;} table{border-collapse:collapse;width:100%;} "));
-            Row headRow=new Row();
-            headRow.addWithTitle("Number", "Trace number")
-                .add("Created")
-                .addWithTitle("Duration", "milliseconds")
-                .addWithTitle("Wait", "Amount of time spent waiting in milliseconds")
-                .add("FromLink","Remote","QueryString");
-            table.setHeadRow(headRow);
-            table.addBodyRowItems(trace.getNumber()
-                    ,Utils.millisToLocalDateTimeString(trace.getCreated())
-                    ,DOUBLE_FORMAT.format(trace.getDuration() * 1000.0)
-                    ,DOUBLE_FORMAT.format(trace.getWait() * 1000.0)
-                    ,trace.getFromLink()
-                    ,entry.getRemoteEndPoint()
-                    ,entry.getQueryString());
-            String headers=entry.getRequestHeaders();
-            panel.content().addInner(new p());
-            if ((headers!=null)&&(headers.length()>0))
-            {
-                Accordion accordion=panel.content().returnAddInner(new Accordion(page.head(), null,false, "Request"));
-                NameValueList list=accordion.panel().returnAddInner(new NameValueList(": "));
-                //            writer.textarea(value, new Attribute("style", "width:98%"), new Attribute("cols", cols), new Attribute("rows", rows), new Attribute("readonly", true));
+            Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),title));
+            writeTrace(page.head(),panel,trace);
 
-                textarea area=new textarea().readonly().style("width:100%");
-                area.addInner(headers);
-                list.add("Headers", area);
-            }
+            panel.content().addInner(new p());
+            WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
+            table.setHeadRow(new Row().add("Query","Remote"));
+            table.addBodyRow(new Row().add(entry.getQueryString(),entry.getRemoteEndPoint()));
+            writeHeaders(page.head(),panel,entry.getRequestHeaders());
+
             page.content().addInner(new p());
         }
         return page;
@@ -1411,7 +1452,7 @@ public class ServerOperatorPages
         HttpServer httpServer=getHttpServer(server);
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
         OperatorPage page=buildServerOperatorPage("Server Status",server);
-        DataTable table=page.content().returnAddInner(createStandardTable(page.head(),null));
+        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         Row row=new Row();
         row.add("Method","Path","200","300","400","500");
         table.setHeadRow(row);
@@ -1691,7 +1732,7 @@ public class ServerOperatorPages
         HttpServer httpServer=getHttpServer(server);
         OperatorPage page=buildServerOperatorPage("Methods",server);
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
-        DataTable table=page.content().returnAddInner(createStandardTable(page.head(), null));
+        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         table.setHeadRow(new Row().add("Method","Path","Description","Filters"));
         for (RequestHandler requestHandler : requestHandlers)
         {
@@ -1761,9 +1802,9 @@ public class ServerOperatorPages
         }
 
         Method method = handler.getMethod();
-        Panel2 panel2=panel.content().returnAddInner(new Panel2(head, heading));
+        Level2Panel panel2=panel.content().returnAddInner(new Level2Panel(head, heading));
         
-        WideTable table=panel2.content().returnAddInner(new WideTable());
+        WideTable table=panel2.content().returnAddInner(new WideTable(head));
         table.setHeadRow(new Row().add("Name","Type","Description","Default"));
         for (ParameterInfo info : handler.getParameterInfos())
         {
@@ -1787,8 +1828,8 @@ public class ServerOperatorPages
         }
 
         Method method = handler.getMethod();
-        Panel3 panel=fieldset.returnAddInner(new Panel3(head, heading));
-        WideTable table=panel.content().returnAddInner(new WideTable());
+        Level3Panel panel=fieldset.returnAddInner(new Level3Panel(head, heading));
+        WideTable table=panel.content().returnAddInner(new WideTable(head));
         table.setHeadRow(new Row().add("Name","Type","Description","Default","Value"));
         for (ParameterInfo info : handler.getParameterInfos())
         {
@@ -1811,6 +1852,7 @@ public class ServerOperatorPages
                 }
             }
         }
+        fieldset.addInner(new p());
     }
 
     private void writeParameterInfos(HtmlWriter writer, String heading, RequestHandler handler, ParameterSource filter)
@@ -1876,13 +1918,13 @@ public class ServerOperatorPages
                 return;
             }
             this.shownClasses.add(type.getName());
-            Panel3 panel=this.parentPanel.content().returnAddInner(new Panel3(this.head,"Class: "+type.getName()));
+            Level3Panel panel=this.parentPanel.content().returnAddInner(new Level3Panel(this.head,"Class: "+type.getName()));
             Description description = type.getAnnotation(Description.class);
             if (description != null)
             {
                 panel.content().addInner(description.value());
             }
-            WideTable table=panel.content().returnAddInner(new WideTable());
+            WideTable table=panel.content().returnAddInner(new WideTable(head));
             table.setHeadRow(new Row().add("Type","Name","Description"));
             for (Field field : type.getDeclaredFields())
             {
@@ -1944,135 +1986,323 @@ public class ServerOperatorPages
 
     @GET
     @Path("/operator/httpServer/info")
-    public Response<OperatorResult> info(@QueryParam("key") String key,@QueryParam("server") String server) throws Throwable
+    public Element info(@QueryParam("key") String key,@QueryParam("server") String server) throws Throwable
     {
-        HtmlWriter writer = new HtmlWriter();
+        OperatorPage page=buildServerOperatorPage("Method: "+key, server);
         HttpServer httpServer=getHttpServer(server);
         RequestHandler requestHandler = httpServer.getRequestHandler(key);
 
         Map<Integer, CountAverageRateMeter> meters = requestHandler.getStatusMeters();
-        if (meters.size() > 0)
+        if (meters.size()>0)
         {
-            writer.h3("Durations");
-            writer.begin_table(1);
-            writer.tr(writer.inner().th("Code", "Status Code").th("Count").th("Rate", "per second").th("Average", "Milliseconds").th("StdDev", "Standard Deviation").th("Total",
-                    "Total duration in milliseconds"));
+            Panel durationPanel=page.content().returnAddInner(new Level1Panel(page.head(),"Durations"));
+            WideTable table=durationPanel.content().returnAddInner(new WideTable(page.head()));
+                table.setHeadRow(new Row()
+                        .addWithTitle("Code", "Status Code")
+                        .add("Count")
+                        .addWithTitle("Rate", "per second")
+                        .addWithTitle("Average", "Milliseconds")
+                        .addWithTitle("StdDev", "Standard Deviation")
+                        .addWithTitle("Total","Total duration in milliseconds")
+                        );
             for (Entry<Integer, CountAverageRateMeter> entry : meters.entrySet())
             {
                 CountAverageRateMeter meter = entry.getValue();
                 AverageAndRate averageAndRate = meter.getCountAverageRate(this.rateSamplingDuration);
                 if (averageAndRate != null)
                 {
-                    writer.tr(writer.inner().td(entry.getKey()).td(meter.getCount()).td(DOUBLE_FORMAT.format(averageAndRate.getRate())).td(DOUBLE_FORMAT.format(averageAndRate.getAverage() / 1.0e6))
-                            .td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation() / 1.0e6)).td(DOUBLE_FORMAT.format(meter.getTotal() / 1.0e6)));
+                    table.addBodyRow(new Row().add(
+                            entry.getKey()
+                            ,meter.getCount()
+                            ,DOUBLE_FORMAT.format(averageAndRate.getRate())
+                            ,DOUBLE_FORMAT.format(averageAndRate.getAverage() / 1.0e6)
+                            ,DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation() / 1.0e6)
+                            ,DOUBLE_FORMAT.format(meter.getTotal() / 1.0e6)
+                            ));
                 }
                 else
                 {
-                    writer.tr(writer.inner().td(entry.getKey()).td(meter.getCount()).td(0).td(0).td(0).td(DOUBLE_FORMAT.format(meter.getTotal() / 1.0e6)));
-
+                    table.addBodyRow(new Row().add(
+                            entry.getKey()
+                            ,meter.getCount()
+                            ,""
+                            ,""
+                            ,""
+                            ,""
+                            ));
+    
                 }
             }
-            writer.end_table();
         }
+        {
+            long requestUncompressed = 0;
+            long requestCompressed = 0;
+            long responseUncompressed = 0;
+            long responseCompressed = 0;
+    
+            page.content().addInner(new p());
+            Panel panel=page.content().returnAddInner(new Level1Panel(page.head(), "Content Sizes"));
+            WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
+            table.setHeadRow(new Row().add("")
+                    .addWithTitle("Average", "Average bytes")
+                    .addWithTitle("StDev", "Standard Deviation")
+                    .add("Total Bytes","KB","MB","GB","TB"));
+            
+            CountAverageRateMeter requestMeter = requestHandler.getRequestUncompressedContentSizeMeter();
+            AverageAndRate averageAndRate = requestMeter.getCountAverageRate(this.rateSamplingDuration);
+            if (averageAndRate != null)
+            {
+                long total = requestUncompressed = requestMeter.getTotal();
+                table.addBodyRow(new Row().add(
+                        "Request uncompressed content"
+                        ,DOUBLE_FORMAT.format(averageAndRate.getAverage())
+                        ,DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())
+                        ,total
+                        ,total / 1024
+                        ,total / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024 / 1024));
+            }
+            else
+            {
+                long total = requestUncompressed = requestMeter.getTotal();
+                table.addBodyRow(new Row().add(
+                        "Request uncompressed content"
+                        ,""
+                        ,""
+                        ,total
+                        ,total / 1024
+                        ,total / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024 / 1024));
+            }
+    
+            CountAverageRateMeter compressedRequestMeter = requestHandler.getRequestCompressedContentSizeMeter();
+            averageAndRate = compressedRequestMeter.getCountAverageRate(this.rateSamplingDuration);
+            if (averageAndRate != null)
+            {
+                long total = requestCompressed = compressedRequestMeter.getTotal();
+                table.addBodyRow(new Row().add(
+                        "Request content"
+                        ,DOUBLE_FORMAT.format(averageAndRate.getAverage())
+                        ,DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())
+                        ,total
+                        ,total / 1024
+                        ,total / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024 / 1024));
+            }
+            else
+            {
+                long total = requestCompressed = compressedRequestMeter.getTotal();
+                table.addBodyRow(new Row().add(
+                        "Request content"
+                        ,""
+                        ,""
+                        ,total
+                        ,total / 1024
+                        ,total / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024 / 1024));
+            }
+    
+            CountAverageRateMeter responseMeter = requestHandler.getResponseUncompressedContentSizeMeter();
+            averageAndRate = responseMeter.getCountAverageRate(this.rateSamplingDuration);
+            if (averageAndRate != null)
+            {
+                long total = responseUncompressed = responseMeter.getTotal();
+                table.addBodyRow(new Row().add(
+                        "Response uncompressed content"
+                        ,DOUBLE_FORMAT.format(averageAndRate.getAverage())
+                        ,DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())
+                        ,total
+                        ,total / 1024
+                        ,total / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024 / 1024));
+            }
+            else
+            {
+                long total = responseUncompressed = responseMeter.getTotal();
+                table.addBodyRow(new Row().add(
+                        "Response uncompressed content"
+                        ,""
+                        ,""
+                        ,total
+                        ,total / 1024
+                        ,total / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024 / 1024));
+            }
+    
+            CountAverageRateMeter compressedResponseMeter = requestHandler.getResponseCompressedContentSizeMeter();
+            averageAndRate = compressedResponseMeter.getCountAverageRate(this.rateSamplingDuration);
+            if (averageAndRate != null)
+            {
+                long total = responseCompressed = compressedResponseMeter.getTotal();
+                table.addBodyRow(new Row().add(
+                        "Response content"
+                        ,DOUBLE_FORMAT.format(averageAndRate.getAverage())
+                        ,DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())
+                        ,total
+                        ,total / 1024
+                        ,total / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024 / 1024));
+            }
+            else
+            {
+                long total = responseCompressed = compressedResponseMeter.getTotal();
+                table.addBodyRow(new Row().add(
+                        "Response content"
+                        ,""
+                        ,""
+                        ,total
+                        ,total / 1024
+                        ,total / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024
+                        ,total / 1024 / 1024 / 1024 / 1024));
+            }
 
-        long requestUncompressed = 0;
-        long requestCompressed = 0;
-        long responseUncompressed = 0;
-        long responseCompressed = 0;
-
-        writer.h3("Content Sizes");
-        writer.begin_table(1);
-        writer.tr(writer.inner().th().th("Average", "Average bytes").th("StDev", "Standard Deviation").th("Total Bytes").th("KB").th("MB").th("GB").th("TB"));
-        CountAverageRateMeter requestMeter = requestHandler.getRequestUncompressedContentSizeMeter();
-        AverageAndRate averageAndRate = requestMeter.getCountAverageRate(this.rateSamplingDuration);
-        if (averageAndRate != null)
-        {
-            long total = requestUncompressed = requestMeter.getTotal();
-            writer.tr(writer.inner().td("Request uncompressed content").td(DOUBLE_FORMAT.format(averageAndRate.getAverage())).td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())).td(total)
-                    .td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024).td(total / 1024 / 1024 / 1024 / 1024));
+            page.content().addInner(new p());
+            Panel ratioPanel=page.content().returnAddInner(new Level1Panel(page.head(), "Compression Ratios"));
+            NameValueList list=ratioPanel.content().returnAddInner(new NameValueList());
+            list.add("Request", requestUncompressed != 0?DOUBLE_FORMAT.format((double) requestCompressed / requestUncompressed):"");
+            list.add("Response",responseUncompressed != 0?DOUBLE_FORMAT.format((double) responseCompressed / responseUncompressed):"");
         }
-        else
-        {
-            long total = requestUncompressed = requestMeter.getTotal();
-            writer.tr(writer.inner().td("Request uncompressed content").td(0).td(0).td(total).td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024)
-                    .td(total / 1024 / 1024 / 1024 / 1024));
-
-        }
-
-        CountAverageRateMeter compressedRequestMeter = requestHandler.getRequestCompressedContentSizeMeter();
-        averageAndRate = compressedRequestMeter.getCountAverageRate(this.rateSamplingDuration);
-        if (averageAndRate != null)
-        {
-            long total = requestCompressed = compressedRequestMeter.getTotal();
-            writer.tr(writer.inner().td("Request compressed content").td(DOUBLE_FORMAT.format(averageAndRate.getAverage())).td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())).td(total)
-                    .td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024).td(total / 1024 / 1024 / 1024 / 1024));
-        }
-        else
-        {
-            long total = requestCompressed = compressedRequestMeter.getTotal();
-            writer.tr(writer.inner().td("Request compressed content").td(0).td(0).td(total).td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024)
-                    .td(total / 1024 / 1024 / 1024 / 1024));
-
-        }
-
-        CountAverageRateMeter responseMeter = requestHandler.getResponseUncompressedContentSizeMeter();
-        averageAndRate = responseMeter.getCountAverageRate(this.rateSamplingDuration);
-        if (averageAndRate != null)
-        {
-            long total = responseUncompressed = responseMeter.getTotal();
-            writer.tr(writer.inner().td("Response uncompressed content").td(DOUBLE_FORMAT.format(averageAndRate.getAverage())).td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())).td(total)
-                    .td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024).td(total / 1024 / 1024 / 1024 / 1024));
-        }
-        else
-        {
-            long total = responseUncompressed = responseMeter.getTotal();
-            writer.tr(writer.inner().td("Response uncompressed content").td(0).td(0).td(total).td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024)
-                    .td(total / 1024 / 1024 / 1024 / 1024));
-
-        }
-
-        CountAverageRateMeter compressedResponseMeter = requestHandler.getResponseCompressedContentSizeMeter();
-        averageAndRate = compressedResponseMeter.getCountAverageRate(this.rateSamplingDuration);
-        if (averageAndRate != null)
-        {
-            long total = responseCompressed = compressedResponseMeter.getTotal();
-            writer.tr(writer.inner().td("Response compressed content").td(DOUBLE_FORMAT.format(averageAndRate.getAverage())).td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())).td(total)
-                    .td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024).td(total / 1024 / 1024 / 1024 / 1024));
-        }
-        else
-        {
-            long total = responseCompressed = compressedResponseMeter.getTotal();
-            writer.tr(writer.inner().td("Response compressed content").td(0).td(0).td(total).td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024)
-                    .td(total / 1024 / 1024 / 1024 / 1024));
-
-        }
-        writer.end_table();
-
-        writer.h3("Compression");
-        writer.begin_table(1);
-        writer.tr(writer.inner().th("Request").th("Response"));
-        writer.begin_tr();
-        if (requestUncompressed != 0)
-        {
-            writer.td(DOUBLE_FORMAT.format((double) requestCompressed / requestUncompressed));
-        }
-        else
-        {
-            writer.td("-");
-        }
-        if (responseUncompressed != 0)
-        {
-            writer.td(DOUBLE_FORMAT.format((double) responseCompressed / responseUncompressed));
-        }
-        else
-        {
-            writer.td("-");
-        }
-        writer.end_tr();
-        writer.end_table();
-
-        return OperatorResult.respond(writer, "Method: " + key);
+        return page;
     }
+//    @GET
+//    @Path("/operator/httpServer/info")
+//    public Response<OperatorResult> info(@QueryParam("key") String key,@QueryParam("server") String server) throws Throwable
+//    {
+//        HtmlWriter writer = new HtmlWriter();
+//        HttpServer httpServer=getHttpServer(server);
+//        RequestHandler requestHandler = httpServer.getRequestHandler(key);
+//
+//        Map<Integer, CountAverageRateMeter> meters = requestHandler.getStatusMeters();
+//        if (meters.size() > 0)
+//        {
+//            writer.h3("Durations");
+//            writer.begin_table(1);
+//            writer.tr(writer.inner().th("Code", "Status Code").th("Count").th("Rate", "per second").th("Average", "Milliseconds").th("StdDev", "Standard Deviation").th("Total",
+//                    "Total duration in milliseconds"));
+//            for (Entry<Integer, CountAverageRateMeter> entry : meters.entrySet())
+//            {
+//                CountAverageRateMeter meter = entry.getValue();
+//                AverageAndRate averageAndRate = meter.getCountAverageRate(this.rateSamplingDuration);
+//                if (averageAndRate != null)
+//                {
+//                    writer.tr(writer.inner().td(entry.getKey()).td(meter.getCount()).td(DOUBLE_FORMAT.format(averageAndRate.getRate())).td(DOUBLE_FORMAT.format(averageAndRate.getAverage() / 1.0e6))
+//                            .td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation() / 1.0e6)).td(DOUBLE_FORMAT.format(meter.getTotal() / 1.0e6)));
+//                }
+//                else
+//                {
+//                    writer.tr(writer.inner().td(entry.getKey()).td(meter.getCount()).td(0).td(0).td(0).td(DOUBLE_FORMAT.format(meter.getTotal() / 1.0e6)));
+//
+//                }
+//            }
+//            writer.end_table();
+//        }
+//
+//        long requestUncompressed = 0;
+//        long requestCompressed = 0;
+//        long responseUncompressed = 0;
+//        long responseCompressed = 0;
+//
+//        writer.h3("Content Sizes");
+//        writer.begin_table(1);
+//        writer.tr(writer.inner().th().th("Average", "Average bytes").th("StDev", "Standard Deviation").th("Total Bytes").th("KB").th("MB").th("GB").th("TB"));
+//        CountAverageRateMeter requestMeter = requestHandler.getRequestUncompressedContentSizeMeter();
+//        AverageAndRate averageAndRate = requestMeter.getCountAverageRate(this.rateSamplingDuration);
+//        if (averageAndRate != null)
+//        {
+//            long total = requestUncompressed = requestMeter.getTotal();
+//            writer.tr(writer.inner().td("Request uncompressed content").td(DOUBLE_FORMAT.format(averageAndRate.getAverage())).td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())).td(total)
+//                    .td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024).td(total / 1024 / 1024 / 1024 / 1024));
+//        }
+//        else
+//        {
+//            long total = requestUncompressed = requestMeter.getTotal();
+//            writer.tr(writer.inner().td("Request uncompressed content").td(0).td(0).td(total).td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024)
+//                    .td(total / 1024 / 1024 / 1024 / 1024));
+//
+//        }
+//
+//        CountAverageRateMeter compressedRequestMeter = requestHandler.getRequestCompressedContentSizeMeter();
+//        averageAndRate = compressedRequestMeter.getCountAverageRate(this.rateSamplingDuration);
+//        if (averageAndRate != null)
+//        {
+//            long total = requestCompressed = compressedRequestMeter.getTotal();
+//            writer.tr(writer.inner().td("Request compressed content").td(DOUBLE_FORMAT.format(averageAndRate.getAverage())).td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())).td(total)
+//                    .td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024).td(total / 1024 / 1024 / 1024 / 1024));
+//        }
+//        else
+//        {
+//            long total = requestCompressed = compressedRequestMeter.getTotal();
+//            writer.tr(writer.inner().td("Request compressed content").td(0).td(0).td(total).td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024)
+//                    .td(total / 1024 / 1024 / 1024 / 1024));
+//
+//        }
+//
+//        CountAverageRateMeter responseMeter = requestHandler.getResponseUncompressedContentSizeMeter();
+//        averageAndRate = responseMeter.getCountAverageRate(this.rateSamplingDuration);
+//        if (averageAndRate != null)
+//        {
+//            long total = responseUncompressed = responseMeter.getTotal();
+//            writer.tr(writer.inner().td("Response uncompressed content").td(DOUBLE_FORMAT.format(averageAndRate.getAverage())).td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())).td(total)
+//                    .td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024).td(total / 1024 / 1024 / 1024 / 1024));
+//        }
+//        else
+//        {
+//            long total = responseUncompressed = responseMeter.getTotal();
+//            writer.tr(writer.inner().td("Response uncompressed content").td(0).td(0).td(total).td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024)
+//                    .td(total / 1024 / 1024 / 1024 / 1024));
+//
+//        }
+//
+//        CountAverageRateMeter compressedResponseMeter = requestHandler.getResponseCompressedContentSizeMeter();
+//        averageAndRate = compressedResponseMeter.getCountAverageRate(this.rateSamplingDuration);
+//        if (averageAndRate != null)
+//        {
+//            long total = responseCompressed = compressedResponseMeter.getTotal();
+//            writer.tr(writer.inner().td("Response compressed content").td(DOUBLE_FORMAT.format(averageAndRate.getAverage())).td(DOUBLE_FORMAT.format(averageAndRate.getStandardDeviation())).td(total)
+//                    .td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024).td(total / 1024 / 1024 / 1024 / 1024));
+//        }
+//        else
+//        {
+//            long total = responseCompressed = compressedResponseMeter.getTotal();
+//            writer.tr(writer.inner().td("Response compressed content").td(0).td(0).td(total).td(total / 1024).td(total / 1024 / 1024).td(total / 1024 / 1024 / 1024)
+//                    .td(total / 1024 / 1024 / 1024 / 1024));
+//
+//        }
+//        writer.end_table();
+//
+//        writer.h3("Compression");
+//        writer.begin_table(1);
+//        writer.tr(writer.inner().th("Request").th("Response"));
+//        writer.begin_tr();
+//        if (requestUncompressed != 0)
+//        {
+//            writer.td(DOUBLE_FORMAT.format((double) requestCompressed / requestUncompressed));
+//        }
+//        else
+//        {
+//            writer.td("-");
+//        }
+//        if (responseUncompressed != 0)
+//        {
+//            writer.td(DOUBLE_FORMAT.format((double) responseCompressed / responseUncompressed));
+//        }
+//        else
+//        {
+//            writer.td("-");
+//        }
+//        writer.end_tr();
+//        writer.end_table();
+//
+//        return OperatorResult.respond(writer, "Method: " + key);
+//    }
 
     static class ContentWriterList
     {
@@ -2141,48 +2371,80 @@ public class ServerOperatorPages
 
     @GET
     @Path("/operator/httpServer/classDefinitions/{server}")
-    public Response<OperatorResult> classDefinitions(Context context,@PathParam("server") String server) throws Throwable
+    public Element classDefinitions(Context context,@PathParam("server") String server) throws Throwable
     {
-        HtmlWriter writer = new HtmlWriter();
-        writer.begin_form("/operator/httpServer/classDefinitions/download/"+server, "get");
-        writer.begin_table();
-        writer.tr().td("Target").td(":");
-        writer.begin_td();
-        Selection selection=new Selection("target",new Attribute("style", "width:100%;"));
-        selection.options(InteropTarget.values());
-        writer.writeObject(selection);
-        writer.end_td();
-
-        writer.tr().td("Namespace").td(":");
-        writer.begin_td();
-        writer.input_text(40,"namespace", this.serverApplication.getName());
-        writer.end_td();
-
-        writer.tr().td("Columns").td(":");
-        writer.begin_td();
-        writer.input_text(40,"columns", "120");
-        writer.end_td();
-        writer.end_table();
+        OperatorPage page=buildServerOperatorPage("Interoperability", server);
         
-        writer.begin_table();
-        writer.td(new input_submit().value("Download"));
-
+        form_get form=page.content().returnAddInner(new form_get().action("/operator/httpServer/classDefinitions/download/"+server));
+        fieldset fieldset=form.returnAddInner(new fieldset());
+        fieldset.addInner(new legend().addInner("C# Target"));
+        NameInputValueList list=fieldset.returnAddInner(new NameInputValueList());
+        SelectOptions options=new SelectOptions();
+        options.name("target").id("target");
+        options.style("width:400px;");
+        for (InteropTarget value:InteropTarget.values())
+        {
+            options.addOption(value);
+        }
+        list.add("Code",options);
+        list.add("Columns", new input_number().name("columns").id("columns").min(40).style("width:396px;").value(80));
+        list.add("Namespace", new input_text().name("namespace").id("namespace").style("width:100%"));
+        list.add("",new input_submit().value("Download").style("width:400px;"));
         AjaxButton button = new AjaxButton("button", "Preview", "/operator/httpServer/classDefinitions/preview/"+server);
+        list.add("",button);
         button.type("post");
         button.val("namespace", "namespace");
         button.val("target", "target");
         button.val("columns", "columns");
         button.async(true);
-        writer.td(writer.inner().writeObject(button));
-        writer.end_td();
-        writer.end_table();
-        writer.end_form();
-        writer.hr();
-        
-        writer.div(null, new Attribute("id", "result"));
-        
-        return OperatorResult.respond(writer, "Generate Interop Classes: " + server);
+        page.content().addInner(new div().id("result"));
+        return page;
     }
+    
+//    @GET
+//    @Path("/operator/httpServer/classDefinitions/{server}")
+//    public Response<OperatorResult> classDefinitions(Context context,@PathParam("server") String server) throws Throwable
+//    {
+//        HtmlWriter writer = new HtmlWriter();
+//        writer.begin_form("/operator/httpServer/classDefinitions/download/"+server, "get");
+//        writer.begin_table();
+//        writer.tr().td("Target").td(":");
+//        writer.begin_td();
+//        Selection selection=new Selection("target",new Attribute("style", "width:100%;"));
+//        selection.options(InteropTarget.values());
+//        writer.writeObject(selection);
+//        writer.end_td();
+//
+//        writer.tr().td("Namespace").td(":");
+//        writer.begin_td();
+//        writer.input_text(40,"namespace", this.serverApplication.getName());
+//        writer.end_td();
+//
+//        writer.tr().td("Columns").td(":");
+//        writer.begin_td();
+//        writer.input_text(40,"columns", "120");
+//        writer.end_td();
+//        writer.end_table();
+//        
+//        writer.begin_table();
+//        writer.td(new input_submit().value("Download"));
+//
+//        AjaxButton button = new AjaxButton("button", "Preview", "/operator/httpServer/classDefinitions/preview/"+server);
+//        button.type("post");
+//        button.val("namespace", "namespace");
+//        button.val("target", "target");
+//        button.val("columns", "columns");
+//        button.async(true);
+//        writer.td(writer.inner().writeObject(button));
+//        writer.end_td();
+//        writer.end_table();
+//        writer.end_form();
+//        writer.hr();
+//        
+//        writer.div(null, new Attribute("id", "result"));
+//        
+//        return OperatorResult.respond(writer, "Generate Interop Classes: " + server);
+//    }
     
     @POST
     @Path("/operator/httpServer/classDefinitions/preview/{server}")
@@ -2190,21 +2452,15 @@ public class ServerOperatorPages
     public AjaxQueryResult previewClassDefinitions(Trace parent, Context context, @PathParam("server") String server,@QueryParam("namespace") String namespace,@QueryParam ("columns") int columns,@QueryParam("target") InteropTarget target) throws Throwable
     {
         AjaxQueryResult result = new AjaxQueryResult();
-        HtmlWriter writer = new HtmlWriter();
         String text=generateClassDefinitions(server, namespace, columns, target);
-        int rows=Utils.occurs(text, "\n")+2;
-        if (rows>50)
-        {
-            rows=50;
-        }
-        writer.textarea(text, new Attribute("style","width:100%"),new Attribute("rows",rows));
-        result.put("result", writer.toString());
+        Panel panel=new Panel(null,null,"C# classes");
+        panel.content().addInner(new textarea().readonly().style("width:998%;").rows(Utils.occurs(text, "\r")+1).addInner(text));
+        result.put("result", panel.toString());
         return result;
     }
 
     @GET
     @Path("/operator/httpServer/classDefinitions/download/{server}")
-    
     public Response<String> downloadClassDefinitions(Context context,@PathParam("server") String server,@QueryParam("namespace") String namespace,@QueryParam ("columns") int columns,@QueryParam("target") InteropTarget target) throws Throwable
     {
         switch (target)
@@ -2237,11 +2493,11 @@ public class ServerOperatorPages
         String text = getDescription(method);
         if (text != null)
         {
-            Panel panel=page.content().returnAddInner(new Panel(page.head(),null,"Description"));
+            Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Description"));
             panel.addInner(text);
         }
         
-        Panel1 requestPanel=page.content().returnAddInner(new Panel1(page.head(),"Request"));
+        Level1Panel requestPanel=page.content().returnAddInner(new Level1Panel(page.head(),"Request"));
 
         writeParameterInfos(page.head(),requestPanel, "Query Parameters", requestHandler, ParameterSource.QUERY);
         writeParameterInfos(page.head(),requestPanel, "Path Parameters", requestHandler, ParameterSource.PATH);
@@ -2251,7 +2507,7 @@ public class ServerOperatorPages
         ParameterInfo contentParameterInfo = findContentParameter(requestHandler);
         if (contentParameterInfo != null)
         {
-            Panel2 contentParameterPanel=requestPanel.content().returnAddInner(new Panel2(page.head(),"Content Parameter"));
+            Level2Panel contentParameterPanel=requestPanel.content().returnAddInner(new Level2Panel(page.head(),"Content Parameter"));
 
             Parameter contentParameter = method.getParameters()[contentParameterInfo.getIndex()];
             ParameterWriter parameterWriter = new ParameterWriter(page.head(),contentParameterPanel);
@@ -2260,10 +2516,10 @@ public class ServerOperatorPages
             if (requestHandler.getContentReaders().size() > 0)
             {
                 requestPanel.content().addInner(new p());
-                Panel2 contentReaderPanel=requestPanel.content().returnAddInner(new Panel2(page.head(),"Content Readers"));
+                Level2Panel contentReaderPanel=requestPanel.content().returnAddInner(new Level2Panel(page.head(),"Content Readers"));
                 for (ContentReader<?> contentReader : requestHandler.getContentReaders().values())
                 {
-                    WideTable table=contentReaderPanel.content().returnAddInner(new WideTable());
+                    WideTable table=contentReaderPanel.content().returnAddInner(new WideTable(page.head()));
                     table.setHeadRow(new Row().add("Class","Media Type"));
                     table.addBodyRow(new Row().add(contentReader.getClass().getName(),contentReader.getMediaType())); 
                     contentReaderPanel.content().addInner(new p());
@@ -2278,13 +2534,13 @@ public class ServerOperatorPages
                     if (schema.length() > 0)
                     {
                         Accordion accordion=contentReaderPanel.content().returnAddInner(new Accordion(page.head(), null, false, "Schema"));
-                        textarea area=accordion.panel().returnAddInner(new textarea().readonly().style("width:100%;").rows(Utils.occurs(schema, "\r")+1));
+                        textarea area=accordion.content().returnAddInner(new textarea().readonly().style("width:100%;").rows(Utils.occurs(schema, "\r")+1));
                         area.addInner(schema);
                     }
                     if (example.length() > 0)
                     {
                         Accordion accordion=contentReaderPanel.content().returnAddInner(new Accordion(page.head(), null, false, "Example"));
-                        textarea area=accordion.panel().returnAddInner(new textarea().readonly().style("width:100%;").rows(Utils.occurs(example,"\r")+1));
+                        textarea area=accordion.content().returnAddInner(new textarea().readonly().style("width:100%;").rows(Utils.occurs(example,"\r")+1));
                         area.addInner(example);
                     }
                     contentReaderPanel.content().addInner(new p());
@@ -2297,9 +2553,9 @@ public class ServerOperatorPages
         Type innerReturnType = null;
         if (returnType != void.class)
         {
-            Panel1 responsePanel=page.content().returnAddInner(new Panel1(page.head(), "Response"));
+            Level1Panel responsePanel=page.content().returnAddInner(new Level1Panel(page.head(), "Response"));
             
-            Panel2 returnParameterPanel=responsePanel.content().returnAddInner(new Panel2(page.head(),"Return Type"));
+            Level2Panel returnParameterPanel=responsePanel.content().returnAddInner(new Level2Panel(page.head(),"Return Type"));
             
             ParameterWriter parameterWriter = new ParameterWriter(page.head(),returnParameterPanel);
             if (returnType == Response.class)
@@ -2338,10 +2594,10 @@ public class ServerOperatorPages
                 }
 
                 responsePanel.content().addInner(new p());
-                Panel2 contentWriterPanel=responsePanel.content().returnAddInner(new Panel2(page.head(),"Content Writers"));
+                Level2Panel contentWriterPanel=responsePanel.content().returnAddInner(new Level2Panel(page.head(),"Content Writers"));
                 for (ContentWriterList list : lists.values())
                 {
-                    WideTable table=contentWriterPanel.content().returnAddInner(new WideTable());
+                    WideTable table=contentWriterPanel.content().returnAddInner(new WideTable(page.head()));
                     table.setHeadRow(new Row().add("Class","Media Type","Accept Types"));
                     table.addBodyRow(new Row().add(list.contentWriter.getClass().getName(),list.contentWriter.getMediaType(),Utils.combine(list.types, ", ")));
 
@@ -2358,13 +2614,13 @@ public class ServerOperatorPages
                         if (schema.length() > 0)
                         {
                             Accordion accordion=contentWriterPanel.content().returnAddInner(new Accordion(page.head(), null, false, "Schema"));
-                            textarea area=accordion.panel().returnAddInner(new textarea().readonly().style("width:100%;").rows(Utils.occurs(schema, "\r")+1));
+                            textarea area=accordion.content().returnAddInner(new textarea().readonly().style("width:100%;").rows(Utils.occurs(schema, "\r")+1));
                             area.addInner(schema);
                         }
                         if (example.length() > 0)
                         {
                             Accordion accordion=contentWriterPanel.content().returnAddInner(new Accordion(page.head(), null, false, "Example"));
-                            textarea area=accordion.panel().returnAddInner(new textarea().readonly().style("width:100%;").rows(Utils.occurs(example,"\r")+1));
+                            textarea area=accordion.content().returnAddInner(new textarea().readonly().style("width:100%;").rows(Utils.occurs(example,"\r")+1));
                             area.addInner(example);
                         }
                     }
@@ -2375,8 +2631,8 @@ public class ServerOperatorPages
 
         if (requestHandler.getContentDecoders().size() > 0)
         {
-            Panel1 panel=page.content().returnAddInner(new Panel1(page.head(),"Content Decoders"));
-            WideTable table=panel.content().returnAddInner(new WideTable());
+            Level1Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Content Decoders"));
+            WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
             table.setHeadRow(new Row().add("Class","Content-Encoding","Encoder"));
             for (Entry<String, ContentDecoder> entry : requestHandler.getContentDecoders().entrySet())
             {
@@ -2385,8 +2641,8 @@ public class ServerOperatorPages
         }
         if (requestHandler.getContentEncoders().size() > 0)
         {
-            Panel1 panel=page.content().returnAddInner(new Panel1(page.head(),"Content Encoders"));
-            WideTable table=panel.content().returnAddInner(new WideTable());
+            Level1Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Content Encoders"));
+            WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
             table.setHeadRow(new Row().add("Class","Content-Encoding","Encoder"));
             for (Entry<String, ContentEncoder> entry : requestHandler.getContentEncoders().entrySet())
             {
@@ -2395,8 +2651,8 @@ public class ServerOperatorPages
         }
         if (requestHandler.getFilters().length > 0)
         {
-            Panel1 panel=page.content().returnAddInner(new Panel1(page.head(),"Filters"));
-            WideTable table=panel.content().returnAddInner(new WideTable());
+            Level1Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Filters"));
+            WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
             Row row=new Row();
             for (Filter filter : requestHandler.getFilters())
             {
@@ -2404,11 +2660,10 @@ public class ServerOperatorPages
             }
             table.addBodyRow(row);
         }
-        Panel1 methodPanel=page.content().returnAddInner(new Panel1(page.head(),"Class Method"));
+        Level1Panel methodPanel=page.content().returnAddInner(new Level1Panel(page.head(),"Class Method"));
         methodPanel.content().addInner(Utils.escapeHtml(method.toGenericString()+";"));
-
         
-        Panel1 executePanel=page.content().returnAddInner(new Panel1(page.head(),"Execute: "+key));
+        Level1Panel executePanel=page.content().returnAddInner(new Level1Panel(page.head(),"Execute: "+key));
         String httpMethod = requestHandler.getHttpMethod();
         {
             fieldset fieldset=executePanel.content().returnAddInner(new fieldset());
@@ -2430,14 +2685,18 @@ public class ServerOperatorPages
                         Collection<ContentReader<?>> readers = requestHandler.getContentReaders().values();
                         if (readers.size() > 0)
                         {
-                            Panel3 panel3=fieldset.returnAddInner(new Panel3(page.head(),"Request Content"));
-                            textarea input=panel3.content().returnAddInner(new textarea()).id("contentText").style("width:100%;height:10em;");
+                            Level3Panel panel3=fieldset.returnAddInner(new Level3Panel(page.head(),"Request Content"));
+                            textarea input=new textarea().id("contentText").style("width:100%;height:10em;");
+                            panel3.content().addInner(new div().style("padding-right:6px;").addInner(input));
                             button.val("contentText", "contentText");
                         }
                     }
                 }
             }
-            NameValueList list=fieldset.returnAddInner(new NameValueList(": "));
+            fieldset.addInner(new p());
+            NameInputValueList list=fieldset.returnAddInner(new NameInputValueList());
+            list.add("Additional Headers",new input_text().id("headers").style("width:100%;"));
+            button.val("headers", "headers");
             if ("POST".equals(httpMethod) || "PUT".equals(httpMethod))
             {
                 Collection<ContentReader<?>> readers = requestHandler.getContentReaders().values();
@@ -2448,9 +2707,8 @@ public class ServerOperatorPages
                     {
                         set.add(reader.getMediaType());
                     }
-                    
                     SelectOptions options=new SelectOptions();
-                    options.id("accept").style("width:100%;");
+                    options.id("accept");
                     for (String type:set)
                     {
                         options.add(type);
@@ -2468,7 +2726,7 @@ public class ServerOperatorPages
                     set.add(contentWriter.getMediaType());
                 }
                 SelectOptions options=new SelectOptions();
-                options.id("contentType").style("width:100%;");
+                options.id("contentType");
                 for (String type:set)
                 {
                     options.add(type);
@@ -2476,12 +2734,7 @@ public class ServerOperatorPages
                 list.add("ContentType", options);
                 button.val("contentType", "contentType");
             }
-            fieldset.addInner(new p());
-            list.add("Additional Headers",new input_text().id("headers").style("width:100%;"));
-            button.val("headers", "headers");
-            
-            fieldset.addInner(new p());
-            fieldset.addInner(button);
+            list.add(null, button);
             executePanel.content().addInner(new p());
             executePanel.content().addInner(new div().id("result"));
 
@@ -2672,15 +2925,15 @@ public class ServerOperatorPages
             else
             {
                 AjaxQueryResult result = new AjaxQueryResult();
-                Panel2 panel=new Panel2(null, "Not implemented");
+                Level2Panel panel=new Level2Panel(null, "Not implemented");
                 panel.content().addInner("Method=" + method);
                 result.put("result",panel.toString());
                 return result;
             }
             AjaxQueryResult result = new AjaxQueryResult();
-            Panel2 resultPanel=new Panel2(null, "Result");
-            Panel3 statusPanel=resultPanel.content().returnAddInner(new Panel3(null, "Performance and Status"));
-            NameValueList list=statusPanel.content().returnAddInner(new NameValueList(": "));
+            Level2Panel resultPanel=new Level2Panel(null, "Result");
+            Level3Panel statusPanel=resultPanel.content().returnAddInner(new Level3Panel(null, "Performance and Status"));
+            NameValueList list=statusPanel.content().returnAddInner(new NameValueList());
             list.add("Time",Utils.millisToLocalDateTimeString(System.currentTimeMillis()));
             list.add("Duration", duration * 1000 + " ms");
             list.add("Status Code",statusCode);
@@ -2689,8 +2942,8 @@ public class ServerOperatorPages
                 if (response.getHeaders().length > 0)
                 {
                     resultPanel.content().addInner(new p());
-                    Panel3 panel=resultPanel.content().returnAddInner(new Panel3(null, "Response Headers"));
-                    NameValueList headerList=panel.content().returnAddInner(new NameValueList(": "));
+                    Level3Panel panel=resultPanel.content().returnAddInner(new Level3Panel(null, "Response Headers"));
+                    NameValueList headerList=panel.content().returnAddInner(new NameValueList());
                     for (Header header : response.getHeaders())
                     {
                         headerList.add(header.getName(),header.getValue());
@@ -2699,7 +2952,7 @@ public class ServerOperatorPages
                 if (response.getText().length() > 0)
                 {
                     resultPanel.content().addInner(new p());
-                    Panel3 contentPanel=resultPanel.content().returnAddInner(new Panel3(null,"Content"));
+                    Level3Panel contentPanel=resultPanel.content().returnAddInner(new Level3Panel(null,"Content"));
                     textarea area=contentPanel.content().returnAddInner(new textarea());
                     String text=response.getText();
                     area.readonly().style("width:100%;").rows(Utils.occurs(text,"\r")+1);
@@ -2712,7 +2965,7 @@ public class ServerOperatorPages
         catch (Throwable t)
         {
             AjaxQueryResult result = new AjaxQueryResult();
-            Panel2 panel=new Panel2(null, "Internal Execution Exception");
+            Level2Panel panel=new Level2Panel(null, "Internal Execution Exception");
             String text=Utils.getStrackTraceAsString(t);
             textarea area=panel.content().returnAddInner(new textarea());
             area.readonly().style("width:100%;").rows(Utils.occurs(text, "\r")+1);
@@ -2729,7 +2982,7 @@ public class ServerOperatorPages
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Main");
         long now = System.currentTimeMillis();
-        page.content().returnAddInner(new NameValueList(": "))
+        page.content().returnAddInner(new NameValueList())
         .add("Started",Utils.millisToLocalDateTimeString(this.serverApplication.getStartTime()))
         .add("Current",Utils.millisToLocalDateTimeString(now))
         .add("Uptime",Utils.millisToDurationString(now - this.serverApplication.getStartTime()));
@@ -2765,62 +3018,54 @@ public class ServerOperatorPages
         {
             if (this.serverApplication.getLogQueue() instanceof JSONBufferedLZ4Queue)
             {
-                
                 JSONBufferedLZ4Queue sink = (JSONBufferedLZ4Queue) this.serverApplication.getLogQueue();
                 {
-                    page.content().addInner(new p());
-                    Panel panel=page.content().returnAddInner(new Panel(page.head(),null,"Logger Worker Stats"));
-                    Table table=panel.content().returnAddInner(new Table());
-                    table.addInner(new style().addInner("thead {background-color:#eee;} td {border:1px solid #888;padding:4px;} table{border-collapse:collapse;} "));
-                    table.thead().style("background-color:#eee");
-                    table.setHeadRowItems("Name","Value","Max","Max Instant");
-                    write(table,"Thread Workers Used",sink.getThreadWorkerQueueInUseMeter());
-                    write(table,"Waiting in Thread Workers",sink.getThreadWorkerQueueWaitingMeter());
-                    write(table,"Stalled in Thread Workers",sink.getThreadWorkerQueueStalledMeter());
-                    write(table,"Dropped in Thread Workers",sink.getThreadWorkerQueueDroppedMeter());
-                    write(table,"Waiting in Source",sink.getWaitingMeter());
-                    write(table,"Stalled in Source ",sink.getStalledMeter());
-                    write(table,"Dropped in Source ",sink.getDroppedMeter());
-                }
-                
-                {
-                    page.content().addInner(new p());
-                    Panel panel=page.content().returnAddInner(new Panel(page.head(),null,"Logger Performance"));
-                    Table table=panel.content().returnAddInner(new Table());
-                    table.addInner(new style().addInner("thead {background-color:#eee;} td {border:1px solid #888;padding:4px;} table{border-collapse:collapse;} "));
-                    table.thead().style("background-color:#eee");
-                    table.setHeadRowItems("","Bytes","KB","MB","GB");
-                
-                    writeSize(table, "Write Rate (per second)", sink.getWriteRateMeter().sampleRate(this.rateSamplingDuration));
-                    writeSize(table, "Written", sink.getWriteRateMeter().getCount());
+                    Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Logger"));
+                    {
+                        Panel statsPanel=panel.content().returnAddInner(new Level2Panel(page.head(), "Worker Stats"));
+                        Table table=statsPanel.content().returnAddInner(new WideTable(page.head()));
+                        table.setHeadRowItems("Name","Value","Max","Max Instant");
+                        write(table,"Thread Workers Used",sink.getThreadWorkerQueueInUseMeter());
+                        write(table,"Waiting in Thread Workers",sink.getThreadWorkerQueueWaitingMeter());
+                        write(table,"Stalled in Thread Workers",sink.getThreadWorkerQueueStalledMeter());
+                        write(table,"Dropped in Thread Workers",sink.getThreadWorkerQueueDroppedMeter());
+                        write(table,"Waiting in Source",sink.getWaitingMeter());
+                        write(table,"Stalled in Source ",sink.getStalledMeter());
+                        write(table,"Dropped in Source ",sink.getDroppedMeter());
+                    }
+                    {
+                        panel.content().addInner(new p());
+                        Panel performancePanel=panel.content().returnAddInner(new Level2Panel(page.head(),"Performance"));
+                        Table table=performancePanel.content().returnAddInner(new WideTable(page.head()));
+                        table.setHeadRowItems("","Bytes","KB","MB","GB");
+                    
+                        writeSize(table, "Write Rate (per second)", sink.getWriteRateMeter().sampleRate(this.rateSamplingDuration));
+                        writeSize(table, "Written", sink.getWriteRateMeter().getCount());
+                    }
                 }
             }
             
             {
+                Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Volume"));
+
+                Panel infoPanel=panel.content().returnAddInner(new Level2Panel(page.head(), "Info"));
                 LogDirectoryInfo info = manager.getLogDirectoryInfo();
-                page.content().addInner(new p());
-                Panel panel=page.content().returnAddInner(new Panel(page.head(),null,"Volume Info"));
-                Table table=panel.content().returnAddInner(new Table());
-                table.addInner(new style().addInner("thead {background-color:#eee;} td {border:1px solid #888;padding:4px;} table{border-collapse:collapse;} "));
-                table.addBodyRowItems("Path",manager.getFullDirectoryPath());
-                table.addBodyRowItems("Deletes due to directory size exceeded",manager.getDirectorySizeDeleteMeter().getCount());
-                table.addBodyRowItems("Deletes due to maximum files exceeded",manager.getMaximumFilesDeleteMeter().getCount());
-                table.addBodyRowItems("Deletes due to reserve space exceeded",manager.getReserveSpaceDeleteMeter().getCount());
-                table.addBodyRowItems("File delete failures",manager.getFileDeleteFailedMeter().getCount());
-                table.addBodyRowItems("Number of files",info.getFileCount());
-                table.addBodyRowItems("Oldest file name",info.getOldestFileName());
-                table.addBodyRowItems("Oldest file date",Utils.millisToLocalDateTimeString(info.getOldestFileDate()));
-                table.addBodyRowItems("Newest file name",info.getNewestFileName());
-                table.addBodyRowItems("Newest file date",Utils.millisToLocalDateTimeString(info.getNewestFileDate()));
-            }
-            
-            LogDirectoryInfo info = manager.getLogDirectoryInfo();
-            {
-                page.content().addInner(new p());
-                Panel panel=page.content().returnAddInner(new Panel(page.head(),null,"Volume Usage"));
-                Table table=panel.content().returnAddInner(new Table());
-                table.addInner(new style().addInner("thead {background-color:#eee;} td {border:1px solid #888;padding:4px;} table{border-collapse:collapse;} "));
-                table.thead().style("background-color:#eee");
+                NameValueList list=infoPanel.content().returnAddInner(new NameValueList());
+                list.addInner(new style().addInner("thead {background-color:#eee;} td {border:1px solid #888;padding:4px;} table{border-collapse:collapse;} "));
+                list.add("Path",manager.getFullDirectoryPath());
+                list.add("Deletes due to directory size exceeded",manager.getDirectorySizeDeleteMeter().getCount());
+                list.add("Deletes due to maximum files exceeded",manager.getMaximumFilesDeleteMeter().getCount());
+                list.add("Deletes due to reserve space exceeded",manager.getReserveSpaceDeleteMeter().getCount());
+                list.add("File delete failures",manager.getFileDeleteFailedMeter().getCount());
+                list.add("Number of files",info.getFileCount());
+                list.add("Oldest file name",info.getOldestFileName());
+                list.add("Oldest file date",Utils.millisToLocalDateTimeString(info.getOldestFileDate()));
+                list.add("Newest file name",info.getNewestFileName());
+                list.add("Newest file date",Utils.millisToLocalDateTimeString(info.getNewestFileDate()));
+
+                panel.content().addInner(new p());
+                Panel usagePanel=panel.content().returnAddInner(new Level2Panel(page.head(), "Usage"));
+                Table table=usagePanel.content().returnAddInner(new WideTable(page.head()));
                 table.setHeadRowItems("","Bytes","KB","MB","GB");
                 writeSize(table, "Directory size", info.getDirectorySize());
                 writeSize(table, "Volume free space", info.getFreeSpace());
@@ -2832,12 +3077,12 @@ public class ServerOperatorPages
                     writeSize(table, "Oldest file size", info.getOldestFileSize());
                     writeSize(table, "Newest file size", info.getNewestFileSize());
                 }
-            }
-            if (info.getThrowable() != null)
-            {
-                page.content().addInner(new p());
-                Panel panel=page.content().returnAddInner(new Panel(page.head(),null,"Volume Exception"));
-                panel.content().addInner(Utils.toString(info.getThrowable()));
+                if (info.getThrowable() != null)
+                {
+                    panel.content().addInner(new p());
+                    Panel exceptionPanel=page.content().returnAddInner(new Level2Panel(page.head(),"Exception"));
+                    exceptionPanel.content().addInner(Utils.toString(info.getThrowable()));
+                }
             }
         }
         return page;

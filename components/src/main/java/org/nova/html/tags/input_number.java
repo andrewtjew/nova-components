@@ -36,5 +36,9 @@ public class input_number extends InputElement<input_number>
         }
         return this;
     }
+    public input_number value(long value)
+    {
+        return attr("value",value);
+    }
     
 }

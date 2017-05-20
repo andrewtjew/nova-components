@@ -12,6 +12,8 @@ public class Panel extends div
     final private div heading;
     public Panel(Head head,String id,String sourcePath,String cssFile,String heading)
     {
+        this.heading=returnAddInner(new div().class_("panel-heading").addInner(heading));
+        this.content=returnAddInner(new div().class_("panel-content"));
         if (id==null)
         {
             id=Integer.toString(this.hashCode());
@@ -21,8 +23,10 @@ public class Panel extends div
         {
             head.add(TopNavigationMenu.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
         }
-        this.heading=returnAddInner(new div().class_("panel-heading").addInner(heading));
-        this.content=returnAddInner(new div().class_("panel-content"));
+        else
+        {
+            addInner(new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
+        }
     }
     public Panel(Head head,String id,String heading)
     {

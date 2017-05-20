@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public class WsUtils
 {
-	static String getRequestHeaders(HttpServletRequest request)
+	public static String getRequestHeaders(HttpServletRequest request)
 	{
 		StringBuilder sb=new StringBuilder();
 		Enumeration<String> names=request.getHeaderNames();
@@ -26,7 +26,7 @@ public class WsUtils
 		return sb.toString();
 	}
 
-	static String getResponseHeaders(HttpServletResponse response)
+	public static String getResponseHeaders(HttpServletResponse response)
 	{
 		StringBuilder sb=new StringBuilder();
 		for (String header:response.getHeaderNames())
@@ -42,7 +42,7 @@ public class WsUtils
 		return sb.toString();
 	}
 	
-	static String toAnySubMediaType(String mediaType)
+	public static String toAnySubMediaType(String mediaType)
 	{
 		int index=mediaType.indexOf('/');
 		if (index<0)
@@ -51,7 +51,7 @@ public class WsUtils
 		}
 		return mediaType.substring(0, index+1)+"*";
 	}
-	static String removeParameterFromCoding(String coding)
+	public static String removeParameterFromCoding(String coding)
 	{
 		int index=coding.indexOf(';');
 		if (index<0)
@@ -61,7 +61,7 @@ public class WsUtils
 		return coding.substring(0,index);
 	}
 	
-	static boolean isSubTypeAny(String mediaType)
+	public static boolean isSubTypeAny(String mediaType)
 	{
 		if (mediaType.length()>1)
 		{
