@@ -15,7 +15,7 @@ import org.nova.html.tags.style;
 import org.nova.html.tags.script;
 import org.nova.html.tags.noscript;
 
-public class Head extends Element
+public class Head extends head
 {
     private title title;
     private noscript noscript;
@@ -81,35 +81,34 @@ public class Head extends Element
     @Override
     public void build(Builder builder) throws Throwable
     {
-        head head=new head();
         if (this.title!=null)
         {
-            head.addInner(this.title);
+            addInner(this.title);
         }
         for (style value:this.styles.values())
         {
-            head.addInner(value);
+            addInner(value);
         }
         for (base value:this.bases.values())
         {
-            head.addInner(value);
+            addInner(value);
         }
         for (link value:this.links.values())
         {
-            head.addInner(value);
+            addInner(value);
         }
         for (meta value:this.metas.values())
         {
-            head.addInner(value);
+            addInner(value);
         }
         for (script value:this.scripts.values())
         {
-            head.addInner(value);
+            addInner(value);
         }
         if (this.noscript!=null)
         {
-            head.addInner(this.noscript);
+            addInner(this.noscript);
         }
-        head.build(builder);
+        super.build(builder);
     }
 }

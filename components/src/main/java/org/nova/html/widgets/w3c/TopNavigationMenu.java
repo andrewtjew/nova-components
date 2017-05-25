@@ -26,6 +26,10 @@ public class TopNavigationMenu extends div
     {
         this(head,id, "/resources/html","/w3c/TopNavigationMenu/topnav.css");
     }
+    public TopNavigationMenu(Head head)
+    {
+        this(head,null);
+    }
     
     public TopNavigationMenu addMenuItem(String name,String href)
     {
