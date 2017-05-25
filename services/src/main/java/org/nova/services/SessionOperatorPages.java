@@ -8,10 +8,26 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.nova.core.NameObject;
 import org.nova.core.Utils;
+import org.nova.frameworks.OperatorPage;
+import org.nova.frameworks.ServerApplication;
+import org.nova.frameworks.ServerOperatorPages;
+import org.nova.frameworks.ServerOperatorPages.OperatorTable;
+import org.nova.frameworks.ServerOperatorPages.WideTable;
 import org.nova.html.HtmlWriter;
+import org.nova.html.elements.Element;
 import org.nova.html.operator.OperatorResult;
 import org.nova.html.operator.OperatorResultWriter;
+import org.nova.html.tags.form_get;
+import org.nova.html.tags.hr;
+import org.nova.html.tags.input_checkbox;
+import org.nova.html.tags.input_submit;
+import org.nova.html.tags.td;
 import org.nova.html.widgets.AjaxQueryResultWriter;
+import org.nova.html.elements.HtmlElementWriter;
+import org.nova.html.widgets.DataTable;
+import org.nova.html.widgets.NameValueList;
+import org.nova.html.widgets.Row;
+import org.nova.http.client.PathAndQueryBuilder;
 import org.nova.http.server.Context;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
@@ -34,26 +50,32 @@ import com.google.common.base.Strings;
 @ContentDecoders(GzipContentDecoder.class)
 @ContentEncoders(GzipContentEncoder.class)
 @ContentReaders({JSONContentReader.class,JSONPatchContentReader.class})
-@ContentWriters({OperatorResultWriter.class,JSONContentWriter.class,AjaxQueryResultWriter.class})
+@ContentWriters({OperatorResultWriter.class,JSONContentWriter.class,AjaxQueryResultWriter.class,HtmlElementWriter.class})
 public class SessionOperatorPages<SESSION extends Session>
 {
-    final SessionManager<SESSION> sessionManager;
-    public SessionOperatorPages(SessionManager<SESSION> sessionManager)
+    final private SessionManager<SESSION> sessionManager;
+    final private ServerApplication serverApplication;
+    public SessionOperatorPages(SessionManager<SESSION> sessionManager,ServerApplication serverApplication)
     {
         this.sessionManager=sessionManager;
+        this.serverApplication=serverApplication;
     }
     
     @GET
     @Path("/operator/sessions")
-    public Response<OperatorResult> getAll(Trace parent) throws Exception, Throwable
+    public Element getAll(Trace parent) throws Exception, Throwable
     {
-        HtmlWriter writer=new HtmlWriter();
-
-        writer.begin_form("/operator/sessions/remove", "get");
-        writer.begin_table(1);
-        writer.input_submit("Remove");
-        writer.p();
-        writer.tr().th().th("Token").th("User").th("Created").th("Last Accessed").th("Active").th("Idle").th("Accessed").th("Rate");
+        OperatorPage page=this.serverApplication.buildOperatorPage("All Sessions");
+        form_get form=page.content().returnAddInner(new form_get()
+                .action("/operator/sessions/remove")
+                );
+        form.returnAddInner(new input_submit().value("Remove sessions"));
+        page.content().addInner(new hr());
+        OperatorTable table=page.content().returnAddInner(new ServerOperatorPages.OperatorTable(page.head()));
+        table.setHeadRow(new Row()
+                .add("Token","User","Created","Last Accessed","Active","Idle","Accessed","Rate")
+                );
+        
         this.sessionManager.getSessionSnapshot().stream().
         sorted((a,b)->Utils.
         compare(a.getUser(),b.getUser())).
@@ -61,27 +83,33 @@ public class SessionOperatorPages<SESSION extends Session>
         {
             long duration=System.currentTimeMillis()-session.getCreated();
             long idle=System.currentTimeMillis()-session.getLastAccess();
-            writer.tr();
-            writer.td(writer.inner().input_checkbox(session.getToken(),session.getToken(), false));
-            writer.td(writer.inner().a(session.getToken(),"/operator/session?token="+session.getToken()));
-            writer.td(session.getUser()).td(Utils.millisToLocalDateTimeString(session.getCreated())).td(Utils.millisToLocalDateTimeString(session.getLastAccess())).td(Utils.millisToDurationString(duration)).td(Utils.millisToDurationString(idle));
-            writer.td(session.getAccessRateMeter().getCount()).td(writer.inner().text(String.format("%.2f",session.getAccessRateMeter().sampleRate(10))));
+            Row row=new Row();
+            row.addInner(
+                    new td()
+                    .addInner(
+                            new input_checkbox().name(session.getToken())
+                    ));
+            try
+            {
+                row.addWithUrl(session.getToken(),new PathAndQueryBuilder("/operator/session").addQuery("token",session.getToken()).toString(),true);
+            }
+            catch (Exception e)
+            {
+            }
+            row.add(session.getUser(),Utils.millisToLocalDateTimeString(session.getCreated()),Utils.millisToLocalDateTimeString(session.getLastAccess()),Utils.millisToDurationString(duration),Utils.millisToDurationString(idle)
+                    ,session.getAccessRateMeter().getCount(),String.format("%.2f",session.getAccessRateMeter().sampleRate(10)
+                            ));
         });
-        writer.end_table();
-        writer.end_form();
-        return OperatorResult.respond(writer, "All Sessions");
+        return page;
     }   
-/*
-1-888-520-9090
-broker@ups.com
-X7W601LGWS
-*/
 
     @GET
     @Path("/operator/sessions/remove")
-    public Response<OperatorResult> delete(Trace parent,Context context) throws Exception, Throwable
+    public Element delete(Trace parent,Context context) throws Exception, Throwable
     {
-        HtmlWriter writer=new HtmlWriter();
+        OperatorPage page=this.serverApplication.buildOperatorPage("Session Info");
+        WideTable table=page.content().returnAddInner(new ServerOperatorPages.WideTable(page.head()));
+        table.setHeadRow(new Row().add("Session token","Remove result"));
         HttpServletRequest request=context.getHttpServletRequest();
         int success=0;
         int failures=0;
@@ -89,43 +117,35 @@ X7W601LGWS
         {
             if (this.sessionManager.removeSessionByToken(parent, entry))
             {
-                writer.p(entry+"...OK");
+                table.addBodyRow(new Row().add(entry,"OK"));
                 success++;
             }
             else
             {
-                writer.p(entry+"...FAILED");
+                table.addBodyRow(new Row().add(entry,"FAILED"));
                 failures++;
             }
         }
-        writer.p("Removed: "+success);
-        if (failures>0)
-        {
-            writer.p("Failures: "+failures);
-        }
-        return OperatorResult.respond(writer, "Remove Sessions");
+        NameValueList list=page.content().returnAddInner(new NameValueList());
+        list.add("Removed", success);
+        list.add("Failures", failures);
+        return page;
     }   
 
     @GET
     @Path("/operator/session")
-    public Response<OperatorResult> getSession(Trace parent,@QueryParam("token") String token) throws Exception, Throwable
+    public Element getSession(Trace parent,@QueryParam("token") String token) throws Exception, Throwable
     {
-        HtmlWriter writer=new HtmlWriter();
+        OperatorPage page=this.serverApplication.buildOperatorPage("Session Info");
+        OperatorTable table=page.content().returnAddInner(new ServerOperatorPages.OperatorTable(page.head()));
+        table.setHeadRow(new Row().add("Name","Value"));
+        
         SESSION session= this.sessionManager.getSessionByToken(token);
-        if (session!=null)
+        for (NameObject item:session.getDisplayInfo())
         {
-            writer.begin_table();
-            for (NameObject item:session.getDisplayInfo())
-            {
-                writer.tr().td(item.getName()).td(":").td(item.getValue());
-            }
-            writer.end_table();
+            table.addBodyRow(new Row().add(item.getName(),item.getValue()));
         }
-        else
-        {
-            writer.h3("Session not found");
-        }
-        return OperatorResult.respond(writer, "Session info");
+        return page;
     }   
 
 }

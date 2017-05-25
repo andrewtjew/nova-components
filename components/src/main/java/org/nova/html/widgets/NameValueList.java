@@ -48,7 +48,7 @@ public class NameValueList extends div
            NameValue<Element> item=this.list.get(i);
 
            div line=returnAddInner(new div());
-           if (i<this.list.size()-1)
+           if (i<this.list.size())
            {
                line.style("display:flex;text-align:right;width:100%;border-bottom:1px solid #888;");
            }

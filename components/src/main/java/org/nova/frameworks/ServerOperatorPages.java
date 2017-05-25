@@ -39,10 +39,12 @@ import org.nova.html.tags.form_get;
 import org.nova.html.tags.form_post;
 import org.nova.html.tags.hr;
 import org.nova.html.tags.input_checkbox;
+import org.nova.html.tags.input_hidden;
 import org.nova.html.tags.input_number;
 import org.nova.html.tags.input_submit;
 import org.nova.html.tags.input_text;
 import org.nova.html.tags.legend;
+import org.nova.html.tags.meta;
 import org.nova.html.tags.p;
 import org.nova.html.tags.style;
 import org.nova.html.tags.td;
@@ -51,6 +53,7 @@ import org.nova.html.tags.tr;
 import org.nova.html.widgets.AjaxButton;
 import org.nova.html.widgets.AjaxQueryResult;
 import org.nova.html.widgets.AjaxQueryResultWriter;
+import org.nova.html.widgets.BasicPage;
 import org.nova.html.widgets.DataTable;
 import org.nova.html.widgets.Head;
 import org.nova.html.widgets.MenuBar;
@@ -89,7 +92,10 @@ import org.nova.http.server.RequestLogEntry;
 import org.nova.http.server.Response;
 import org.nova.http.server.HtmlContentWriter;
 import org.nova.html.elements.Element;
+import org.nova.html.elements.FormElement;
 import org.nova.html.elements.HtmlElementWriter;
+import org.nova.html.elements.InnerElement;
+import org.nova.html.enums.http_equiv;
 import org.nova.http.server.annotations.ContentDecoders;
 import org.nova.http.server.annotations.ContentEncoders;
 import org.nova.http.server.annotations.ContentReaders;
@@ -131,38 +137,33 @@ import com.google.common.base.Strings;
 @ContentWriters({OperatorResultWriter.class, HtmlContentWriter.class, HtmlElementWriter.class})
 public class ServerOperatorPages
 {
-    static class OperatorTable extends DataTable
+    static public class OperatorTable extends DataTable
     {
         public OperatorTable(Head head)
         {
             super(head,null);
-            this.lengthMenu(-1,16,32,64);
+            this.lengthMenu(-1,20,30,40,50);
         }
     }
 
-    static class WideTable extends Table
+    static public class WideTable extends Table
     {
         public WideTable(Head head)
         {
             super();
             
-//            head.add(WideTable.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").addInner(".widetable thead {background-color:#eee;} .widetable td {border:1px solid #888;padding:4px;} .widetable table{border-collapse:collapse;width:100%;} }"));
-//            head.add(WideTable.class.getCanonicalName(),new style().addInner("thead.widetable {background-color:#eee;} td.widetable {border:1px solid #888;padding:4px;} table.widetable {border-collapse:collapse;width:100%;}"));
             head.add(WideTable.class.getCanonicalName(),new style().addInner("table.widetable {border-collapse:collapse;width:100%;} .widetable thead {background-color:#eee;} .widetable td{border:1px solid #888;padding:4px;} "));
             class_("widetable");
-//            addInner(new style().addInner("thead {background-color:#eee;} td {border:1px solid #888;padding:4px;} table{border-collapse:collapse;width:100%;} "));
-//            style("thead {background-color:#eee;};td {border:1px solid #888;padding:4px;}; table{border-collapse:collapse;width:100%;}");
-//            thead().style("background-color:#eee");
         }
     }
-    static class Level1Panel extends Panel
+    static public class Level1Panel extends Panel
     {
         public Level1Panel(Head head,String title)
         {
             super(head,null,title);
         }
     }
-    static class Level2Panel extends Level1Panel
+    static public class Level2Panel extends Level1Panel
     {
         public Level2Panel(Head head,String title)
         {
@@ -172,7 +173,7 @@ public class ServerOperatorPages
             this.content().style("padding:0px;");
         }
     }
-    static class Level3Panel extends Level1Panel
+    static public class Level3Panel extends Level1Panel
     {
         public Level3Panel(Head head,String title)
         {
@@ -591,9 +592,9 @@ public class ServerOperatorPages
         table.setHeadRow(new Row().add("Category","Number").addWithTitle("Active", "milliseconds").addWithTitle("Wait", "milliseconds").addWithTitle("Duration", "milliseconds").add("Waiting","Details","Created"));
         for (Trace trace : traces)
         {
-            Row row=new Row().add(trace.getCategory(), trace.getNumber(),trace.getActiveNs() / 1000000,trace.getWaitNs() / 1000000
-                    ,trace.getDurationNs() / 1000000,trace.isWaiting(),trace.getDetails(),Utils.millisToLocalDateTime(trace.getCreated()));
-            row.onClickLocation(new PathAndQueryBuilder("./activeTrace").addQuery("number", trace.getNumber()).toString());
+            Row row=new Row()
+                    .addWithUrl(trace.getCategory(),new PathAndQueryBuilder("./activeTrace").addQuery("number", trace.getNumber()).toString(),true)
+                    .add(trace.getNumber(),trace.getActiveNs() / 1000000,trace.getWaitNs() / 1000000,trace.getDurationNs() / 1000000,trace.isWaiting(),trace.getDetails(),Utils.millisToLocalDateTime(trace.getCreated()));
             table.addBodyRow(row);
         }
         return page;
@@ -615,13 +616,13 @@ public class ServerOperatorPages
         {
             CountAverageRateMeter meter = item.getMeter();
             AverageAndRate ar = meter.getMarkCountAverage(this.rateSamplingDuration);
-            Row row=new Row().add(item.getCategory()
-                    ,meter.getCount()
+            Row row=new Row()
+                    .addWithUrl(item.getCategory(),new PathAndQueryBuilder("./trace").addQuery("category", item.getCategory()).toString(),true)
+                    .add(meter.getCount()
                     ,nanoToDefaultFormat(ar.getAverage())
                     ,nanoToDefaultFormat(ar.getStandardDeviation())
                     ,nanoToDefaultFormat(meter.getTotal()));
 
-            row.onClickLocation(new PathAndQueryBuilder("./trace").addQuery("category", item.getCategory()).toString());
             table.addBodyRow(row);
         }
         return page;
@@ -667,11 +668,12 @@ public class ServerOperatorPages
         for (Entry<String, TraceNode> entry : map.entrySet())
         {
             TraceNode node = entry.getValue();
-            Row row=new Row().add(entry.getKey(),node.getCount()
+            Row row=new Row()
+                    .addWithUrl(entry.getKey(),new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString(),true)
+                    .add(node.getCount()
                     ,nanoToDefaultFormat(node.getTotalDurationNs() / node.getCount())
                     ,nanoToDefaultFormat(node.getTotalDurationNs())
                     ,nanoToDefaultFormat(node.getTotalWaitNs()));
-            row.onclick("window.location='"+new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString()+"'");
             table.addBodyRow(row);
         }
         return page;
@@ -844,8 +846,9 @@ public class ServerOperatorPages
                 totalWaitNs += item.getTotalWaitNs();
             }
 
-            Row row=new Row().add(entry.getKey(), count,nanoToDefaultFormat(totalDurationNs),nanoToDefaultFormat(totalWaitNs),list.size(),map.containsKey(entry.getKey()));
-            row.onclick("window.location='"+new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString()+"'");
+            Row row=new Row()
+                    .add(entry.getKey(),new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString(),true)
+                    .add(count,nanoToDefaultFormat(totalDurationNs),nanoToDefaultFormat(totalWaitNs),list.size(),map.containsKey(entry.getKey()));
             table.addBodyRow(row);
 
         }
@@ -963,8 +966,7 @@ public class ServerOperatorPages
             double totalPercentage = totalAll > 0 ? 100.0 * total / totalAll : 0;
 
             row=new Row();
-            row.onclick("window.location='"+new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).addQuery("server", server).toString()+"'");
-            row.add(requestHandler.getHttpMethod() + " " + requestHandler.getPath())
+            row.addWithUrl(requestHandler.getHttpMethod() + " " + requestHandler.getPath(),new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).addQuery("server", server).toString(),true)
             .add(count)
             .add(DOUBLE_FORMAT.format(countPercentage))
             .add(Utils.millisToDurationString((long) totalMilliseconds))
@@ -1214,9 +1216,9 @@ public class ServerOperatorPages
                 statusCodes.put(status, count);
             }
             row=new Row();
-            row.onclick("window.location='"+new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).addQuery("server", server).toString()+"'");
-            row.add(requestHandler.getHttpMethod(),requestHandler.getPath()
-                ,statusCodes.get(200)
+            row.add(requestHandler.getHttpMethod())
+            .addWithUrl(requestHandler.getPath(),new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).addQuery("server", server).toString(),true)
+            .add(statusCodes.get(200)
                 ,statusCodes.get(300)
                 ,statusCodes.get(400)
                 ,statusCodes.get(500)
@@ -1471,7 +1473,9 @@ public class ServerOperatorPages
         table.setHeadRow(new Row().add("Method","Path","Description","Filters"));
         for (RequestHandler requestHandler : requestHandlers)
         {
-            Row row=new Row().add(requestHandler.getHttpMethod(),requestHandler.getPath());
+            Row row=new Row().add(requestHandler.getHttpMethod());
+            row.addWithUrl(requestHandler.getPath(), new PathAndQueryBuilder("/operator/httpServer/method/"+server).addQuery("key", requestHandler.getKey()).toString(),true);
+            
             Method method = requestHandler.getMethod();
             Description description = method.getAnnotation(Description.class);
             if (description != null)
@@ -1501,7 +1505,6 @@ public class ServerOperatorPages
             {
                 row.add("");
             }
-            row.onclick("window.location='"+new PathAndQueryBuilder("/operator/httpServer/method/"+server).addQuery("key", requestHandler.getKey()).toString()+"'");
             table.addBodyRow(row);
         }
         return page;
@@ -1552,42 +1555,42 @@ public class ServerOperatorPages
         panel.content().addInner(new p());
     }
 
-    private void writeInputParameterInfos(Head head,fieldset fieldset, AjaxButton button, String heading, RequestHandler handler, ParameterSource filter)
+    private void writeInputParameterInfos(Head head,InnerElement<?> container, AjaxButton button, String heading, RequestHandler handler, ParameterSource source)
     {
         if (Arrays.stream(handler.getParameterInfos()).filter(info ->
         {
-            return info.getSource() == filter;
+            return info.getSource() == source;
         }).count() == 0)
         {
             return;
         }
 
         Method method = handler.getMethod();
-        Level3Panel panel=fieldset.returnAddInner(new Level3Panel(head, heading));
-        WideTable table=panel.content().returnAddInner(new WideTable(head));
+        fieldset field=container.returnAddInner(new fieldset());
+        field.addInner(new legend().addInner(heading));
+        WideTable table=field.returnAddInner(new WideTable(head));
         table.setHeadRow(new Row().add("Name","Type","Description","Default","Value"));
         for (ParameterInfo info : handler.getParameterInfos())
         {
-            if (info.getSource() == filter)
+            if (info.getSource() == source)
             {
                 String name = info.getName();
                 Parameter parameter = method.getParameters()[info.getIndex()];
                 Row row=new Row().add(info.getName(),parameter.getType().getName(),getDescription(parameter),info.getDefaultValue());
                 table.addBodyRow(row);
-                String key = filter.toString() + name;
+                String key = source.toString() + name;
                 if (parameter.getType() == boolean.class)
                 {
                     button.val(key, key);
-                    row.add(new input_checkbox().id(key).checked((boolean)info.getDefaultValue()));
+                    row.add(new input_checkbox().id(key).name(key).checked((boolean)info.getDefaultValue()));
                 }
                 else
                 {
                     button.val(key, key);
-                    row.add(new input_text().id(key).style("background-color:#ffa;width:100%;").placeholder(info.getDefaultValue() == null ? "" : info.getDefaultValue().toString()));
+                    row.add(new input_text().id(key).name(key).style("background-color:#ffa;width:100%;").placeholder(info.getDefaultValue() == null ? "" : info.getDefaultValue().toString()));
                 }
             }
         }
-        fieldset.addInner(new p());
     }
 
     private ParameterInfo findContentParameter(RequestHandler requestHandler)
@@ -2194,14 +2197,14 @@ public class ServerOperatorPages
         Level1Panel executePanel=page.content().returnAddInner(new Level1Panel(page.head(),"Execute: "+key));
         String httpMethod = requestHandler.getHttpMethod();
         {
-            fieldset fieldset=executePanel.content().returnAddInner(new fieldset());
-            fieldset.addInner(new legend().addInner("Parameters"));
-            AjaxButton button = new AjaxButton("button", "Execute", "/operator/httpServer/method/execute/"+server);
+            form_get form=executePanel.content().returnAddInner(new form_get());
+            AjaxButton button = new AjaxButton("button", "Execute call", "/operator/httpServer/method/execute/"+server);
             button.parameter("key", key);
-            writeInputParameterInfos(page.head(),fieldset, button, "Query Parameters", requestHandler, ParameterSource.QUERY);
-            writeInputParameterInfos(page.head(),fieldset, button, "Path Parameters", requestHandler, ParameterSource.PATH);
-            writeInputParameterInfos(page.head(),fieldset, button, "Header Parameters", requestHandler, ParameterSource.HEADER);
-            writeInputParameterInfos(page.head(),fieldset, button, "Cookie Parameters", requestHandler, ParameterSource.COOKIE);
+            button.style("height:3em;width:10em;margin:10px;");
+            writeInputParameterInfos(page.head(),form, button, "Query Parameters", requestHandler, ParameterSource.QUERY);
+            writeInputParameterInfos(page.head(),form, button, "Path Parameters", requestHandler, ParameterSource.PATH);
+            writeInputParameterInfos(page.head(),form, button, "Header Parameters", requestHandler, ParameterSource.HEADER);
+            writeInputParameterInfos(page.head(),form, button, "Cookie Parameters", requestHandler, ParameterSource.COOKIE);
             button.async(false);
 
             if ("POST".equals(httpMethod) || "PUT".equals(httpMethod)|| "PATCH".equals(httpMethod))
@@ -2213,18 +2216,22 @@ public class ServerOperatorPages
                         Collection<ContentReader<?>> readers = requestHandler.getContentReaders().values();
                         if (readers.size() > 0)
                         {
-                            Level3Panel panel3=fieldset.returnAddInner(new Level3Panel(page.head(),"Request Content"));
-                            textarea input=new textarea().id("contentText").style("width:100%;height:10em;");
-                            panel3.content().addInner(new div().style("padding-right:6px;").addInner(input));
+                            fieldset field=form.returnAddInner(new fieldset());
+                            field.addInner(new legend().addInner("Request Content"));
+                            textarea input=new textarea().id("contentText").style("width:99%;height:10em;");
+                            field.addInner(input);
                             button.val("contentText", "contentText");
                         }
                     }
                 }
             }
-            fieldset.addInner(new p());
-            NameInputValueList list=fieldset.returnAddInner(new NameInputValueList());
-            list.add("Additional Headers",new input_text().id("headers").style("width:100%;"));
+            fieldset field=form.returnAddInner(new fieldset());
+            field.addInner(new legend().addInner("Additional Headers"));
+            field.addInner(new input_text().name("headers").id("headers").style("width:100%;"));
+            
             button.val("headers", "headers");
+
+            NameInputValueList list=new NameInputValueList();
             if ("POST".equals(httpMethod) || "PUT".equals(httpMethod))
             {
                 Collection<ContentReader<?>> readers = requestHandler.getContentReaders().values();
@@ -2262,7 +2269,22 @@ public class ServerOperatorPages
                 list.add("ContentType", options);
                 button.val("contentType", "contentType");
             }
-            list.add(null, button);
+            if (list.size()>0)
+            {
+                form.addInner(new fieldset()
+                        .addInner(new legend().addInner("Media Types"))
+                        .addInner(list));
+            }
+            div buttons=form.returnAddInner(new div()).style("display:inline;");
+            button.style("height:3em;width:10em;margin:10px;");
+            buttons.addInner(button);
+            if ("GET".equals(httpMethod))
+            {
+                form.action("/operator/httpServer/method/run/"+server);
+                form.addInner(new input_hidden().name("key").value(key));
+                form.addInner(new input_hidden().name("server").value(server));
+              buttons.addInner(new input_submit().value("Run in browser").style("height:3em;width:10em;margin:10px;"));
+            }
             executePanel.content().addInner(new p());
             executePanel.content().addInner(new div().id("result"));
 
@@ -2309,6 +2331,8 @@ public class ServerOperatorPages
         }
         return new HttpClientEndPoint(HttpClientFactory.createDefaultClient(),endPoint);
     }
+    
+    //TODO: Use PathAndQueryBuilder to ensure strings are escaped properly.
     @GET
     @Path("/operator/httpServer/method/execute/{server}")
     @ContentWriters(AjaxQueryResultWriter.class)
@@ -2406,6 +2430,7 @@ public class ServerOperatorPages
             }
             else if (method.equals("GET"))
             {
+                String browser=request.getParameter("browser");
                 try (Trace trace = new Trace(this.serverApplication.getTraceManager(), parent, "Execute"))
                 {
                     response = textClient.get(trace, null, pathAndQuery.toString(), headers.toArray(new Header[headers.size()]));
@@ -2501,6 +2526,54 @@ public class ServerOperatorPages
             return result;
             
         }
+    }
+    @GET
+    @Path("/operator/httpServer/method/run/{server}")
+    @ContentWriters(HtmlElementWriter.class)
+    public Element run(Trace parent, Context context, @PathParam("server") String server,@QueryParam("key") String key) throws Throwable
+    {
+        HttpServer httpServer=getHttpServer(server);
+        HttpServletRequest request = context.getHttpServletRequest();
+        String[] methodSchema = Utils.split(key, ' ');
+        String method = methodSchema[0];
+        String schema = methodSchema[1];
+        String[] fragments = Utils.split(schema, '/');
+
+        StringBuilder pathAndQuery = new StringBuilder();
+        for (int i = 1; i < fragments.length; i++)
+        {
+            String fragment = fragments[i];
+            pathAndQuery.append("/");
+            if (fragment.startsWith("{"))
+            {
+                String name = ParameterSource.PATH + fragment.substring(1, fragment.length() - 2);
+                pathAndQuery.append(request.getParameter(name));
+            }
+            else
+            {
+                pathAndQuery.append(fragment);
+            }
+        }
+        String prefix = "?";
+        for (Enumeration<String> enumerator = request.getParameterNames(); enumerator.hasMoreElements(); enumerator.hasMoreElements())
+        {
+            String mangledName = enumerator.nextElement();
+            if (mangledName.startsWith(ParameterSource.QUERY.toString()))
+            {
+                String name = mangledName.substring(ParameterSource.QUERY.toString().length());
+                pathAndQuery.append(prefix);
+                pathAndQuery.append(name);
+                pathAndQuery.append("=");
+                pathAndQuery.append(request.getParameter(mangledName));
+                prefix = "&";
+            }
+        }
+        
+        HttpClientEndPoint httpClientEndPoint=getExecuteClient(httpServer,context);
+        String content=httpClientEndPoint.endPoint+pathAndQuery.toString();
+        BasicPage page=new BasicPage();
+        page.getHead().addInner(new meta().http_equiv(http_equiv.refresh).content("0:URL='"+content+"'"));
+        return page;
     }
 
     @GET

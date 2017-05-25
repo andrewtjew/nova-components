@@ -85,9 +85,9 @@ public class DataTable extends Table
     final private String id;
     final private Objects objects;
     
-    public DataTable(String id)
+    public DataTable(Head head)
     {
-        this(null,id);
+        this(head,null);
     }
     
     public DataTable(Head head,String id)

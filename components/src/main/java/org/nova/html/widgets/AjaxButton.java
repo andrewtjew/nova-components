@@ -9,22 +9,22 @@ import org.nova.html.Attribute;
 import org.nova.html.elements.Builder;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
+import org.nova.html.tags.button_button;
+import org.nova.html.tags.script;
 
-public class AjaxButton extends InnerElement<AjaxButton>
+public class AjaxButton extends button_button
 {
-	final private String id;
-	final private String text;
+    final private String id;
 	final private String url;
 	private boolean async=true;
 	private String type="get";
 	private ArrayList<KeyValue<String,String>> queryInputs;
-	private final Attribute[] attributes;
 	
-	public AjaxButton(String id,String text,String url,Attribute...attributes)
+	public AjaxButton(String id,String text,String url)
 	{
-	    this.attributes=attributes;
-		this.id=id;
-		this.text=text;
+	    this.id=id;
+        id(id);
+        addInner(text);
 		this.url=url;
 		this.queryInputs=new ArrayList<>();
 	}
@@ -53,50 +53,37 @@ public class AjaxButton extends InnerElement<AjaxButton>
 		this.queryInputs.add(new KeyValue<String, String>(parameterName, "':'"+value+"'"));
 		return this;
 	}
-
-	@Override
-	public String toString()
-	{
-		StringBuilder sb=new StringBuilder();
-		sb.append("<button");
-
-		for (Attribute attribute:this.attributes)
-		{
-		    sb.append(" "+attribute.getName()+"=\""+attribute.getValue()+"\"");
-		}
-		sb.append(" type='button' id='");
-		sb.append(this.id);
-		sb.append("'>");
-		sb.append(this.text);
-		sb.append("</button><script type='text/javascript'>$('#"+id+"').click(function(){$.ajax({type:'");
-		sb.append(this.type);
-		sb.append("',url:'");
-		sb.append(this.url);
-		sb.append("',dataType:'json',data:{");
-		boolean commaNeeded=false;
-		for (KeyValue<String,String> item:this.queryInputs)
-		{
-			if (commaNeeded==false)
-			{
-				sb.append("'");
-				commaNeeded=true;
-			}
-			else
-			{
-				sb.append(",'");
-			}
-			sb.append(item.getName());
-			sb.append(item.getValue());
-		}
-		sb.append("},async:");
-		sb.append(async);
-		sb.append(",success:function(data){$.each(data,function(key,value){$('#'+key).html(value);})} });});</script>");
-		return sb.toString();
-	}
     @Override
     public void build(Builder builder) throws Throwable
     {
-        builder.getOutputStream().write(toString().getBytes(StandardCharsets.UTF_8));
+//        builder.getOutputStream().write(toString().getBytes(StandardCharsets.UTF_8));
+        StringBuilder sb=new StringBuilder();
+        sb.append("$('#"+id+"').click(function(){$.ajax({type:'");
+        sb.append(this.type);
+        sb.append("',url:'");
+        sb.append(this.url);
+        sb.append("',dataType:'json',data:{");
+        boolean commaNeeded=false;
+        for (KeyValue<String,String> item:this.queryInputs)
+        {
+            if (commaNeeded==false)
+            {
+                sb.append("'");
+                commaNeeded=true;
+            }
+            else
+            {
+                sb.append(",'");
+            }
+            sb.append(item.getName());
+            sb.append(item.getValue());
+        }
+        sb.append("},async:");
+        sb.append(async);
+        sb.append(",success:function(data){$.each(data,function(key,value){$('#'+key).html(value);})} });});");
+        addInner(new script().type("text/javascript").addInner(sb));
+        super.build(builder);
+//        builder.getOutputStream().write(sb.toString().getBytes(StandardCharsets.UTF_8));
         
     }
 }

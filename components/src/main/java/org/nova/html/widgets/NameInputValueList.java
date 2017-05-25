@@ -59,4 +59,8 @@ public class NameInputValueList extends div
        }
        super.build(builder);
     }
+    public int size()
+    {
+        return this.list.size();
+    }
 }

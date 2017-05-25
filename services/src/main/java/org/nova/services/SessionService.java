@@ -35,7 +35,7 @@ public class SessionService<SESSION extends Session> extends ServerApplication
         this.getMenuBar().add("/operator/sessions","Sessions","View All");
         
         this.getPublicServer().addFilters(this.sessionFilter);
-        SessionOperatorPages<SESSION> sessionOperatorPages=new SessionOperatorPages<>(this.sessionManager);
+        SessionOperatorPages<SESSION> sessionOperatorPages=new SessionOperatorPages<>(this.sessionManager,this);
         this.getOperatorServer().register(sessionOperatorPages);
     }
     public SessionManager<SESSION> getSessionManager()
