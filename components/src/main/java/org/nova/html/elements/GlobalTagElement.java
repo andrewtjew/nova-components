@@ -53,7 +53,15 @@ public class GlobalTagElement<ELEMENT extends TagElement<ELEMENT>> extends TagEl
     }
     public ELEMENT hidden(boolean value)
     {
-        return attr("hidden",value);
+        if (value==true)
+        {
+            return attr("hidden");
+        }
+        return (ELEMENT)this;
+    }
+    public ELEMENT hidden()
+    {
+        return attr("hidden");
     }
     public ELEMENT id(String value)
     {

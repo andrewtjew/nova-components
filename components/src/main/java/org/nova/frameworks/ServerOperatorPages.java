@@ -1099,8 +1099,9 @@ public class ServerOperatorPages
             return;
         }
         panel.content().addInner(new p());
-        Panel textpanel=panel.content().returnAddInner(new Level3Panel(head,"Request Content (Length: "+text.length()+")"));
-        textpanel.addInner(new textarea().readonly().addInner(text));
+//        Panel textpanel=panel.content().returnAddInner(new Level3Panel(head,"Request Content (Length: "+text.length()+")"));
+        Accordion textAccodion=panel.content().returnAddInner(new Accordion(head,false,"Request Content (Length: "+text.length()+")"));
+        textAccodion.content().addInner(new textarea().readonly().style("width:100%").addInner(text));
     }
     
     private void writeRequest(OperatorPage page,RequestLogEntry entry)

@@ -24,6 +24,8 @@ public class HtmlElementWriter extends ContentWriter<Element>
 		if (element!=null)
 		{
             element.build(new OutputStreamBuilder(outputStream));
+            String text=element.toString();
+            context.setResponseContentText(text);
 		}
 	}
 

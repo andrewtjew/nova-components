@@ -1,10 +1,14 @@
 package org.nova.html.widgets;
 import org.nova.html.tags.html;
+import org.nova.html.tags.link;
+import org.nova.html.tags.meta;
 import org.nova.html.tags.head;
 
 import java.io.OutputStream;
 
 import org.nova.html.elements.Element;
+import org.nova.html.enums.link_rel;
+import org.nova.html.enums.name;
 import org.nova.html.tags.body;
 
 public class BasicPage extends Content
@@ -18,6 +22,7 @@ public class BasicPage extends Content
         addInner(new DocType(docType));
         this.html=returnAddInner(new html());
         this.head=this.html.returnAddInner(new Head());
+        this.head.addInner(new meta().name(name.viewport).content("width=device-width,initial-scale=1.0"));
         this.body=this.html.returnAddInner(new body());
     }
     public BasicPage()
@@ -25,7 +30,7 @@ public class BasicPage extends Content
         this("html");
     }
     
-    public Head getHead()
+    public Head head()
     {
         return this.head;
     }
