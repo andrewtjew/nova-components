@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import org.nova.core.NameObject;
-import org.nova.html.elements.Builder;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.enums.link_rel;
 import org.nova.html.tags.link;
@@ -76,9 +76,9 @@ public class DataTable extends Table
             }
         }
         @Override
-        public void build(Builder builder) throws Throwable
+        public void build(Composer composer) throws Throwable
         {
-            builder.getOutputStream().write(this.toString().getBytes(StandardCharsets.UTF_8));
+            composer.getStringBuilder().append(toString());
         }
     }
     

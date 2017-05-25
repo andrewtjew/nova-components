@@ -2,14 +2,17 @@ package org.nova.html.operator;
 
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 
 import org.nova.core.Utils;
 import org.nova.html.elements.Element;
-import org.nova.html.elements.OutputStreamBuilder;
+import org.nova.html.elements.StringComposer;
 import org.nova.html.widgets.Text;
 import org.nova.html.widgets.templates.Template;
 import org.nova.http.server.ContentWriter;
 import org.nova.http.server.Context;
+
+import com.sun.xml.bind.api.impl.NameConverter.Standard;
 
 public class OperatorResultWriter extends ContentWriter<OperatorResult>
 {
@@ -43,7 +46,9 @@ public class OperatorResultWriter extends ContentWriter<OperatorResult>
 			page.fill("info", new Text(this.name+"@"+this.hostName+"<br/>"+Utils.nowToLocalDateTimeString()));
 			page.fill("title", new Text(result.getTitle()));
 			page.fill("content", result.getContent());
-			page.build(new OutputStreamBuilder(outputStream));
+			StringComposer composer=new StringComposer();
+			page.build(composer);
+			outputStream.write(composer.getStringBuilder().toString().getBytes(StandardCharsets.UTF_8));
 		}
 		
 	}

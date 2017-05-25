@@ -1,6 +1,7 @@
 package org.nova.html.elements;
 
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.nova.http.server.ContentWriter;
 import org.nova.http.server.Context;
@@ -23,8 +24,10 @@ public class HtmlElementWriter extends ContentWriter<Element>
         context.getHttpServletResponse().setContentType("text/html;charset=utf-8");
 		if (element!=null)
 		{
-            element.build(new OutputStreamBuilder(outputStream));
-            String text=element.toString();
+		    StringComposer composer=new StringComposer();
+            element.build(composer);
+            String text=composer.getStringBuilder().toString();
+            outputStream.write(text.getBytes(StandardCharsets.UTF_8));
             context.setResponseContentText(text);
 		}
 	}

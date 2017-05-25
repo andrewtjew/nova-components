@@ -4,7 +4,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 
 import org.nova.collections.FileCache;
-import org.nova.html.elements.Builder;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.base;
 import org.nova.html.tags.head;
@@ -79,7 +79,7 @@ public class Head extends head
     }
     
     @Override
-    public void build(Builder builder) throws Throwable
+    public void build(Composer builder) throws Throwable
     {
         if (this.title!=null)
         {

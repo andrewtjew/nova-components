@@ -1,6 +1,6 @@
 package org.nova.frameworks;
 
-import org.nova.html.elements.Builder;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.enums.link_rel;
 import org.nova.html.tags.body;
@@ -42,7 +42,7 @@ public class OperatorPage extends Element
         return content;
     }
     @Override
-    public void build(Builder builder) throws Throwable
+    public void build(Composer builder) throws Throwable
     {
         this.template.build(builder);
     }

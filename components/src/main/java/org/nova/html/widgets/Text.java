@@ -3,7 +3,7 @@ package org.nova.html.widgets;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.nova.html.elements.Builder;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
 
@@ -35,11 +35,11 @@ public class Text extends InnerElement<Text>
     }
     
     @Override
-    public void build(Builder builder) throws Throwable
+    public void build(Composer composer) throws Throwable
     {
         if (this.text!=null)
         {
-            builder.getOutputStream().write(this.text.getBytes(StandardCharsets.UTF_8));
+            composer.getStringBuilder().append(this.text);
         }
     }
 }

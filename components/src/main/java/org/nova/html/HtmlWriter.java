@@ -7,7 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.jar.Attributes;
 
-import org.nova.html.elements.Builder;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 
 public class HtmlWriter extends Element
@@ -520,9 +520,9 @@ public class HtmlWriter extends Element
 		return sb.toString();
 	}
     @Override
-    public void build(Builder builder) throws Throwable
+    public void build(Composer builder) throws Throwable
     {
-        builder.getOutputStream().write(this.sb.toString().getBytes(StandardCharsets.UTF_8));
+        builder.getStringBuilder().append(toString());
     }
 
 }

@@ -6,13 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.nova.core.Utils;
-import org.nova.html.elements.Builder;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 
 public class Menu extends Element
 {
 	final private ArrayList<MenuItem> items;
-    private byte[] bytes;
     private String text;
 	
 	public Menu()
@@ -22,10 +21,10 @@ public class Menu extends Element
 	public void add(String navigation,String action) throws Exception
 	{
 		this.items.add(new MenuItem(navigation,action));
-        synchronized(this)
-        {
-            this.bytes=null;
-        }
+		synchronized(this)
+		{
+		    this.text=null;
+		}
 	}
 	public ArrayList<MenuItem> getItems()
 	{
@@ -117,20 +116,20 @@ public class Menu extends Element
 		}
 	}
     @Override
-    public void build(Builder builder) throws Throwable
+    public void build(Composer builder) throws Throwable
     {
-        byte[] bytes=null;
+        String text;
         synchronized (this)
         {
             build();
-            bytes=this.bytes;
+            text=this.text;
         }
-        builder.getOutputStream().write(bytes);
+        builder.getStringBuilder().append(text);
     }
     
     private void build()
     {
-        if (this.bytes==null)
+        if (this.text==null)
         {
             Node root=new Node("root");
             for (MenuItem item:getItems())
@@ -140,7 +139,6 @@ public class Menu extends Element
             StringBuilder sb=new StringBuilder();
             buildMenuText(sb,root);
             this.text=sb.toString();
-            this.bytes=this.text.getBytes(StandardCharsets.UTF_8);
         }
     }
     

@@ -3,7 +3,7 @@ package org.nova.html.widgets;
 import java.util.ArrayList;
 
 import org.nova.core.NameValue;
-import org.nova.html.elements.Builder;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.div;
 import org.nova.html.tags.span;
@@ -40,7 +40,7 @@ public class NameInputValueList extends div
         return add(name, new Text(null));
     }
     @Override
-    public void build(Builder builder) throws Throwable
+    public void build(Composer builder) throws Throwable
     {
        int width=this.longest/2+3;
        for (int i=0;i<this.list.size();i++)

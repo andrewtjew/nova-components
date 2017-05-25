@@ -5,42 +5,41 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
-import org.nova.html.elements.Builder;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 
-public class TemplateBuilder extends Builder
+public class TemplateComposer extends Composer
 {
     final private ArrayList<Section> sections;
-    private ByteArrayOutputStream outputStream;
+    private StringBuilder sb;
     
-    public TemplateBuilder()
+    public TemplateComposer()
     {
         this.sections=new ArrayList<>();
     }
     
     public void processInsertKey(InsertKey insertKey) throws IOException
     {
-        this.outputStream.close();
-        this.sections.add(new StaticSection(this.outputStream.toByteArray()));
+        this.sections.add(new StaticSection(this.sb.toString()));
         this.sections.add(new InsertSection(insertKey.getKey()));
-        
-        this.outputStream=new ByteArrayOutputStream();
+        this.sb=new StringBuilder();
     }
     
     public Template build(Element element) throws Throwable
     {
-        this.outputStream=new ByteArrayOutputStream();
+        this.sb=new StringBuilder(); 
         element.build(this);
-        if (this.outputStream.size()>0)
+        if (this.sb.length()>0)
         {
-            this.sections.add(new StaticSection(this.outputStream.toByteArray()));
+            this.sections.add(new StaticSection(this.sb.toString()));
         }
         return new Template(this.sections.toArray(new Section[this.sections.size()]));
     }
-    
+
     @Override
-    public OutputStream getOutputStream()
+    public StringBuilder getStringBuilder()
     {
-        return this.outputStream;
+        return this.sb;
     }
+    
 }

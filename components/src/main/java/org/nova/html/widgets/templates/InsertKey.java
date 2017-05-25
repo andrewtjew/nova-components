@@ -3,7 +3,7 @@ package org.nova.html.widgets.templates;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.nova.html.elements.Builder;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 
 public class InsertKey extends Element
@@ -14,11 +14,11 @@ public class InsertKey extends Element
         this.key=key;
     }
     @Override
-    public void build(Builder builder) throws Throwable
+    public void build(Composer builder) throws Throwable
     {
-        if (builder instanceof TemplateBuilder)
+        if (builder instanceof TemplateComposer)
         {
-            ((TemplateBuilder)builder).processInsertKey(this);
+            ((TemplateComposer)builder).processInsertKey(this);
         }
     }
     public String getKey()

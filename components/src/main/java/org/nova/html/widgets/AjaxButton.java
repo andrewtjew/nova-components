@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import org.nova.core.KeyValue;
 import org.nova.html.Attribute;
-import org.nova.html.elements.Builder;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
 import org.nova.html.tags.button_button;
@@ -54,7 +54,7 @@ public class AjaxButton extends button_button
 		return this;
 	}
     @Override
-    public void build(Builder builder) throws Throwable
+    public void build(Composer builder) throws Throwable
     {
 //        builder.getOutputStream().write(toString().getBytes(StandardCharsets.UTF_8));
         StringBuilder sb=new StringBuilder();

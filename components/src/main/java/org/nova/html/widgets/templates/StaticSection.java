@@ -3,25 +3,23 @@ package org.nova.html.widgets.templates;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.nova.html.elements.Composer;
+
 class StaticSection extends Section
 {
-    final private byte[] bytes;
+    final private String text;
     StaticSection(String text)
     {
-        this(text.getBytes(StandardCharsets.UTF_8));
-    }
-    StaticSection(byte[] bytes)
-    {
-        this.bytes=bytes;
+        this.text=text;
     }
     @Override
-    public void write(OutputStream outputStream,ElementMap map) throws Throwable
+    public void write(Composer composer,ElementMap map) throws Throwable
     {
-        outputStream.write(this.bytes);
+        composer.getStringBuilder().append(this.text);
     }
     @Override 
     public String toString()
     {
-        return new String(this.bytes,StandardCharsets.UTF_8);
+        return this.text;
     }
 }

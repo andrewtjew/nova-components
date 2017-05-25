@@ -2573,7 +2573,7 @@ public class ServerOperatorPages
         HttpClientEndPoint httpClientEndPoint=getExecuteClient(httpServer,context);
         String content=httpClientEndPoint.endPoint+pathAndQuery.toString();
         BasicPage page=new BasicPage();
-        page.getHead().addInner(new meta().http_equiv(http_equiv.refresh).content("0:URL='"+content+"'"));
+        page.head().addInner(new meta().http_equiv(http_equiv.refresh).content("0;URL='"+content+"'"));
         return page;
     }
 

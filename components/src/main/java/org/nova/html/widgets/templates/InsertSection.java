@@ -4,9 +4,9 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.nova.core.Utils;
-import org.nova.html.elements.Builder;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.elements.OutputStreamBuilder;
+import org.nova.html.elements.StringComposer;
 
 public class InsertSection extends Section
 {
@@ -16,12 +16,12 @@ public class InsertSection extends Section
         this.key=key;
     }
     @Override
-    public void write(OutputStream outputStream,ElementMap map) throws Throwable
+    public void write(Composer composer,ElementMap map) throws Throwable
     {
         Element element=map.get(this.key);
         if (element!=null)
         {
-            element.build(new OutputStreamBuilder(outputStream));
+            element.build(composer);
         }
     }
 	

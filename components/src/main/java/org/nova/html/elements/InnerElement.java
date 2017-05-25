@@ -69,7 +69,7 @@ public abstract class InnerElement<ELEMENT extends InnerElement<ELEMENT>> extend
     }
 
     @Override
-    public void build(Builder builder) throws Throwable
+    public void build(Composer builder) throws Throwable
     {
         if (this.inners!=null)
         {

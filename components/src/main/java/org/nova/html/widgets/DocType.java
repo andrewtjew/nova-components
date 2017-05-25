@@ -3,7 +3,7 @@ package org.nova.html.widgets;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.nova.html.elements.Builder;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 
 public class DocType extends Element
@@ -14,9 +14,9 @@ public class DocType extends Element
         this.docType=docType;
     }
     @Override
-    public void build(Builder builder) throws Throwable
+    public void build(Composer builder) throws Throwable
     {
-        builder.getOutputStream().write(("<!DOCTYPE "+docType+">").getBytes(StandardCharsets.UTF_8));
+        builder.getStringBuilder().append("<!DOCTYPE "+docType+">");
     }
 
 }

@@ -40,39 +40,14 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
         sb.append(' ').append(name);
         return (ELEMENT) this;
     }
-    static byte[] CLOSE=new byte[]{'>'};
-    static byte[] END_OPEN=new byte[]{'<','/'};
-    static byte[] INLINE_CLOSE=new byte[]{' ','/','>'};
-    
     @Override
-    public void build(Builder builder) throws Throwable
+    public void build(Composer builder) throws Throwable
     {
-        OutputStream outputStream=builder.getOutputStream();
-        outputStream.write(this.sb.toString().getBytes(StandardCharsets.UTF_8));
-        outputStream.write(CLOSE);
+        StringBuilder composerStringBuilder=builder.getStringBuilder();
+        composerStringBuilder.append(this.sb.toString());
+        composerStringBuilder.append('>');
         super.build(builder);
-        outputStream=builder.getOutputStream();
-        outputStream.write(END_OPEN);
-        outputStream.write(this.tag.getBytes(StandardCharsets.UTF_8));
-        outputStream.write(CLOSE);
-    }
-    @Override
-    public String toString()
-    {
-        try
-        {
-            try (ByteArrayOutputStream outputStream=new ByteArrayOutputStream())
-            {
-                OutputStreamBuilder builder=new OutputStreamBuilder(outputStream);
-                build(builder);
-                outputStream.close();
-                return outputStream.toString();
-            }            
-        }
-        catch (Throwable e)
-        {
-            return e.getMessage();
-        }
-        
+        composerStringBuilder=builder.getStringBuilder();
+        composerStringBuilder.append("</").append(this.tag).append('>');
     }
 }

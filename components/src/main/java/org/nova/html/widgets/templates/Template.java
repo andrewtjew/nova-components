@@ -5,7 +5,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
-import org.nova.html.elements.Builder;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.widgets.Text;
 
@@ -29,7 +29,7 @@ public class Template extends Element
     
     public Template(Element element) throws Throwable
     {
-        this(new TemplateBuilder().build(element));
+        this(new TemplateComposer().build(element));
     }
     
     public void fill(String key,Element element)
@@ -48,11 +48,11 @@ public class Template extends Element
 
 
     @Override
-    public void build(Builder builder) throws Throwable
+    public void build(Composer composer) throws Throwable
     {
         for (Section section:this.sections)
         {
-            section.write(builder.getOutputStream(), this.map);
+            section.write(composer, this.map);
         }
     }
     
