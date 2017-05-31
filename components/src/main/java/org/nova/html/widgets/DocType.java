@@ -14,7 +14,7 @@ public class DocType extends Element
         this.docType=docType;
     }
     @Override
-    public void build(Composer builder) throws Throwable
+    public void compose(Composer builder) throws Throwable
     {
         builder.getStringBuilder().append("<!DOCTYPE "+docType+">");
     }

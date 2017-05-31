@@ -520,7 +520,7 @@ public class HtmlWriter extends Element
 		return sb.toString();
 	}
     @Override
-    public void build(Composer builder) throws Throwable
+    public void compose(Composer builder) throws Throwable
     {
         builder.getStringBuilder().append(toString());
     }

@@ -1,7 +1,9 @@
 package org.nova.html.widgets;
 
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.nova.collections.FileCache;
 import org.nova.html.elements.Composer;
@@ -17,98 +19,83 @@ import org.nova.html.tags.noscript;
 
 public class Head extends head
 {
-    private title title;
-    private noscript noscript;
-    final private HashMap<String,style> styles;
-    final private HashMap<String,base> bases;
-    final private HashMap<String,link> links;
-    final private HashMap<String,meta> metas;
-    final private HashMap<String,script> scripts;
-    
+    private HashSet<String> styleSet;
+    private HashSet<String> baseSet;
+    private HashSet<String> linkSet;
+    private HashSet<String> metaSet;
+    private HashSet<String> scriptSet;
+
     public Head()
     {
-        this.styles=new HashMap<>();
-        this.bases=new HashMap<>();
-        this.links=new HashMap<>();
-        this.metas=new HashMap<>();
-        this.scripts=new HashMap<>();
     }
-    
-    public Head add(String id,style style)
+
+    public Head add(String id, style style)
     {
-        this.styles.put(id, style);
+        if (this.styleSet == null)
+        {
+            this.styleSet = new HashSet<>();
+        }
+        if (this.styleSet.add(id))
+        {
+            addInner(style);
+        }
         return this;
     }
-    public Head add(String id,base base)
+
+    public Head add(String id, base base)
     {
-        this.bases.put(id, base);
+        if (this.baseSet == null)
+        {
+            this.baseSet = new HashSet<>();
+        }
+        if (this.baseSet.add(id))
+        {
+            addInner(base);
+        }
         return this;
     }
-    public Head add(String id,link link)
+
+    public Head add(String id, link link)
     {
-        this.links.put(id, link);
+        if (this.linkSet == null)
+        {
+            this.linkSet = new HashSet<>();
+        }
+        if (this.linkSet.add(id))
+        {
+            addInner(link);
+        }
         return this;
     }
-    public Head add(String id,meta meta)
+
+    public Head add(String id, meta meta)
     {
-        this.metas.put(id, meta);
+        if (this.metaSet == null)
+        {
+            this.metaSet = new HashSet<>();
+        }
+        if (this.metaSet.add(id))
+        {
+            addInner(meta);
+        }
         return this;
     }
-    public Head add(String id,script script)
+
+    public Head add(String id, script script)
     {
-        this.scripts.put(id, script);
+        if (this.scriptSet == null)
+        {
+            this.scriptSet = new HashSet<>();
+        }
+        if (this.scriptSet.add(id))
+        {
+            addInner(script);
+        }
         return this;
     }
+
     public Head addScript(String URL)
     {
-        if (this.scripts.containsKey(URL)==false)
-        {
-            this.scripts.put(URL, new script().src(URL));
-        }
-        return this;
-    }
-    public Head setTitle(title title)
-    {
-        this.title=title;
-        return this;
-    }
-    public Head setTitle(noscript noscript)
-    {
-        this.noscript=noscript;
-        return this;
-    }
-    
-    @Override
-    public void build(Composer builder) throws Throwable
-    {
-        if (this.title!=null)
-        {
-            addInner(this.title);
-        }
-        for (style value:this.styles.values())
-        {
-            addInner(value);
-        }
-        for (base value:this.bases.values())
-        {
-            addInner(value);
-        }
-        for (link value:this.links.values())
-        {
-            addInner(value);
-        }
-        for (meta value:this.metas.values())
-        {
-            addInner(value);
-        }
-        for (script value:this.scripts.values())
-        {
-            addInner(value);
-        }
-        if (this.noscript!=null)
-        {
-            addInner(this.noscript);
-        }
-        super.build(builder);
+        return add(URL,new script().src(URL));
     }
 }

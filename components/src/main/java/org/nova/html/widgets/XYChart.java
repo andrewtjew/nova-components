@@ -85,7 +85,7 @@ public class XYChart extends InnerElement<XYChart>
 	}
 
     @Override
-    public void build(Composer composer) throws Throwable
+    public void compose(Composer composer) throws Throwable
     {
         composer.getStringBuilder().append(toString());
     }

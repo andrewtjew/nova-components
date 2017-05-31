@@ -42,9 +42,9 @@ public class OperatorPage extends Element
         return content;
     }
     @Override
-    public void build(Composer builder) throws Throwable
+    public void compose(Composer composer) throws Throwable
     {
-        this.template.build(builder);
+        this.template.compose(composer);
     }
     
     static Template buildTemplate(MenuBar menuBar,String name,String hostName) throws Throwable

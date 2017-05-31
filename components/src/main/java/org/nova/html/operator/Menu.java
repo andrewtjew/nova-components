@@ -116,7 +116,7 @@ public class Menu extends Element
 		}
 	}
     @Override
-    public void build(Composer builder) throws Throwable
+    public void compose(Composer builder) throws Throwable
     {
         String text;
         synchronized (this)

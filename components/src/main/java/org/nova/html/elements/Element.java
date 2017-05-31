@@ -4,6 +4,6 @@ import java.io.OutputStream;
 
 public abstract class Element
 {
-    abstract public void build(Composer builder) throws Throwable;
+    abstract public void compose(Composer composer) throws Throwable;
 
 }

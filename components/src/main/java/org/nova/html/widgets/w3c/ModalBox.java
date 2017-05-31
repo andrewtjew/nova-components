@@ -20,10 +20,6 @@ public class ModalBox extends div
     final private div footer;
     public ModalBox(Head head,String id,String header,String footer,String sourcePath,String cssFile)
     {
-        if (id==null)
-        {
-            id=Integer.toString(this.hashCode());
-        }
         this.id=id;
         id(id);
         class_("modal");
@@ -51,23 +47,11 @@ public class ModalBox extends div
         this(head,id,title,footer,"/resources/html","/w3c/ModalBox/modal.css");
     }
     
-    public ModalBox(Head head,String title,String footer)
+    public ModalBox(Head head,String id,String title)
     {
-        this(head,null,title,footer);
+        this(head,id,title,null);
     }
 
-    public ModalBox setWidth(int width)
-    {
-        this.box.style("width:"+width+"px");
-        return this;
-    }
-    
-    public ModalBox setWidth(String width)
-    {
-        this.box.style("width:"+width);
-        return this;
-    }
-    
     public div content()
     {
         return this.content;

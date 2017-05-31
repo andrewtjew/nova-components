@@ -2,6 +2,7 @@ package org.nova.html.elements;
 
 import org.nova.html.enums.dir;
 import org.nova.html.enums.dropzone;
+import org.nova.html.properties.Style;
 
 public class GlobalTagElement<ELEMENT extends TagElement<ELEMENT>> extends TagElement<ELEMENT>
 {
@@ -78,6 +79,10 @@ public class GlobalTagElement<ELEMENT extends TagElement<ELEMENT>> extends TagEl
     public ELEMENT style(String value)
     {
         return attr("style",value);
+    }
+    public ELEMENT style(Style value)
+    {
+        return attr("style",value.toString());
     }
     public ELEMENT tabindex(int value)
     {

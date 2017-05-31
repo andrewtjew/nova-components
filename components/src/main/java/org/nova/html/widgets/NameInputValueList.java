@@ -40,24 +40,28 @@ public class NameInputValueList extends div
         return add(name, new Text(null));
     }
     @Override
-    public void build(Composer builder) throws Throwable
+    public void compose(Composer builder) throws Throwable
     {
-       int width=this.longest/2+3;
+       int width=(int)((this.longest+2)*0.6);
        for (int i=0;i<this.list.size();i++)
        {
            NameValue<Element> item=this.list.get(i);
 
-           div line=returnAddInner(new div().style("display:flex;text-align:right;width:100%;margin:2px;"));
+           div line=returnAddInner(new div().style("display:flex;text-align:right;width:100%;margin:0.25em;"));
            String label=item.getName();
            if (label==null)
            {
                label="";
            }
-           label+=" :";
-           line.addInner(new div().style("width:"+width+"em;padding-right:4px;margin-right:4px;").addInner(label));
-           line.addInner(new div().style("width:100%;text-align:left;").addInner(item.getValue()));
+           else
+           {
+               label+=":";
+           }
+           line.addInner(new div().style("width:"+width+"em;padding-right:0.5em;margin-left:0.5em;font-weight:bold;").addInner(label));
+//           line.addInner(new div().style("width:100%;text-align:left;display:block;").addInner(item.getValue()));
+           line.addInner(new div().style("width:100%;text-align:left;display:block;").addInner(item.getValue()).addInner(new div().style("display:none;padding:0.5em;margin-bottom:0.5em;background-color:#fdd;")));
        }
-       super.build(builder);
+       super.compose(builder);
     }
     public int size()
     {

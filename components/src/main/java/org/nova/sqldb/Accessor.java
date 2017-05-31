@@ -20,6 +20,7 @@ import org.nova.collections.Resource;
 import org.nova.core.MultiException;
 import org.nova.core.Utils;
 import org.nova.logging.Item;
+import org.nova.sqldb.FieldMaps.ConstructorFieldMap;
 import org.nova.sqldb.Param.Direction;
 import org.nova.tracing.Trace;
 
@@ -293,7 +294,8 @@ public class Accessor extends Resource
         ArrayList<TYPE> list = new ArrayList<>();
         int columns = rowSet.getColumns();
         
-        Map<String,Field> map=FieldMaps.get(type);
+        ConstructorFieldMap constructorFieldMap=FieldMaps.get(type);
+        HashMap<String,Field> map=constructorFieldMap.map;
         Field[] fields=new Field[columns];
         for (int columnIndex = 0; columnIndex < columns; columnIndex++)
         {
@@ -304,7 +306,7 @@ public class Accessor extends Resource
 
         for (Row row:rowSet.getRows())
         {
-            TYPE item = type.newInstance();
+            TYPE item = (TYPE)constructorFieldMap.newInstance();
             list.add(item);
             for (int columnIndex = 0; columnIndex < columns; columnIndex++)
             {
@@ -334,7 +336,8 @@ public class Accessor extends Resource
 		ResultSetMetaData metaData = resultSet.getMetaData();
 		int columns = metaData.getColumnCount();
 		
-		Map<String,Field> map=FieldMaps.get(type);
+        ConstructorFieldMap constructorFieldMap=FieldMaps.get(type);
+        HashMap<String,Field> map=constructorFieldMap.map;
 		Field[] fields=new Field[columns];
 		for (int columnIndex = 0; columnIndex < columns; columnIndex++)
 		{
@@ -345,7 +348,7 @@ public class Accessor extends Resource
 		
 		while (resultSet.next())
 		{
-			TYPE item = type.newInstance();
+            TYPE item = (TYPE)constructorFieldMap.newInstance();
 			list.add(item);
 			for (int columnIndex = 0; columnIndex < columns; columnIndex++)
 			{
@@ -363,10 +366,11 @@ public class Accessor extends Resource
 		ResultSetMetaData metaData = resultSet.getMetaData();
 		int columns = metaData.getColumnCount();
 		
-		Map<String,Field> map=FieldMaps.get(type);
+        ConstructorFieldMap constructorFieldMap=FieldMaps.get(type);
+        HashMap<String,Field> map=constructorFieldMap.map;
 		if (resultSet.next())
 		{
-			TYPE item = type.newInstance();
+            TYPE item = (TYPE)constructorFieldMap.newInstance();
 			for (int columnIndex = 0; columnIndex < columns; columnIndex++)
 			{
 				String name = metaData.getColumnName(columnIndex + 1);

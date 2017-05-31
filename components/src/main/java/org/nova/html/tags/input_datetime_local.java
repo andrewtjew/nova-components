@@ -1,5 +1,6 @@
 package org.nova.html.tags;
 
+import org.nova.core.Utils;
 import org.nova.html.elements.InputElement;
 import org.nova.html.enums.autocomplete;
 
@@ -40,7 +41,7 @@ public class input_datetime_local extends InputElement<input_datetime_local>
     }
     public input_datetime_local min(long number)
     {
-        return attr("min",number);
+        return attr("min",Utils.millisToDurationString(number));
     }
     public input_datetime_local step(int number) //number, range, date, datetime, datetime-local, month, time and week.
     {

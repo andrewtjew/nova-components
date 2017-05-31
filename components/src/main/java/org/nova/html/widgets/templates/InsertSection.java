@@ -21,7 +21,7 @@ public class InsertSection extends Section
         Element element=map.get(this.key);
         if (element!=null)
         {
-            element.build(composer);
+            element.compose(composer);
         }
     }
 	

@@ -9,7 +9,6 @@ import org.nova.security.UnsecureVault;
 import org.nova.security.Vault;
 import org.nova.tracing.TraceManager;
 
-import com.amazonaws.services.elasticmapreduce.util.BootstrapActions.ConfigFile;
 import com.nova.disrupt.Disruptor;
 
 public class MySqlConnector extends Connector

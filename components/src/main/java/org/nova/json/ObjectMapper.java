@@ -622,6 +622,10 @@ public class ObjectMapper
 					{
 					    list.add(readArray(lexer, componentType));
 					}
+					else if (lexer.getRestOfNull())
+					{
+                        list.add(null);
+					}
 					else
 					{
                         throw new Exception("String expected at " + lexer.getPosition());
@@ -732,10 +736,12 @@ public class ObjectMapper
 								parameters[i] = (short) 0;
 							}
 						}
+						/*
 						else if (parameterType.isEnum())
 						{
-							parameters[i] = parameterType.newInstance();
+							parameters[i] = null;
 						}
+						*/
 					}
 					shortestConstructor.setAccessible(true);
 					typeInfo = new ReadTypeInfo(shortestConstructor, parameters, fields);
@@ -852,11 +858,6 @@ public class ObjectMapper
 			}
             else if (fieldType.isEnum())
             {
-                next = lexer.getNextCharacter();
-                if (next != '"')
-                {
-                    throw new Exception("String expected at " + lexer.getPosition());
-                }
                 field.set(object, Enum.valueOf((Class<Enum>) fieldType, lexer.getString()));
             }
             else if (fieldType==java.lang.Enum.class)

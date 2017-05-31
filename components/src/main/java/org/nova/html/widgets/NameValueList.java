@@ -40,7 +40,7 @@ public class NameValueList extends div
         return add(name, new Text(null));
     }
     @Override
-    public void build(Composer builder) throws Throwable
+    public void compose(Composer builder) throws Throwable
     {
        int width=this.longest/2+3;
        for (int i=0;i<this.list.size();i++)
@@ -50,7 +50,7 @@ public class NameValueList extends div
            div line=returnAddInner(new div());
            if (i<this.list.size())
            {
-               line.style("display:flex;text-align:right;width:100%;border-bottom:1px solid #888;");
+               line.style("display:flex;text-align:right;width:100%;border-bottom:1px solid #bbb;");
            }
            else
            {
@@ -61,9 +61,9 @@ public class NameValueList extends div
            {
                label="";
            }
-           line.addInner(new div().style("width:"+width+"em;border-right:1px solid #888;padding-right:4px;margin-right:4px;").addInner(label));
-           line.addInner(new div().style("width:100%;text-align:left;").addInner(item.getValue()));
+           line.addInner(new div().style("width:"+width+"em;border-right:1px solid #bbb;padding-right:4px;margin-right:4px;padding-top:0.2em;padding-bottom:0.1em;").addInner(label));
+           line.addInner(new div().style("width:100%;text-align:left;padding-top:0.2em;padding-bottom:0.1em;").addInner(item.getValue()));
        }
-       super.build(builder);
+       super.compose(builder);
     }
 }

@@ -35,7 +35,7 @@ public class Text extends InnerElement<Text>
     }
     
     @Override
-    public void build(Composer composer) throws Throwable
+    public void compose(Composer composer) throws Throwable
     {
         if (this.text!=null)
         {

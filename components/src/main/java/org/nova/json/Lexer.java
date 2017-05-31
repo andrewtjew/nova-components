@@ -253,8 +253,24 @@ public class Lexer
             }
         }
         throw new Exception("String or null expected at "+getPosition());
-
 	}
+
+	public boolean getRestOfNull() throws Exception
+    {
+        if (this.reader.read()=='u')
+        {
+            if (this.reader.read()=='l')
+            {
+                if (this.reader.read()=='l')
+                {
+                    this.last=0;
+                    return true;
+                }
+            }
+        }
+        throw new Exception("null expected at "+getPosition());
+
+    }
 
 	public Boolean getBoolean() throws Exception
 	{

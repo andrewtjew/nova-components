@@ -538,7 +538,38 @@ public class Utils
 		}
 		return occurs;
 	}
-	
+	static public boolean equals(String a,String b)
+	{
+	    if ((a==null)&&(b==null))
+	    {
+	        return true;
+	    }
+        if ((a!=null)&&(b==null))
+        {
+            return false;
+        }
+        if ((a==null)&&(b!=null))
+        {
+            return false;
+        }
+        return a.equals(b);
+	}
+    static public boolean equalsIgnoreCase(String a,String b)
+    {
+        if ((a==null)&&(b==null))
+        {
+            return true;
+        }
+        if ((a!=null)&&(b==null))
+        {
+            return false;
+        }
+        if ((a==null)&&(b!=null))
+        {
+            return false;
+        }
+        return a.equalsIgnoreCase(b);
+    }
 	
 }
 

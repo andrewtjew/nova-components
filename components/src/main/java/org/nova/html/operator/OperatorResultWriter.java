@@ -47,7 +47,7 @@ public class OperatorResultWriter extends ContentWriter<OperatorResult>
 			page.fill("title", new Text(result.getTitle()));
 			page.fill("content", result.getContent());
 			StringComposer composer=new StringComposer();
-			page.build(composer);
+			page.compose(composer);
 			outputStream.write(composer.getStringBuilder().toString().getBytes(StandardCharsets.UTF_8));
 		}
 		

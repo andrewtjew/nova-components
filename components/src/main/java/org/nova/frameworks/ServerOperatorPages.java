@@ -333,10 +333,10 @@ public class ServerOperatorPages
         form_post form=page.content().returnAddInner(new form_post());
         form.addInner("Sampling interval (seconds): ");
         SelectOptions options=form.returnAddInner(new SelectOptions());
-        options.addOption(1,interval==1);
-        options.addOption(2,interval==2);
-        options.addOption(5,interval==5);
-        options.addOption(10,interval==10);
+        options.add(1,interval==1);
+        options.add(2,interval==2);
+        options.add(5,interval==5);
+        options.add(10,interval==10);
         options.onchange("window.location='./all?interval='+(this.value);");
         
         page.content().addInner(new p());
@@ -410,10 +410,10 @@ public class ServerOperatorPages
         form_post form=page.content().returnAddInner(new form_post());
         form.addInner("Sampling interval (seconds): ");
         SelectOptions options=form.returnAddInner(new SelectOptions());
-        options.addOption(1,interval==1);
-        options.addOption(2,interval==2);
-        options.addOption(5,interval==5);
-        options.addOption(10,interval==10);
+        options.add(1,interval==1);
+        options.add(2,interval==2);
+        options.add(5,interval==5);
+        options.add(10,interval==10);
         options.onchange("window.location='./all?interval='+(this.value);");
         page.content().addInner(new p());
         CategoryMeters categories = this.serverApplication.getMeterManager().getSnapshot().getMeterBoxes(category);
@@ -589,12 +589,12 @@ public class ServerOperatorPages
         OperatorPage page=this.serverApplication.buildOperatorPage("Active Trace Stats");
         Trace[] traces = this.serverApplication.getTraceManager().getActiveSnapshot();
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
-        table.setHeadRow(new Row().add("Category","Number").addWithTitle("Active", "milliseconds").addWithTitle("Wait", "milliseconds").addWithTitle("Duration", "milliseconds").add("Waiting","Details","Created"));
+        table.setHeadRow(new Row().add("Category","Number").addWithTitle("Active", "milliseconds").addWithTitle("Wait", "milliseconds").addWithTitle("Duration", "milliseconds").add("Waiting","Details","Created",""));
         for (Trace trace : traces)
         {
             Row row=new Row()
-                    .addWithUrl(trace.getCategory(),new PathAndQueryBuilder("./activeTrace").addQuery("number", trace.getNumber()).toString(),true)
-                    .add(trace.getNumber(),trace.getActiveNs() / 1000000,trace.getWaitNs() / 1000000,trace.getDurationNs() / 1000000,trace.isWaiting(),trace.getDetails(),Utils.millisToLocalDateTime(trace.getCreated()));
+                    .add(trace.getCategory(),trace.getNumber(),trace.getActiveNs() / 1000000,trace.getWaitNs() / 1000000,trace.getDurationNs() / 1000000,trace.isWaiting(),trace.getDetails(),Utils.millisToLocalDateTime(trace.getCreated()));
+            row.addDetailButton(new PathAndQueryBuilder("./activeTrace").addQuery("number", trace.getNumber()).toString());
             table.addBodyRow(row);
         }
         return page;
@@ -611,17 +611,18 @@ public class ServerOperatorPages
         table.setHeadRow(new Row().add("Category","Count")
                 .addWithTitle("Average", "milliseconds")
                 .addWithTitle("Stddev", "Standard deviation in milliseconds")
-                .addWithTitle("Total", "Total duration in milliseconds"));
+                .addWithTitle("Total", "Total duration in milliseconds").add(""));
         for (TraceStats item : array)
         {
             CountAverageRateMeter meter = item.getMeter();
             AverageAndRate ar = meter.getMarkCountAverage(this.rateSamplingDuration);
             Row row=new Row()
-                    .addWithUrl(item.getCategory(),new PathAndQueryBuilder("./trace").addQuery("category", item.getCategory()).toString(),true)
-                    .add(meter.getCount()
+                    .add(item.getCategory()
+                    ,meter.getCount()
                     ,nanoToDefaultFormat(ar.getAverage())
                     ,nanoToDefaultFormat(ar.getStandardDeviation())
                     ,nanoToDefaultFormat(meter.getTotal()));
+            row.addDetailButton(new PathAndQueryBuilder("./trace").addQuery("category", item.getCategory()).toString());
 
             table.addBodyRow(row);
         }
@@ -669,11 +670,12 @@ public class ServerOperatorPages
         {
             TraceNode node = entry.getValue();
             Row row=new Row()
-                    .addWithUrl(entry.getKey(),new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString(),true)
-                    .add(node.getCount()
+                    .add(entry.getKey()
+                    ,node.getCount()
                     ,nanoToDefaultFormat(node.getTotalDurationNs() / node.getCount())
                     ,nanoToDefaultFormat(node.getTotalDurationNs())
                     ,nanoToDefaultFormat(node.getTotalWaitNs()));
+            row.addDetailButton(new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString());
             table.addBodyRow(row);
         }
         return page;
@@ -846,9 +848,11 @@ public class ServerOperatorPages
                 totalWaitNs += item.getTotalWaitNs();
             }
 
+            String location=new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString();
             Row row=new Row()
-                    .add(entry.getKey(),new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString(),true)
+                    .add(entry.getKey())
                     .add(count,nanoToDefaultFormat(totalDurationNs),nanoToDefaultFormat(totalWaitNs),list.size(),map.containsKey(entry.getKey()));
+            row.onclick("window.location='"+location+"'");
             table.addBodyRow(row);
 
         }
@@ -930,7 +934,8 @@ public class ServerOperatorPages
             .addWithTitle("Ave Dur", "Average duration of request in milliseconds")
             .addWithTitle("Rate", "Request rate per second")
             .addWithTitle("ReqSize", "Average uncompressed size of request content in bytes")
-            .addWithTitle("RespSize", "Average uncompressed size of response content in bytes");
+            .addWithTitle("RespSize", "Average uncompressed size of response content in bytes")
+            .add("");
         table.setHeadRow(row);
 
         double totalAll = 0;
@@ -966,7 +971,7 @@ public class ServerOperatorPages
             double totalPercentage = totalAll > 0 ? 100.0 * total / totalAll : 0;
 
             row=new Row();
-            row.addWithUrl(requestHandler.getHttpMethod() + " " + requestHandler.getPath(),new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).addQuery("server", server).toString(),true)
+            row.add(requestHandler.getHttpMethod() + " " + requestHandler.getPath())
             .add(count)
             .add(DOUBLE_FORMAT.format(countPercentage))
             .add(Utils.millisToDurationString((long) totalMilliseconds))
@@ -975,6 +980,7 @@ public class ServerOperatorPages
             .add(DOUBLE_FORMAT.format(rate))
             .add(count > 0 ? requestHandler.getRequestUncompressedContentSizeMeter().getTotal() / count : 0)
             .add(count > 0 ? requestHandler.getResponseUncompressedContentSizeMeter().getTotal() / count : 0);
+            row.addDetailButton(new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).addQuery("server", server).toString());
             table.addBodyRow(row);
             
         }
@@ -1077,7 +1083,7 @@ public class ServerOperatorPages
         }
         panel.content().addInner(new p());
         String[] array=Utils.split(headers, '\r');
-        Accordion accordion=panel.content().returnAddInner(new Accordion(head,null,false, "Headers (Count: "+(array.length-1)+")"));
+        Accordion accordion=panel.content().returnAddInner(new Accordion(head,null,false, "Headers (Length: "+(array.length-1)+")"));
         NameValueList list=accordion.content().returnAddInner(new NameValueList());
         for (String item:array)
         {
@@ -1098,10 +1104,11 @@ public class ServerOperatorPages
         {
             return;
         }
-        panel.content().addInner(new p());
+//        panel.content().addInner(new p());
 //        Panel textpanel=panel.content().returnAddInner(new Level3Panel(head,"Request Content (Length: "+text.length()+")"));
-        Accordion textAccodion=panel.content().returnAddInner(new Accordion(head,false,"Request Content (Length: "+text.length()+")"));
-        textAccodion.content().addInner(new textarea().readonly().style("width:100%").addInner(text));
+        Accordion textAccodion=panel.content().returnAddInner(new Accordion(head,false,"Content (Length: "+text.length()+")"));
+        int rows=text.length()/120+1;
+        textAccodion.content().addInner(new textarea().readonly().style("width:100%").addInner(text).rows(rows));
     }
     
     private void writeRequest(OperatorPage page,RequestLogEntry entry)
@@ -1192,7 +1199,7 @@ public class ServerOperatorPages
         OperatorPage page=buildServerOperatorPage("Server Status",server);
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         Row row=new Row();
-        row.add("Method","Path","200","300","400","500");
+        row.add("Method","Path","200","300","400","500","");
         table.setHeadRow(row);
         for (RequestHandler requestHandler : requestHandlers)
         {
@@ -1218,12 +1225,13 @@ public class ServerOperatorPages
             }
             row=new Row();
             row.add(requestHandler.getHttpMethod())
-            .addWithUrl(requestHandler.getPath(),new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).addQuery("server", server).toString(),true)
+            .add(requestHandler.getPath())
             .add(statusCodes.get(200)
                 ,statusCodes.get(300)
                 ,statusCodes.get(400)
                 ,statusCodes.get(500)
             );
+            row.addDetailButton(new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).addQuery("server", server).toString());
             table.addBodyRow(row);
         }
         return page;

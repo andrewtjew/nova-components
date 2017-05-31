@@ -87,12 +87,12 @@ public class MenuBar extends Element
     }
 
     @Override
-    public void build(Composer builder) throws Throwable
+    public void compose(Composer builder) throws Throwable
     {
         ul menu=new ul();
         menu.class_("menu-level-0");
         write(menu,0,this.rootItems);
-        menu.build(builder);
+        menu.compose(builder);
     }
     
     private void write(ul ul,int level,ArrayList<Item> items)

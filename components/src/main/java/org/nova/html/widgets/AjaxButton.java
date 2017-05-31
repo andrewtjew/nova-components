@@ -54,7 +54,7 @@ public class AjaxButton extends button_button
 		return this;
 	}
     @Override
-    public void build(Composer builder) throws Throwable
+    public void compose(Composer builder) throws Throwable
     {
 //        builder.getOutputStream().write(toString().getBytes(StandardCharsets.UTF_8));
         StringBuilder sb=new StringBuilder();
@@ -82,7 +82,7 @@ public class AjaxButton extends button_button
         sb.append(async);
         sb.append(",success:function(data){$.each(data,function(key,value){$('#'+key).html(value);})} });});");
         addInner(new script().type("text/javascript").addInner(sb));
-        super.build(builder);
+        super.compose(builder);
 //        builder.getOutputStream().write(sb.toString().getBytes(StandardCharsets.UTF_8));
         
     }

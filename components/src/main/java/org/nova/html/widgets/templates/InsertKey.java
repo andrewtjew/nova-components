@@ -14,11 +14,11 @@ public class InsertKey extends Element
         this.key=key;
     }
     @Override
-    public void build(Composer builder) throws Throwable
+    public void compose(Composer composer) throws Throwable
     {
-        if (builder instanceof TemplateComposer)
+        if (composer instanceof TemplateComposer)
         {
-            ((TemplateComposer)builder).processInsertKey(this);
+            ((TemplateComposer)composer).processInsertKey(this);
         }
     }
     public String getKey()

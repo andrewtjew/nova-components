@@ -29,7 +29,7 @@ public class Template extends Element
     
     public Template(Element element) throws Throwable
     {
-        this(new TemplateComposer().build(element));
+        this(TemplateComposer.compose(element));
     }
     
     public void fill(String key,Element element)
@@ -48,7 +48,7 @@ public class Template extends Element
 
 
     @Override
-    public void build(Composer composer) throws Throwable
+    public void compose(Composer composer) throws Throwable
     {
         for (Section section:this.sections)
         {

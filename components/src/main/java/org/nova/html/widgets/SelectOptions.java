@@ -12,32 +12,37 @@ public class SelectOptions extends select
     public SelectOptions()
     {
     }
-    public SelectOptions addOption(String value,String text,boolean selected)
+    public SelectOptions add(String value,String text,boolean selected)
     {
         addInner(new option().value(value).addInner(text).selected(selected));
         return this;
     }
-    public SelectOptions addOption(String value,boolean selected)
+    public SelectOptions add(String value,String text,String currenValue)
     {
-        return addOption(value,value,selected);
+        addInner(new option().value(value).addInner(text).selected(value.equals(currenValue)));
+        return this;
     }
-    public SelectOptions addOption(Object value,boolean selected)
+    public SelectOptions add(String value,boolean selected)
+    {
+        return add(value,value,selected);
+    }
+    public SelectOptions add(Object value,boolean selected)
     {
         String text=value.toString();
-        return addOption(text,text,selected);
+        return add(text,text,selected);
     }
-    public SelectOptions addOption(String value,String text)
+    public SelectOptions add(String value,String text)
     {
         addInner(new option().value(value).addInner(text));
         return this;
     }
     public SelectOptions add(String value)
     {
-        return addOption(value,value);
+        return add(value,value);
     }
     public SelectOptions addOption(Object value)
     {
         String text=value.toString();
-        return addOption(text,text);
+        return add(text,text);
     }
 }

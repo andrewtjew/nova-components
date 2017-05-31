@@ -4,6 +4,8 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
+import javax.management.RuntimeErrorException;
+
 import org.nova.html.widgets.Text;
 
 public abstract class InnerElement<ELEMENT extends InnerElement<ELEMENT>> extends Element
@@ -69,38 +71,32 @@ public abstract class InnerElement<ELEMENT extends InnerElement<ELEMENT>> extend
     }
 
     @Override
-    public void build(Composer builder) throws Throwable
+    public void compose(Composer builder) throws Throwable
     {
         if (this.inners!=null)
         {
             for (Element inner:this.inners)
             {
-                inner.build(builder);
+                inner.compose(builder);
             }
         }
         else if (inner!=null)
         {
-            inner.build(builder);
+            inner.compose(builder);
         }
     }
     @Override
     public String toString()
     {
-        if (this.inners!=null)
+        try
         {
-            StringBuilder sb=new StringBuilder();
-            {
-                for (Element inner:this.inners)
-                {
-                    sb.append(inner.toString());
-                }
-            }
-            return sb.toString();
+            StringComposer composer=new StringComposer();
+            compose(composer);
+            return composer.getStringBuilder().toString();
         }
-        else if (inner!=null)
+        catch(Throwable t)
         {
-            return inner.toString();
+            throw new RuntimeException(t);
         }
-        return "";
-    }
+   }
 }

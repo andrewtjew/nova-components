@@ -26,7 +26,20 @@ public class Row extends tr
         }
         return this;
     }
+    public Row add(Element...items)
+    {
+        for (Element item:items)
+        {
+            addInner(new td().addInner(item));
+        }
+        return this;
+    }
     public Row addWithTitle(String item,String title)
+    {
+        addInner(new td().addInner(item).title(title));
+        return this;
+    }
+    public Row addWithTitle(Element item,String title)
     {
         addInner(new td().addInner(item).title(title));
         return this;
@@ -44,6 +57,33 @@ public class Row extends tr
         {
             onclick("window.location='"+url+"'");
         }
+        return this;
+    }
+    public Row addRemoveAndDetailButtons(String removeScript,String detailLocation)
+    {
+        td data=returnAddInner(new td());
+        if (detailLocation!=null)
+        {
+            data.addInner(new RowDetailButton(detailLocation));
+        }
+        if (removeScript!=null)
+        {
+            data.addInner(new RowRemoveButton().onclick(removeScript));
+        }
+        return this;
+        
+    }
+    public Row addRemoveButton(String removeScript)
+    {
+        td data=returnAddInner(new td());
+        data.addInner(new RowRemoveButton().onclick(removeScript));
+        return this;
+        
+    }
+    public Row addDetailButton(String detailLocation)
+    {
+        td data=returnAddInner(new td());
+        data.addInner(new RowDetailButton(detailLocation));
         return this;
     }
     /*

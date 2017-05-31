@@ -12,8 +12,6 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
 {
     final private StringBuilder sb;
     final private String tag;
-    private Element inner=null;
-    private ArrayList<Element> inners=null; 
     
     TagElement()
     {
@@ -41,13 +39,13 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
         return (ELEMENT) this;
     }
     @Override
-    public void build(Composer builder) throws Throwable
+    public void compose(Composer composer) throws Throwable
     {
-        StringBuilder composerStringBuilder=builder.getStringBuilder();
+        StringBuilder composerStringBuilder=composer.getStringBuilder();
         composerStringBuilder.append(this.sb.toString());
         composerStringBuilder.append('>');
-        super.build(builder);
-        composerStringBuilder=builder.getStringBuilder();
+        super.compose(composer);
+        composerStringBuilder=composer.getStringBuilder();
         composerStringBuilder.append("</").append(this.tag).append('>');
     }
 }

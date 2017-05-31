@@ -25,10 +25,10 @@ public class TemplateComposer extends Composer
         this.sb=new StringBuilder();
     }
     
-    public Template build(Element element) throws Throwable
+    private Template compose_(Element element) throws Throwable 
     {
         this.sb=new StringBuilder(); 
-        element.build(this);
+        element.compose(this);
         if (this.sb.length()>0)
         {
             this.sections.add(new StaticSection(this.sb.toString()));
@@ -41,5 +41,9 @@ public class TemplateComposer extends Composer
     {
         return this.sb;
     }
-    
+
+    static public Template compose(Element element) throws Throwable
+    {
+        return new TemplateComposer().compose_(element);
+    }
 }

@@ -124,7 +124,7 @@ public class ResourceController
 
     @GET
     @Path("/resources/{+}")
-    public void cache(@PathParam(PathParam.AT_LEAST_ONE_SEGMENT) String file, Context context, Trace trace) throws Throwable
+    public void resource(@PathParam(PathParam.AT_LEAST_ONE_SEGMENT) String file, Context context, Trace trace) throws Throwable
     {
         HttpServletResponse response = context.getHttpServletResponse();
         context.setHandled(true);
@@ -132,19 +132,14 @@ public class ResourceController
         try
         {
             bytes = this.serverApplication.getFileCache().get(trace, file);
-            /*
             if (this.serverApplication.isDebug())
             {
                 System.out.println("Resource:"+file);
-                String text=new String(bytes);
-                System.out.println("Resource:"+text);
-                
             }
-            */
         }
         catch (Throwable t)
         {
-            if (Testing.ENABLED)
+            if (this.serverApplication.isDebug())
             {
                 TestTraceClient.clientLog(file + " not found");
             }

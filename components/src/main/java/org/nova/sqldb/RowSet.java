@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.nova.sqldb.FieldMaps.ConstructorFieldMap;
+
 public class RowSet
 {
 	final String[] columnNames;
@@ -54,7 +56,8 @@ public class RowSet
     {
         int columns = getColumns();
         
-        Map<String,Field> map=FieldMaps.get(type);
+        ConstructorFieldMap constructorFieldMap=FieldMaps.get(type);
+        HashMap<String,Field> map=constructorFieldMap.map;
         Field[] fields=new Field[columns];
         for (int columnIndex = 0; columnIndex < columns; columnIndex++)
         {
@@ -68,7 +71,7 @@ public class RowSet
             return null;
         }
         Row row=getRows()[0];
-        TYPE item = type.newInstance();
+        TYPE item = (TYPE)constructorFieldMap.newInstance();
         for (int columnIndex = 0; columnIndex < columns; columnIndex++)
         {
             Field field = fields[columnIndex];
@@ -84,7 +87,8 @@ public class RowSet
         ArrayList<TYPE> list = new ArrayList<>();
         int columns = getColumns();
         
-        Map<String,Field> map=FieldMaps.get(type);
+        ConstructorFieldMap constructorFieldMap=FieldMaps.get(type);
+        HashMap<String,Field> map=constructorFieldMap.map;
         Field[] fields=new Field[columns];
         for (int columnIndex = 0; columnIndex < columns; columnIndex++)
         {
@@ -95,7 +99,7 @@ public class RowSet
 
         for (Row row:getRows())
         {
-            TYPE item = type.newInstance();
+            TYPE item = (TYPE)constructorFieldMap.newInstance();
             list.add(item);
             for (int columnIndex = 0; columnIndex < columns; columnIndex++)
             {
@@ -123,7 +127,8 @@ public class RowSet
         ArrayList<TYPE> list = new ArrayList<>();
         int columns = getColumns();
         
-        Map<String,Field> map=FieldMaps.get(type);
+        ConstructorFieldMap constructorFieldMap=FieldMaps.get(type);
+        HashMap<String,Field> map=constructorFieldMap.map;
         Field[] fields=new Field[columns];
         for (int columnIndex = 0; columnIndex < columns; columnIndex++)
         {
@@ -134,7 +139,7 @@ public class RowSet
 
         for (Row row:getRows())
         {
-            TYPE item = type.newInstance();
+            TYPE item = (TYPE)constructorFieldMap.newInstance();
             list.add(item);
             for (int columnIndex = 0; columnIndex < columns; columnIndex++)
             {

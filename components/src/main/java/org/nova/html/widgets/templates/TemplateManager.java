@@ -32,7 +32,7 @@ public class TemplateManager
 	public void add(String key,Element element) throws Throwable
 	{
 	    StringComposer composer=new StringComposer();
-        element.build(composer);
+        element.compose(composer);
         String text=composer.getStringBuilder().toString();
         Parser parser=new Parser();
         Section[] sections=parser.parseText(text);
