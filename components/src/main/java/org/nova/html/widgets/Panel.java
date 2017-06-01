@@ -21,7 +21,7 @@ public class Panel extends div
         id(id).class_("panel");
         if (head!=null)
         {
-            head.add(TopNavigationMenu.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
+            head.add(Panel.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
         }
     }
     public Panel(Head head,String id,String heading)

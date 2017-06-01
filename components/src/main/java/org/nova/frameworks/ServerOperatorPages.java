@@ -1995,7 +1995,7 @@ public class ServerOperatorPages
         AjaxQueryResult result = new AjaxQueryResult();
         String text=generateClassDefinitions(server, namespace, columns, target);
         Panel panel=new Panel(null,null,"C# classes");
-        panel.content().addInner(new textarea().readonly().style("width:998%;").rows(Utils.occurs(text, "\r")+1).addInner(text));
+        panel.content().addInner(new textarea().readonly().style("width:99%;").rows(Utils.occurs(text, "\r")+1).addInner(text));
         result.put("result", panel.toString());
         return result;
     }
@@ -2292,7 +2292,7 @@ public class ServerOperatorPages
                 form.action("/operator/httpServer/method/run/"+server);
                 form.addInner(new input_hidden().name("key").value(key));
                 form.addInner(new input_hidden().name("server").value(server));
-              buttons.addInner(new input_submit().value("Run in browser").style("height:3em;width:10em;margin:10px;"));
+              buttons.addInner(new input_submit().value("Open in browser").style("height:2.5em;width:10em;margin:10px;"));
             }
             executePanel.content().addInner(new p());
             executePanel.content().addInner(new div().id("result"));

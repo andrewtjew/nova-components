@@ -103,6 +103,7 @@ public class DataTable extends Table
         }
         id(id);
         class_(class_);
+        style("width:100%;");
         this.id=id;
         this.objects=new Objects(id);
         this.addInner(new script().addInner(this.objects));

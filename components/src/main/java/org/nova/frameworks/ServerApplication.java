@@ -213,6 +213,8 @@ public class ServerApplication extends CoreApplication
         this.getOperatorVariableManager().register("HttpServer.private", this.privateServer);
 
         this.menuBar=new MenuBar();
+        this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName);
+        startServer(this.operatorServer);
 	}
 	
 	private void printUnsecureVaultWarning(PrintStream stream)
@@ -225,7 +227,6 @@ public class ServerApplication extends CoreApplication
 	
 	private void startServer(HttpServer server) throws Throwable
 	{
-        this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName);
 		if (server!=null)
 		{
 			server.start();
@@ -238,7 +239,6 @@ public class ServerApplication extends CoreApplication
         this.operatorServer.register(new ServerOperatorPages(this));
         this.operatorServer.register(new OperatorPages(this.operatorVariableManager, this.getMenuBar()));
         onStart();
-        startServer(this.operatorServer);
         startServer(this.privateServer);
         startServer(this.publicServer);
 		System.out.println("Running forever!");

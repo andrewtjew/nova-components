@@ -48,14 +48,6 @@ public abstract class InnerElement<ELEMENT extends InnerElement<ELEMENT>> extend
         }
         return (ELEMENT)this;
     }
-    public ELEMENT addInner(String text)
-    {
-        if (text!=null)
-        {
-            return addInner(new Text(text));
-        }
-        return (ELEMENT)this;
-    }
     public ELEMENT addInner(Object object)
     {
         if (object!=null)
