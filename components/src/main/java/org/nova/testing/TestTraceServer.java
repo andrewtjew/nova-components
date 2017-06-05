@@ -17,6 +17,8 @@ import org.nova.http.server.annotations.GET;
 import org.nova.http.server.annotations.PUT;
 import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.QueryParam;
+import org.nova.logging.Logger;
+import org.nova.logging.Loggers;
 import org.nova.test.PrintMessage;
 import org.nova.test.Testing;
 import org.nova.tracing.TraceManager;
@@ -27,11 +29,11 @@ public class TestTraceServer
 	final private LinkedList<ReceivedDebugMessage> messages;
 	final private int maximumMessages;
 	
-	public TestTraceServer(int maximumMessages,int threads,int port) throws Exception
+	public TestTraceServer(int maximumMessages,int threads,int port) throws Throwable
 	{
 		this.maximumMessages=maximumMessages;
 		this.messages=new LinkedList<>();
-		this.server=new HttpServer(new TraceManager(), JettyServerFactory.createServer(threads,port));
+		this.server=new HttpServer(new TraceManager(), Loggers.createConsoleLogger(),JettyServerFactory.createServer(threads,port));
 
 		Transformers transformers=new Transformers();
         transformers.add(new GzipContentDecoder());
@@ -44,7 +46,7 @@ public class TestTraceServer
 		System.out.println("TestTraceServer started: port="+port);
 	}
 
-	public TestTraceServer() throws Exception
+	public TestTraceServer() throws Throwable
 	{
 		this(10000,10,9111);
 	}

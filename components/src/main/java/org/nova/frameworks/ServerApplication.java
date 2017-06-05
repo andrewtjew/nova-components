@@ -138,7 +138,7 @@ public class ServerApplication extends CoreApplication
         this.operatorResultWriter=new OperatorResultWriter(this.getName(),menu, menuTemplate);
 		int threads=configuration.getIntegerValue("HttpServer.operator.threads",10);
         int operatorPort=configuration.getIntegerValue("HttpServer.operator.port",10051);
-		this.operatorServer=new HttpServer(this.getTraceManager(), JettyServerFactory.createServer(threads, operatorPort));
+		this.operatorServer=new HttpServer(this.getTraceManager(), getLogger("HttpServer.Operator"), JettyServerFactory.createServer(threads, operatorPort));
         this.operatorServer.addContentDecoders(new GzipContentDecoder());
         this.operatorServer.addContentEncoders(new GzipContentEncoder());
         this.operatorServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
@@ -151,7 +151,7 @@ public class ServerApplication extends CoreApplication
         if (privatePort>0)
         {
             threads=configuration.getIntegerValue("httpServer.private.threads",1000);
-            this.privateServer=new HttpServer(this.getTraceManager(), JettyServerFactory.createServer(threads, privatePort));
+            this.privateServer=new HttpServer(this.getTraceManager(), getLogger("HttpServer.Operator"),JettyServerFactory.createServer(threads, privatePort));
             this.privateServer.addContentDecoders(new GzipContentDecoder());
             this.privateServer.addContentEncoders(new GzipContentEncoder());
             this.privateServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
@@ -193,7 +193,7 @@ public class ServerApplication extends CoreApplication
             {
                 servers[0]=JettyServerFactory.createServer(threads, publicPort);
             }
-            this.publicServer=new HttpServer(this.getTraceManager(), publicServerConfiguration, servers);
+            this.publicServer=new HttpServer(this.getTraceManager(), this.getLogger("HttpServer"),publicServerConfiguration, servers);
             
             this.publicServer.addContentDecoders(new GzipContentDecoder());
             this.publicServer.addContentEncoders(new GzipContentEncoder());
@@ -214,6 +214,8 @@ public class ServerApplication extends CoreApplication
 
         this.menuBar=new MenuBar();
         this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName);
+        this.operatorServer.register(new ServerOperatorPages(this));
+        this.operatorServer.register(new OperatorPages(this.operatorVariableManager, this.getMenuBar()));
         startServer(this.operatorServer);
 	}
 	
@@ -236,8 +238,6 @@ public class ServerApplication extends CoreApplication
 	public void runForever() throws Throwable
 	{
         this.startTime=System.currentTimeMillis();
-        this.operatorServer.register(new ServerOperatorPages(this));
-        this.operatorServer.register(new OperatorPages(this.operatorVariableManager, this.getMenuBar()));
         onStart();
         startServer(this.privateServer);
         startServer(this.publicServer);

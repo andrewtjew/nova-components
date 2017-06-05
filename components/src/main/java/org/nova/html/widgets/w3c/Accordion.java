@@ -4,6 +4,7 @@ import org.nova.html.enums.link_rel;
 import org.nova.html.tags.button_button;
 import org.nova.html.tags.div;
 import org.nova.html.tags.link;
+import org.nova.html.tags.script;
 import org.nova.html.widgets.Content;
 import org.nova.html.widgets.Head;
 
@@ -19,12 +20,14 @@ public class Accordion extends Content
         }
         if (head!=null)
         {
+            head.add(Accordion.class.getCanonicalName(),new script().src("/resources/html/js/accordion.js"));
             head.add(Accordion.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
         }
         if (opened==false)
         {
             this.button=returnAddInner(new button_button()).class_("accordion");
             this.button.onclick("this.classList.toggle('active');var panel=this.nextElementSibling;if (panel.style.maxHeight){panel.style.maxHeight=null;}else{panel.style.maxHeight=panel.scrollHeight+'px';}");
+//            this.button.onclick("openAccordions();");
             this.content=returnAddInner(new div()).class_("accordion-content").id(id);
         }
         else

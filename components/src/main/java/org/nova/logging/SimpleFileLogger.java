@@ -21,7 +21,7 @@ import org.nova.metrics.RateMeter;
  * compared to the logging-in-a-file.
  */
 
-public class JSONBufferedLZ4Queue extends SourceQueue<LogEntry> 
+public class SimpleFileLogger extends SourceQueue<LogEntry> 
 {
 	private static Distributor connect(LogDirectoryManager logDirectoryManager,JSONBufferedLZ4QueueConfiguration configuration) throws Throwable
 	{
@@ -63,7 +63,7 @@ public class JSONBufferedLZ4Queue extends SourceQueue<LogEntry>
     final private BufferedLZ4FileWriter[] writers;
     final private ThreadWorkerQueue[] queues;
 
-    public JSONBufferedLZ4Queue(LogDirectoryManager logDirectoryManager, JSONBufferedLZ4QueueConfiguration configuration) throws Throwable
+    public SimpleFileLogger(LogDirectoryManager logDirectoryManager, JSONBufferedLZ4QueueConfiguration configuration) throws Throwable
 	{
 		super(connect(logDirectoryManager,configuration),configuration);
         this.writers=new BufferedLZ4FileWriter[configuration.writerThreads];
@@ -79,6 +79,8 @@ public class JSONBufferedLZ4Queue extends SourceQueue<LogEntry>
 		this.threadWorkerQueueStalledMeter=this.queues[0].getStalledMeter();
 		this.threadWorkerQueueInUseMeter=this.queues[0].getThreadInUseMeter();
 		this.threadWorkerQueueWaitingMeter=this.queues[0].getWaitingMeter();
+		
+		this.start();
 	}
 	
 	public Throwable getThrowable()

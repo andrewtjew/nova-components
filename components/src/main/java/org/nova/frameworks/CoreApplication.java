@@ -6,12 +6,16 @@ import org.nova.concurrent.FutureScheduler;
 import org.nova.concurrent.TimerScheduler;
 import org.nova.configuration.Configuration;
 import org.nova.flow.SourceQueue;
+import org.nova.flow.SourceQueueConfiguration;
+import org.nova.logging.ConsoleWriter;
 import org.nova.logging.JSONBufferedLZ4Queue;
 import org.nova.logging.JSONBufferedLZ4QueueConfiguration;
+import org.nova.logging.JSONFormatter;
 import org.nova.logging.Level;
 import org.nova.logging.LogDirectoryManager;
 import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
+import org.nova.logging.SimpleFileWriter;
 import org.nova.logging.SourceQueueLogger;
 import org.nova.metrics.MeterManager;
 import org.nova.tracing.TraceManager;
@@ -25,7 +29,7 @@ public class CoreApplication
 	final private MeterManager meterManager;
 	final private Logger logger;
 	final HashMap<String,SourceQueueLogger> loggers;
-	final SourceQueue<LogEntry> logQueue;
+	final SourceQueue<LogEntry> logSourceQueue;
 	final private LogDirectoryManager logDirectoryManager;
 	
 	public CoreApplication(Configuration configuration) throws Throwable
@@ -38,7 +42,23 @@ public class CoreApplication
 		long maxDirectorySize=configuration.getLongValue("Logger.logDirectory.maxDirectorySize",10_000_000_000L);
 		int maxMakeSpaceRetries=configuration.getIntegerValue("Logger.logDirectory.maxMakeSpaceRetries",10);
 		this.logDirectoryManager=new LogDirectoryManager(directory, maxMakeSpaceRetries, maxFiles, maxDirectorySize, reserve);
-		this.logQueue=new JSONBufferedLZ4Queue(logDirectoryManager, new JSONBufferedLZ4QueueConfiguration());
+
+		String loggerType=configuration.getValue("Logger.class","ConsoleWriter");
+		switch (loggerType)
+		{
+            case "SimpleFileWriter":
+                this.logSourceQueue=new SourceQueue<LogEntry>(new SimpleFileWriter(this.logDirectoryManager,new JSONFormatter()),new SourceQueueConfiguration());
+                break;
+
+            case "JSONBufferedLZ4Queue":
+                this.logSourceQueue=new JSONBufferedLZ4Queue(logDirectoryManager, new JSONBufferedLZ4QueueConfiguration());
+                break;
+                
+		    default:
+		        this.logSourceQueue=new SourceQueue<LogEntry>(new ConsoleWriter(new JSONFormatter(),true),new SourceQueueConfiguration());
+		        break;
+		}
+		this.logSourceQueue.start();
 		this.loggers=new HashMap<>();
 		SourceQueueLogger traceLogger=this.getLogger("tracing");
 		this.loggers.put("trace", traceLogger);
@@ -49,6 +69,7 @@ public class CoreApplication
 		this.timerScheduler=new TimerScheduler(traceManager, this.getLogger());
 		this.timerScheduler.start();
 		this.logger=getLogger("application");
+        this.getLogger().log(Level.NOTICE,"Starting");
 	}
 	
 	public MeterManager getMeterManager()
@@ -82,7 +103,7 @@ public class CoreApplication
 		    SourceQueueLogger logger=this.loggers.get(category);
 			if (logger==null)
 			{
-				logger=new SourceQueueLogger(category, this.logQueue);
+				logger=new SourceQueueLogger(category, this.logSourceQueue);
 				this.loggers.put(category, logger);
 			}
 			return logger;
@@ -94,7 +115,7 @@ public class CoreApplication
 	}
 	public SourceQueue<LogEntry> getLogQueue()
 	{
-	    return this.logQueue;
+	    return this.logSourceQueue;
 	}
 	public LogDirectoryManager getLogDirectoryManager()
 	{
@@ -103,7 +124,7 @@ public class CoreApplication
 	public void runForever() throws Throwable
 	{
 		Object object=new Object();
-		this.getLogger().log(Level.NORMAL,"Started");
+		this.getLogger().log(Level.NOTICE,"Started");
 		synchronized (object)
 		{
 			for (;;)

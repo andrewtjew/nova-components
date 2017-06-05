@@ -21,8 +21,26 @@ public class Loggers
 
 	public static SourceQueueLogger createConsoleLogger() throws Throwable
 	{
-		return createConsoleLogger("console");
+		return createConsoleLogger(null);
 	}
+
+	
+    public static SourceQueueLogger createSimpleFileLogger(LogDirectoryManager logDirectoryManager,String category,Formatter formatter,SourceQueueConfiguration configuration) throws Throwable
+    {
+        SourceQueue<LogEntry> queue=new SourceQueue<>(new SimpleFileWriter(logDirectoryManager,formatter),configuration);
+        queue.start();
+        return new SourceQueueLogger(category,queue);
+    }
+
+    public static SourceQueueLogger createSimpleFileLogger(LogDirectoryManager logDirectoryManager,String category) throws Throwable
+    {
+        return createSimpleFileLogger(logDirectoryManager,category, new JSONFormatter(), new SourceQueueConfiguration());
+    }
+
+    public static SourceQueueLogger createSimpleFileLogger(LogDirectoryManager logDirectoryManager) throws Throwable
+    {
+        return createSimpleFileLogger(logDirectoryManager,null);
+    }
 
 	
 }

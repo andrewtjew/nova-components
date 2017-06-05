@@ -25,6 +25,13 @@ public class RequestHandler
 	final private String key;
 	final private String httpMethod;
 	final private boolean public_;
+    final private boolean log;
+    final private boolean logRequestHeaders;
+    final private boolean logRequestContent;
+    final private boolean logResponseHeaders;
+    final private boolean logResponseContent;
+    final private boolean logLastRequestsInMemory;
+	
 	
 	final private HashMap<Integer,CountAverageRateMeter> meters;
 	final private CountAverageRateMeter requestUncompressedContentSizeMeter;
@@ -32,7 +39,7 @@ public class RequestHandler
 	final private CountAverageRateMeter requestCompressedContentSizeMeter;
 	final private CountAverageRateMeter responseCompressedContentSizeMeter;
 	
-	RequestHandler(Object object,Method method,String httpMethod,String path,Filter[] filters,ParameterInfo[] parameterInfos,	Map<String,ContentDecoder> contentDecoders,Map<String,ContentEncoder> contentEncoders,Map<String,ContentReader<?>> contentReaders,Map<String,ContentWriter<?>> contentWriters,boolean public_)
+	RequestHandler(Object object,Method method,String httpMethod,String path,Filter[] filters,ParameterInfo[] parameterInfos,	Map<String,ContentDecoder> contentDecoders,Map<String,ContentEncoder> contentEncoders,Map<String,ContentReader<?>> contentReaders,Map<String,ContentWriter<?>> contentWriters,boolean log,boolean logRequestHeaders,boolean logRequestContent,boolean logResponseHeaders,boolean logResponseContent,boolean logLastRequestsInMemory,boolean public_)
 	{
 		this.object=object;
 		this.method=method;
@@ -51,6 +58,13 @@ public class RequestHandler
 		this.responseUncompressedContentSizeMeter=new CountAverageRateMeter();
 		this.requestCompressedContentSizeMeter=new CountAverageRateMeter();
 		this.responseCompressedContentSizeMeter=new CountAverageRateMeter();
+		
+		this.log=log;
+		this.logRequestHeaders=logRequestHeaders;
+		this.logRequestContent=logRequestContent;
+        this.logResponseHeaders=logResponseHeaders;
+        this.logResponseContent=logResponseContent;
+        this.logLastRequestsInMemory=logLastRequestsInMemory;
 	}
 
 	public Object getObject()
@@ -165,5 +179,36 @@ public class RequestHandler
 		return responseCompressedContentSizeMeter;
 	}
 
+    public boolean isLog()
+    {
+        return log;
+    }
+
+    public boolean isLogRequestHeaders()
+    {
+        return logRequestHeaders;
+    }
+
+    public boolean isLogRequestContent()
+    {
+        return logRequestContent;
+    }
+
+    public boolean isLogResponseHeaders()
+    {
+        return logResponseHeaders;
+    }
+
+    public boolean isLogResponseContent()
+    {
+        return logResponseContent;
+    }
+
+    public boolean isLogLastRequestsInMemory()
+    {
+        return logLastRequestsInMemory;
+    }
+    
+    
 	
 }

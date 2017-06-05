@@ -5,9 +5,10 @@ import org.nova.http.server.annotations.ContentEncoders;
 import org.nova.http.server.annotations.ContentReaders;
 import org.nova.http.server.annotations.ContentWriters;
 import org.nova.http.server.annotations.Filters;
+import org.nova.http.server.annotations.Log;
 import org.nova.http.server.annotations.Path;
 
-public class ClassAnnotations
+public class Annotations
 {
 	Path path=null;
 	ContentWriters contentWriters = null;
@@ -15,29 +16,21 @@ public class ClassAnnotations
 	ContentEncoders contentEncoders=null;
 	ContentDecoders contentDecoders=null;
 	Filters filters = null;
+	Log log=null;
 	
-	public void setPath(Path path)
+    Annotations()
+    {
+        
+    }
+	Annotations(Annotations that)
 	{
-		this.path = path;
+	    this.path=that.path;
+	    this.contentWriters = that.contentWriters;
+	    this.contentReaders = that.contentReaders;
+	    this.contentEncoders=that.contentEncoders;
+	    this.contentDecoders=that.contentDecoders;
+	    this.filters = that.filters;
+	    this.log=that.log;
 	}
-	public void setWriters(ContentWriters writers)
-	{
-		this.contentWriters = writers;
-	}
-	public void setReaders(ContentReaders readers)
-	{
-		this.contentReaders = readers;
-	}
-	public void setContentEncoders(ContentEncoders contentEncoders)
-	{
-		this.contentEncoders = contentEncoders;
-	}
-	public void setContentDecoders(ContentDecoders contentDecoders)
-	{
-		this.contentDecoders = contentDecoders;
-	}
-	public void setFilters(Filters filters)
-	{
-		this.filters = filters;
-	}
+
 }

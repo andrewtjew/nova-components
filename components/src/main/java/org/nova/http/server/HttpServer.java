@@ -3,6 +3,7 @@ package org.nova.http.server;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletException;
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -18,6 +20,9 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.nova.annotations.Description;
 import org.nova.collections.RingBuffer;
 import org.nova.http.Header;
+import org.nova.logging.Item;
+import org.nova.logging.LogEntry;
+import org.nova.logging.Logger;
 import org.nova.metrics.RateMeter;
 import org.nova.operations.OperatorVariable;
 import org.nova.test.Testing;
@@ -42,12 +47,14 @@ public class HttpServer
 	final private RingBuffer<RequestHandlerNotFoundLogEntry> lastRequestHandlerNotFoundLogEntries;
 	final private int [] ports;
 	private Transformers transformers;
+	final private Logger logger;
 	
 	@OperatorVariable()
 	private boolean debug;
 	
-	public HttpServer(TraceManager traceManager, HttpServerConfiguration configuration,Server[] servers) throws Exception
+	public HttpServer(TraceManager traceManager, Logger logger,HttpServerConfiguration configuration,Server[] servers) throws Exception
 	{
+	    this.logger=logger;
 	    this.ports=new int[servers.length];
 	    for (int i=0;i<servers.length;i++)
 	    {
@@ -66,15 +73,12 @@ public class HttpServer
 		this.lastRequestHandlerNotFoundLogEntries=new RingBuffer<>(new RequestHandlerNotFoundLogEntry[configuration.lastNotFoundBufferSize]);
 		this.transformers=new Transformers();
 	}
-	public HttpServer(String categoryPrefix,TraceManager traceManager, Server server) throws Exception
-	{
-		this(traceManager,new HttpServerConfiguration(),new Server[]{server});
-	}
 
-	public HttpServer(TraceManager traceManager, Server server) throws Exception
+	public HttpServer(TraceManager traceManager, Logger logger,Server server) throws Exception
 	{
-		this("HttpServer",traceManager, server);
+		this(traceManager, logger ,new HttpServerConfiguration(),  new Server[]{server});
 	}
+	
 
 	public void start() throws Exception
 	{
@@ -397,20 +401,60 @@ public class HttpServer
 			trace.close();
 			handler.update(context,servletResponse.getStatus(), trace.getDurationNs(),requestUncompressedContentSize,responseUncompressedContentSize,requestCompressedContentSize,responseCompressedContentSize);
 			RequestLogEntry entry=new RequestLogEntry(trace,context,handler,servletRequest,servletResponse);
-			if (trace.getThrowable()==null)
+			
+			if (handler.isLogLastRequestsInMemory())
 			{
-				synchronized (this.lastRequestsLogEntries)
-				{
-					this.lastRequestsLogEntries.add(entry);
-				}
+    			if (trace.getThrowable()==null)
+    			{
+    				synchronized (this.lastRequestsLogEntries)
+    				{
+    					this.lastRequestsLogEntries.add(entry);
+    				}
+    			}
+    			else
+    			{
+    				synchronized (this.lastExceptionRequestsLogEntries)
+    				{
+    					this.lastExceptionRequestsLogEntries.add(entry);
+    				}
+    			}
 			}
-			else
-			{
-				synchronized (this.lastExceptionRequestsLogEntries)
-				{
-					this.lastExceptionRequestsLogEntries.add(entry);
-				}
-			}
+            ArrayList<Item> items=new ArrayList<>();
+            if (handler.isLog())
+            {
+                items.add(new Item("remoteEndPoint",entry.remoteEndPoint));
+                items.add(new Item("request",entry.request));
+                items.add(new Item("statusCode",entry.statusCode));
+            }
+            if ((handler.isLogRequestHeaders()&&entry.requestHeaders!=null))
+            {
+                if (entry.requestHeaders!=null)
+                {
+                    items.add(new Item("requestHeaders",entry.requestHeaders));
+                }
+            }
+            if ((handler.isLogRequestContent()&&entry.requestContentText!=null))
+            {
+                if (entry.requestContentText!=null)
+                {
+                    items.add(new Item("requestContent",entry.requestContentText));
+                }
+            }
+            if ((handler.isLogResponseHeaders()&&entry.responseHeaders!=null))
+            {
+                if (entry.responseHeaders!=null)
+                {
+                    items.add(new Item("responseHeaders",entry.responseHeaders));
+                }
+            }
+            if ((handler.isLogResponseContent()&&entry.responseContentText!=null))
+            {
+                if (entry.responseContentText!=null)
+                {
+                    items.add(new Item("responseContent",entry.responseContentText));
+                }
+            }
+            this.logger.log(trace,handler.getKey(),Logger.toArray(items));
 		}
 	}
 

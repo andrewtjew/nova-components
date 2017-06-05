@@ -289,33 +289,13 @@ public class LogDirectoryManager
 	{
 		return reserveSpaceDeleteMeter;
 	}
-	public void write(File file,byte[] bytes,int offset,int length) throws FileNotFoundException, IOException
-	{
-		synchronized(this.writeLock)
-		{
-			try (FileOutputStream fileOutputStream=new FileOutputStream(file))
-			{
-				fileOutputStream.write(bytes,offset,length);
-			}
-		}
-	}
-	public void write(File file,ByteArrayOutputStream outputStream) throws FileNotFoundException, IOException
-	{
-		synchronized(this.writeLock)
-		{
-			try (FileOutputStream fileOutputStream=new FileOutputStream(file))
-			{
-				outputStream.writeTo(fileOutputStream);
-			}
-		}
-	}
-
-	public void write(ByteArrayOutputStream outputStream,long millis,String extension) throws FileNotFoundException, IOException
+	
+	public void write(ByteArrayOutputStream outputStream,long instanceMillis,String extension) throws FileNotFoundException, IOException
     {
         synchronized(this.writeLock)
         {
             makeSpace();
-            String dateTime=Utils.millisToLocalDateTimeFileName(millis);
+            String dateTime=Utils.millisToLocalDateTimeFileName(instanceMillis);
             String name=dateTime;
             int counter=0;
             while (this.map.containsKey(name))
@@ -332,6 +312,29 @@ public class LogDirectoryManager
                 this.map.put(name, file);
                 outputStream.writeTo(fileOutputStream);
             }
+        }
+    }
+
+	public FileOutputStream openFileOutputStream(long instanceMillis,String extension) throws FileNotFoundException, IOException
+    {
+        synchronized(this.writeLock)
+        {
+            makeSpace();
+            String dateTime=Utils.millisToLocalDateTimeFileName(instanceMillis);
+            String name=dateTime;
+            int counter=0;
+            while (this.map.containsKey(name))
+            {
+                synchronized (this)
+                {
+                    counter++;
+                }
+                name=dateTime+"_"+counter;
+            }
+            File file=new File(this.fullDirectoryPath+File.separator+name+extension);
+            FileOutputStream fileOutputStream=new FileOutputStream(file);
+            this.map.put(name, file);
+            return fileOutputStream;
         }
     }
 	

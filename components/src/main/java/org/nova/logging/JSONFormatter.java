@@ -103,7 +103,7 @@ public class JSONFormatter extends Formatter
             write(true,sb,"closed",closed);
             sb.append('}');
         }
-        sb.append('}');
+        sb.append("}\r\n");
         byte[] bytes=sb.toString().getBytes(StandardCharsets.UTF_8);
         outputStream.write(bytes);
 		return bytes.length;

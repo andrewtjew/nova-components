@@ -25,6 +25,7 @@ import org.nova.http.server.annotations.DefaultValue;
 import org.nova.http.server.annotations.Filters;
 import org.nova.http.server.annotations.GET;
 import org.nova.http.server.annotations.HEAD;
+import org.nova.http.server.annotations.Log;
 import org.nova.http.server.annotations.OPTIONS;
 import org.nova.http.server.annotations.PATCH;
 import org.nova.http.server.annotations.POST;
@@ -115,7 +116,7 @@ class RequestHandlerMap
 
 	void register(String root, Object object, Transformers transformers) throws Exception
 	{
-		ClassAnnotations classAnnotations = new ClassAnnotations();
+		Annotations classAnnotations = new Annotations();
 		for (Class<?> classType=object.getClass();classType!=null;classType=classType.getSuperclass())
 		{
 		    if (Modifier.isPublic(classType.getModifiers())==false)
@@ -141,21 +142,25 @@ class RequestHandlerMap
     			{
     				classAnnotations.contentDecoders = (ContentDecoders) annotation;
     			}
-    			else if (type == Filters.class)
-    			{
-    				classAnnotations.filters = (Filters) annotation;
-    			}
+                else if (type == Filters.class)
+                {
+                    classAnnotations.filters = (Filters) annotation;
+                }
+                else if (type == Log.class)
+                {
+                    classAnnotations.log = (Log) annotation;
+                }
     		}
 		}
 		for (Method method : object.getClass().getMethods())
 		{
-			register(root, object, method, classAnnotations, transformers);
+			register(root, object, method, new Annotations(classAnnotations), transformers);
 		}
 	}
 
 	void register(String root, Object object, Method method, Transformers transformers) throws Exception
 	{
-		register(root, object, method, new ClassAnnotations(), transformers);
+		register(root, object, method, new Annotations(), transformers);
 	}
 
 	private boolean isSimpleParameterType(Class<?> type)
@@ -245,15 +250,8 @@ class RequestHandlerMap
 	    }
 	}
 	
-	private void register(String root, Object object, Method method, ClassAnnotations classAnnotations, Transformers transformers) throws Exception
+	private void register(String root, Object object, Method method, Annotations handlerAnnotations, Transformers transformers) throws Exception
 	{
-		ContentWriters contentWriters = null;
-		ContentReaders contentReaders = null;
-		ContentDecoders contentDecoders = null;
-		ContentEncoders contentEncoders = null;
-		Filters filters = classAnnotations.filters;
-
-		Path path = null;
 		String httpMethod = null;
 		int verbs = 0;
 
@@ -262,24 +260,28 @@ class RequestHandlerMap
 			Class<?> type = annotation.annotationType();
 			if (type == ContentReaders.class)
 			{
-				contentReaders = (ContentReaders) annotation;
+				handlerAnnotations.contentReaders = (ContentReaders) annotation;
 			}
 			else if (type == ContentWriters.class)
 			{
-				contentWriters = (ContentWriters) annotation;
+			    handlerAnnotations.contentWriters = (ContentWriters) annotation;
 			}
 			else if (type == ContentEncoders.class)
 			{
-				contentEncoders = (ContentEncoders) annotation;
+			    handlerAnnotations.contentEncoders = (ContentEncoders) annotation;
 			}
 			else if (type == ContentDecoders.class)
 			{
-				contentDecoders = (ContentDecoders) annotation;
+			    handlerAnnotations.contentDecoders = (ContentDecoders) annotation;
 			}
 			else if (type == Filters.class)
 			{
-				filters = (Filters) annotation;
+			    handlerAnnotations.filters = (Filters) annotation;
 			}
+            else if (type == Log.class)
+            {
+                handlerAnnotations.log = (Log) annotation;
+            }
 			else if (type == GET.class)
 			{
 				httpMethod = "GET";
@@ -322,28 +324,8 @@ class RequestHandlerMap
 			}
 			else if (type == Path.class)
 			{
-				path = (Path) annotation;
+				handlerAnnotations.path = (Path) annotation;
 			}
-		}
-		if (contentWriters == null)
-		{
-			contentWriters = classAnnotations.contentWriters;
-		}
-		if (contentReaders == null)
-		{
-			contentReaders = classAnnotations.contentReaders;
-		}
-		if (contentDecoders == null)
-		{
-			contentDecoders = classAnnotations.contentDecoders;
-		}
-		if (contentEncoders == null)
-		{
-			contentEncoders = classAnnotations.contentEncoders;
-		}
-		if (filters == null)
-		{
-			filters = classAnnotations.filters;
 		}
 
 		if (verbs == 0)
@@ -354,7 +336,7 @@ class RequestHandlerMap
 		{
 			throw new Exception("Multiple Http verbs. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
 		}
-		if (path == null)
+		if (handlerAnnotations.path == null)
 		{
 			throw new Exception("Missing @Path annotation. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
 		}
@@ -368,9 +350,9 @@ class RequestHandlerMap
 				handlerFilters.add(filter);
 			}
 		}
-		if (filters != null)
+		if (handlerAnnotations.filters != null)
 		{
-			for (Class<? extends Filter> type: filters.value())
+			for (Class<? extends Filter> type: handlerAnnotations.filters.value())
 			{
 				Filter filter = transformers.getFilter(type);
 				if (filter == null)
@@ -422,7 +404,7 @@ class RequestHandlerMap
 				}
 				else if (type == ContentParam.class)
 				{
-					if (contentReaders == null)
+					if (handlerAnnotations.contentReaders == null)
 					{
 						throw new Exception("Need @ContentReaders for @ContentParam." + object.getClass().getCanonicalName() + "." + method.getName());
 					}
@@ -563,7 +545,7 @@ class RequestHandlerMap
 		// ContentReaders and writers
 		HashMap<String, ContentWriter<?>> contentWriterMap = new HashMap<>();
 		Type returnType=method.getReturnType();
-		if (contentWriters == null)
+		if (handlerAnnotations.contentWriters == null)
 		{
 			if (returnType != void.class)
 			{
@@ -589,7 +571,7 @@ class RequestHandlerMap
 		    if ((returnType!=void.class)&&(returnType!=Void.class))
 		    {
 		        HashMap<String,DistanceContentWriter> closestDistanceWriters=new HashMap<>();
-    			for (Class<? extends ContentWriter<?>> type : contentWriters.value())
+    			for (Class<? extends ContentWriter<?>> type : handlerAnnotations.contentWriters.value())
     			{
     				ContentWriter<?> writer=transformers.getContentWriter(type);
     				if (writer==null)
@@ -623,9 +605,9 @@ class RequestHandlerMap
 		}
 
 		HashMap<String, ContentReader<?>> contentReaderMap = new HashMap<>();
-		if (contentReaders!=null) 
+		if (handlerAnnotations.contentReaders!=null) 
 		{
-			for (Class<? extends ContentReader<?>> type : contentReaders.value())
+			for (Class<? extends ContentReader<?>> type : handlerAnnotations.contentReaders.value())
 			{
 				ContentReader<?> reader=transformers.getContentReader(type);
 				if (reader!=null)
@@ -636,9 +618,9 @@ class RequestHandlerMap
 		}
 		
 		HashMap<String, ContentDecoder> contentDecoderMap = new HashMap<>();
-		if (contentDecoders != null)
+		if (handlerAnnotations.contentDecoders != null)
 		{
-			for (Class<? extends ContentDecoder> type: contentDecoders.value())
+			for (Class<? extends ContentDecoder> type: handlerAnnotations.contentDecoders.value())
 			{
 				ContentDecoder decoder=transformers.getContentDecoder(type);
 				if (decoder==null)
@@ -652,9 +634,9 @@ class RequestHandlerMap
 		}
 
 		HashMap<String, ContentEncoder> contentEncoderMap = new HashMap<>();
-		if (contentEncoders!= null)
+		if (handlerAnnotations.contentEncoders!= null)
 		{
-			for (Class<? extends ContentEncoder> type: contentEncoders.value())
+			for (Class<? extends ContentEncoder> type: handlerAnnotations.contentEncoders.value())
 			{
 				ContentEncoder encoder=transformers.getContentEncoder(type);
 				if (encoder==null)
@@ -667,13 +649,41 @@ class RequestHandlerMap
 			}
 		}
 
-		// register the request handler
-		String fullPath = root != null ? root + path.value() : path.value();
-		RequestHandler requestHandler = new RequestHandler(object, method, httpMethod, fullPath, handlerFilters.toArray(new Filter[handlerFilters.size()]),
-				parameterInfos.toArray(new ParameterInfo[parameterInfos.size()]), contentDecoderMap, contentEncoderMap, contentReaderMap, contentWriterMap,
-				true);
-		add(httpMethod, fullPath, requestHandler);
+	    boolean log=true;
+	    boolean logLastRequestsInMemory=true;
+	    boolean logRequestHeaders=true;
+	    boolean logRequestContent=true;
+        boolean logResponseHeaders=true;
+        boolean logResponseContent=true;
+        
+        String fullPath = root != null ? root + handlerAnnotations.path.value() : handlerAnnotations.path.value();
+	    if (handlerAnnotations.log!=null)
+	    {
+	        log=handlerAnnotations.log.value();
+	        if (log==true)
+	        {
+    	        logLastRequestsInMemory=handlerAnnotations.log.lastRequestsInMemory();
+    	        logRequestHeaders=handlerAnnotations.log.requestHeaders();
+    	        logRequestContent=handlerAnnotations.log.requestContent();
+    	        logResponseHeaders=handlerAnnotations.log.responseHeaders();
+    	        logResponseContent=handlerAnnotations.log.responseContent();
+	        }
+	        else
+	        {
+                logLastRequestsInMemory=false;
+                logRequestHeaders=false;
+                logRequestContent=false;
+                logResponseHeaders=false;
+                logResponseContent=false;
+	        }
+	    }
+        RequestHandler requestHandler = new RequestHandler(object, method, httpMethod, fullPath, handlerFilters.toArray(new Filter[handlerFilters.size()]),
+                parameterInfos.toArray(new ParameterInfo[parameterInfos.size()]), contentDecoderMap, contentEncoderMap, contentReaderMap, contentWriterMap,
+                log,logRequestHeaders,logRequestContent,logResponseHeaders,logResponseContent,logLastRequestsInMemory,
+                true);
+        add(httpMethod, fullPath, requestHandler);
 	}
+	
 
 	void add(String method, String path, RequestHandler requestHandler) throws Exception
 	{

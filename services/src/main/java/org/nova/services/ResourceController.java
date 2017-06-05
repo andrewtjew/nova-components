@@ -75,6 +75,7 @@ import org.nova.http.server.annotations.ContentReaders;
 import org.nova.http.server.annotations.ContentWriters;
 import org.nova.http.server.annotations.DefaultValue;
 import org.nova.http.server.annotations.GET;
+import org.nova.http.server.annotations.Log;
 import org.nova.http.server.annotations.POST;
 import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.PathParam;
@@ -124,6 +125,7 @@ public class ResourceController
 
     @GET
     @Path("/resources/{+}")
+    @Log(lastRequestsInMemory=false,responseContent=false)
     public void resource(@PathParam(PathParam.AT_LEAST_ONE_SEGMENT) String file, Context context, Trace trace) throws Throwable
     {
         HttpServletResponse response = context.getHttpServletResponse();

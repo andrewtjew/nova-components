@@ -63,6 +63,7 @@ import org.nova.html.widgets.Panel;
 import org.nova.html.widgets.Row;
 import org.nova.html.widgets.SelectOptions;
 import org.nova.html.widgets.Table;
+import org.nova.html.widgets.Text;
 import org.nova.html.widgets.w3c.Accordion;
 import org.nova.html.widgets.w3c.VerticalMenu;
 import org.nova.http.Header;
@@ -102,6 +103,7 @@ import org.nova.http.server.annotations.ContentReaders;
 import org.nova.http.server.annotations.ContentWriters;
 import org.nova.http.server.annotations.DefaultValue;
 import org.nova.http.server.annotations.GET;
+import org.nova.http.server.annotations.Log;
 import org.nova.http.server.annotations.POST;
 import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.PathParam;
@@ -169,7 +171,7 @@ public class ServerOperatorPages
         {
             super(head,title);
             style("padding:4px;");
-            this.heading().style("background-color:#ddd;color:#000;text-align:left;padding:2px 2px 2px 4px;");
+            this.heading().style("background-color:#bbb;color:#000;text-align:left;padding:2px 2px 2px 4px;");
             this.content().style("padding:0px;");
         }
     }
@@ -1075,6 +1077,93 @@ public class ServerOperatorPages
         }
     }
     
+    private void writeTrace(Head head,InnerElement<?> content,Trace trace)
+    {
+        WideTable table=content.returnAddInner(new WideTable(head));
+        Row headRow=new Row()
+            .add("Created")
+            .addWithTitle("Number", "Sequence number")
+            .addWithTitle("Parent", "Parent sequence number if trace has parent")
+            .addWithTitle("Duration", "Milliseconds")
+            .addWithTitle("Wait", "Milliseconds")
+            .add("Waiting","Closed","Thread","ThreadId")
+            ;
+        table.setHeadRow(headRow);
+        Row row=new Row()
+                .add(Utils.millisToLocalDateTimeString(trace.getCreated())
+                ,trace.getNumber()
+                ,trace.getParent() == null ? "" : trace.getParent().getNumber()
+                ,nanoToDefaultFormat(trace.getActiveNs())
+                ,nanoToDefaultFormat(trace.getWaitNs())
+                ,trace.isWaiting()
+                ,trace.isClosed()
+                ,trace.getThread().getName()
+                ,trace.getThread().getId());
+        table.addBodyRow(row);
+
+        NameValueList list=null;
+        String details = trace.getDetails();
+        if (details != null)
+        {
+            if (list==null)
+            {
+                list=new NameValueList();
+            }
+            list.add("Details",details);
+        }
+
+        String fromLink = trace.getFromLink();
+        if (fromLink != null)
+        {
+            if (list==null)
+            {
+                list=new NameValueList();
+            }
+            list.add("FromLink",fromLink);
+        }
+
+        String toLink = trace.getToLink();
+        if (toLink != null)
+        {
+            if (list==null)
+            {
+                list=new NameValueList();
+            }
+            list.add("ToLink",toLink);
+        }
+        if (list!=null)
+        {
+            Panel listPanel=content.returnAddInner(new Level3Panel(head,"Additional Trace Info"));
+            listPanel.content().addInner(list);
+        }
+
+        content.addInner(new p());
+        if (trace.getThrowable() != null)
+        {
+            Accordion accordion=content.returnAddInner(new Accordion(head, null, true, "Exception: "+trace.getThrowable().getMessage()));
+            accordion.content().addInner(Utils.toString(trace.getThrowable()));
+            content.addInner(new p());
+        }
+        StackTraceElement[] currentStackTrace = trace.getThread().getStackTrace();
+        if (currentStackTrace != null)
+        {
+            Accordion accordion=content.returnAddInner(new Accordion(head, null, false, "Current Stack Trace"));
+            accordion.content().addInner(toString(currentStackTrace, 0));
+        }
+        StackTraceElement[] createStackTrace = trace.getCreateStackTrace();
+        if (createStackTrace != null)
+        {
+            Accordion accordion=content.returnAddInner(new Accordion(head, null, false, "Create Stack Trace"));
+            accordion.content().addInner(toString(createStackTrace, 0));
+        }
+        StackTraceElement[] closeStackTrace = trace.getCloseStackTrace();
+        if (closeStackTrace != null)
+        {
+            Accordion accordion=content.returnAddInner(new Accordion(head, null, false, "Close Stack Trace"));
+            accordion.content().addInner(toString(closeStackTrace, 0));
+        }
+    }
+    
     private void writeHeaders(Head head,Panel panel,String headers)
     {
         if (headers==null)
@@ -1097,8 +1186,30 @@ public class ServerOperatorPages
             list.add(name,value);
         }
     }    
+    private void writeHeaders(Head head,String heading,InnerElement<?> content,String headers)
+    {
+        if (headers==null)
+        {
+            return;
+        }
+        content.addInner(new p());
+        String[] array=Utils.split(headers, '\r');
+        Accordion accordion=content.returnAddInner(new Accordion(head,null,false, heading+", length: "+(array.length-1)));
+        NameValueList list=accordion.content().returnAddInner(new NameValueList());
+        for (String item:array)
+        {
+            int index=item.indexOf(':');
+            if (index<0)
+            {
+                continue;
+            }
+            String name=item.substring(0, index);
+            String value=item.substring(index+1);
+            list.add(name,value);
+        }
+    }    
     
-    private void writeContent(Head head,Panel panel,String text)
+    private void writeContent(Head head,String heading,InnerElement<?> content,String text,boolean htmlResponse)
     {
         if (text==null)
         {
@@ -1106,11 +1217,48 @@ public class ServerOperatorPages
         }
 //        panel.content().addInner(new p());
 //        Panel textpanel=panel.content().returnAddInner(new Level3Panel(head,"Request Content (Length: "+text.length()+")"));
-        Accordion textAccodion=panel.content().returnAddInner(new Accordion(head,false,"Content (Length: "+text.length()+")"));
+        Accordion textAccodion=content.returnAddInner(new Accordion(head,false,heading+", length: "+text.length()));
         int rows=text.length()/120+1;
-        textAccodion.content().addInner(new textarea().readonly().style("width:100%").addInner(text).rows(rows));
+        if (rows>20)
+        {
+            rows=20;
+        }
+//      textAccodion.content().addInner(new textarea().readonly().style("width:100%;resize:none;").addInner(text).rows(rows));
+        if (htmlResponse)
+        {
+            StringBuilder sb=new StringBuilder();
+            for (int i=0;i<text.length();i++)
+            {
+                char c=text.charAt(i);
+                if (c=='<')
+                {
+                    sb.append("&lt");
+                }
+                else if (c=='>')
+                {
+                    sb.append("&gt");
+                }
+                else 
+                {
+                    sb.append(c);
+                }
+            }
+            text=sb.toString();
+        }
+        textAccodion.content().addInner(new textarea().readonly().style("width:100%;resize:none;").addInner(text).rows(rows));
     }
     
+    /*
+    private void writeContent(Head head,Panel panel,String text)
+    {
+        if (text==null)
+        {
+            return;
+        }
+        Accordion textAccodion=panel.content().returnAddInner(new Accordion(head,false,"Content (Length: "+text.length()+")"));
+        textAccodion.content().addInner(new textarea().readonly().style("width:100%;height:auto;resize:none;").addInner(text));
+    }
+
     private void writeRequest(OperatorPage page,RequestLogEntry entry)
     {
         Head head=page.head();
@@ -1137,6 +1285,44 @@ public class ServerOperatorPages
         for (RequestLogEntry entry : entries)
         {
             writeRequest(page, entry);
+            page.content().addInner(new p());
+        }
+    }
+    */
+    private void writeRequest(DataTable dataTable,OperatorPage page,RequestLogEntry entry)
+    {
+        Head head=page.head();
+        String title;
+        if (entry.getQueryString()!=null)
+        {
+            title=entry.getStatusCode()+" | "+entry.getRemoteEndPoint()+" | "+entry.getRequest()+"?"+entry.getQueryString();
+        }
+        else
+        {
+            title=entry.getStatusCode()+" | "+entry.getRemoteEndPoint()+" | "+entry.getRequest();
+        }
+        Panel panel=new Level2Panel(page.head(),title);
+
+        tr tr=dataTable.tbody().returnAddInner(new tr());
+        tr.addInner(new td().addInner(new Text(entry.getTrace().getNumber())));
+        tr.addInner(new td().style("height:100%").addInner(panel));
+
+        writeTrace(head,panel.content(),entry.getTrace());
+        
+        writeHeaders(head,"Request Headers",panel.content(),entry.getRequestHeaders());
+        writeContent(head,"Request Content",panel.content(),entry.getRequestContentText(),false);
+
+        writeHeaders(head,"Response Headers",panel.content(),entry.getResponseHeaders());
+        writeContent(head,"Response Content",panel.content(),entry.getResponseContentText(),entry.isHtmlResponse());
+    }    
+    private void writeRequestLogEntries(OperatorPage page, RequestLogEntry[] entries) throws Exception
+    {
+        DataTable dataTable=page.content().returnAddInner(new DataTable(page.head()));
+        dataTable.setHeadRowItems("#","Entry");
+        dataTable.lengthMenu(-1,5,10,25);
+        for (RequestLogEntry entry : entries)
+        {
+            writeRequest(dataTable,page, entry);
             page.content().addInner(new p());
         }
     }
@@ -1175,17 +1361,10 @@ public class ServerOperatorPages
         for (RequestHandlerNotFoundLogEntry entry : entries)
         {
             Trace trace = entry.getTrace();
-            String title= entry.getMethod() + " " + entry.getURI();
-            Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),title));
+            String title= entry.getRemoteEndPoint()+" | "+entry.getMethod() + " " + entry.getURI();
+            Panel panel=page.content().returnAddInner(new Level2Panel(page.head(),title));
             writeTrace(page.head(),panel,trace);
-
-            panel.content().addInner(new p());
-            WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
-            table.setHeadRow(new Row().add("Query","Remote"));
-            table.addBodyRow(new Row().add(entry.getQueryString(),entry.getRemoteEndPoint()));
-            writeHeaders(page.head(),panel,entry.getRequestHeaders());
-
-            page.content().addInner(new p());
+            writeHeaders(page.head(),"Request Headers",panel.content(),entry.getRequestHeaders());
         }
         return page;
     }

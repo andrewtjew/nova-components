@@ -23,31 +23,27 @@ public class RequestLogEntry
 	final int statusCode;
 	final String remoteEndPoint;
 	final String request;
+	final boolean htmlResponse;
 
 	public RequestLogEntry(Trace trace,Context context,RequestHandler requestHandler,HttpServletRequest request,HttpServletResponse response)
 	{
+	    boolean htmlResponse=false;
 		this.trace=trace;
 		this.requestContentText=context.getRequestContentText();
 		String contentType=response.getContentType();
 		if (contentType!=null)
 		{
-			switch (contentType)
-			{
-			case "text/css":
-			case "text/javascript":
-			case "text/html":
-				this.responseContentText=null;
-				break;
-			
-				default:
-				this.responseContentText=context.getResponseContentText();
-				break;
-			}
+		    if (contentType.startsWith("text/html"))
+		    {
+				htmlResponse=true;
+		    }
+            this.responseContentText=context.getResponseContentText();
 		}
 		else
 		{
 			this.responseContentText=null;
 		}
+		this.htmlResponse=htmlResponse;
 		this.requestHandler=requestHandler;
 		this.queryString=request.getQueryString();
 		this.statusCode=response.getStatus();
@@ -106,5 +102,8 @@ public class RequestLogEntry
         return responseHeaders;
     }
 	
-
+    public boolean isHtmlResponse()
+    {
+        return this.htmlResponse;
+    }
 }
