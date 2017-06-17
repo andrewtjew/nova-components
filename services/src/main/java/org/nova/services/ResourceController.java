@@ -125,7 +125,7 @@ public class ResourceController
 
     @GET
     @Path("/resources/{+}")
-    @Log(lastRequestsInMemory=false,responseContent=false)
+    @Log(responseContent=false)
     public void resource(@PathParam(PathParam.AT_LEAST_ONE_SEGMENT) String file, Context context, Trace trace) throws Throwable
     {
         HttpServletResponse response = context.getHttpServletResponse();

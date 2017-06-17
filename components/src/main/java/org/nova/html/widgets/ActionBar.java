@@ -5,9 +5,9 @@ import org.nova.html.tags.div;
 import org.nova.html.tags.head;
 import org.nova.html.tags.style;
 
-public class OptionsBar extends div
+public class ActionBar extends div
 {
-    public OptionsBar(Head head,String id)
+    public ActionBar(Head head,String id)
     {
         if (id==null)
         {
@@ -15,15 +15,15 @@ public class OptionsBar extends div
         }
         if (head!=null)
         {
-            head.add(id, new style().addInner(".optionsBar{width:100%;display:inline-block;background-color:#ddd;padding-top:0.5em;padding-bottom:0.5em;}"));
+            head.add(id, new style().addInner(".optionsBar{width:100%;display:inline-block;background-color:#ddd;padding-top:0.4em;padding-bottom:0.5em;}"));
         }
         class_("optionsBar");
     }
-    public OptionsBar(Head head)
+    public ActionBar(Head head)
     {
         this(head, null);
     }
-    public OptionsBar add(Element element)
+    public ActionBar add(Element element)
     {
         addInner(new div().style("float:left;").addInner(element));
         return this;

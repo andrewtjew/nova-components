@@ -632,7 +632,6 @@ public class ServerOperatorPages
     }
 
     private static DecimalFormat millisecondFormat = new DecimalFormat("#.###");
-
     private String nanoToDefaultFormat(double value)
     {
         return millisecondFormat.format(value / 1.0e6);
@@ -666,6 +665,7 @@ public class ServerOperatorPages
                 .addWithTitle("Average", "Milliseconds")
                 .addWithTitle("Duration", "Milliseconds")
                 .addWithTitle("Wait", "Milliseconds")
+                .add("")
                 );
 
         for (Entry<String, TraceNode> entry : map.entrySet())
@@ -835,7 +835,9 @@ public class ServerOperatorPages
                 .addWithTitle("Total", "Total duration in seconds")
                 .addWithTitle("Wait", "Total wait duration in seconds")
                 .addWithTitle("occurs", "The number of times the category occurs in the trace graph")
-                .add("root"));
+                .add("root")
+                .add("")
+                );
 
         for (Entry<String, ArrayList<TraceNode>> entry : all.entrySet())
         {
@@ -843,6 +845,7 @@ public class ServerOperatorPages
             double totalWaitNs = 0;
             long count = 0;
             List<TraceNode> list = entry.getValue();
+            
             for (TraceNode item : list)
             {
                 count += item.getCount();
@@ -854,7 +857,7 @@ public class ServerOperatorPages
             Row row=new Row()
                     .add(entry.getKey())
                     .add(count,nanoToDefaultFormat(totalDurationNs),nanoToDefaultFormat(totalWaitNs),list.size(),map.containsKey(entry.getKey()));
-            row.onclick("window.location='"+location+"'");
+            row.addDetailButton(location);
             table.addBodyRow(row);
 
         }
@@ -1144,6 +1147,7 @@ public class ServerOperatorPages
             accordion.content().addInner(Utils.toString(trace.getThrowable()));
             content.addInner(new p());
         }
+        /*
         StackTraceElement[] currentStackTrace = trace.getThread().getStackTrace();
         if (currentStackTrace != null)
         {
@@ -1162,6 +1166,7 @@ public class ServerOperatorPages
             Accordion accordion=content.returnAddInner(new Accordion(head, null, false, "Close Stack Trace"));
             accordion.content().addInner(toString(closeStackTrace, 0));
         }
+        */
     }
     
     private void writeHeaders(Head head,Panel panel,String headers)
@@ -1323,10 +1328,11 @@ public class ServerOperatorPages
         for (RequestLogEntry entry : entries)
         {
             writeRequest(dataTable,page, entry);
-            page.content().addInner(new p());
+//            page.content().addInner(new p());
         }
     }
 
+    @Log(lastRequestsInMemory=false,responseContent=false)
     @GET
     @Path("/operator/httpServer/lastRequests/{server}")
     public Element lastRequests(@PathParam("server") String server) throws Throwable
@@ -1338,6 +1344,7 @@ public class ServerOperatorPages
         return page;
     }
 
+    @Log(lastRequestsInMemory=false,responseContent=false)
     @GET
     @Path("/operator/httpServer/lastExceptionRequests/{server}")
     public Element lastExceptionRequests(@PathParam("server") String server) throws Throwable
@@ -1658,11 +1665,11 @@ public class ServerOperatorPages
         OperatorPage page=buildServerOperatorPage("Methods",server);
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
-        table.setHeadRow(new Row().add("Method","Path","Description","Filters"));
+        table.setHeadRow(new Row().add("Method","Path","Description","Filters",""));
         for (RequestHandler requestHandler : requestHandlers)
         {
             Row row=new Row().add(requestHandler.getHttpMethod());
-            row.addWithUrl(requestHandler.getPath(), new PathAndQueryBuilder("/operator/httpServer/method/"+server).addQuery("key", requestHandler.getKey()).toString(),true);
+            row.add(requestHandler.getPath());
             
             Method method = requestHandler.getMethod();
             Description description = method.getAnnotation(Description.class);
@@ -1693,6 +1700,7 @@ public class ServerOperatorPages
             {
                 row.add("");
             }
+            row.addDetailButton(new PathAndQueryBuilder("/operator/httpServer/method/"+server).addQuery("key", requestHandler.getKey()).toString());
             table.addBodyRow(row);
         }
         return page;
@@ -2214,15 +2222,14 @@ public class ServerOperatorPages
         {
             Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Description"));
             panel.addInner(text);
+            page.content().addInner(new p());
         }
         
         Level1Panel requestPanel=page.content().returnAddInner(new Level1Panel(page.head(),"Request"));
-
         writeParameterInfos(page.head(),requestPanel, "Query Parameters", requestHandler, ParameterSource.QUERY);
         writeParameterInfos(page.head(),requestPanel, "Path Parameters", requestHandler, ParameterSource.PATH);
         writeParameterInfos(page.head(),requestPanel, "Header Parameters", requestHandler, ParameterSource.HEADER);
         writeParameterInfos(page.head(),requestPanel, "Cookie Parameters", requestHandler, ParameterSource.COOKIE);
-
         ParameterInfo contentParameterInfo = findContentParameter(requestHandler);
         if (contentParameterInfo != null)
         {
@@ -2265,8 +2272,9 @@ public class ServerOperatorPages
                     contentReaderPanel.content().addInner(new p());
                 }
             }
-            
         }
+        page.content().addInner(new p());
+
 
         Class<?> returnType = method.getReturnType();
         Type innerReturnType = null;
@@ -2346,7 +2354,10 @@ public class ServerOperatorPages
                     contentWriterPanel.content().addInner(new p());
                 }
             }
+            page.content().addInner(new p());
         }
+        
+        
 
         if (requestHandler.getContentDecoders().size() > 0)
         {
@@ -2357,7 +2368,8 @@ public class ServerOperatorPages
             {
                 table.addBodyRow(new Row().add(entry.getValue().getClass().getName(),entry.getValue().getCoding(),entry.getKey()));
             }
-        }
+            page.content().addInner(new p());
+     }
         if (requestHandler.getContentEncoders().size() > 0)
         {
             Level1Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Content Encoders"));
@@ -2367,6 +2379,7 @@ public class ServerOperatorPages
             {
                 table.addBodyRow(new Row().add(entry.getValue().getClass().getName(),entry.getValue().getCoding(),entry.getKey()));
             }
+            page.content().addInner(new p());
         }
         if (requestHandler.getFilters().length > 0)
         {
@@ -2378,9 +2391,11 @@ public class ServerOperatorPages
                 row.add(filter.getClass().getName());
             }
             table.addBodyRow(row);
+            page.content().addInner(new p());
         }
         Level1Panel methodPanel=page.content().returnAddInner(new Level1Panel(page.head(),"Class Method"));
         methodPanel.content().addInner(Utils.escapeHtml(method.toGenericString()+";"));
+        page.content().addInner(new p());
         
         Level1Panel executePanel=page.content().returnAddInner(new Level1Panel(page.head(),"Execute: "+key));
         String httpMethod = requestHandler.getHttpMethod();
@@ -2415,7 +2430,7 @@ public class ServerOperatorPages
             }
             fieldset field=form.returnAddInner(new fieldset());
             field.addInner(new legend().addInner("Additional Headers"));
-            field.addInner(new input_text().name("headers").id("headers").style("width:100%;"));
+            field.addInner(new input_text().name("headers").id("headers").style("width:100%;").placeholder("Example: X-test:debug,X-session:123"));
             
             button.val("headers", "headers");
 
@@ -2900,6 +2915,7 @@ public class ServerOperatorPages
         response.getOutputStream().write(bytes);
     }
 
+    @Log(responseContent=false)
     @GET
     @Path("/resources/{+}")
     public void cache(@PathParam(PathParam.AT_LEAST_ONE_SEGMENT) String file, Context context, Trace trace) throws Throwable

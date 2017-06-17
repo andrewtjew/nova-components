@@ -42,7 +42,7 @@ public class NameInputValueList extends div
     @Override
     public void compose(Composer builder) throws Throwable
     {
-       int width=(int)((this.longest+2)*0.6);
+       int width=(int)((this.longest+2)*0.9);
        for (int i=0;i<this.list.size();i++)
        {
            NameValue<Element> item=this.list.get(i);

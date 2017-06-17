@@ -1,10 +1,9 @@
 package org.nova.core;
 
-public class NameValue<VALUE> extends KeyValue<String,VALUE>
+public class NameValue<VALUE> extends Pair<String,VALUE>
 {
-
-	public NameValue(String key, VALUE value)
+	public NameValue(String name, VALUE value)
 	{
-		super(key, value);
+		super(name, value);
 	}
 }

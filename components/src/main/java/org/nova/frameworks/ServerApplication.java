@@ -41,10 +41,11 @@ import org.nova.security.SecureFileVault;
 import org.nova.security.UnsecureFileVault;
 import org.nova.security.UnsecureVault;
 import org.nova.security.Vault;
+import org.nova.tracing.Trace;
 
 import com.nova.disrupt.DisruptorManager;
 
-public class ServerApplication extends CoreApplication
+public abstract class ServerApplication extends CoreApplication
 {
 	final private HttpServer publicServer;
 	final private HttpServer privateServer;
@@ -155,7 +156,7 @@ public class ServerApplication extends CoreApplication
             this.privateServer.addContentDecoders(new GzipContentDecoder());
             this.privateServer.addContentEncoders(new GzipContentEncoder());
             this.privateServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
-            this.privateServer.addContentWriters(new JSONContentWriter());
+            this.privateServer.addContentWriters(this.operatorResultWriter,new HtmlContentWriter(),new HtmlElementWriter(),new JSONContentWriter(),new AjaxQueryResultWriter());
         }
         else
         {
@@ -213,10 +214,12 @@ public class ServerApplication extends CoreApplication
         this.getOperatorVariableManager().register("HttpServer.private", this.privateServer);
 
         this.menuBar=new MenuBar();
-        this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName);
         this.operatorServer.register(new ServerOperatorPages(this));
         this.operatorServer.register(new OperatorPages(this.operatorVariableManager, this.getMenuBar()));
-        startServer(this.operatorServer);
+        
+        //Build template and start operator server so we can monitor the rest of the startup.
+        this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName); 
+        startServer(this.operatorServer); 
 	}
 	
 	private void printUnsecureVaultWarning(PrintStream stream)
@@ -238,7 +241,11 @@ public class ServerApplication extends CoreApplication
 	public void runForever() throws Throwable
 	{
         this.startTime=System.currentTimeMillis();
-        onStart();
+        try (Trace trace=new Trace(this.getTraceManager(),"OnStart"))
+        {
+            onStart(trace);
+        }
+        this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName); //build again as sub classes may have added more items to menubar
         startServer(this.privateServer);
         startServer(this.publicServer);
 		System.out.println("Running forever!");
@@ -250,10 +257,7 @@ public class ServerApplication extends CoreApplication
 	    return this.disruptorManager;
 	}
 	
-    public void onStart() throws Throwable
-    {
-        //for sub classes to overrride
-    }
+    public abstract void onStart(Trace parent) throws Throwable;
     
     public HttpServer getPublicServer()
 	{

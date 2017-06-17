@@ -54,6 +54,16 @@ public class Style
         sb.append("margin:"+size+";");
         return this;
     }
+    public Style margin_auto(Size size)
+    {
+        sb.append("margin:"+size+" auto;");
+        return this;
+    }
+    public Style margin_auto()
+    {
+        sb.append("margin:0 auto;");
+        return this;
+    }
     public Style margin_top(Size size)
     {
         sb.append("margin-top:"+size+";");
@@ -158,6 +168,11 @@ public class Style
     public Style left(Size value)
     {
         sb.append("left:"+value+";");
+        return this;
+    }
+    public Style font_weight(font_weight value)
+    {
+        sb.append("font-size:"+value+";");
         return this;
     }
     public Style font_size(Size value)

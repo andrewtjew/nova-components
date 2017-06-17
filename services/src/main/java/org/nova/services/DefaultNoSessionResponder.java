@@ -4,12 +4,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.http.HttpStatus;
 import org.nova.http.server.Context;
+import org.nova.tracing.Trace;
 
-public class DefaultSessionRejectResponder extends SessionRejectResponder
+public class DefaultNoSessionResponder extends NoSessionResponder
 {
     
     @Override
-    void respondToNoSession(SessionFilter sessionFilter,Context context)
+    public Session respondToNoSession(Trace parent,SessionFilter sessionFilter,Context context)
     {
         HttpServletResponse response=context.getHttpServletResponse();
         String endPoint=sessionFilter.getDirectoryServiceEndPoint();
@@ -18,24 +19,25 @@ public class DefaultSessionRejectResponder extends SessionRejectResponder
             response.addHeader("Location", endPoint);
         }
         response.setStatus(HttpStatus.UNAUTHORIZED_401);
+        return null;
     }
 
     @Override
-    void respondToAccessDenied(SessionFilter sessionFilter,Session session, Context context)
+    public void respondToAccessDenied(Trace parent,SessionFilter sessionFilter,Session session, Context context)
     {
         HttpServletResponse response=context.getHttpServletResponse();
         response.setStatus(HttpStatus.CONFLICT_409);
     }
 
     @Override
-    void respondToNoLock(SessionFilter sessionFilter,Session session, Context context)
+    public void respondToNoLock(Trace parent,SessionFilter sessionFilter,Session session, Context context)
     {
         HttpServletResponse response=context.getHttpServletResponse();
         response.setStatus(HttpStatus.CONFLICT_409);
     }
 
     @Override
-    String getAssociatedMediaType()
+    public String getAssociatedMediaType()
     {
         return null;
     }

@@ -42,7 +42,7 @@ public class NameValueList extends div
     @Override
     public void compose(Composer builder) throws Throwable
     {
-       int width=this.longest/2+3;
+       int width=(int)(this.longest*0.7f+1);
        for (int i=0;i<this.list.size();i++)
        {
            NameValue<Element> item=this.list.get(i);
@@ -61,7 +61,7 @@ public class NameValueList extends div
            {
                label="";
            }
-           line.addInner(new div().style("width:"+width+"em;border-right:1px solid #bbb;padding-right:4px;margin-right:4px;padding-top:0.2em;padding-bottom:0.1em;").addInner(label));
+           line.addInner(new div().style("width:"+width+"em;border-right:1px solid #bbb;padding-right:4px;margin-right:4px;padding-top:0.2em;padding-bottom:0.1em;font-weight:bold;").addInner(label));
            line.addInner(new div().style("width:100%;text-align:left;padding-top:0.2em;padding-bottom:0.1em;").addInner(item.getValue()));
        }
        super.compose(builder);

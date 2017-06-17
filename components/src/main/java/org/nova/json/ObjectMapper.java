@@ -773,7 +773,7 @@ public class ObjectMapper
 			Field field = typeInfo.fields.get(string);
 			if (field==null)
 			{
-			    throw new Exception("No such field. Name="+string);
+			    throw new Exception("No such field. Name="+string+", type="+type.getCanonicalName());
 			}
 			Class<?> fieldType = field.getType();
 			if (fieldType.isPrimitive())

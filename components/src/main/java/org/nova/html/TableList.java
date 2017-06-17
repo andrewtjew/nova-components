@@ -1,7 +1,7 @@
 package org.nova.html;
 
 import java.util.ArrayList;
-import org.nova.core.KeyValue;
+import org.nova.core.Pair;
 
 public class TableList
 {

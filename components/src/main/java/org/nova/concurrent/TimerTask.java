@@ -190,9 +190,6 @@ public class TimerTask
         }
            break;
            
-        default:
-            //TODO implement the others
-            break;
         }
         this.key=new Key(this.due, this.number);
         return this.key;

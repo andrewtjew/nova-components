@@ -8,6 +8,7 @@ import java.util.HashSet;
 import org.nova.collections.FileCache;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
+import org.nova.html.enums.link_rel;
 import org.nova.html.tags.base;
 import org.nova.html.tags.head;
 import org.nova.html.tags.link;
@@ -94,6 +95,10 @@ public class Head extends head
         return this;
     }
 
+    public Head addCssLink(String URL)
+    {
+        return add(URL,new link().rel(link_rel.stylesheet).type("text/css").href(URL));
+    }
     public Head addScript(String URL)
     {
         return add(URL,new script().src(URL));

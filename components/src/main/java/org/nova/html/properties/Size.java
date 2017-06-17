@@ -7,6 +7,10 @@ public class Size
     {
         this.size=size+unit.toString();
     }
+    public Size(float size,unit unit)
+    {
+        this.size=size+unit.toString();
+    }
     @Override
     public String toString()
     {

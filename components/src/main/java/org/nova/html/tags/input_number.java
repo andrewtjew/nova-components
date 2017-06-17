@@ -12,15 +12,15 @@ public class input_number extends InputElement<input_number>
     }
 
 
-    public input_number max(long number)
+    public input_number max(double number)
     {
         return attr("max",number);
     }
-    public input_number min(long number)
+    public input_number min(double number)
     {
         return attr("min",number);
     }
-    public input_number step(int number) //number, range, date, datetime, datetime-local, month, time and week.
+    public input_number step(double number) //number, range, date, datetime, datetime-local, month, time and week.
     {
         return attr("step",number);
     }
@@ -36,7 +36,7 @@ public class input_number extends InputElement<input_number>
         }
         return this;
     }
-    public input_number value(long value)
+    public input_number value(double value)
     {
         return attr("value",value);
     }

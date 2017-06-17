@@ -43,7 +43,7 @@ public class CoreApplication
 		int maxMakeSpaceRetries=configuration.getIntegerValue("Logger.logDirectory.maxMakeSpaceRetries",10);
 		this.logDirectoryManager=new LogDirectoryManager(directory, maxMakeSpaceRetries, maxFiles, maxDirectorySize, reserve);
 
-		String loggerType=configuration.getValue("Logger.class","ConsoleWriter");
+		String loggerType=configuration.getValue("Logger.class","JSONBufferedLZ4Queue");
 		switch (loggerType)
 		{
             case "SimpleFileWriter":

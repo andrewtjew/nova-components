@@ -4,7 +4,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import org.nova.core.KeyValue;
+import org.nova.core.Pair;
 import org.nova.html.Attribute;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
@@ -18,7 +18,7 @@ public class AjaxButton extends button_button
 	final private String url;
 	private boolean async=true;
 	private String type="get";
-	private ArrayList<KeyValue<String,String>> queryInputs;
+	private ArrayList<Pair<String,String>> queryInputs;
 	
 	public AjaxButton(String id,String text,String url)
 	{
@@ -40,17 +40,17 @@ public class AjaxButton extends button_button
 	}
 	public AjaxButton val(String parameterName,String inputId)
 	{
-		this.queryInputs.add(new KeyValue<String, String>(parameterName, "':$('#"+inputId+"').val()"));
+		this.queryInputs.add(new Pair<String, String>(parameterName, "':$('#"+inputId+"').val()"));
 		return this;
 	}
 	public AjaxButton prop(String parameterName,String inputId,String prop)
 	{
-		this.queryInputs.add(new KeyValue<String, String>(parameterName, "':$('#"+inputId+"').prop('"+prop+"')"));
+		this.queryInputs.add(new Pair<String, String>(parameterName, "':$('#"+inputId+"').prop('"+prop+"')"));
 		return this;
 	}
 	public AjaxButton parameter(String parameterName,String value)
 	{
-		this.queryInputs.add(new KeyValue<String, String>(parameterName, "':'"+value+"'"));
+		this.queryInputs.add(new Pair<String, String>(parameterName, "':'"+value+"'"));
 		return this;
 	}
     @Override
@@ -64,7 +64,7 @@ public class AjaxButton extends button_button
         sb.append(this.url);
         sb.append("',dataType:'json',data:{");
         boolean commaNeeded=false;
-        for (KeyValue<String,String> item:this.queryInputs)
+        for (Pair<String,String> item:this.queryInputs)
         {
             if (commaNeeded==false)
             {
