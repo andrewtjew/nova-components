@@ -85,11 +85,6 @@ public class ConfigurationReader
     
                 String value=null;
                 character=lexer.skipWhiteSpaceAndBegin();
-                if (character==0)
-                {
-                    LineAndColumn lc=new LineAndColumn(lexeme.getSnippet().getContext(), lexeme.getSnippet().getAbsolutePosition());
-                    throw new Exception("Unexpected end at " + this.fileName + "(" + (lc.getLine()+1)+":"+(source.getContextPosition()+1)+")");
-                }
                 if (character == '{')
                 {
                     lexeme=lexer.produceEnclosedJSONText('{', '}');

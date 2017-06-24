@@ -54,7 +54,7 @@ public class HtmlUtils
                 Class<?> type=parameter.getClass();
                 if (type==String.class)
                 {
-                    sb.append("'"+parameter+"'");
+                    sb.append("'"+parameter.toString().replace("'","\\'")+"'");
                 }
                 else if ((type==byte.class)
                         ||(type==short.class)

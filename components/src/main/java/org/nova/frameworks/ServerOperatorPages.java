@@ -767,7 +767,10 @@ public class ServerOperatorPages
       {
           NameValueList list=panel.content().returnAddInner(new NameValueList());
           list.add("Count", node.getCount());
-          list.add("Average", nanoToDefaultFormat(node.getTotalDurationNs() / node.getCount()));  //Milliseconds
+          if (node.getCount()>0)
+          {
+              list.add("Average", nanoToDefaultFormat(node.getTotalDurationNs() / node.getCount()));  //Milliseconds
+          }
           list.add("Duration", nanoToDefaultFormat(node.getTotalDurationNs()));
           list.add("Wait", nanoToDefaultFormat(node.getTotalWaitNs()));
       }
@@ -1778,7 +1781,7 @@ public class ServerOperatorPages
                 if (parameter.getType() == boolean.class)
                 {
                     button.val(key, key);
-                    row.add(new input_checkbox().id(key).name(key).checked((boolean)info.getDefaultValue()));
+                    row.add(new input_checkbox().id(key).name(key).checked(info.getDefaultValue()==null?false:(boolean)info.getDefaultValue()));
                 }
                 else
                 {

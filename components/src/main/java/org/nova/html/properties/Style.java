@@ -42,6 +42,66 @@ public class Style
         sb.append("border:"+size+" "+borderStyle+";");
         return this;
     }
+    public Style border_left(Size size,border_style borderStyle,Color color)
+    {
+        sb.append("border-left:"+size+" "+borderStyle+" "+color+";");
+        return this;
+    }
+    public Style border_top(Size size,border_style borderStyle,Color color)
+    {
+        sb.append("border-top:"+size+" "+borderStyle+" "+color+";");
+        return this;
+    }
+    public Style border_right(Size size,border_style borderStyle,Color color)
+    {
+        sb.append("border-right:"+size+" "+borderStyle+" "+color+";");
+        return this;
+    }
+    public Style border_bottom(Size size,border_style borderStyle,Color color)
+    {
+        sb.append("border-bottom:"+size+" "+borderStyle+" "+color+";");
+        return this;
+    }
+    public Style border_left(Size size,border_style borderStyle)
+    {
+        sb.append("border-left:"+size+" "+borderStyle+";");
+        return this;
+    }
+    public Style border_top(Size size,border_style borderStyle)
+    {
+        sb.append("border-top:"+size+" "+borderStyle+";");
+        return this;
+    }
+    public Style border_right(Size size,border_style borderStyle)
+    {
+        sb.append("border-right:"+size+" "+borderStyle+";");
+        return this;
+    }
+    public Style border_bottom(Size size,border_style borderStyle)
+    {
+        sb.append("border-bottom:"+size+" "+borderStyle+";");
+        return this;
+    }
+    public Style border_left(Size size)
+    {
+        sb.append("border-left:"+size+";");
+        return this;
+    }
+    public Style border_top(Size size)
+    {
+        sb.append("border-top:"+size+";");
+        return this;
+    }
+    public Style border_right(Size size)
+    {
+        sb.append("border-right:"+size+";");
+        return this;
+    }
+    public Style border_bottom(Size size)
+    {
+        sb.append("border-bottom:"+size+";");
+        return this;
+    }
 
     public Style border(Size size)
     {

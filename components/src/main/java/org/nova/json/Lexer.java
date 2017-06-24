@@ -300,7 +300,7 @@ public class Lexer
 						if (this.reader.read()=='e')
 						{
 	                        this.last=0;
-							return true;
+							return false;
 						}
 					}
 				}
@@ -351,7 +351,7 @@ public class Lexer
 						if (this.reader.read()=='e')
 						{
 		                    this.last=0;
-							return true;
+							return false;
 						}
 					}
 				}

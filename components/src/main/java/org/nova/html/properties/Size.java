@@ -7,7 +7,7 @@ public class Size
     {
         this.size=size+unit.toString();
     }
-    public Size(float size,unit unit)
+    public Size(double size,unit unit)
     {
         this.size=size+unit.toString();
     }
