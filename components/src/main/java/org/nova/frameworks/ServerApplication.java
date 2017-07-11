@@ -11,13 +11,15 @@ import java.nio.file.Path;
 import org.eclipse.jetty.server.Server;
 import org.nova.collections.FileCache;
 import org.nova.collections.FileCacheConfiguration;
+import org.nova.concurrent.FutureScheduler;
+import org.nova.concurrent.TimerScheduler;
 import org.nova.configuration.Configuration;
 import org.nova.core.Utils;
+import org.nova.flow.SourceQueue;
 import org.nova.html.TypeMappings;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.operator.Menu;
-import org.nova.html.operator.OperatorResultWriter;
 import org.nova.html.widgets.AjaxQueryResultWriter;
 import org.nova.html.widgets.MenuBar;
 import org.nova.html.widgets.templates.Template;
@@ -34,6 +36,11 @@ import org.nova.http.server.JSONContentWriter;
 import org.nova.http.server.JSONPatchContentReader;
 import org.nova.http.server.TextContentWriter;
 import org.nova.logging.Level;
+import org.nova.logging.LogDirectoryManager;
+import org.nova.logging.LogEntry;
+import org.nova.logging.Logger;
+import org.nova.logging.SourceQueueLogger;
+import org.nova.metrics.MeterManager;
 import org.nova.operations.OperatorVariable;
 import org.nova.operations.OperatorVariableManager;
 import org.nova.operator.OperatorPages;
@@ -42,11 +49,13 @@ import org.nova.security.UnsecureFileVault;
 import org.nova.security.UnsecureVault;
 import org.nova.security.Vault;
 import org.nova.tracing.Trace;
+import org.nova.tracing.TraceManager;
 
 import com.nova.disrupt.DisruptorManager;
 
-public abstract class ServerApplication extends CoreApplication
+public abstract class ServerApplication
 {
+    final private CoreEnvironment coreEnvironment;
 	final private HttpServer publicServer;
 	final private HttpServer privateServer;
 	final private HttpServer operatorServer;
@@ -55,7 +64,6 @@ public abstract class ServerApplication extends CoreApplication
 	final private String baseDirectory;
 	final private TypeMappings typeMappings;
 	final private TemplateManager operationTemplateManager;
-	final private OperatorResultWriter operatorResultWriter;
 	final private DisruptorManager disruptorManager;
 	final private Vault vault;
 	private long startTime;
@@ -66,11 +74,14 @@ public abstract class ServerApplication extends CoreApplication
 	@OperatorVariable
 	boolean debug;
 	
-	public ServerApplication(String name,Configuration configuration) throws Throwable 
+	public ServerApplication(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer) throws Throwable 
 	{
-		super(configuration);
 		this.name=name;
+		this.coreEnvironment=coreEnvironment;
 		this.hostName=Utils.getLocalHostName();
+		this.operatorServer=operatorServer;
+		
+		Configuration configuration=coreEnvironment.getConfiguration();
 		
 		//Discover base directory. This is important to know for troubleshooting errors with file paths, so we output this info and we put this in the configuration. 
         File baseDirectory=new File(".");
@@ -131,32 +142,19 @@ public abstract class ServerApplication extends CoreApplication
 		
         String operationTemplateDirectory=configuration.getValue("HttpServer.operator.templateDirectory","../resources/html/operator/");
         this.operationTemplateManager=new TemplateManager(this.getTraceManager(), operationTemplateDirectory);
-        Menu menu=new Menu();
-        String menuHtml=configuration.getValue("OperationResultWriter.template.main","./main.html");
-        Template menuTemplate=this.operationTemplateManager.get(menuHtml);
 
-        //Admin http server
-        this.operatorResultWriter=new OperatorResultWriter(this.getName(),menu, menuTemplate);
-		int threads=configuration.getIntegerValue("HttpServer.operator.threads",10);
-        int operatorPort=configuration.getIntegerValue("HttpServer.operator.port",10051);
-		this.operatorServer=new HttpServer(this.getTraceManager(), getLogger("HttpServer.Operator"), JettyServerFactory.createServer(threads, operatorPort));
-        this.operatorServer.addContentDecoders(new GzipContentDecoder());
-        this.operatorServer.addContentEncoders(new GzipContentEncoder());
-        this.operatorServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
-        this.operatorServer.addContentWriters(this.operatorResultWriter,new HtmlContentWriter(),new HtmlElementWriter(),new JSONContentWriter(),new AjaxQueryResultWriter());
-        this.getMeterManager().register("HttpServer.operatorServer",this.operatorServer);
-        System.out.println("admin endpoint: http://"+Utils.getLocalHostName()+":"+operatorPort);
+        int operatorPort=this.operatorServer.getPorts()[0];
 
         //Private http server
         int privatePort=configuration.getIntegerValue("HttpServer.private.port",operatorPort+1);
         if (privatePort>0)
         {
-            threads=configuration.getIntegerValue("httpServer.private.threads",1000);
+            int threads=configuration.getIntegerValue("httpServer.private.threads",1000);
             this.privateServer=new HttpServer(this.getTraceManager(), getLogger("HttpServer.Operator"),JettyServerFactory.createServer(threads, privatePort));
             this.privateServer.addContentDecoders(new GzipContentDecoder());
             this.privateServer.addContentEncoders(new GzipContentEncoder());
             this.privateServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
-            this.privateServer.addContentWriters(this.operatorResultWriter,new HtmlContentWriter(),new HtmlElementWriter(),new JSONContentWriter(),new AjaxQueryResultWriter());
+            this.privateServer.addContentWriters(new HtmlContentWriter(),new HtmlElementWriter(),new JSONContentWriter(),new AjaxQueryResultWriter());
         }
         else
         {
@@ -172,7 +170,7 @@ public abstract class ServerApplication extends CoreApplication
         }
         if (publicPort>0)
         {
-            threads=configuration.getIntegerValue("HttpServer.public.threads",100);
+            int threads=configuration.getIntegerValue("HttpServer.public.threads",100);
             boolean useTestPort=isDebug();
             Server[] servers=new Server[useTestPort?2:1];
             if (useTestPort)
@@ -215,11 +213,9 @@ public abstract class ServerApplication extends CoreApplication
 
         this.menuBar=new MenuBar();
         this.operatorServer.register(new ServerOperatorPages(this));
-        this.operatorServer.register(new OperatorPages(this.operatorVariableManager, this.getMenuBar()));
         
         //Build template and start operator server so we can monitor the rest of the startup.
         this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName); 
-        startServer(this.operatorServer); 
 	}
 	
 	private void printUnsecureVaultWarning(PrintStream stream)
@@ -238,7 +234,7 @@ public abstract class ServerApplication extends CoreApplication
 		}
 	}
 	
-	public void runForever() throws Throwable
+	public void start() throws Throwable
 	{
         this.startTime=System.currentTimeMillis();
         try (Trace trace=new Trace(this.getTraceManager(),"OnStart"))
@@ -248,8 +244,6 @@ public abstract class ServerApplication extends CoreApplication
         this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName); //build again as sub classes may have added more items to menubar
         startServer(this.privateServer);
         startServer(this.publicServer);
-		System.out.println("Running forever!");
-		super.runForever();
 	}
 
 	public DisruptorManager getDisruptorManager()
@@ -307,11 +301,6 @@ public abstract class ServerApplication extends CoreApplication
 	    return this.vault;
 	}
 	
-    public OperatorResultWriter getOperatorResultWriter()
-    {
-        return this.operatorResultWriter;
-    }
-    
     public MenuBar getMenuBar()
     {
         return this.menuBar;
@@ -336,6 +325,46 @@ public abstract class ServerApplication extends CoreApplication
         }
     }
     
+    public MeterManager getMeterManager()
+    {
+        return this.coreEnvironment.getMeterManager();
+    }
+
+    public FutureScheduler getFutureScheduler()
+    {
+        return this.coreEnvironment.getFutureScheduler();
+    }
+
+    public TraceManager getTraceManager()
+    {
+        return this.coreEnvironment.getTraceManager();
+    }
+
+    public Configuration getConfiguration()
+    {
+        return this.coreEnvironment.getConfiguration();
+    }
+
+    public TimerScheduler getTimerScheduler()
+    {
+        return this.coreEnvironment.getTimerScheduler();
+    }
+    public SourceQueueLogger getLogger(String category) throws Throwable
+    {
+        return this.coreEnvironment.getLogger(category);
+    }
+    public Logger getLogger() 
+    {
+        return this.coreEnvironment.getLogger();
+    }
+    public SourceQueue<LogEntry> getLogQueue()
+    {
+        return this.coreEnvironment.getLogQueue();
+    }
+    public CoreEnvironment getCoreEnvironment()
+    {
+        return this.coreEnvironment;
+    }
 	public String getName()
 	{
 	    return this.name;
@@ -344,4 +373,8 @@ public abstract class ServerApplication extends CoreApplication
 	{
 	    return this.debug;
 	}
+    public LogDirectoryManager getLogDirectoryManager()
+    {
+        return this.coreEnvironment.getLogDirectoryManager();
+    }
 }

@@ -39,7 +39,6 @@ import org.nova.html.Selection;
 import org.nova.html.TableList;
 import org.nova.html.operator.Menu;
 import org.nova.html.operator.OperatorResult;
-import org.nova.html.operator.OperatorResultWriter;
 import org.nova.html.tags.input_submit;
 import org.nova.html.widgets.AjaxButton;
 import org.nova.html.widgets.AjaxQueryResult;
@@ -109,7 +108,7 @@ import com.google.common.base.Strings;
 @ContentDecoders(GzipContentDecoder.class)
 @ContentEncoders(GzipContentEncoder.class)
 @ContentReaders({ JSONContentReader.class, JSONPatchContentReader.class })
-@ContentWriters({OperatorResultWriter.class, HtmlContentWriter.class})
+@ContentWriters({HtmlContentWriter.class})
 
 public class ServerStatusController
 {

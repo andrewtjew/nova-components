@@ -1,4 +1,4 @@
-package org.nova.html.widgets;
+package org.nova.html.widgets.InputFeedBackForm;
 
 import java.util.ArrayList;
 
@@ -7,6 +7,7 @@ import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.div;
 import org.nova.html.tags.span;
+import org.nova.html.widgets.Text;
 
 public class NameInputValueList extends div
 {

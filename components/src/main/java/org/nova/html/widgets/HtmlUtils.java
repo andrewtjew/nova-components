@@ -28,10 +28,10 @@ public class HtmlUtils
     public static String confirmPOST(String title,String text,PathAndQueryBuilder post,Object content,PathAndQueryBuilder success) throws Exception
     {
         String data=content==null?null:ObjectMapper.write(content);
-        return call("confirmPOST",title,text,post.toString(),data,success.toString());
+        return callScriptFunction("confirmPOST",title,text,post.toString(),data,success.toString());
     }
     
-    public static String call(String method,Object...parameters)
+    public static String callScriptFunction(String method,Object...parameters)
     {
         StringBuilder sb=new StringBuilder(method+"(");
         boolean commaNeeded=false;
@@ -80,6 +80,27 @@ public class HtmlUtils
             }
         }
         sb.append(");");
+        return sb.toString();
+    }
+    public static String escapeXmlBrackets(String xmlText)
+    {
+        StringBuilder sb=new StringBuilder();
+        for (int i=0;i<xmlText.length();i++)
+        {
+            char c=xmlText.charAt(i);
+            if (c=='<')
+            {
+                sb.append("&lt");
+            }
+            else if (c=='>')
+            {
+                sb.append("&gt");
+            }
+            else 
+            {
+                sb.append(c);
+            }
+        }
         return sb.toString();
     }
 }

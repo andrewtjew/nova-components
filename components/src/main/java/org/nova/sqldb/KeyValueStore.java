@@ -60,7 +60,7 @@ public class KeyValueStore
 
     public String read(Trace parent,String key) throws Throwable
     {
-        try (Accessor accessor=this.connector.openAccessor(parent, "KeyValueStore"))
+        try (Accessor accessor=this.connector.openAccessor(parent, "KeyValueStore.read"))
         {
             return read(parent,accessor,key);
         }
@@ -83,6 +83,17 @@ public class KeyValueStore
     public <OBJECT> OBJECT read(Trace parent,Accessor accessor,Class<OBJECT> type) throws Throwable
     {
         return ObjectMapper.read(read(parent,accessor,type.getSimpleName()), type);
+    }    
+    public <OBJECT> OBJECT read(Trace parent,String key,Class<OBJECT> type) throws Throwable
+    {
+        try (Accessor accessor=this.connector.openAccessor(parent, "KeyValueStore.read"))
+        {
+            return ObjectMapper.read(read(parent,accessor,key), type);
+        }
+    }    
+    public <OBJECT> OBJECT read(Trace parent,Class<OBJECT> type) throws Throwable
+    {
+        return ObjectMapper.read(read(parent,type.getSimpleName()), type);
     }    
     
 }

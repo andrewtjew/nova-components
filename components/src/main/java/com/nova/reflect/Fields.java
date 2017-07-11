@@ -8,7 +8,7 @@ import java.util.TreeMap;
 public class Fields
 {
     private final static HashMap<String,Field[]> SORTED_FIELDS=new HashMap<>();
-    private final static HashMap<String,Map<String,Field>> FIELDS_MAPS=new HashMap<>();
+    private final static HashMap<String,FieldMap> FIELDS_MAPS=new HashMap<>();
     
     public final static Field[] getOrderedFields(Class<?> class_)
     {
@@ -37,15 +37,15 @@ public class Fields
         }
     }
     
-    public final static Map<String,Field> getFieldsMap(Class<?> class_)
+    public final static FieldMap getFieldsMap(Class<?> class_)
     {
         synchronized (FIELDS_MAPS)
         {
             String name=class_.getCanonicalName();
-            Map<String,Field> fields=FIELDS_MAPS.get(name);
+            FieldMap fields=FIELDS_MAPS.get(name);
             if (fields==null)
             {
-                fields=new HashMap<>();
+                fields=new FieldMap();
                 for (Class<?> current=class_;current!=null;current=current.getSuperclass())
                 {
                     for (Field field:current.getDeclaredFields())

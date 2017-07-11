@@ -16,7 +16,6 @@ import org.nova.frameworks.ServerOperatorPages.WideTable;
 import org.nova.html.HtmlWriter;
 import org.nova.html.elements.Element;
 import org.nova.html.operator.OperatorResult;
-import org.nova.html.operator.OperatorResultWriter;
 import org.nova.html.tags.form_get;
 import org.nova.html.tags.hr;
 import org.nova.html.tags.input_checkbox;
@@ -54,7 +53,7 @@ import com.google.common.base.Strings;
 @ContentDecoders(GzipContentDecoder.class)
 @ContentEncoders(GzipContentEncoder.class)
 @ContentReaders({JSONContentReader.class,JSONPatchContentReader.class})
-@ContentWriters({OperatorResultWriter.class,JSONContentWriter.class,AjaxQueryResultWriter.class,HtmlElementWriter.class})
+@ContentWriters({JSONContentWriter.class,AjaxQueryResultWriter.class,HtmlElementWriter.class})
 public class SessionOperatorPages<SESSION extends Session>
 {
     final private SessionManager<SESSION> sessionManager;
@@ -109,13 +108,21 @@ public class SessionOperatorPages<SESSION extends Session>
     public Element getSession(Trace parent,@QueryParam("token") String token) throws Exception, Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Session Info");
+        /*
         OperatorTable table=page.content().returnAddInner(new ServerOperatorPages.OperatorTable(page.head()));
         table.setHeadRow(new Row().add("Name","Value"));
         
         SESSION session= this.sessionManager.getSessionByToken(token);
-        for (NameObject item:session.getDisplayInfo())
+        for (NameObject item:session.getDisplayItems())
         {
             table.addBodyRow(new Row().add(item.getName(),item.getValue()));
+        }
+        */
+        SESSION session= this.sessionManager.getSessionByToken(token);
+        NameValueList list=page.content().returnAddInner(new NameValueList());
+        for (NameObject item:session.getDisplayItems())
+        {
+            list.add(item.getName(),item.getValue());
         }
         return page;
     }   

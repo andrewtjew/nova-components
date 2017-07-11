@@ -2,18 +2,18 @@ package org.nova.flow;
 
 import java.util.List;
 
-public class Duplicator extends Receiver
+public class Duplicator extends Node
 {
-	final private Receiver[] receivers;
+	final private Node[] receivers;
 	final private Object lock;
-	public Duplicator(Object lock,Receiver...receivers)
+	public Duplicator(Object lock,Node...receivers)
 	{
 		this.receivers=receivers;
 		this.lock=lock;
 	}
 	private void _flush() throws Throwable
 	{
-		for (Receiver receiver:this.receivers)
+		for (Node receiver:this.receivers)
 		{
 			receiver.flush();
 		}
@@ -35,7 +35,7 @@ public class Duplicator extends Receiver
 	}
 	private void _endSegment() throws Throwable
 	{
-        for (Receiver receiver:this.receivers)
+        for (Node receiver:this.receivers)
 		{
 			receiver.endSegment();
 		}
@@ -57,13 +57,13 @@ public class Duplicator extends Receiver
 	}
     private void _send(Packet container) throws Throwable
     {
-        for (Receiver receiver:this.receivers)
+        for (Node receiver:this.receivers)
         {
-            receiver.send(container);
+            receiver.process(container);
         }
     }
     @Override
-    public void send(Packet container) throws Throwable
+    public void process(Packet container) throws Throwable
     {
         if (this.lock!=null)
         {
@@ -80,7 +80,7 @@ public class Duplicator extends Receiver
 
     private void _beginSegment(long marker) throws Throwable
     {
-        for (Receiver receiver:this.receivers)
+        for (Node receiver:this.receivers)
         {
             receiver.beginSegment(marker);
         }

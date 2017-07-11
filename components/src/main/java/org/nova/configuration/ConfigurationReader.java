@@ -145,11 +145,11 @@ public class ConfigurationReader
                 candidates.add(parts[1]);
             }
         }
-        candidates.add("./target/production.cnf");
-        candidates.add("./target/test.cnf");
-        candidates.add("./target/qa.cnf");
-        candidates.add("./target/dev.cnf");
         candidates.add("./resources/dev.cnf");
+        candidates.add("./resources/integration.cnf");
+        candidates.add("./resources/test.cnf");
+        candidates.add("./resources/stage.cnf");
+        candidates.add("./resources/production.cnf");
 
         return search(args,candidates.toArray(new String[candidates.size()]));
     }
@@ -167,7 +167,7 @@ public class ConfigurationReader
             {
                 File file=new File(candidate);
                 String path=file.getCanonicalPath();
-                System.out.print("Trying "+path+"...");
+                System.out.print("Trying to use "+path+"...");
                 if (file.exists()==false)
                 {
                     System.out.println("does not exist");

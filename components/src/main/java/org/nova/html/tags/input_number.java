@@ -47,7 +47,15 @@ public class input_number extends InputElement<input_number>
         }
         return this;
     }
+    public input_number value(Double value)
+    {
+        return attr("value",value);
+    }
     public input_number value(double value)
+    {
+        return attr("value",value);
+    }
+    public input_number value(Long value)
     {
         return attr("value",value);
     }

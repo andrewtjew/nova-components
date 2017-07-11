@@ -10,11 +10,13 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.NetworkInterface;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -411,10 +413,14 @@ public class Utils
 	public static String getMacAddress() throws Exception
     {
         NetworkInterface network = NetworkInterface.getByInetAddress(java.net.InetAddress.getLocalHost());
+        if (network==null)
+        {
+            return ""; //Hack
+        }
         byte[] mac = network.getHardwareAddress();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < mac.length; i++) {
-            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+            sb.append(String.format("%02X", mac[i]));
         }
         return sb.toString();
     }
@@ -627,6 +633,19 @@ public class Utils
 			stream.write(text.getBytes(charset));
 		}
 	}
+    public static void writeTextFile(String fileName,String text,String encoding) throws Exception
+    {
+        File file=new File(fileName);
+        if (file.isDirectory()==true)
+        {
+            throw new Exception("File is a directory. Filename="+fileName);
+        }
+        
+        try (OutputStream stream=new FileOutputStream(file))
+        {
+            stream.write(text.getBytes(encoding));
+        }
+    }
 	public static int occurs(String string,String pattern)
 	{
 		int occurs=0;
@@ -668,6 +687,12 @@ public class Utils
         }
         return a.equalsIgnoreCase(b);
     }
-	
+
+    public static long parseLocalToUTCDateTime(String local,int timeZoneOffsetSeconds)
+    {
+        LocalDateTime localDateTime=LocalDateTime.parse(local);
+        ZonedDateTime zoned=ZonedDateTime.ofInstant(localDateTime, ZoneOffset.ofTotalSeconds(timeZoneOffsetSeconds), ZoneId.of("UTC"));
+        return zoned.toInstant().toEpochMilli();
+    }	
 }
 

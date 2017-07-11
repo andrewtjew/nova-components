@@ -127,9 +127,9 @@ public class MenuBar extends Element
             ArrayList<Item> subItems=item.subItems;
             if ((subItems!=null)&&(level>0))
             {
+                a.addInner(new span().class_("menu-expand").addInner("&#x27a4;"));
                 a.addInner(item.name);
             //    a.addInner(new span().class_("menu-expand").addInner("&#9658;"));
-                a.addInner(new span().class_("menu-expand").addInner("&#x27a4;"));
                 ;            
             }
             else
@@ -140,7 +140,7 @@ public class MenuBar extends Element
             {
                 if (level>0)
                 {
-                    li.style("width:"+longestSubMenu+"em;");
+                    li.style("width:"+longestSubMenu*0.7+"em;");
                 }
                 ul subMenu=li.returnAddInner(new ul());
                 subMenu.class_("menu-level-"+(level+1));

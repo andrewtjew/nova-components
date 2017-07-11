@@ -3,7 +3,9 @@ package org.nova.services;
 
 import org.nova.configuration.Configuration;
 import org.nova.core.Utils;
+import org.nova.frameworks.CoreEnvironment;
 import org.nova.frameworks.ServerApplication;
+import org.nova.http.server.HttpServer;
 import org.nova.tracing.Trace;
 
 public abstract class SessionService<SESSION extends Session> extends ServerApplication
@@ -12,9 +14,9 @@ public abstract class SessionService<SESSION extends Session> extends ServerAppl
     final private SessionManager<SESSION> sessionManager;
     private SessionFilter sessionFilter;
 
-    public SessionService(String name,Configuration configuration) throws Throwable
+    public SessionService(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer) throws Throwable
     {
-        super(name,configuration);
+        super(name,coreEnvironment,operatorServer);
         long lockTimeoutMs=this.getConfiguration().getLongValue("SessionService.session.lockTimeout", 1*1000);
         long timeoutMs=this.getConfiguration().getLongValue("SessionService.session.timeout", 30*60*1000);
         int generations=this.getConfiguration().getIntegerValue("SessionService.session.timeoutGenerations", 10);
@@ -24,9 +26,9 @@ public abstract class SessionService<SESSION extends Session> extends ServerAppl
         
     }
 
-    public SessionService(String name,Configuration configuration,NoSessionResponder...sessionRejectResponders) throws Throwable
+    public SessionService(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer,NoSessionResponder...sessionRejectResponders) throws Throwable
     {
-        this(name,configuration);
+        this(name,coreEnvironment,operatorServer);
         String directoryServiceEndPoint=this.getConfiguration().getValue("SessionService.directoryServiceEndPoint", "http://"+Utils.getLocalHostName()+":"+this.getPublicServer().getPorts()[0]);
         String headerTokenKey=this.getConfiguration().getValue("SessionService.tokenKey.header", "X-Token");
         String queryTokenKey=this.getConfiguration().getValue("SessionService.tokenKey.query", "token");

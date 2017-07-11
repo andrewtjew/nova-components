@@ -3,13 +3,13 @@ package org.nova.logging;
 import java.io.OutputStream;
 
 import org.nova.flow.Packet;
-import org.nova.flow.Receiver;
+import org.nova.flow.Node;
 import org.nova.logging.Formatter;
 import org.nova.logging.LogEntry;
 import org.nova.metrics.RateMeter;
 
 
-public abstract class OutputStreamWriter extends Receiver
+public abstract class OutputStreamWriter extends Node
 {
 	private Throwable throwable;
 	private OutputStream outputStream;
@@ -69,7 +69,7 @@ public abstract class OutputStreamWriter extends Receiver
     }
 
     @Override
-    public void send(Packet container) throws Throwable
+    public void process(Packet container) throws Throwable
     {
         synchronized(this)
         {

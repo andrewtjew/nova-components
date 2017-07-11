@@ -31,7 +31,6 @@ import org.nova.configuration.Configuration;
 import org.nova.configuration.ConfigurationItem;
 import org.nova.core.Utils;
 import org.nova.html.operator.Menu;
-import org.nova.html.operator.OperatorResultWriter;
 import org.nova.html.tags.a;
 import org.nova.html.tags.div;
 import org.nova.html.tags.fieldset;
@@ -56,14 +55,15 @@ import org.nova.html.widgets.AjaxQueryResultWriter;
 import org.nova.html.widgets.BasicPage;
 import org.nova.html.widgets.DataTable;
 import org.nova.html.widgets.Head;
+import org.nova.html.widgets.HtmlUtils;
 import org.nova.html.widgets.MenuBar;
-import org.nova.html.widgets.NameInputValueList;
 import org.nova.html.widgets.NameValueList;
 import org.nova.html.widgets.Panel;
 import org.nova.html.widgets.Row;
 import org.nova.html.widgets.SelectOptions;
 import org.nova.html.widgets.Table;
 import org.nova.html.widgets.Text;
+import org.nova.html.widgets.InputFeedBackForm.NameInputValueList;
 import org.nova.html.widgets.w3c.Accordion;
 import org.nova.html.widgets.w3c.VerticalMenu;
 import org.nova.http.Header;
@@ -136,7 +136,7 @@ import com.google.common.base.Strings;
 @ContentDecoders(GzipContentDecoder.class)
 @ContentEncoders(GzipContentEncoder.class)
 @ContentReaders({ JSONContentReader.class, JSONPatchContentReader.class })
-@ContentWriters({OperatorResultWriter.class, HtmlContentWriter.class, HtmlElementWriter.class})
+@ContentWriters({HtmlContentWriter.class, HtmlElementWriter.class})
 public class ServerOperatorPages
 {
     static public class OperatorTable extends DataTable
@@ -1234,24 +1234,7 @@ public class ServerOperatorPages
 //      textAccodion.content().addInner(new textarea().readonly().style("width:100%;resize:none;").addInner(text).rows(rows));
         if (htmlResponse)
         {
-            StringBuilder sb=new StringBuilder();
-            for (int i=0;i<text.length();i++)
-            {
-                char c=text.charAt(i);
-                if (c=='<')
-                {
-                    sb.append("&lt");
-                }
-                else if (c=='>')
-                {
-                    sb.append("&gt");
-                }
-                else 
-                {
-                    sb.append(c);
-                }
-            }
-            text=sb.toString();
+            text=HtmlUtils.escapeXmlBrackets(text);
         }
         textAccodion.content().addInner(new textarea().readonly().style("width:100%;resize:none;").addInner(text).rows(rows));
     }
@@ -2194,21 +2177,11 @@ public class ServerOperatorPages
     @Path("/operator/httpServer/classDefinitions/download/{server}")
     public Response<String> downloadClassDefinitions(Context context,@PathParam("server") String server,@QueryParam("namespace") String namespace,@QueryParam ("columns") int columns,@QueryParam("target") InteropTarget target) throws Throwable
     {
-        switch (target)
-        {
-            case CSHARP_PLAIN:
-            {
-                String text=generateClassDefinitions(server, namespace, columns, target);
-                String filename=namespace.replace(".", "_")+".cs";
-                Response<String> response=new Response<>(text);
-                response.addHeader("Content-Disposition","attachment;filename="+filename);
-                return response;
-            }
-            default:
-                break;
-            
-        }
-        return new Response<String>(HttpStatus.BAD_REQUEST_400);
+        String text=generateClassDefinitions(server, namespace, columns, target);
+        String filename=namespace.replace(".", "_")+".cs";
+        Response<String> response=new Response<>(text);
+        response.addHeader("Content-Disposition","attachment;filename="+filename);
+        return response;
     }
     
     @Description("Displays information and documentation of method.")

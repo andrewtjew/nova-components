@@ -21,7 +21,7 @@ public class SourceQueue<ITEM>
     final private long endSegmentWait;
     final private int maxQueueSize;
 
-    final private Receiver receiver;
+    final private Node receiver;
     final private Object lock;
     private Thread thread;
 
@@ -32,7 +32,7 @@ public class SourceQueue<ITEM>
     private boolean stop;
     private boolean noWait = false;
 
-    public SourceQueue(Receiver receiver, SourceQueueConfiguration configuration)
+    public SourceQueue(Node receiver, SourceQueueConfiguration configuration)
     {
         this.droppedMeter = new CountMeter();
         this.stalledMeter = new CountMeter();
@@ -259,7 +259,7 @@ public class SourceQueue<ITEM>
                         {
                             if (sendPacket.size() > 0)
                             {
-                                this.receiver.send(sendPacket);
+                                this.receiver.process(sendPacket);
                                 sendPacket = new Packet((int) this.waitingMeter.getLevel());
                             }
                             long rollOver = System.currentTimeMillis();
@@ -276,7 +276,7 @@ public class SourceQueue<ITEM>
                         {
                             if (sendPacket.size() > 0)
                             {
-                                this.receiver.send(sendPacket);
+                                this.receiver.process(sendPacket);
                                 sendPacket = new Packet((int) this.waitingMeter.getLevel());
                             }
                             if (flush)
@@ -297,7 +297,7 @@ public class SourceQueue<ITEM>
                     }
                     if (sendPacket.size() > 0)
                     {
-                        this.receiver.send(sendPacket);
+                        this.receiver.process(sendPacket);
                         flush = true;
                     }
                 }
@@ -337,7 +337,7 @@ public class SourceQueue<ITEM>
         }
     }
 
-    public Receiver getReceiver()
+    public Node getReceiver()
     {
         return this.receiver;
     }

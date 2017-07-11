@@ -5,7 +5,29 @@ import org.nova.core.Predicate;
 
 public class Synchronization
 {
-	public static void waitFor(Object synchronizationObject,Predicate predicate)  throws Throwable
+    public static void wait(Object synchronizationObject)
+    {
+        try
+        {
+            synchronizationObject.wait();
+        }
+        catch (InterruptedException e)
+        {
+        }
+    }
+    public static void wait(Object synchronizationObject,long timeout)
+    {
+        try
+        {
+            synchronizationObject.wait(timeout);
+            return;
+        }
+        catch (InterruptedException e)
+        {
+        }
+    }
+    
+    public static void waitFor(Object synchronizationObject,Predicate predicate)  throws Throwable
 	{
 		while (predicate.evaluate()==false)
 		{
@@ -20,16 +42,22 @@ public class Synchronization
 	}
 	public static boolean waitFor(Object synchronizationObject,Predicate predicate,long timeout) throws Throwable
 	{
+        if (timeout==Long.MAX_VALUE)
+        {
+            waitFor(synchronizationObject,predicate);
+            return true;
+        }
 		long start=System.currentTimeMillis();
 		while (predicate.evaluate()==false)
 		{
-			if (System.currentTimeMillis()-start>timeout)
-			{
-				return false;
-			}
+            long remaining=timeout-(System.currentTimeMillis()-start);
+            if (remaining<=0)
+            {
+                return false;
+            }
 			try
 			{
-				synchronizationObject.wait(timeout);
+				synchronizationObject.wait(remaining);
 			}
 			catch (InterruptedException e)
 			{
@@ -55,35 +83,48 @@ public class Synchronization
 
 	public static boolean waitForNoThrow(Object synchronizationObject,NoThrowPredicate predicate,long timeout)
 	{
+        if (timeout==Long.MAX_VALUE)
+        {
+            waitForNoThrow(synchronizationObject,predicate);
+            return true;
+        }
 		long start=System.currentTimeMillis();
 		while (predicate.evaluate()==false)
 		{
-			if (System.currentTimeMillis()-start>timeout)
+            long remaining=timeout-(System.currentTimeMillis()-start);
+            if (remaining<=0)
+            {
+                return false;
+            }
+			try
 			{
-				return false;
+				synchronizationObject.wait(remaining);
 			}
-			if (timeout>0)
+			catch (InterruptedException e)
 			{
-				try
-				{
-					synchronizationObject.wait(timeout);
-				}
-				catch (InterruptedException e)
-				{
-				}
-			}
-			else
-			{
-				try
-				{
-					synchronizationObject.wait();
-				}
-				catch (InterruptedException e)
-				{
-				}
 			}
 		}
 		return true;
 	}
+
+	public static void sleep(Object synchronizationObject,long timeout)
+    {
+        long start=System.currentTimeMillis();
+        for (;;)
+        {
+            long remaining=timeout-(System.currentTimeMillis()-start);
+            if (remaining<=0)
+            {
+                return;
+            }
+            try
+            {
+                synchronizationObject.wait(remaining);
+            }
+            catch (InterruptedException e)
+            {
+            }
+        }
+    }
 
 }
