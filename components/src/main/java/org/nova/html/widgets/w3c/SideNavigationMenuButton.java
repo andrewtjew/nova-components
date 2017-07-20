@@ -29,17 +29,17 @@ public class SideNavigationMenuButton extends div
         
         head.add(SideNavigationMenuButton.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
     }
-    public SideNavigationMenuButton(Head head,String id,int width,int height,unit buttonSizeUnit,String openStateText,String closeStateText,int sideNavWidth,unit sideNavWidthUnit)
+    public SideNavigationMenuButton(Head head,String id,int buttonWidth,int buttonHeight,unit buttonSizeUnit,String openStateText,String closeStateText,int sideNavWidth,unit sideNavWidthUnit)
     {
-        this(head,id,width,height,buttonSizeUnit,openStateText,closeStateText,sideNavWidth,sideNavWidthUnit,"/resources/html","/w3c/SideNavigationMenu/sidenavbutton.css");
+        this(head,id,buttonWidth,buttonHeight,buttonSizeUnit,openStateText,closeStateText,sideNavWidth,sideNavWidthUnit,"/resources/html","/w3c/SideNavigationMenu/sidenavbutton.css");
     }
-    public SideNavigationMenuButton(Head head,String id,int width,int height,int sideNavWidth,unit sizeUnit)
+    public SideNavigationMenuButton(Head head,String id,int buttonWidth,int buttonHeight,int sideNavWidth,unit sizeUnit)
     {
-        this(head,id,width,height,sizeUnit,"&#8801;","&#x2716",sideNavWidth,sizeUnit,"/resources/html","/w3c/SideNavigationMenu/sidenavbutton.css");
+        this(head,id,buttonWidth,buttonHeight,sizeUnit,"&#8801;","&#x2716",sideNavWidth,sizeUnit,"/resources/html","/w3c/SideNavigationMenu/sidenavbutton.css");
     }
-    public SideNavigationMenuButton(Head head,String id,int size,int sideNavWidth,unit sizeUnit)
+    public SideNavigationMenuButton(Head head,String id,int buttonSize,int sideNavWidth,unit sizeUnit)
     {
-        this(head,id,size,size,sideNavWidth,sizeUnit);
+        this(head,id,buttonSize,buttonSize,sideNavWidth,sizeUnit);
     }
     public SideNavigationMenuButton(Head head,int size,int sideNavWidth,unit sizeUnit)
     {

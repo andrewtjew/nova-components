@@ -106,6 +106,7 @@ public class SQLServerConnector extends Connector
 		return this.name;
 	}
 
+	/*
     @SuppressWarnings("unchecked")
     public <RETURN_TYPE> CallResult<RETURN_TYPE> executeSqlServerCall(Trace parent, String traceCategoryOverride, Class<RETURN_TYPE> returnType,Param[] parameters,String name) throws Throwable
     {
@@ -222,6 +223,6 @@ public class SQLServerConnector extends Connector
             }
         }
     }
-	
+	*/
 	
 }

@@ -2,6 +2,7 @@ package org.nova.concurrent;
 
 import java.util.HashMap;
 
+import org.nova.core.NoThrowPredicate;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
 
@@ -31,22 +32,31 @@ public class LockManager<KEY>
 				this.slots.put(key, slot);
 			}
 		}
-		final Slot finalSlot=slot;
-		synchronized (finalSlot)
+		synchronized (slot)
 		{
-			if (finalSlot.locked)
+			if (slot.locked)
 			{
 				slot.waiting++;
-				Synchronization.waitForNoThrow(slot, ()->{return finalSlot.locked==false;});
-				slot.waiting--;
+		        while (slot.locked)
+		        {
+		            try
+		            {
+		                slot.wait();
+		            }
+		            catch (InterruptedException e)
+		            {
+		            }
+		        }
+		        slot.waiting--;
 			}
-			finalSlot.locked=true;
+			slot.locked=true;
 		}
 		trace.endWait();
 		return new Lock<KEY>(key,this,slot,trace);
 	}
 
-	public Lock<KEY> waitForLock(KEY key,long timeoutMs)
+	@SuppressWarnings("resource")
+    public Lock<KEY> waitForLock(KEY key,long timeoutMs)
     {
         Slot slot;
         Trace trace=new Trace(this.traceManager, this.categoryPrefix+key,true);
@@ -67,7 +77,7 @@ public class LockManager<KEY>
                 slot.waiting++;
                 try
                 {
-                    if (Synchronization.waitForNoThrow(slot, ()->{return finalSlot.locked==false;},timeoutMs)==false)
+                    if (Synchronization.waitForNoThrow(finalSlot, ()->{return finalSlot.locked==false;},timeoutMs)==false)
                     {
                         trace.close();
                         return null;
@@ -80,6 +90,8 @@ public class LockManager<KEY>
             }
             finalSlot.locked=true;
         }
+
+        
         trace.endWait();
         return new Lock<KEY>(key,this,slot,trace);
     }
