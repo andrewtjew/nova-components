@@ -163,7 +163,7 @@ public class ServerStatusController
     
     public int raiseAlert(Trace parent,AlertRequest request) throws Throwable
     {
-        return this.client.post(parent, null, "/alert",request).getStatusCode();
+        return this.client.post(parent, null, "/alert",request);
     }
 
     public int raiseAlert(Trace parent,String type,AlertLevel level,String message,String url) throws Throwable
@@ -178,7 +178,7 @@ public class ServerStatusController
                 ,this.interval
                 ,this.serverApplication.getName()+"@"+localHostName);
                 
-        if (this.client.post(parent, null, "/server/add",request).getStatusCode()<300)
+        if (this.client.post(parent, null, "/server/add",request)<300)
         {
             event.cancel();
         }

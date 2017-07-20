@@ -112,7 +112,6 @@ public class ResourceController
     public final ServerApplication serverApplication;
     private int cacheMaxAge = 300;
     private String cacheControlValue = "public";
-//    private HashMap<String,Integer> 
 
     public ResourceController(ServerApplication serverApplication) throws Throwable
     {
@@ -151,6 +150,7 @@ public class ResourceController
         {
             response.setContentType(contentType);
         }
+        response.setContentLength(bytes.length);
         response.setHeader("Cache-Control",
                 (this.cacheControlValue == null || this.cacheControlValue.length() == 0) ? "max-age=" + this.cacheMaxAge : this.cacheControlValue + ",max-age=" + this.cacheMaxAge);
         response.setStatus(HttpStatus.OK_200);

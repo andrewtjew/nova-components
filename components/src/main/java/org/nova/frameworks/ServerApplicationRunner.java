@@ -35,8 +35,13 @@ import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
 
 
-public abstract class ServerApplicationRunner
+public class ServerApplicationRunner
 {
+    public static interface ServerApplicationInstantiator
+    {
+        ServerApplication newServerApplication(CoreEnvironment coreEnvironment,HttpServer operatorServer) throws Throwable;
+    }
+    
     private Throwable startupException;
     
     private HttpServer startOperatorServer(Configuration configuration,TraceManager traceManager,Logger logger) throws Exception
@@ -67,7 +72,7 @@ public abstract class ServerApplicationRunner
     }
     
     
-    public void run(String[] args)
+    public void run(String[] args,ServerApplicationInstantiator instantiator)
     {
         Configuration configuration=ConfigurationReader.search(args);
         if (configuration==null)
@@ -104,7 +109,7 @@ public abstract class ServerApplicationRunner
         try
         {
             showNotice(coreEnvironment.getLogger(),"New ServerApplication...");
-            serverApplication=newServerApplication(coreEnvironment,operatorServer);
+            serverApplication=instantiator.newServerApplication(coreEnvironment,operatorServer);
         }
         catch (Throwable t)
         {
@@ -152,6 +157,4 @@ public abstract class ServerApplicationRunner
             context.getHttpServletResponse().getWriter().write("No exception");
         }
     }
-    
-    protected abstract ServerApplication newServerApplication(CoreEnvironment coreEnvironment,HttpServer operatorServer) throws Throwable;
 }

@@ -152,11 +152,46 @@ public class Utils
         }
         return sb.toString();
     }
+
+    public static String combine(long[] items,String seperator)
+    {
+        StringBuilder sb=new StringBuilder();
+        for (long item:items)
+        {
+            if (sb.length()>0)
+            {
+                sb.append(seperator);
+            }
+            sb.append(item);
+        }
+        return sb.toString();
+    }
     
     public static String combine(Iterable<?> iterable,String seperator,String pre,String post)
     {
         StringBuilder sb=new StringBuilder();
         for (Object item:iterable)
+        {
+            if (sb.length()>0)
+            {
+                sb.append(seperator);
+            }
+            if (pre!=null)
+            {
+                sb.append(pre);
+            }
+            sb.append(item);
+            if (post!=null)
+            {
+                sb.append(post);
+            }
+        }
+        return sb.toString();
+    }
+    public static String combine(long[] items,String seperator,String pre,String post)
+    {
+        StringBuilder sb=new StringBuilder();
+        for (long item:items)
         {
             if (sb.length()>0)
             {

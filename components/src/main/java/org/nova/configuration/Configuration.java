@@ -354,12 +354,12 @@ public class Configuration
 		return (ENUM) Enum.valueOf((Class<Enum>)type, getValue(name,defaultValue.toString()));
 	}
 	
-	public <OBJECT> OBJECT getJSONValue(String name,Class<OBJECT> type) throws Exception
+	public <OBJECT> OBJECT getJSONObject(String name,Class<OBJECT> type) throws Exception
 	{
 		return ObjectMapper.read(getValue(name),type);
 	}
 
-	public <OBJECT> OBJECT getJSONValue(String name,OBJECT defaultValue,Class<OBJECT> type) throws Exception
+	public <OBJECT> OBJECT getJSONObject(String name,OBJECT defaultValue,Class<OBJECT> type) throws Exception
 	{
 	    ConfigurationItem item=getConfigurationItem(name);
 	    if (item==null)
@@ -368,7 +368,7 @@ public class Configuration
 	    }
 		return ObjectMapper.read(getValue(name),type);
 	}
-    public <OBJECT> OBJECT getJSONValue(String name,Class<OBJECT> type,String defaultText) throws Exception
+    public <OBJECT> OBJECT getJSONObject(String name,Class<OBJECT> type,String defaultText) throws Exception
     {
         return ObjectMapper.read(getValue(name,defaultText),type);
     }

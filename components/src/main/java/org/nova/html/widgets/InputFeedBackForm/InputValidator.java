@@ -168,6 +168,36 @@ public class InputValidator
     {
         return getLong(id,"Number expected.");
     }    
+
+    public long parseLong(String id,Long min,Long max)
+    {
+        long value=0;
+        try
+        {
+            value=Long.parseLong(getValue(id).toString());
+            if (min!=null)
+            {
+                if (value<min)
+                {
+                    this.inputFeedbacks.add(new InputFeedback(id,"Minimum is "+min+"."));
+                }
+            }
+            if (max!=null)
+            {
+                if (value>max)
+                {
+                    this.inputFeedbacks.add(new InputFeedback(id,"Maximum is "+max+"."));
+                }
+            }
+        }
+        catch (Throwable t)
+        {
+            this.inputFeedbacks.add(new InputFeedback(id,"Integer (long) value expected."));
+        }
+        return value;
+    }    
+    
+    
     public double parseDouble(String id,String feedback)
     {
         double value=0;

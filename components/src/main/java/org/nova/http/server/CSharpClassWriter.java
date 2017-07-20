@@ -288,7 +288,7 @@ public class CSharpClassWriter
                 {
                     String typeName=fieldType.getSimpleName();
                     String fieldName=field.getName();
-                    writeIndent(sb, indentLevel + 1).append("private string");
+                    writeIndent(sb, indentLevel + 1).append("public string");
                     sb.append(' ').append(field.getName()).append(";\r\n\r\n");
                     writeIndent(sb, indentLevel + 1).append("public "+typeName+" Get"+fieldName+"()\r\n");
                     writeIndent(sb, indentLevel + 1).append("{\r\n");
