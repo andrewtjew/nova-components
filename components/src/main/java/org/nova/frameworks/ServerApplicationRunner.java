@@ -35,7 +35,7 @@ import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
 
 
-public class ServerApplicationRunner
+public class ServerApplicationRunner //
 {
     public static interface ServerApplicationInstantiator
     {
