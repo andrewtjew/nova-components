@@ -37,7 +37,7 @@ import org.nova.tracing.TraceManager;
 
 public abstract class ServerApplicationRunner
 {
-    private Throwable startupException;
+    private Throwable startupException; //
     
     private HttpServer startOperatorServer(Configuration configuration,TraceManager traceManager,Logger logger) throws Exception
     {
