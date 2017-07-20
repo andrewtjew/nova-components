@@ -154,7 +154,7 @@ public class ServerOperatorPages
         {
             super();
             
-            head.add(WideTable.class.getCanonicalName(),new style().addInner("table.widetable {border-collapse:collapse;width:100%;} .widetable thead {background-color:#eee;} .widetable td{border:1px solid #888;padding:4px;} "));
+            head.add(WideTable.class.getCanonicalName(),new style().addInner("table.widetable {border-collapse:collapse;width:100%;} .widetable thead {background-color:#ddd;font-weight:bold;} .widetable td{border:1px solid #888;padding:4px;} "));
             class_("widetable");
         }
     }
@@ -206,11 +206,12 @@ public class ServerOperatorPages
         this.serverApplication = serverApplication;
 
         MenuBar menuBar=serverApplication.getMenuBar();
-        menuBar.add("/operator/application/configuration","Application","Configuration");
-        menuBar.add("/operator/application/futures","Application","Futures");
-        menuBar.add("/operator/application/timers","Application","Timer Tasks");
-        menuBar.add("/operator/application/meters/categories","Application","Category Meters");
-        menuBar.add("/operator/application/meters/all","Application","All Meters");
+        menuBar.add("/operator/application/configuration","Environment","Configuration");
+        menuBar.add("/operator/application/futures","Environment","Futures");
+        menuBar.add("/operator/application/timers","Environment","Timer Tasks");
+        menuBar.add("/operator/application/meters/categories","Environment","Category Meters");
+        menuBar.add("/operator/application/meters/all","Environment","All Meters");
+        menuBar.add("/operator/exception","Environment","Startup Exception");
 
         menuBar.add("/operator/tracing/activeStats","Tracing","Active Trace Stats");
         menuBar.add("/operator/tracing/lastStats","Tracing","Last Trace Stats");
@@ -1769,7 +1770,12 @@ public class ServerOperatorPages
                 else
                 {
                     button.val(key, key);
-                    row.add(new input_text().id(key).name(key).style("background-color:#ffa;width:100%;").placeholder(info.getDefaultValue() == null ? "" : info.getDefaultValue().toString()));
+                    input_text input=new input_text().id(key).name(key).style("background-color:#ffa;width:100%;");
+                    if (info.getDefaultValue()!=null)
+                    {
+                        input.value(info.getDefaultValue().toString());
+                    }
+                    row.add(input);
                 }
             }
         }

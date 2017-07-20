@@ -580,11 +580,13 @@ public class ObjectMapper
 			{
 				for (;;)
 				{
+				    /*
 					next = lexer.getNextCharacter();
 					if (next != '"')
 					{
 						throw new Exception("String expected at " + lexer.getPosition());
 					}
+					*/
 					list.add(Enum.valueOf((Class<Enum>) componentType, lexer.getString()));
 					next = lexer.isCommaOrCloseArray();
 					if (next == ']')
@@ -881,6 +883,10 @@ public class ObjectMapper
     				{
     					field.set(object, readObject(lexer, fieldType));
     				}
+                    else if (lexer.getRestOfNull())
+                    {
+                        field.set(object, null);
+                    }
     			}
 			}
 			next = lexer.getNextCharacter();

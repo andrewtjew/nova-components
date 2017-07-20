@@ -30,6 +30,48 @@ public class HtmlUtils
         String data=content==null?null:ObjectMapper.write(content);
         return callScriptFunction("confirmPOST",title,text,post.toString(),data,success.toString());
     }
+    public static String confirmAndExecuteOnServer(String title,String text,String executeUrl,Object content) throws Exception
+    {
+        String data=content==null?null:ObjectMapper.write(content);
+        StringBuilder sb=new StringBuilder("confirmAndExecuteOnServer(");
+        if (title==null)
+        {
+            sb.append("null");
+        }
+        else
+        {
+            sb.append('\'').append(title).append('\'');
+        }
+        if (text==null)
+        {
+            sb.append(",null");
+        }
+        else
+        {
+            sb.append(",'").append(text).append('\'');
+        }
+        if (executeUrl==null)
+        {
+            sb.append(",null");
+        }
+        else
+        {
+            sb.append(",'").append(executeUrl).append('\'');
+        }
+        if (data==null)
+        {
+            sb.append(",null);");
+        }
+        else
+        {
+            sb.append(",\'").append(data).append("');");
+        }
+        return sb.toString();
+    }
+    public static String confirmAndExecuteOnServer(String title,String text,String executeUrl) throws Exception
+    {
+        return confirmAndExecuteOnServer(title, text, executeUrl,null);
+    }
     
     public static String callScriptFunction(String method,Object...parameters)
     {

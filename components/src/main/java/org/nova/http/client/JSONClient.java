@@ -106,13 +106,7 @@ public class JSONClient
                 context.endWait();
     			try
     			{
-                    String json=processResponse(response, context);
-    				int statusCode=response.getStatusLine().getStatusCode();
-    				if (statusCode>=300)
-    				{
-    					return new JSONResponse<TYPE>(statusCode, null);
-    				}
-    				return new JSONResponse<TYPE>(statusCode,ObjectMapper.read(json, responseContentType));
+                    return processResponse(response, context,responseContentType);
     			}
     			finally
     			{
@@ -125,7 +119,20 @@ public class JSONClient
             }
 	    }
 	}
-    public <TYPE> JSONResponse<TYPE> get(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Throwable
+    private <TYPE> JSONResponse<TYPE> processResponse(HttpResponse response,DisruptorTraceContext context,Class<TYPE> responseContentType) throws Throwable
+    {
+       String json=processResponse(response, context);
+       int statusCode=response.getStatusLine().getStatusCode();
+       if (statusCode>=300)
+       {
+           return new JSONResponse<TYPE>(statusCode, null);
+       }
+       return new JSONResponse<TYPE>(statusCode,ObjectMapper.read(json, responseContentType));
+    }
+
+	
+	
+    public int get(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Throwable
     {
         try (DisruptorTraceContext context=new DisruptorTraceContext(parent, this.traceManager, this.logger, this.disruptor, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery,this.endPoint))
         {
@@ -151,8 +158,7 @@ public class JSONClient
                 try
                 {
                     processResponse(response, context);
-                    int statusCode=response.getStatusLine().getStatusCode();
-                    return new JSONResponse<TYPE>(statusCode, null);
+                    return response.getStatusLine().getStatusCode();
                 }
                 finally
                 {
@@ -333,13 +339,7 @@ public class JSONClient
     			context.endWait();
     			try
     			{
-                    String json=processResponse(response,context);
-                    int statusCode=response.getStatusLine().getStatusCode();
-    				if (statusCode>=300)
-    				{
-    					return new JSONResponse<TYPE>(statusCode, null);
-    				}
-    				return new JSONResponse<TYPE>(statusCode,ObjectMapper.read(json, responseContentType));
+                    return processResponse(response,context,responseContentType);
     			}
     			finally
     			{
@@ -360,7 +360,7 @@ public class JSONClient
     {
         return post(parent,traceCategoryOverride,pathAndQuery,null);
     }	
-    public <TYPE> JSONResponse<TYPE> post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Throwable
+    public int post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Throwable
     {
         try (DisruptorTraceContext context=createDisruptorConext(parent, traceCategoryOverride, pathAndQuery))
         {
@@ -392,8 +392,7 @@ public class JSONClient
                 try
                 {
                     processResponse(response,context);
-                    int statusCode=response.getStatusLine().getStatusCode();
-                    return new JSONResponse<TYPE>(statusCode,null);
+                    return response.getStatusLine().getStatusCode();
                 }
                 finally
                 {
