@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 import org.nova.concurrent.TimerScheduler;
 import org.nova.concurrent.TimerTask;
 import org.nova.concurrent.TimerTask.TimeBase;
-import org.nova.core.KeyValue;
+import org.nova.core.Pair;
 import org.nova.core.MultiException;
 import org.nova.tracing.Trace;
 
@@ -231,7 +231,7 @@ public class ExpireMap<KEY,VALUE>
         }
 	}
 
-	public List<KeyValue<KEY,VALUE>> getEntries()
+	public List<Pair<KEY,VALUE>> getEntries()
     {
         int size=0;
         synchronized(this)
@@ -244,7 +244,7 @@ public class ExpireMap<KEY,VALUE>
                     size+=generation.size();
                 }
             }
-            List<KeyValue<KEY,VALUE>> entries=new ArrayList<>(size);
+            List<Pair<KEY,VALUE>> entries=new ArrayList<>(size);
             for (int i=0;i<this.generations.length;i++)
             {
                 HashMap<KEY,VALUE> generation=this.generations[i];
@@ -252,7 +252,7 @@ public class ExpireMap<KEY,VALUE>
                 {
                     for (Entry<KEY, VALUE> entry:generation.entrySet())
                     {
-                        entries.add(new KeyValue<KEY,VALUE>(entry.getKey(),entry.getValue()));
+                        entries.add(new Pair<KEY,VALUE>(entry.getKey(),entry.getValue()));
                     }
                 }
             }

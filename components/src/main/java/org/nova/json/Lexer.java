@@ -12,7 +12,7 @@ public class Lexer
 	abstract static class Reader
 	{
 		abstract char read() throws Exception;
-		abstract String readJsonName() throws Exception;
+//		abstract String readJsonName() throws Exception;
 		abstract int getPosition();
 	}
 	
@@ -35,6 +35,7 @@ public class Lexer
 		{
 			return this.position;
 		}
+		/*
 		@Override
 		String readJsonName() throws Exception
 		{
@@ -56,6 +57,7 @@ public class Lexer
 				sb.append(c);
 			}
 		}
+		*/
 	}
 
 	static class StringReader extends Reader
@@ -78,6 +80,7 @@ public class Lexer
 		{
 			return this.position;
 		}
+		/*
 		@Override
 		String readJsonName() throws Exception
 		{
@@ -101,6 +104,7 @@ public class Lexer
 						
 			}
 		}
+		*/
 	}
 	
 	final Reader reader;
@@ -153,7 +157,23 @@ public class Lexer
 	
 	public String getJSONName() throws Exception
 	{
-		return this.reader.readJsonName();
+        StringBuilder sb=new StringBuilder();
+        for (;;)
+        {
+            char c=this.reader.read();
+            if (c=='"')
+            {
+                for (;;)
+                {
+                    c=this.reader.read();
+                    if (c==':')
+                    {
+                        return sb.toString();
+                    }                       
+                }
+            }
+            sb.append(c);
+        }
 	}
 	
 	public String getString() throws Exception
@@ -300,7 +320,7 @@ public class Lexer
 						if (this.reader.read()=='e')
 						{
 	                        this.last=0;
-							return true;
+							return false;
 						}
 					}
 				}
@@ -322,6 +342,38 @@ public class Lexer
 		}
 		throw new Exception("Boolean value or null expected at "+getPosition());
 	}
+	
+	public void skipJSONValue() throws Exception
+	{
+	    char c=this.skipWhiteSpace();
+	    if (c=='"')
+	    {
+	        getString(); //we can optimize this by noticing that we don't need the computed string.
+	    }
+	    else
+	    {
+	        char character=skipWhiteSpace();
+	        for (;;)
+	        {
+	            if ((character==',')||(character=='}')||(character==']'))
+	            {
+	                this.last=character;
+	                break;
+	            }
+	            if (character<=0x20)
+	            {
+	                if ((character==0x20)||(character==0x09)||(character==0x0A)||(character==0x0D))
+	                {
+	                    this.last=0;
+	                    skipWhiteSpace();
+	                    break;
+	                }
+	            }
+	            character=this.reader.read();
+	        }
+	    }
+	}
+	
 	
 	public boolean getPrimitiveBoolean() throws Exception
 	{
@@ -351,7 +403,7 @@ public class Lexer
 						if (this.reader.read()=='e')
 						{
 		                    this.last=0;
-							return true;
+							return false;
 						}
 					}
 				}

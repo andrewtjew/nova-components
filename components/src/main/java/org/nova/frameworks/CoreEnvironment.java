@@ -20,7 +20,7 @@ import org.nova.logging.SourceQueueLogger;
 import org.nova.metrics.MeterManager;
 import org.nova.tracing.TraceManager;
 
-public class CoreApplication
+public class CoreEnvironment
 {
 	final private TimerScheduler timerScheduler;
 	final private FutureScheduler futureScheduler;
@@ -32,7 +32,7 @@ public class CoreApplication
 	final SourceQueue<LogEntry> logSourceQueue;
 	final private LogDirectoryManager logDirectoryManager;
 	
-	public CoreApplication(Configuration configuration) throws Throwable
+	public CoreEnvironment(Configuration configuration) throws Throwable
 	{
         this.configuration=configuration;
 
@@ -43,7 +43,7 @@ public class CoreApplication
 		int maxMakeSpaceRetries=configuration.getIntegerValue("Logger.logDirectory.maxMakeSpaceRetries",10);
 		this.logDirectoryManager=new LogDirectoryManager(directory, maxMakeSpaceRetries, maxFiles, maxDirectorySize, reserve);
 
-		String loggerType=configuration.getValue("Logger.class","ConsoleWriter");
+		String loggerType=configuration.getValue("Logger.class","JSONBufferedLZ4Queue");
 		switch (loggerType)
 		{
             case "SimpleFileWriter":
@@ -60,16 +60,14 @@ public class CoreApplication
 		}
 		this.logSourceQueue.start();
 		this.loggers=new HashMap<>();
-		SourceQueueLogger traceLogger=this.getLogger("tracing");
-		this.loggers.put("trace", traceLogger);
-
+		Logger traceLogger=this.getLogger("tracing");
+	
         this.meterManager=new MeterManager();
 		this.traceManager=new TraceManager(traceLogger);
 		this.futureScheduler=new FutureScheduler(traceManager,configuration.getIntegerValue("FutureScheduler.threads",1000));
 		this.timerScheduler=new TimerScheduler(traceManager, this.getLogger());
 		this.timerScheduler.start();
 		this.logger=getLogger("application");
-        this.getLogger().log(Level.NOTICE,"Starting");
 	}
 	
 	public MeterManager getMeterManager()
@@ -120,23 +118,5 @@ public class CoreApplication
 	public LogDirectoryManager getLogDirectoryManager()
 	{
 		return this.logDirectoryManager;
-	}
-	public void runForever() throws Throwable
-	{
-		Object object=new Object();
-		this.getLogger().log(Level.NOTICE,"Started");
-		synchronized (object)
-		{
-			for (;;)
-			{
-				try
-				{
-					object.wait();
-				}
-				catch (InterruptedException e)
-				{
-				}
-			}
-		}
 	}
 }

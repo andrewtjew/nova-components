@@ -40,17 +40,16 @@ public class TimerTask
 	private long misses;
 	private boolean cancel;
 	
-	TimerTask(long number,String category,TimerScheduler timerScheduler,TimeBase schedulingMode,long delay,long period,TimerRunnable executable)
+	TimerTask(long number,String category,TimerScheduler timerScheduler,TimeBase schedulingMode,long offset,long period,TimerRunnable executable)
 	{
 		this.created=System.currentTimeMillis();
 		this.number=number;
-		this.offset=delay;
+		this.offset=offset;
 		this.category=category;
 		this.timerScheduler=timerScheduler;
 		this.executable=executable;
 		this.period=period;
 		this.executeStatus=TaskStatus.READY;
-		this.due=this.created+delay;
 		this.schedulingMode=schedulingMode;
 		this.key=new Key(this.due, this.number);
 	}
@@ -111,19 +110,33 @@ public class TimerTask
         case FIXED:
         {
             long now=System.currentTimeMillis();
-            long duration=now-this.due;
-            long misses=duration/period;
-            this.misses+=misses;
-            this.due=this.due+this.period*(misses+1);
+            if (this.due==0)
+            {
+                this.due=now+this.offset;
+            }
+            else
+            {
+                long duration=now-this.due;
+                long misses=duration/period;
+                this.misses+=misses;
+                this.due=this.due+this.period*(misses+1);
+            }
         }   
             break;
         
         case FREE:
         {
             long now=System.currentTimeMillis();
-            long duration=now-this.due;
-            this.misses+=duration/period;
-            this.due=now+this.period;
+            if (this.due==0)
+            {
+                this.due=now+this.offset;
+            }
+            else
+            {
+                long duration=now-this.due;
+                this.misses+=duration/period;
+                this.due=now+this.period;
+            }
         }   
             break;
 
@@ -190,9 +203,6 @@ public class TimerTask
         }
            break;
            
-        default:
-            //TODO implement the others
-            break;
         }
         this.key=new Key(this.due, this.number);
         return this.key;

@@ -1,15 +1,15 @@
 package org.nova.core;
 
-public class KeyValue<KEY,VALUE>
+public class Pair<NAME,VALUE>
 {
-	final private KEY key;
+	final private NAME key;
 	final private VALUE value;
-	public KeyValue(KEY key,VALUE value)
+	public Pair(NAME key,VALUE value)
 	{
 		this.key=key;
 		this.value=value;
 	}
-	public KEY getName()
+	public NAME getName()
 	{
 		return key;
 	}

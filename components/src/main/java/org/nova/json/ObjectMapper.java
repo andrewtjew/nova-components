@@ -773,111 +773,115 @@ public class ObjectMapper
 			Field field = typeInfo.fields.get(string);
 			if (field==null)
 			{
-			    throw new Exception("No such field. Name="+string);
+			    //throw new Exception("No such field. Name="+string+", type="+type.getCanonicalName());
+			    lexer.skipJSONValue();
 			}
-			Class<?> fieldType = field.getType();
-			if (fieldType.isPrimitive())
-			{
-				if (fieldType == boolean.class)
-				{
-					field.setBoolean(object, lexer.getPrimitiveBoolean());
-				}
-				else if (fieldType == int.class)
-				{
-					field.setInt(object, lexer.getPrimitiveInteger());
-				}
-				else if (fieldType == long.class)
-				{
-					field.setLong(object, lexer.getPrimitiveLong());
-				}
-				else if (fieldType == float.class)
-				{
-					field.setFloat(object, lexer.getPrimitiveFloat());
-				}
-				else if (fieldType == double.class)
-				{
-					field.setDouble(object, lexer.getPrimitiveDouble());
-				}
-				else if (fieldType == byte.class)
-				{
-					field.setByte(object, lexer.getPrimitiveByte());
-				}
-				else if (fieldType == char.class)
-				{
-					field.setChar(object, lexer.getPrimitiveCharacter());
-				}
-				else if (fieldType == short.class)
-				{
-					field.setShort(object, lexer.getPrimitiveShort());
-				}
-			}
-			else if (fieldType == String.class)
-			{
-				field.set(object, lexer.getString());
-			}
-			else if (fieldType.isArray())
-			{
-				next = lexer.getNextCharacter();
-				if (next != '[')
-				{
-					throw new Exception("Array expected at " + lexer.getPosition());
-				}
-				field.set(object, readArray(lexer, fieldType.getComponentType()));
-			}
-			else if (fieldType == Boolean.class)
-			{
-				field.set(object, lexer.getBoolean());
-			}
-			else if (fieldType == Integer.class)
-			{
-				field.set(object, lexer.getInteger());
-			}
-			else if (fieldType == Long.class)
-			{
-				field.set(object, lexer.getLong());
-			}
-			else if (fieldType == Float.class)
-			{
-				field.set(object, lexer.getFloat());
-			}
-			else if (fieldType == Double.class)
-			{
-				field.set(object, lexer.getDouble());
-			}
-			else if (fieldType == Byte.class)
-			{
-				field.set(object, lexer.getByte());
-			}
-			else if (fieldType == Character.class)
-			{
-				field.set(object, lexer.getCharacter());
-			}
-			else if (fieldType == Short.class)
-			{
-				field.set(object, lexer.getShort());
-			}
-            else if (fieldType.isEnum())
-            {
-                field.set(object, Enum.valueOf((Class<Enum>) fieldType, lexer.getString()));
-            }
-            else if (fieldType==java.lang.Enum.class)
-            {
-                int value=lexer.getPrimitiveInteger();
-                //this is not tested...
-                field.set(object, value);
-            }
-            else if (fieldType==BigDecimal.class)
-            {
-                next = lexer.getNextCharacter();
-                field.set(object, new BigDecimal(lexer.getValueText()));
-            }
 			else
 			{
-				next = lexer.getNextCharacter();
-				if (next == '{')
-				{
-					field.set(object, readObject(lexer, fieldType));
-				}
+    			Class<?> fieldType = field.getType();
+    			if (fieldType.isPrimitive())
+    			{
+    				if (fieldType == boolean.class)
+    				{
+    					field.setBoolean(object, lexer.getPrimitiveBoolean());
+    				}
+    				else if (fieldType == int.class)
+    				{
+    					field.setInt(object, lexer.getPrimitiveInteger());
+    				}
+    				else if (fieldType == long.class)
+    				{
+    					field.setLong(object, lexer.getPrimitiveLong());
+    				}
+    				else if (fieldType == float.class)
+    				{
+    					field.setFloat(object, lexer.getPrimitiveFloat());
+    				}
+    				else if (fieldType == double.class)
+    				{
+    					field.setDouble(object, lexer.getPrimitiveDouble());
+    				}
+    				else if (fieldType == byte.class)
+    				{
+    					field.setByte(object, lexer.getPrimitiveByte());
+    				}
+    				else if (fieldType == char.class)
+    				{
+    					field.setChar(object, lexer.getPrimitiveCharacter());
+    				}
+    				else if (fieldType == short.class)
+    				{
+    					field.setShort(object, lexer.getPrimitiveShort());
+    				}
+    			}
+    			else if (fieldType == String.class)
+    			{
+    				field.set(object, lexer.getString());
+    			}
+    			else if (fieldType.isArray())
+    			{
+    				next = lexer.getNextCharacter();
+    				if (next != '[')
+    				{
+    					throw new Exception("Array expected at " + lexer.getPosition());
+    				}
+    				field.set(object, readArray(lexer, fieldType.getComponentType()));
+    			}
+    			else if (fieldType == Boolean.class)
+    			{
+    				field.set(object, lexer.getBoolean());
+    			}
+    			else if (fieldType == Integer.class)
+    			{
+    				field.set(object, lexer.getInteger());
+    			}
+    			else if (fieldType == Long.class)
+    			{
+    				field.set(object, lexer.getLong());
+    			}
+    			else if (fieldType == Float.class)
+    			{
+    				field.set(object, lexer.getFloat());
+    			}
+    			else if (fieldType == Double.class)
+    			{
+    				field.set(object, lexer.getDouble());
+    			}
+    			else if (fieldType == Byte.class)
+    			{
+    				field.set(object, lexer.getByte());
+    			}
+    			else if (fieldType == Character.class)
+    			{
+    				field.set(object, lexer.getCharacter());
+    			}
+    			else if (fieldType == Short.class)
+    			{
+    				field.set(object, lexer.getShort());
+    			}
+                else if (fieldType.isEnum())
+                {
+                    field.set(object, Enum.valueOf((Class<Enum>) fieldType, lexer.getString()));
+                }
+                else if (fieldType==java.lang.Enum.class)
+                {
+                    int value=lexer.getPrimitiveInteger();
+                    //this is not tested...
+                    field.set(object, value);
+                }
+                else if (fieldType==BigDecimal.class)
+                {
+                    next = lexer.getNextCharacter();
+                    field.set(object, new BigDecimal(lexer.getValueText()));
+                }
+    			else
+    			{
+    				next = lexer.getNextCharacter();
+    				if (next == '{')
+    				{
+    					field.set(object, readObject(lexer, fieldType));
+    				}
+    			}
 			}
 			next = lexer.getNextCharacter();
 			if (next == '}')

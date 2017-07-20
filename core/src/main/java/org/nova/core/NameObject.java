@@ -1,6 +1,6 @@
 package org.nova.core;
 
-public class NameObject extends KeyValue<String, Object>
+public class NameObject extends Pair<String, Object>
 {
     public NameObject(String key, Object value)
     {

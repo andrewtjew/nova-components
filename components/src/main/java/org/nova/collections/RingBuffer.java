@@ -1,5 +1,7 @@
 package org.nova.collections;
 
+import java.util.ArrayList;
+import java.util.List;
 
 public class RingBuffer<ITEM>
 {
@@ -51,14 +53,15 @@ public class RingBuffer<ITEM>
 	{
 		return this.array.length;
 	}
-	public int getSnapshot(ITEM[] array)
+	public List<ITEM> getSnapshot()
 	{
-		int size=size();
+	    int size=size();
+	    ArrayList<ITEM> list=new ArrayList<>(size);
 		int count=array.length>size?size:array.length;
 		for (int i=0;i<count;i++)
 		{
-			array[i]=this.array[(this.readIndex+i)%this.length];
+			list.add(this.array[(this.readIndex+i)%this.length]);
 		}
-		return count;
+		return list;
 	}
 }

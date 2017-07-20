@@ -22,7 +22,6 @@ public class BasicPage extends Content
         addInner(new DocType(docType));
         this.html=returnAddInner(new html());
         this.head=this.html.returnAddInner(new Head());
-//        this.head.addInner(new meta().name(name.viewport).content("width=device-width,initial-scale=1.0"));
         this.body=this.html.returnAddInner(new body());
     }
     public BasicPage()

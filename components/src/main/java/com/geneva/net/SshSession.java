@@ -43,28 +43,43 @@ public class SshSession
 		this.channel.connect();
 	}
 
-	public String exec(String command) throws IOException, JSchException
+	public String exec(boolean captureOutput,String command) throws IOException, JSchException
 	{
 		ChannelExec channel = (ChannelExec) this.session.openChannel("exec");
-		StringBuilder sb = new StringBuilder();
-		channel.setCommand(command);
-		channel.connect();
-		final BufferedReader reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
-		try
+		if (captureOutput)
 		{
-			for (String line = reader.readLine(); line != null; line = reader.readLine())
-			{
-				sb.append(line);
-				sb.append("\r\n");
-			}
+	        StringBuilder sb = new StringBuilder();
+    		final BufferedReader reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
+            channel.setCommand(command);
+            channel.connect();
+    		try
+    		{
+    			for (String line = reader.readLine(); line != null; line = reader.readLine())
+    			{
+    				sb.append(line);
+    				sb.append("\r\n");
+    			}
+    		}
+    		finally
+    		{
+    			channel.disconnect();
+    		}
+            return sb.toString();
 		}
-		finally
+		else
 		{
-			channel.disconnect();
+	        channel.setCommand(command);
+	        channel.connect();
+		    channel.disconnect();
+		    return null;
 		}
-		return sb.toString();
 	}
+    public String exec(boolean captureOutput,String directory,String command) throws IOException, JSchException
+    {
+        return exec(captureOutput,"cd \""+directory+"\";"+command);
+    }
 
+	/*
 	public void execQuiet(String command) throws IOException, JSchException
     {
         ChannelExec channel = (ChannelExec) this.session.openChannel("exec");
@@ -72,11 +87,12 @@ public class SshSession
         channel.connect();
         channel.disconnect();
     }
+    */
 
 	public int killMatching(String commandPattern,int delay) throws Throwable
 	{
 		String command="ps -C \""+commandPattern+"\" -f";
-		String output=exec(command);
+		String output=exec(true,command);
 		String[] lines=Utils.split(output, '\n');
 		for (String line:lines)
 		{
@@ -84,14 +100,14 @@ public class SshSession
 			{
                 String[] parts=Utils.splitUsingWhiteSpace(line);
 				String id=parts[1];
-				exec("kill "+id);
+				exec(true,"kill "+id);
 			}
 		}
 		if (delay>0)
 		{
             Thread.sleep(delay);
 		}
-		String afterOutput=exec(command);
+		String afterOutput=exec(true,command);
 		String[] afterLines=Utils.split(afterOutput, '\n');
 		int killed=lines.length-afterLines.length;
 		return killed;
@@ -99,7 +115,7 @@ public class SshSession
 	
 	public void execBackground(String directory,String command) throws IOException, JSchException
 	{
-		execQuiet("cd \""+directory+"\";nohup "+command+" &>/dev/null &");
+		exec(false,"cd \""+directory+"\";nohup "+command+" &>/dev/null &");
 	}
 
 	public boolean exists(String path)
@@ -159,6 +175,7 @@ public class SshSession
 		return true;
 	}
 
+	/*
 	public boolean copyIfOlder(String source, String destination, int seconds) throws JSchException, SftpException
 	{
 		try
@@ -183,7 +200,8 @@ public class SshSession
 		channel.put(source, destination);
 		return true;
 	}
-
+    */
+	
 	public boolean copy(String source, String destination) throws JSchException, SftpException
 	{
 		try
@@ -245,6 +263,7 @@ public class SshSession
 		}
 	}
 
+	/*
 	public CopyDirectoryResult copyDirectoryRecursivelyIfOlder(String sourceDirectory, String destinationDirectory, int seconds) throws JSchException, SftpException, IOException
 	{
 		File directory = new File(sourceDirectory);
@@ -305,7 +324,7 @@ public class SshSession
 			}
 		}
 	}
-
+    */
 	private boolean checkDirectory(File directory, String destination) throws JSchException, SftpException, IOException
 	{
 		try

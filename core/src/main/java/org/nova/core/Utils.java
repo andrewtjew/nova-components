@@ -9,10 +9,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.net.NetworkInterface;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -219,15 +224,24 @@ public class Utils
 		return LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 	}
 
-	public static LocalDateTime millisToLocalDateTime(long millis)
-	{
-		return LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), TimeZone.getDefault().toZoneId());
-	}
+    public static LocalDateTime millisToLocalDateTime(long millis)
+    {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), TimeZone.getDefault().toZoneId());
+    }
+    public static ZonedDateTime millisToUTCDateTime(long millis)
+    {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.of("UTC"));
+    }
 
-	public static String millisToLocalDateTimeString(long millis)
-	{
-		return millisToLocalDateTime(millis).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-	}
+    public static String millisToLocalDateTimeString(long millis)
+    {
+        return millisToLocalDateTime(millis).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    }
+
+    public static String millisToUTCDateTimeString(long millis)
+    {
+        return millisToUTCDateTime(millis).format(DateTimeFormatter.ISO_DATE_TIME);
+    }
 	public static String millisToDateTimeString(long dateTime,String defaultValue)
 	{
 		if (dateTime<=0)
@@ -265,6 +279,81 @@ public class Utils
 		return days+" days "+hours+":"+minutes+":"+seconds+"."+milliseconds;
 		
 	}
+
+	public static String millisToNiceDurationString(long millis)
+    {
+	    if (millis==0)
+	    {
+	        return "0";
+	    }
+        if (millis/1000==0)
+        {
+            return millis+" ms";
+        }
+        StringBuilder sb=new StringBuilder();
+        long days=millis/(1000*3600*24);
+        if (days>1)
+        {
+            sb.append(days+" days");
+        }
+        else if (days==1)
+        {
+            sb.append(days+" day");
+        }
+        long hours=(millis-days*1000*3600*24)/(1000*3600);
+        if (hours>1)
+        {
+            if (sb.length()>0)
+            {
+                sb.append(", ");
+            }
+            sb.append(hours+" hours");
+        }
+        else if (hours==1)
+        {
+            if (sb.length()>0)
+            {
+                sb.append(", ");
+            }
+            sb.append(hours+" hour");
+        }
+        
+        long minutes=(millis-days*1000*3600*24-hours*1000*3600)/(1000*60);
+        if (minutes>1)
+        {
+            if (sb.length()>0)
+            {
+                sb.append(", ");
+            }
+            sb.append(minutes+" minutes");
+        }
+        else if (minutes==1)
+        {
+            if (sb.length()>0)
+            {
+                sb.append(", ");
+            }
+            sb.append(minutes+" minute");
+        }
+        long seconds=(millis-days*1000*3600*24-hours*1000*3600-minutes*1000*60)/1000;
+        if (seconds>1)
+        {
+            if (sb.length()>0)
+            {
+                sb.append(", ");
+            }
+            sb.append(seconds+" seconds");
+        }
+        else if (seconds==1)
+        {
+            if (sb.length()>0)
+            {
+                sb.append(", ");
+            }
+            sb.append(seconds+" second");
+        }
+        return sb.toString();
+    }
 
 	public static String nanosToDurationString(long nanos)
 	{
@@ -320,6 +409,21 @@ public class Utils
 	{
 		return java.net.InetAddress.getLocalHost().getHostName();
 	}
+
+	public static String getMacAddress() throws Exception
+    {
+        NetworkInterface network = NetworkInterface.getByInetAddress(java.net.InetAddress.getLocalHost());
+        if (network==null)
+        {
+            return ""; //Hack
+        }
+        byte[] mac = network.getHardwareAddress();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mac.length; i++) {
+            sb.append(String.format("%02X", mac[i]));
+        }
+        return sb.toString();
+    }
 	
 	public static String toString(StackTraceElement[] elements) 
 	{
@@ -529,6 +633,19 @@ public class Utils
 			stream.write(text.getBytes(charset));
 		}
 	}
+    public static void writeTextFile(String fileName,String text,String encoding) throws Exception
+    {
+        File file=new File(fileName);
+        if (file.isDirectory()==true)
+        {
+            throw new Exception("File is a directory. Filename="+fileName);
+        }
+        
+        try (OutputStream stream=new FileOutputStream(file))
+        {
+            stream.write(text.getBytes(encoding));
+        }
+    }
 	public static int occurs(String string,String pattern)
 	{
 		int occurs=0;
@@ -570,6 +687,12 @@ public class Utils
         }
         return a.equalsIgnoreCase(b);
     }
-	
+
+    public static long parseLocalToUTCDateTime(String local,int timeZoneOffsetSeconds)
+    {
+        LocalDateTime localDateTime=LocalDateTime.parse(local);
+        ZonedDateTime zoned=ZonedDateTime.ofInstant(localDateTime, ZoneOffset.ofTotalSeconds(timeZoneOffsetSeconds), ZoneId.of("UTC"));
+        return zoned.toInstant().toEpochMilli();
+    }	
 }
 

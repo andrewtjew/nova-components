@@ -460,35 +460,29 @@ public class HttpServer
 
 	public RequestLogEntry[] getLastRequestLogEntries()
 	{
-		RequestLogEntry[] entries=new RequestLogEntry[this.lastRequestsLogEntries.size()];
 		synchronized (this.lastRequestsLogEntries)
 		{
-			
-			this.lastRequestsLogEntries.getSnapshot(entries);
+			List<RequestLogEntry> list=this.lastRequestsLogEntries.getSnapshot();
+            return list.toArray(new RequestLogEntry[list.size()]);
 		}
-		return entries;
 	}
 	
 	public RequestHandlerNotFoundLogEntry[] getRequestHandlerNotFoundLogEntries()
 	{
-		RequestHandlerNotFoundLogEntry[] entries=new RequestHandlerNotFoundLogEntry[this.lastRequestHandlerNotFoundLogEntries.size()];
 		synchronized (this.lastRequestsLogEntries)
 		{
-			
-			this.lastRequestHandlerNotFoundLogEntries.getSnapshot(entries);
+			List<RequestHandlerNotFoundLogEntry> list=this.lastRequestHandlerNotFoundLogEntries.getSnapshot();
+            return list.toArray(new RequestHandlerNotFoundLogEntry[list.size()]);
 		}
-		return entries;
 	}
 	
 	public RequestLogEntry[] getLastExceptionRequestLogEntries()
 	{
-		RequestLogEntry[] entries=new RequestLogEntry[this.lastExceptionRequestsLogEntries.size()];
 		synchronized (this.lastRequestsLogEntries)
 		{
-			
-			this.lastExceptionRequestsLogEntries.getSnapshot(entries);
+            List<RequestLogEntry> list=this.lastExceptionRequestsLogEntries.getSnapshot();
+            return list.toArray(new RequestLogEntry[list.size()]);
 		}
-		return entries;
 	}
 	public RateMeter getRequestRateMeter()
 	{

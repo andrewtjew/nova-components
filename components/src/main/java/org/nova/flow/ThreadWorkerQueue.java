@@ -9,7 +9,7 @@ import org.nova.metrics.CountMeter;
 import org.nova.metrics.LevelMeter;
 import org.nova.test.Testing;
 
-public class ThreadWorkerQueue extends Receiver
+public class ThreadWorkerQueue extends Node
 {
 	final private CountMeter droppedMeter;
 	final private CountMeter stalledMeter;
@@ -20,7 +20,7 @@ public class ThreadWorkerQueue extends Receiver
     final private int maxQueueSize;
     final private int id;
 
-    final private Receiver receiver;
+    final private Node receiver;
     final private Object lock;
     private Thread thread;
 
@@ -29,7 +29,7 @@ public class ThreadWorkerQueue extends Receiver
 	private Throwable throwable;
 	private boolean stop;
 	
-	public ThreadWorkerQueue(Receiver receiver,long stallWait,int stallSizeThreshold,int maxQueueSize,int id,CountMeter droppedMeter,CountMeter stalledMeter,LevelMeter threadInUseMeter,LevelMeter waitingMeter)
+	public ThreadWorkerQueue(Node receiver,long stallWait,int stallSizeThreshold,int maxQueueSize,int id,CountMeter droppedMeter,CountMeter stalledMeter,LevelMeter threadInUseMeter,LevelMeter waitingMeter)
 	{
 		this.droppedMeter=droppedMeter;
 		this.stalledMeter=stalledMeter;
@@ -134,7 +134,7 @@ public class ThreadWorkerQueue extends Receiver
 			        else 
                     {
 	                    this.waitingMeter.add(-size);
-                        this.receiver.send(packet);
+                        this.receiver.process(packet);
                     }
 			    }
 			}
@@ -161,7 +161,7 @@ public class ThreadWorkerQueue extends Receiver
 	}
 
     @Override
-    public void send(Packet container) throws Throwable
+    public void process(Packet container) throws Throwable
     {
         synchronized (this.lock)
         {
@@ -247,7 +247,7 @@ public class ThreadWorkerQueue extends Receiver
             this.lock.notify();
         }
     }
-    public Receiver getReceiver()
+    public Node getReceiver()
     {
         return this.receiver;
     }

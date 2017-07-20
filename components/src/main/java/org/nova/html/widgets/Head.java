@@ -8,6 +8,7 @@ import java.util.HashSet;
 import org.nova.collections.FileCache;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
+import org.nova.html.enums.link_rel;
 import org.nova.html.tags.base;
 import org.nova.html.tags.head;
 import org.nova.html.tags.link;
@@ -29,71 +30,75 @@ public class Head extends head
     {
     }
 
-    public Head add(String id, style style)
+    public Head add(String key, style style)
     {
         if (this.styleSet == null)
         {
             this.styleSet = new HashSet<>();
         }
-        if (this.styleSet.add(id))
+        if (this.styleSet.add(key))
         {
             addInner(style);
         }
         return this;
     }
 
-    public Head add(String id, base base)
+    public Head add(String key, base base)
     {
         if (this.baseSet == null)
         {
             this.baseSet = new HashSet<>();
         }
-        if (this.baseSet.add(id))
+        if (this.baseSet.add(key))
         {
             addInner(base);
         }
         return this;
     }
 
-    public Head add(String id, link link)
+    public Head add(String key, link link)
     {
         if (this.linkSet == null)
         {
             this.linkSet = new HashSet<>();
         }
-        if (this.linkSet.add(id))
+        if (this.linkSet.add(key))
         {
             addInner(link);
         }
         return this;
     }
 
-    public Head add(String id, meta meta)
+    public Head add(String key, meta meta)
     {
         if (this.metaSet == null)
         {
             this.metaSet = new HashSet<>();
         }
-        if (this.metaSet.add(id))
+        if (this.metaSet.add(key))
         {
             addInner(meta);
         }
         return this;
     }
 
-    public Head add(String id, script script)
+    public Head add(String key, script script)
     {
         if (this.scriptSet == null)
         {
             this.scriptSet = new HashSet<>();
         }
-        if (this.scriptSet.add(id))
+        if (this.scriptSet.add(key))
         {
             addInner(script);
         }
         return this;
     }
 
+    public Head addCssLink(String URL)
+    {
+        return add(URL,new link().rel(link_rel.stylesheet).type("text/css").href(URL));
+    }
     public Head addScript(String URL)
     {
         return add(URL,new script().src(URL));

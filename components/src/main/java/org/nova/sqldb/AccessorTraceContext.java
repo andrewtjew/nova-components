@@ -64,9 +64,9 @@ public class AccessorTraceContext extends DisruptorTraceContext
         try
         {
             this.accessor.connector.executeFailures.increment();
-            Connection connection=this.accessor.connection;
-            this.accessor.connection = null;
-            connection.close();
+//            Connection connection=this.accessor.connection;
+//            this.accessor.connection = null;
+//            connection.close();
             return super.handleThrowable(throwable);
         }
         catch (Throwable t)

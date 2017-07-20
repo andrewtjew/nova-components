@@ -63,32 +63,7 @@ public class Pool<RESOURCE extends Resource>
 	@SuppressWarnings("resource")
 	public RESOURCE waitForAvailable(Trace parent,String traceCategory) throws Throwable
 	{
-		Trace trace=new Trace(this.traceManager,parent, traceCategory,true);
-		this.waitingMeter.increment();
-		try
-		{
-			synchronized (this)
-			{
-				try
-				{
-					Synchronization.waitForNoThrow(this,()->{return container.size()>0;});
-					RESOURCE resource=container.pop();
-					this.inUseMeter.increment();
-					resource.activate(trace);
-					trace.endWait();
-					return resource;
-				}
-				catch (Throwable t)
-				{
-					trace.close(t);
-					throw t;
-				}
-			}
-		}
-		finally
-		{
-			this.waitingMeter.decrement();
-		}
+	    return waitForAvailable(parent, traceCategory,Long.MAX_VALUE);
 	}
 	/*
 	@SuppressWarnings("resource")

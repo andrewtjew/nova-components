@@ -6,10 +6,24 @@ public class PathAndQueryBuilder
 {
 	private StringBuilder sb;
 	private char separator='?'; 
-	public PathAndQueryBuilder(String path)
-	{
-		this.sb=new StringBuilder(path);
-	}
+    public PathAndQueryBuilder(String path)
+    {
+        this.sb=new StringBuilder(path);
+    }
+    public PathAndQueryBuilder()
+    {
+        this.sb=new StringBuilder();
+    }
+    public PathAndQueryBuilder addSegment(String segment) throws Exception
+    {
+        if (this.separator!='?')
+        {
+            throw new Exception();
+        }
+        this.sb.append(segment);
+        return this;
+    }
+    @Deprecated
     public PathAndQueryBuilder addSegments(Object...segments) throws Exception
     {
         if (this.separator!='?')

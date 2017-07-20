@@ -13,7 +13,7 @@ import org.nova.http.server.ContentWriter;
 import org.nova.http.server.Context;
 
 import com.sun.xml.bind.api.impl.NameConverter.Standard;
-
+/*
 public class OperatorResultWriter extends ContentWriter<OperatorResult>
 {
 	final private Template template;
@@ -62,12 +62,10 @@ public class OperatorResultWriter extends ContentWriter<OperatorResult>
 	public void writeExample(OutputStream outputStream, Class<?> contentType) throws Throwable
 	{
 	}
-/*
     public Menu getMenu()
     {
         return menu;
     }
-    */
     public Template getTemplate()
     {
         return this.template;
@@ -78,3 +76,4 @@ public class OperatorResultWriter extends ContentWriter<OperatorResult>
     }
 }
 
+*/

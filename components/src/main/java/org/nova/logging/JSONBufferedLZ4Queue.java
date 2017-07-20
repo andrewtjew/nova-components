@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.nova.core.MultiException;
 import org.nova.flow.Distributor;
 import org.nova.flow.Packet;
-import org.nova.flow.Receiver;
+import org.nova.flow.Node;
 import org.nova.flow.SourceQueue;
 import org.nova.flow.SourceQueueConfiguration;
 import org.nova.flow.ThreadWorkerQueue;
@@ -68,7 +68,7 @@ public class JSONBufferedLZ4Queue extends SourceQueue<LogEntry>
 		super(connect(logDirectoryManager,configuration),configuration);
         this.writers=new BufferedLZ4FileWriter[configuration.writerThreads];
         this.queues=new ThreadWorkerQueue[configuration.writerThreads];
-		Receiver[] receivers=((Distributor)this.getReceiver()).getReceivers();
+		Node[] receivers=((Distributor)this.getReceiver()).getReceivers();
 		for (int i=0;i<this.writers.length;i++)
 		{
 		    this.queues[i]=(ThreadWorkerQueue)receivers[i];

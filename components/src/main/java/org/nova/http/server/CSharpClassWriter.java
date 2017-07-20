@@ -284,9 +284,28 @@ public class CSharpClassWriter
                 {
                     writeIndent(sb, indentLevel + 1).append("[DataMember]\r\n");
                 }
-                writeIndent(sb, indentLevel + 1).append("public ");
-                sb.append(translateTypeName(fieldType));
-                sb.append(' ').append(field.getName()).append(";\r\n\r\n");
+                if (fieldType.isEnum())
+                {
+                    String typeName=fieldType.getSimpleName();
+                    String fieldName=field.getName();
+                    writeIndent(sb, indentLevel + 1).append("private string");
+                    sb.append(' ').append(field.getName()).append(";\r\n\r\n");
+                    writeIndent(sb, indentLevel + 1).append("public "+typeName+" Get"+fieldName+"()\r\n");
+                    writeIndent(sb, indentLevel + 1).append("{\r\n");
+                    writeIndent(sb, indentLevel + 2).append("return ("+typeName+")System.Enum.Parse(typeof("+typeName+"),this."+fieldName+");\r\n");
+                    writeIndent(sb, indentLevel + 1).append("}\r\n");
+                    writeIndent(sb, indentLevel + 1).append("public void Set"+fieldName+"("+typeName+" "+fieldName+")\r\n");
+                    writeIndent(sb, indentLevel + 1).append("{\r\n");
+                    writeIndent(sb, indentLevel + 2).append("this."+fieldName+"="+fieldName+".ToString();\r\n");
+                    writeIndent(sb, indentLevel + 1).append("}\r\n");
+                    
+                }
+                else
+                {
+                    writeIndent(sb, indentLevel + 1).append("public ");
+                    sb.append(translateTypeName(fieldType));
+                    sb.append(' ').append(field.getName()).append(";\r\n\r\n");
+                }
             }
             writeIndent(sb, indentLevel).append("}\r\n");
         }

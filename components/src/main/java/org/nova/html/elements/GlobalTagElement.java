@@ -32,9 +32,9 @@ public class GlobalTagElement<ELEMENT extends TagElement<ELEMENT>> extends TagEl
         return attr("contextmenu",value);
     }
     
-    public ELEMENT datea(String custom,String value)
+    public ELEMENT data_(String attribute,String value)
     {
-        return attr("data-"+custom,value);
+        return attr("data-"+attribute,value);
     }
     public ELEMENT dir(dir dir)
     {

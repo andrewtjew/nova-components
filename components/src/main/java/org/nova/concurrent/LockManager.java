@@ -21,38 +21,7 @@ public class LockManager<KEY>
 	
 	public Lock<KEY> waitForLock(KEY key) throws Exception
 	{
-		Slot slot;
-		Trace trace=new Trace(this.traceManager, this.categoryPrefix+key,true);
-		synchronized (this)
-		{
-			slot=this.slots.get(key);
-			if (slot==null)
-			{
-				slot=new Slot();
-				this.slots.put(key, slot);
-			}
-		}
-		synchronized (slot)
-		{
-			if (slot.locked)
-			{
-				slot.waiting++;
-		        while (slot.locked)
-		        {
-		            try
-		            {
-		                slot.wait();
-		            }
-		            catch (InterruptedException e)
-		            {
-		            }
-		        }
-		        slot.waiting--;
-			}
-			slot.locked=true;
-		}
-		trace.endWait();
-		return new Lock<KEY>(key,this,slot,trace);
+	    return waitForLock(key,Long.MAX_VALUE);
 	}
 
 	@SuppressWarnings("resource")

@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import javax.servlet.http.Cookie;
 
 import org.nova.core.Utils;
+import org.nova.http.client.PathAndQueryBuilder;
 import org.nova.http.server.annotations.ContentDecoders;
 import org.nova.http.server.annotations.ContentEncoders;
 import org.nova.http.server.annotations.ContentParam;
@@ -36,6 +37,9 @@ import org.nova.http.server.annotations.QueryParam;
 import org.nova.http.server.annotations.StateParam;
 import org.nova.http.server.annotations.TRACE;
 import org.nova.tracing.Trace;
+
+import com.amazonaws.HandlerContextAware;
+import com.sun.mail.handlers.handler_base;
 
 //TODO!!! Resolve Consumes and ContentReaders just like produces and contentwriters
 
@@ -150,6 +154,10 @@ class RequestHandlerMap
                 {
                     classAnnotations.log = (Log) annotation;
                 }
+                else if (type == Path.class)
+                {
+                    classAnnotations.path= (Path) annotation;
+                }
     		}
 		}
 		for (Method method : object.getClass().getMethods())
@@ -254,7 +262,9 @@ class RequestHandlerMap
 	{
 		String httpMethod = null;
 		int verbs = 0;
-
+		Path classPath=handlerAnnotations.path;
+		handlerAnnotations.path=null;
+		
 		for (Annotation annotation : method.getAnnotations())
 		{
 			Class<?> type = annotation.annotationType();
@@ -335,10 +345,6 @@ class RequestHandlerMap
 		if (verbs > 1)
 		{
 			throw new Exception("Multiple Http verbs. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
-		}
-		if (handlerAnnotations.path == null)
-		{
-			throw new Exception("Missing @Path annotation. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
 		}
 
 		// filters
@@ -656,7 +662,26 @@ class RequestHandlerMap
         boolean logResponseHeaders=true;
         boolean logResponseContent=true;
         
-        String fullPath = root != null ? root + handlerAnnotations.path.value() : handlerAnnotations.path.value();
+        PathAndQueryBuilder path=new PathAndQueryBuilder();
+        if (root!=null)
+        {
+            path.addSegment(root);
+        }
+        if (classPath!=null)
+        {
+            path.addSegment(classPath.value());
+        }
+        if (handlerAnnotations.path!=null)
+        {
+            path.addSegment(handlerAnnotations.path.value());
+        }
+        
+        
+        String fullPath = path.toString();
+        if (fullPath.length()==0)
+        {
+            throw new Exception("@Path annotation missing at method or class level or no root provided. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
+        }
 	    if (handlerAnnotations.log!=null)
 	    {
 	        log=handlerAnnotations.log.value();
@@ -676,6 +701,10 @@ class RequestHandlerMap
                 logResponseHeaders=false;
                 logResponseContent=false;
 	        }
+	    }
+	    if (fullPath.endsWith("/#"))
+	    {
+	        fullPath=fullPath.substring(0, fullPath.length()-1)+method.getName();
 	    }
         RequestHandler requestHandler = new RequestHandler(object, method, httpMethod, fullPath, handlerFilters.toArray(new Filter[handlerFilters.size()]),
                 parameterInfos.toArray(new ParameterInfo[parameterInfos.size()]), contentDecoderMap, contentEncoderMap, contentReaderMap, contentWriterMap,

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import javax.servlet.http.Cookie;
 
 import org.eclipse.jetty.http.HttpStatus;
-import org.nova.core.KeyValue;
+import org.nova.core.Pair;
 import org.nova.core.NameValue;
 import org.nova.http.Header;
 

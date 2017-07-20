@@ -1,8 +1,8 @@
 package org.nova.flow;
 
-public class Distributor extends Receiver
+public class Distributor extends Node
 {
-    final private Receiver[] receivers;
+    final private Node[] receivers;
     final private Object lock;
     private int index;
     private int sizePerReceiver;
@@ -10,7 +10,7 @@ public class Distributor extends Receiver
     private int currentRoundSize;
     private long lastMarker;
 
-    public Distributor(Object lock, int sizePerReceiver, boolean strictSize, Receiver[] receivers) throws Throwable
+    public Distributor(Object lock, int sizePerReceiver, boolean strictSize, Node[] receivers) throws Throwable
     {
         this.receivers = receivers;
         this.lock = lock;
@@ -52,7 +52,7 @@ public class Distributor extends Receiver
     {
         if ((this.strictSize==false)||(this.currentRoundSize + container.size() <= this.sizePerReceiver))
         {
-            this.receivers[this.index].send(container);
+            this.receivers[this.index].process(container);
             this.currentRoundSize += container.size();
             if (this.currentRoundSize >= this.sizePerReceiver)
             {
@@ -74,7 +74,7 @@ public class Distributor extends Receiver
             {
                 packet.add(array[i]);
             }
-            this.receivers[this.index].send(packet);
+            this.receivers[this.index].process(packet);
             this.currentRoundSize+=receiverContainerSize;
             if (this.currentRoundSize >= this.sizePerReceiver)
             {
@@ -84,7 +84,7 @@ public class Distributor extends Receiver
         }
     }
     @Override
-    public void send(Packet container) throws Throwable
+    public void process(Packet container) throws Throwable
     {
         if (this.lock != null)
         {
@@ -148,7 +148,7 @@ public class Distributor extends Receiver
         }
     }
 
-    public Receiver[] getReceivers()
+    public Node[] getReceivers()
     {
         return this.receivers;
     }

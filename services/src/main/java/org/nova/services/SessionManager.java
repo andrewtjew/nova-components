@@ -113,7 +113,10 @@ public class SessionManager<SESSION extends Session>
     
     public Collection<SESSION> getSessionSnapshot()
     {
-        return this.userSessions.values();
+        synchronized (this)
+        {
+            return this.userSessions.values();
+        }
     }
     Lock<String> waitForLock(String user)
     {

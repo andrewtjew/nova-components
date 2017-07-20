@@ -62,6 +62,7 @@ public class Row extends tr
     public Row addRemoveAndDetailButtons(String removeScript,String detailLocation)
     {
         td data=returnAddInner(new td());
+        data.style("width:5em;");
         if (detailLocation!=null)
         {
             data.addInner(new RowDetailButton(detailLocation));

@@ -23,22 +23,22 @@ public class SessionFilter extends Filter
     final private String headerTokenKey;
     final private String queryTokenKey;
     final private String cookieTokenKey;
-    final private DefaultSessionRejectResponder defaultResponder;
-    final private HashMap<String,SessionRejectResponder> sessionRejectResponders;
+    final private DefaultNoSessionResponder defaultResponder;
+    final private HashMap<String,NoSessionResponder> noSessionResponders;
     private Session debugSession;
     
-    public SessionFilter(SessionManager<?> sessionManager,String directoryServiceEndPoint,String headerTokenKey,String queryTokenKey,String cookieTokenKey,SessionRejectResponder...sessionRejectResponders)
+    public SessionFilter(SessionManager<?> sessionManager,String directoryServiceEndPoint,String headerTokenKey,String queryTokenKey,String cookieTokenKey,NoSessionResponder...noRejectResponders)
     {
         this.sessionManager=sessionManager;
         this.directoryServiceEndPoint=directoryServiceEndPoint;
         this.headerTokenKey=headerTokenKey;
         this.queryTokenKey=queryTokenKey;
         this.cookieTokenKey=cookieTokenKey;
-        this.defaultResponder=new DefaultSessionRejectResponder();
-        this.sessionRejectResponders=new HashMap<>();
-        for (SessionRejectResponder responder:sessionRejectResponders)
+        this.defaultResponder=new DefaultNoSessionResponder();
+        this.noSessionResponders=new HashMap<>();
+        for (NoSessionResponder responder:noRejectResponders)
         {
-            this.sessionRejectResponders.put(responder.getAssociatedMediaType(), responder);
+            this.noSessionResponders.put(responder.getAssociatedMediaType(), responder);
         }
     }
     public void setDebugSession(Session session)
@@ -46,14 +46,14 @@ public class SessionFilter extends Filter
         this.debugSession=session;
     }
     
-    private SessionRejectResponder getBestSessionRejectResponder(Context context)
+    private NoSessionResponder getBestSessionRejectResponder(Context context)
     {
         ContentWriter<?> contentWriter=context.getContentWriter();
         if (contentWriter==null)
         {
             return this.defaultResponder;
         }
-        SessionRejectResponder responder=this.sessionRejectResponders.get(contentWriter.getMediaType());
+        NoSessionResponder responder=this.noSessionResponders.get(contentWriter.getMediaType());
         if (responder==null)
         {
             return this.defaultResponder;
@@ -93,15 +93,21 @@ public class SessionFilter extends Filter
         {
             if (this.debugSession==null)
             {
-                getBestSessionRejectResponder(context).respondToNoSession(this, context);
-                return null;
+                session=getBestSessionRejectResponder(context).respondToNoSession(trace,this, context);
+                if (session==null)
+                {
+                    return null;
+                }
             }
-            session=this.debugSession;
+            else
+            {
+                session=this.debugSession;
+            }
         }
         Lock<String> lock=sessionManager.waitForLock(session.getToken());
         if (lock==null)
         {
-            getBestSessionRejectResponder(context).respondToNoLock(this, session, context);
+            getBestSessionRejectResponder(context).respondToNoLock(trace,this, session, context);
             return null;
         }
         session.update(lock);
@@ -109,7 +115,7 @@ public class SessionFilter extends Filter
         {
             if (session.isAccessDeniedForCurrentRequest(trace,context))
             {
-                getBestSessionRejectResponder(context).respondToAccessDenied(this, session, context);
+                getBestSessionRejectResponder(context).respondToAccessDenied(trace,this, session, context);
                 return null;
             }
             context.setState(session);

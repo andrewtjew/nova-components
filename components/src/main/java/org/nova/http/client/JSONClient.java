@@ -1,5 +1,7 @@
 package org.nova.http.client;
 
+import java.util.ArrayList;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
@@ -26,7 +28,7 @@ public class JSONClient
 	final private Logger logger;
 	final private HttpClient client;
 	final private String endPoint;
-	final private Header[] headers;
+	final private ArrayList<Header> headers;
 	final private String contentType;  
 	final private String patchType;  
 	final private Disruptor disruptor;
@@ -38,7 +40,11 @@ public class JSONClient
 		this.logger=logger;
 		this.endPoint=endPoint;
 		this.client=client;
-		this.headers=headers;
+		this.headers=new ArrayList<>();
+		for (Header header:headers)
+		{
+		    setHeader(header);
+		}
 		this.contentType=contentType;
 		this.patchType=patchType;
 	}
@@ -46,7 +52,18 @@ public class JSONClient
     {
         this(traceManager,logger,null,endPoint,client,"application/json","application/merge-patch+json");
     }
-
+    public void setHeader(Header header)
+    {
+        for (int i=0;i<this.headers.size();i++)
+        {
+            if (Utils.equals(this.headers.get(i).getName(), header.getName()))
+            {
+                this.headers.remove(i);
+                break;
+            }
+        }
+        this.headers.add(header);
+    }
 	public JSONClient(TraceManager traceManager,Logger logger,String endPoint)
 	{
 		this(traceManager,logger,null,endPoint,HttpClientFactory.createDefaultClient(),"application/json","application/merge-patch+json");

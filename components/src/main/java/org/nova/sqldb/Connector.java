@@ -114,6 +114,25 @@ public abstract class Connector
             return accessor.executeUpdate(parent, traceCategoryOverride, parameters,sql);
         }
     }
+
+    public GeneratedKeys executeUpdateAndReturnGeneratedKeys(Trace parent, String traceCategoryOverride, String sql, Object... parameters) throws Throwable
+    {
+        return executeUpdateAndReturnGeneratedKeys(parent, traceCategoryOverride, parameters, sql);
+    }
+    public GeneratedKeys executeUpdateAndReturnGeneratedKeys(Trace parent, String traceCategoryOverride, Object[] parameters,String sql) throws Throwable
+    {
+        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeUpdate"))
+        {
+            return accessor.executeUpdateAndReturnGeneratedKeys(parent, traceCategoryOverride, parameters,sql);
+        }
+    }
+    public GeneratedKeys executeUpdateAndReturnGeneratedKeys(Trace parent, String traceCategoryOverride, List<Object> parameters,String sql) throws Throwable
+    {
+        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeUpdate"))
+        {
+            return accessor.executeUpdateAndReturnGeneratedKeys(parent, traceCategoryOverride, parameters,sql);
+        }
+    }
     
     public int[] executeBatchUpdate(Trace parent, String traceCategoryOverride, Object[][] parameters,String sql) throws Throwable
     {

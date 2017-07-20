@@ -26,7 +26,9 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Server;
 import org.nova.annotations.Description;
 import org.nova.concurrent.Future;
+import org.nova.concurrent.TimerRunnable;
 import org.nova.concurrent.TimerTask;
+import org.nova.concurrent.TimerTask.TimeBase;
 import org.nova.configuration.Configuration;
 import org.nova.configuration.ConfigurationItem;
 import org.nova.core.Utils;
@@ -37,7 +39,6 @@ import org.nova.html.Selection;
 import org.nova.html.TableList;
 import org.nova.html.operator.Menu;
 import org.nova.html.operator.OperatorResult;
-import org.nova.html.operator.OperatorResultWriter;
 import org.nova.html.tags.input_submit;
 import org.nova.html.widgets.AjaxButton;
 import org.nova.html.widgets.AjaxQueryResult;
@@ -45,6 +46,7 @@ import org.nova.html.widgets.AjaxQueryResultWriter;
 import org.nova.http.Header;
 import org.nova.http.client.HttpClientConfiguration;
 import org.nova.http.client.HttpClientFactory;
+import org.nova.http.client.JSONClient;
 import org.nova.http.client.PathAndQueryBuilder;
 import org.nova.http.client.TextClient;
 import org.nova.http.client.TextResponse;
@@ -106,17 +108,29 @@ import com.google.common.base.Strings;
 @ContentDecoders(GzipContentDecoder.class)
 @ContentEncoders(GzipContentEncoder.class)
 @ContentReaders({ JSONContentReader.class, JSONPatchContentReader.class })
-@ContentWriters({OperatorResultWriter.class, HtmlContentWriter.class})
+@ContentWriters({HtmlContentWriter.class})
 
 public class ServerStatusController
 {
     public final ServerApplication serverApplication;
     private int statusCode; 
-
+    final private String monitorEndPoint; 
+    final private long interval;
+    final private CountMeter checkMeter;
+    final private JSONClient client;
     public ServerStatusController(ServerApplication serverApplication) throws Throwable
     {
         this.serverApplication = serverApplication;
         setStatusCode(HttpStatus.OK_200);
+        this.monitorEndPoint=serverApplication.getConfiguration().getValue("Application.Monitoring.remoteServerMonitorEndpoint",null);
+        this.checkMeter=new CountMeter();
+        this.interval=this.serverApplication.getConfiguration().getLongValue("Application.Monitoring.checkInterval",10*1000);
+        if (this.monitorEndPoint!=null)
+        {
+            this.serverApplication.getTimerScheduler().schedule("RegisterWithRemoteServerMonitor", TimeBase.FREE, this.interval/2,this.interval,(trace,event)->{register(trace,event);});
+        }
+        this.client=new JSONClient(this.serverApplication.getTraceManager(), this.serverApplication.getLogger(), this.monitorEndPoint);
+        
     }
     public void setStatusCode(int statusCode)
     {
@@ -130,6 +144,44 @@ public class ServerStatusController
     @Path("/check")
     public Response<Void> check(Trace trace) throws Throwable
     {
+        this.checkMeter.increment();
         return new Response<Void>(this.statusCode);
     }
+    
+    static class AddServerRequest
+    {
+        String url;
+        long interval;
+        String description;
+        AddServerRequest(String url,long interval,String description)
+        {
+            this.url=url;
+            this.interval=interval;
+            this.description=description;
+        }
+    }    
+    
+    public int raiseAlert(Trace parent,AlertRequest request) throws Throwable
+    {
+        return this.client.post(parent, null, "/alert",request).getStatusCode();
+    }
+
+    public int raiseAlert(Trace parent,String type,AlertLevel level,String message,String url) throws Throwable
+    {
+        return raiseAlert(parent,new AlertRequest(this.serverApplication.getName(),type,level,message,url));
+    }
+    
+    private void register(Trace parent,TimerTask event) throws Throwable
+    {
+        String localHostName=Utils.getLocalHostName();
+        AddServerRequest request=new AddServerRequest("http://"+Utils.getLocalHostName()+":"+this.serverApplication.getPrivateServer().getPorts()[0]+"/check"
+                ,this.interval
+                ,this.serverApplication.getName()+"@"+localHostName);
+                
+        if (this.client.post(parent, null, "/server/add",request).getStatusCode()<300)
+        {
+            event.cancel();
+        }
+    }
+    
 }

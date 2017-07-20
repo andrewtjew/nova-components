@@ -10,20 +10,31 @@ public class input_number extends InputElement<input_number>
         super();
         attr("type","number");
     }
-
-
+    public input_number max(double number)
+    {
+        return attr("max",number);
+    }
     public input_number max(long number)
     {
         return attr("max",number);
+    }
+    public input_number min(double number)
+    {
+        return attr("min",number);
     }
     public input_number min(long number)
     {
         return attr("min",number);
     }
-    public input_number step(int number) //number, range, date, datetime, datetime-local, month, time and week.
+    public input_number step(double number) //number, range, date, datetime, datetime-local, month, time and week.
     {
         return attr("step",number);
     }
+    public input_number step(long number) //number, range, date, datetime, datetime-local, month, time and week.
+    {
+        return attr("step",number);
+    }
+
     public input_number required()  //text, search, url, tel, email, password, date pickers, number, checkbox, radio, and file.
     {
         return attr("required");
@@ -35,6 +46,18 @@ public class input_number extends InputElement<input_number>
             attr("required");
         }
         return this;
+    }
+    public input_number value(Double value)
+    {
+        return attr("value",value);
+    }
+    public input_number value(double value)
+    {
+        return attr("value",value);
+    }
+    public input_number value(Long value)
+    {
+        return attr("value",value);
     }
     public input_number value(long value)
     {

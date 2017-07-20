@@ -63,5 +63,10 @@ public class input_datetime_local extends InputElement<input_datetime_local>
         }
         return this;
     }
+
+    public input_datetime_local value(String text) //button, reset, submit, text, password, hidden, checkbox, radio, image
+    {
+        return attr("value",text);
+    }
     
 }
