@@ -3,7 +3,8 @@ package org.nova.metrics;
 public class RateMeter 
 {
 	private long lastCount;
-	private double lastRate;
+    private double lastRate;
+    private double lastLastRate;
 	private long markTime;
 	private long markCount;
 	
@@ -48,11 +49,34 @@ public class RateMeter
 			double markWeight=interval/samplingInterval;
 			return markWeight*this.markCount/interval+(1.0-markWeight)*this.lastRate;
 		}
+		this.lastLastRate=this.lastLastRate;
 		this.lastRate=this.markCount/interval;
 		this.lastCount+=this.markCount;
 		this.markTime=now;
 		this.markCount=0;
 		return this.lastRate;
 	}
-
+	
+	/*
+	public Rates sampleRates()
+	{
+        long now=System.currentTimeMillis();
+        double interval=(now-markTime)/1000.0;
+        if (interval<=samplingInterval)
+        {
+            if (interval<=0)
+            {
+                return this.lastRate;
+            }
+            double markWeight=interval/samplingInterval;
+            markWeight*this.markCount/interval+(1.0-markWeight)*this.lastRate;
+        }
+        this.lastLastRate=this.lastLastRate;
+        this.lastRate=this.markCount/interval;
+        this.lastCount+=this.markCount;
+        this.markTime=now;
+        this.markCount=0;
+        return this.lastRate;
+	}
+	*/
 }

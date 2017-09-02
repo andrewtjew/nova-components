@@ -19,18 +19,19 @@ public class InputValidator
         this.object=object;
     }
     
-    private Object getValue(String id) throws IllegalArgumentException, IllegalAccessException
+    private Object getValue(String id) throws Throwable
     {
         return this.fieldMap.get(id).get(this.object);
     }
 
     
-    public String getRequiredString(String id,String feedback)
+    public String getRequiredString(String id,String feedback) throws Throwable
     {
         String value=null;
+        Object valueObject=getValue(id);
         try
         {
-            value=(String)getValue(id);
+            value=(String)valueObject;
             if ((value==null)||(value.length()==0))
             {
                 this.inputFeedbacks.add(new InputFeedback(id,feedback));
@@ -43,12 +44,13 @@ public class InputValidator
         return value;
     }
 
-    public String getRequiredString(String id,int minLength,int maxLength,String feedback)
+    public String getRequiredString(String id,int minLength,int maxLength,String feedback) throws Throwable
     {
         String value=null;
+        Object valueObject=getValue(id);
         try
         {
-            value=(String)getValue(id);
+            value=(String)valueObject;
             if (value==null)
             {
                 this.inputFeedbacks.add(new InputFeedback(id,feedback));
@@ -74,12 +76,12 @@ public class InputValidator
         }
         return value;
     }
-    public String getRequiredString(String id,int minLength,int maxLength)
+    public String getRequiredString(String id,int minLength,int maxLength) throws Throwable
     {
         String value=null;
+        Object valueObject=getValue(id);
         try
         {
-            Object valueObject=getValue(id);
             if (valueObject==null)
             {
                 this.inputFeedbacks.add(new InputFeedback(id,"String must not be null."));
@@ -106,17 +108,17 @@ public class InputValidator
         }
         return value;
     }    
-    public String getRequiredString(String id)
+    public String getRequiredString(String id) throws Throwable
     {
         return getRequiredString(id,"Required");
     }    
 
-    public String getString(String id,String feedback)
+    public String getString(String id,String feedback) throws Throwable
     {
         String value=null;
+        Object valueObject=getValue(id);
         try
         {
-            Object valueObject=getValue(id);
             if (valueObject!=null)
             {
                 value=valueObject.toString();
@@ -128,17 +130,18 @@ public class InputValidator
         }
         return value;
     }    
-    public String getString(String id)
+    public String getString(String id) throws Throwable
     {
         return getString(id,"String expected.");
     }    
 
-    public double getDouble(String id,String feedback)
+    public double getDouble(String id,String feedback) throws Throwable
     {
         double value=0;
+        Object valueObject=getValue(id);
         try
         {
-            value=(double)getValue(id);
+            value=(double)valueObject;
         }
         catch (Throwable t)
         {
@@ -147,16 +150,17 @@ public class InputValidator
         return value;
     }    
 
-    public double getDouble(String id)
+    public double getDouble(String id) throws Throwable
     {
         return getDouble(id,"Number expected.");
     }    
-    public long getLong(String id,String feedback)
+    public long getLong(String id,String feedback) throws Throwable
     {
         long value=0;
+        Object valueObject=getValue(id);
         try
         {
-            value=(long)getValue(id);
+            value=(long)valueObject;
         }
         catch (Throwable t)
         {
@@ -164,17 +168,18 @@ public class InputValidator
         }
         return value;
     }    
-    public long getLong(String id)
+    public long getLong(String id) throws Throwable
     {
         return getLong(id,"Number expected.");
     }    
 
-    public long parseLong(String id,Long min,Long max)
+    public long parseLong(String id,Long min,Long max) throws Throwable
     {
         long value=0;
+        Object valueObject=getValue(id);
         try
         {
-            value=Long.parseLong(getValue(id).toString());
+            value=Long.parseLong(valueObject.toString());
             if (min!=null)
             {
                 if (value<min)
@@ -198,12 +203,13 @@ public class InputValidator
     }    
     
     
-    public double parseDouble(String id,String feedback)
+    public double parseDouble(String id,String feedback) throws Throwable
     {
         double value=0;
+        Object valueObject=getValue(id);
         try
         {
-            value=Double.parseDouble(getValue(id).toString());
+            value=Double.parseDouble(valueObject.toString());
         }
         catch (Throwable t)
         {
@@ -212,16 +218,16 @@ public class InputValidator
         return value;
     }    
 
-    public double parseDouble(String id)
+    public double parseDouble(String id) throws Throwable
     {
         return parseDouble(id,"Number expected.");
     }    
-    public Double parseNullableDouble(String id,String feedback)
+    public Double parseNullableDouble(String id,String feedback) throws Throwable
     {
         Double value=null;
+        Object valueObject=getValue(id);
         try
         {
-            Object valueObject=getValue(id);
             if (valueObject!=null)
             {
                 String text=valueObject.toString();
@@ -239,7 +245,7 @@ public class InputValidator
         return value;
     }    
 
-    public Double parseNullableDouble(String id)
+    public Double parseNullableDouble(String id) throws Throwable
     {
         return parseNullableDouble(id,"Number expected.");
     }    

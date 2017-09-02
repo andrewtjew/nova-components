@@ -9,8 +9,8 @@ import java.util.HashMap;
 
 public class Row
 {
-	final private HashMap<String,Integer> mappings;
-	Object[] data;
+	final HashMap<String,Integer> mappings;
+	final Object[] data;
 	Row(HashMap<String,Integer> mappings,Object[] data)
 	{
 		this.mappings=mappings;
@@ -214,10 +214,26 @@ public class Row
 	{
 		return (Timestamp)this.data[columnIndex];
 	}
-	public Timestamp getTIMESTAMP(String columnName)
-	{
-		return getTIMESTAMP(this.mappings.get(columnName));
-	}
+    public Timestamp getTIMESTAMP(String columnName)
+    {
+        return getTIMESTAMP(this.mappings.get(columnName));
+    }
+    public boolean getBIT(int columnIndex)
+    {
+        return (boolean)this.data[columnIndex];
+    }
+    public boolean getBIT(String columnName)
+    {
+        return getBIT(this.mappings.get(columnName));
+    }
+    public Boolean getNullableBIT(int columnIndex)
+    {
+        return (Boolean)this.data[columnIndex];
+    }
+    public Boolean getNullableBIT(String columnName)
+    {
+        return getNullableBIT(this.mappings.get(columnName));
+    }
 
 	@SuppressWarnings("unchecked")
 	public <TYPE> TYPE get(int columnIndex)
@@ -227,6 +243,10 @@ public class Row
 	public <TYPE> TYPE get(String columnName)
 	{
 		return get(this.mappings.get(columnName));
+	}
+	public Object[] getObjects()
+	{
+	    return this.data;
 	}
 	
 }

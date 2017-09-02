@@ -17,6 +17,10 @@ public class Synchronization
     }
     public static void wait(Object synchronizationObject,long timeout)
     {
+        if (timeout<0)
+        {
+            return;
+        }
         try
         {
             synchronizationObject.wait(timeout);
@@ -46,6 +50,10 @@ public class Synchronization
         {
             waitFor(synchronizationObject,predicate);
             return true;
+        }
+        else if (timeout<0)
+        {
+            return false;
         }
 		long start=System.currentTimeMillis();
 		while (predicate.evaluate()==false)
@@ -88,6 +96,10 @@ public class Synchronization
             waitForNoThrow(synchronizationObject,predicate);
             return true;
         }
+        else if (timeout<0)
+        {
+            return false;
+        }
 		long start=System.currentTimeMillis();
 		while (predicate.evaluate()==false)
 		{
@@ -109,6 +121,10 @@ public class Synchronization
 
 	public static void sleep(Object synchronizationObject,long timeout)
     {
+	    if (timeout<0)
+	    {
+	        return;
+	    }
         long start=System.currentTimeMillis();
         for (;;)
         {

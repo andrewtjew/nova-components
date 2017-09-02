@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.nova.core.MultiException;
 import org.nova.flow.Distributor;
-import org.nova.flow.Packet;
+import org.nova.flow.DataPacket;
 import org.nova.flow.Node;
 import org.nova.flow.SourceQueue;
 import org.nova.flow.SourceQueueConfiguration;

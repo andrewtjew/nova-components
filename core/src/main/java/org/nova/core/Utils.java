@@ -166,6 +166,19 @@ public class Utils
         }
         return sb.toString();
     }
+    public static String combine(String[] items,String seperator)
+    {
+        StringBuilder sb=new StringBuilder();
+        for (String item:items)
+        {
+            if (sb.length()>0)
+            {
+                sb.append(seperator);
+            }
+            sb.append(item);
+        }
+        return sb.toString();
+    }
     
     public static String combine(Iterable<?> iterable,String seperator,String pre,String post)
     {
@@ -317,14 +330,6 @@ public class Utils
 
 	public static String millisToNiceDurationString(long millis)
     {
-	    if (millis==0)
-	    {
-	        return "0";
-	    }
-        if (millis/1000==0)
-        {
-            return millis+" ms";
-        }
         StringBuilder sb=new StringBuilder();
         long days=millis/(1000*3600*24);
         if (days>1)
@@ -336,7 +341,7 @@ public class Utils
             sb.append(days+" day");
         }
         long hours=(millis-days*1000*3600*24)/(1000*3600);
-        if (hours>1)
+        if ((hours>1)||(sb.length()>0))
         {
             if (sb.length()>0)
             {
@@ -354,7 +359,7 @@ public class Utils
         }
         
         long minutes=(millis-days*1000*3600*24-hours*1000*3600)/(1000*60);
-        if (minutes>1)
+        if ((minutes>1)||(sb.length()>0))
         {
             if (sb.length()>0)
             {
@@ -371,7 +376,7 @@ public class Utils
             sb.append(minutes+" minute");
         }
         long seconds=(millis-days*1000*3600*24-hours*1000*3600-minutes*1000*60)/1000;
-        if (seconds>1)
+        if ((seconds>1)||(sb.length()>0))
         {
             if (sb.length()>0)
             {
@@ -386,6 +391,23 @@ public class Utils
                 sb.append(", ");
             }
             sb.append(seconds+" second");
+        }
+        long ms=millis-days*1000*3600*24-hours*1000*3600-minutes*1000*60-seconds*1000;
+        if ((ms>1)||(sb.length()>0))
+        {
+            if (sb.length()>0)
+            {
+                sb.append(", ");
+            }
+            sb.append(ms+" ms");
+        }
+        else if (ms==1)
+        {
+            if (sb.length()>0)
+            {
+                sb.append(", ");
+            }
+            sb.append(ms+" ms");
         }
         return sb.toString();
     }

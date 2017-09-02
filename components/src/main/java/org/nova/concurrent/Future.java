@@ -9,43 +9,43 @@ public class Future<RESULT>
 	final FutureTask<?>[] tasks;
 	final private long number;
 	final private Trace trace;
-	private int executing;
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+    private int waiting;
+    private int completed;
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
 	Future(TraceManager traceManager,Trace parent,String traceCategory,long number,TraceCallable<?>[] executables)
 	{
 		this.number=number;
-		this.executing=executables.length;
+		this.waiting=executables.length;
 		
 		this.tasks=new FutureTask<?>[executables.length];
 		
-		this.trace=new Trace(traceManager,parent,traceCategory);
+		this.trace=new Trace(traceManager,parent,traceCategory,true);
 		for (int i=0;i<executables.length;i++)
 		{
-			this.tasks[i]=new FutureTask(traceManager,this.trace,traceCategory+"@Task."+i,executables[i]);
+			this.tasks[i]=new FutureTask(traceManager,this.trace,i+"/"+executables.length+"@"+traceCategory+"@Scheduler",executables[i]);
 		}
+	}
+	
+	void startTask()
+	{
+        synchronized (this)
+        {
+            this.waiting--;
+            if (this.waiting==0)
+            {
+                this.trace.close();
+            }
+        }
 	}
 	
 	boolean completeTask()
 	{
 		synchronized (this)
 		{
-			if (this.executing>0)
-			{
-				try
-				{
-					this.executing--;
-					if (this.executing==0)
-					{
-						this.trace.close();
-						return true;
-					}
-				}
-				finally
-				{
-					this.notifyAll();
-				}
-			}
-			return false;
+		    this.completed++;
+		    this.notifyAll();
+		    return this.completed>=this.tasks.length;
 		}
 	}
 	@SuppressWarnings("unchecked")
@@ -99,28 +99,28 @@ public class Future<RESULT>
 	{
 		synchronized(this)
 		{
-			return Synchronization.waitForNoThrow(this, ()->{return this.executing==0;},timeout);
+			return Synchronization.waitForNoThrow(this, ()->{return this.completed>=this.tasks.length;},timeout);
 		}
 	}
 	public void waitAll()
 	{
 		synchronized(this)
 		{
-			Synchronization.waitForNoThrow(this, ()->{return this.executing==0;});
+			Synchronization.waitForNoThrow(this, ()->{return this.completed>=this.tasks.length;});
 		}
 	}
 	public boolean waitAtLeast(long timeout,int count)
 	{
 		synchronized(this)
 		{
-			return Synchronization.waitForNoThrow(this, ()->{return this.tasks.length-this.executing>=count;},timeout);
+			return Synchronization.waitForNoThrow(this, ()->{return this.completed>=count;},timeout);
 		}
 	}
 	public void waitAtLeast(int count)
 	{
 		synchronized(this)
 		{
-			Synchronization.waitForNoThrow(this, ()->{return this.tasks.length-this.executing>=count;});
+			Synchronization.waitForNoThrow(this, ()->{return this.completed>=count;});
 		}
 	}
 
@@ -128,14 +128,14 @@ public class Future<RESULT>
 	{
 		synchronized(this)
 		{
-			return Synchronization.waitForNoThrow(this, ()->{return this.executing<this.tasks.length;},timeout);
+			return Synchronization.waitForNoThrow(this, ()->{return this.completed>0;},timeout);
 		}
 	}
 	public void waitAny()
 	{
 		synchronized(this)
 		{
-			Synchronization.waitForNoThrow(this, ()->{return this.executing<this.tasks.length;});
+			Synchronization.waitForNoThrow(this, ()->{return this.completed>0;});
 		}
 	}
 
@@ -143,15 +143,23 @@ public class Future<RESULT>
 	{
 		synchronized(this)
 		{
-			return this.tasks.length-this.executing;
+			return this.completed;
 		}
 	}
+
+    public int getWaiting()
+    {
+        synchronized(this)
+        {
+            return this.waiting;
+        }
+    }
 
 	public int getExecuting()
 	{
 		synchronized(this)
 		{
-			return this.executing;
+			return this.tasks.length-this.waiting-this.completed;
 		}
 	}
 	
@@ -159,14 +167,14 @@ public class Future<RESULT>
 	{
 		synchronized(this)
 		{
-			return this.executing==0;
+			return this.completed>=this.tasks.length;
 		}
 	}
 	public boolean anyCompleted()
 	{
 		synchronized(this)
 		{
-			return this.executing<this.tasks.length;
+			return this.completed>0;
 		}
 	}
 	public int size()

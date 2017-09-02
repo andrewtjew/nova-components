@@ -48,6 +48,7 @@ public class HttpServer
 	final private int [] ports;
 	private Transformers transformers;
 	final private Logger logger;
+	private boolean started;
 	
 	@OperatorVariable()
 	private boolean debug;
@@ -82,6 +83,10 @@ public class HttpServer
 
 	public void start() throws Exception
 	{
+	    if (started)
+	    {
+	        return;
+	    }
 		for (Server server:this.servers)
 		{
 	        AbstractHandler handler=new AbstractHandler()
@@ -95,6 +100,7 @@ public class HttpServer
 			server.setHandler(handler);
 			server.start();
 		}
+        this.started=true;
 	}
 	
 	public void setTransformers(Transformers transformers)
@@ -165,7 +171,8 @@ public class HttpServer
 		}
 		catch (Throwable t)
 		{
-			t.printStackTrace();
+		    this.logger.log(t);
+		//	t.printStackTrace();
 		}
 		finally
 		{

@@ -18,7 +18,7 @@ public class Configuration
 		this.map = new HashMap<>();
 	}
 
-	public void addCommandLineConfigurations(String[] args) 
+	public void addArgs(String[] args) 
 	{
 		for (String arg:args)
 		{

@@ -125,7 +125,7 @@ public abstract class ServerApplication
             if (unsecureVaultFile!=null)
             {
                 this.vault=new UnsecureFileVault(unsecureVaultFile);
-                this.getLogger().log(Level.FATAL,"Using UnsecureVault");
+                this.getLogger().log(Level.CRITICAL,"Using UnsecureVault");
             }
             else
             {
@@ -234,6 +234,12 @@ public abstract class ServerApplication
 		}
 	}
 	
+	public void startServers() throws Throwable
+	{
+        startServer(this.privateServer);
+        startServer(this.publicServer);
+	}
+	
 	public void start() throws Throwable
 	{
         this.startTime=System.currentTimeMillis();
@@ -242,8 +248,7 @@ public abstract class ServerApplication
             onStart(trace);
         }
         this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName); //build again as sub classes may have added more items to menubar
-        startServer(this.privateServer);
-        startServer(this.publicServer);
+        startServers();
 	}
 
 	public DisruptorManager getDisruptorManager()

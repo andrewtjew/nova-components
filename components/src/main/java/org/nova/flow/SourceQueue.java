@@ -57,7 +57,6 @@ public class SourceQueue<ITEM>
         {
             if (this.thread == null)
             {
-                Testing.setTimeBase(System.currentTimeMillis());
                 this.stop = false;
                 this.thread = new Thread(() ->
                 {

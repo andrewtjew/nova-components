@@ -57,6 +57,7 @@ public abstract class Resource implements AutoCloseable
 				try
 				{
 					park();
+	                pool.release(this);
 					this.trace.close();
 				}
 				catch (Throwable t)
@@ -64,7 +65,6 @@ public abstract class Resource implements AutoCloseable
 					this.trace.close(t);
 				}
 				this.trace=null;
-				pool.release(this);
 			}
 		}
 	}

@@ -1,9 +1,12 @@
 package org.nova.test;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 public class Testing
 {
-    public final static boolean ENABLED=false;
+    public final static boolean ENABLED=true;
     public final static boolean PRINT=true;
+    public final static boolean OPRINT=true;
 	public final static boolean TEST_TRACE_SERVER_PRINT=false;
 
     public static void println(String text)
@@ -28,38 +31,53 @@ public class Testing
         }
     }
 
-    public static volatile long TIME_BASE;
+    private static volatile long TIME_BASE=System.currentTimeMillis();
+    private static AtomicLong LAST=new AtomicLong(System.currentTimeMillis());
     
-    public static void setTimeBase(long base)
+    public static void oset(long base)
     {
-        if (ENABLED&&PRINT)
+        if (ENABLED&&OPRINT)
         {
             TIME_BASE=base;
+            LAST.set(base);
+        }
+    }
+    public static void oset()
+    {
+        if (ENABLED&&OPRINT)
+        {
+            oset(System.currentTimeMillis());
         }
     }
     
     public static void oprintln(String text)
     {
-        if (ENABLED&&PRINT)
+        if (ENABLED&&OPRINT)
         {
-            long offset=System.currentTimeMillis()-TIME_BASE;
-            System.out.println(offset+":"+text);
+            long now=System.currentTimeMillis();
+            long baseOffset=now-TIME_BASE;
+            long lastOffset=now-LAST.getAndSet(now);
+            System.out.println(baseOffset+":"+lastOffset+":"+text);
         }
     }
     public static void oprint(String text)
     {
-        if (ENABLED&&PRINT)
+        if (ENABLED&&OPRINT)
         {
-            long offset=System.currentTimeMillis()-TIME_BASE;
-            System.out.print(offset+":"+text);
+            long now=System.currentTimeMillis();
+            long baseOffset=now-TIME_BASE;
+            long lastOffset=now-LAST.getAndSet(now);
+            System.out.print(baseOffset+":"+lastOffset+":"+text);
         }
     }
     public static void oprintf(String format,Object...args)
     {
-        if (ENABLED&&PRINT)
+        if (ENABLED&&OPRINT)
         {
-            long offset=System.currentTimeMillis()-TIME_BASE;
-            System.out.printf(offset+":"+format,args);
+            long now=System.currentTimeMillis();
+            long baseOffset=now-TIME_BASE;
+            long lastOffset=now-LAST.getAndSet(now);
+            System.out.printf(baseOffset+":"+lastOffset+":"+format,args);
         }
     }
 

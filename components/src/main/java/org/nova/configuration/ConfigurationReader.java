@@ -153,7 +153,7 @@ public class ConfigurationReader
 
         return search(args,candidates.toArray(new String[candidates.size()]));
     }
-	public static Configuration search(String[] args,String[] candidates)
+	private static Configuration search(String[] args,String[] candidates)
 	{
         for (int i=0;i<candidates.length;i++)
         {
@@ -174,7 +174,7 @@ public class ConfigurationReader
                     continue;
                 }
                 Configuration configuration=read(path);
-                configuration.addCommandLineConfigurations(args);
+                configuration.addArgs(args);
                 System.out.println("OK");
                 return configuration;
             }

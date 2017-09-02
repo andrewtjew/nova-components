@@ -37,7 +37,7 @@ public class BufferedLZ4FileWriter extends OutputStreamWriter
         outputStream.close(); // This flushes to the underlying stream.
         if (this.byteArrayOuputStream.size()>0)
         {
-            Testing.println("BufferedLZ4FileWriter: write");
+//            Testing.println("BufferedLZ4FileWriter: write");
             this.logDirectoryManager.write(this.byteArrayOuputStream,marker,".lz4");
         }
     }

@@ -31,6 +31,7 @@ public class CoreEnvironment
 	final HashMap<String,SourceQueueLogger> loggers;
 	final SourceQueue<LogEntry> logSourceQueue;
 	final private LogDirectoryManager logDirectoryManager;
+	final private int logCategoryBufferSize;
 	
 	public CoreEnvironment(Configuration configuration) throws Throwable
 	{
@@ -41,6 +42,7 @@ public class CoreEnvironment
 		long reserve=configuration.getLongValue("Logger.logDirectory.reserveSpace",100_000_000_000L);
 		long maxDirectorySize=configuration.getLongValue("Logger.logDirectory.maxDirectorySize",10_000_000_000L);
 		int maxMakeSpaceRetries=configuration.getIntegerValue("Logger.logDirectory.maxMakeSpaceRetries",10);
+		this.logCategoryBufferSize=configuration.getIntegerValue("Logger.logCategoryBufferSize",10);
 		this.logDirectoryManager=new LogDirectoryManager(directory, maxMakeSpaceRetries, maxFiles, maxDirectorySize, reserve);
 
 		String loggerType=configuration.getValue("Logger.class","JSONBufferedLZ4Queue");
@@ -101,7 +103,7 @@ public class CoreEnvironment
 		    SourceQueueLogger logger=this.loggers.get(category);
 			if (logger==null)
 			{
-				logger=new SourceQueueLogger(category, this.logSourceQueue);
+				logger=new SourceQueueLogger(this.logCategoryBufferSize,category, this.logSourceQueue);
 				this.loggers.put(category, logger);
 			}
 			return logger;
@@ -110,6 +112,13 @@ public class CoreEnvironment
 	public Logger getLogger() 
 	{
 		return this.logger;
+	}
+	public Logger[] getLoggers()
+	{
+	    synchronized (this.loggers)
+	    {
+	        return this.loggers.values().toArray(new Logger[this.loggers.size()]);
+	    }
 	}
 	public SourceQueue<LogEntry> getLogQueue()
 	{

@@ -63,6 +63,7 @@ public class DisruptorTraceContext implements AutoCloseable
     @Override
     public void close() throws Exception
     {
+        /*
         if (this.trace==null)
         {
             return;
@@ -95,6 +96,39 @@ public class DisruptorTraceContext implements AutoCloseable
                 throw (Exception)this.throwable;
             }
             throw new Exception(this.throwable);
+        }
+        */
+        if (this.trace==null)
+        {
+            return;
+        }
+        try
+        {
+            if (this.throwable==null)
+            {
+                if (this.disruptor!=null)
+                {
+                    try
+                    {
+                        Item item=this.disruptor.disruptEnd(this.trace);
+                        if (item!=null)
+                        {
+                            this.logItems.add(item);
+                        }
+                    }
+                    catch (Throwable t)
+                    {
+                        this.throwable=t;
+                        throw t;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            this.trace.close(this.throwable);
+            this.logger.log(trace,this.logMessage,Logger.toArray(this.logItems));
+            this.trace=null;
         }
     }
 

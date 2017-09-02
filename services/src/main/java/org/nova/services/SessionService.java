@@ -65,5 +65,10 @@ public abstract class SessionService<SESSION extends Session> extends ServerAppl
         }
         return token;
     }
+
+    public String generateToken()
+    {
+        return this.tokenGenerator.generate();
+    }
     
 }

@@ -5,6 +5,6 @@ public enum Level
 	NORMAL,
 	EXCEPTION,
 	ERROR,
-	FATAL,
+	CRITICAL,
 	NOTICE,
 }

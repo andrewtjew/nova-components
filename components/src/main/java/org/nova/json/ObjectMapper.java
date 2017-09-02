@@ -622,15 +622,16 @@ public class ObjectMapper
 					}
 					else if (next=='[')
 					{
-					    list.add(readArray(lexer, componentType));
+					    list.add(readArray(lexer, componentType.getComponentType()));
 					}
-					else if (lexer.getRestOfNull())
+					else if (next=='n')
 					{
+					    lexer.getRestOfNull();
                         list.add(null);
 					}
 					else
 					{
-                        throw new Exception("String expected at " + lexer.getPosition());
+                        throw new Exception("Object expected at " + lexer.getPosition());
 					}
 					next = lexer.isCommaOrCloseArray();
 					if (next == ']')
@@ -883,9 +884,14 @@ public class ObjectMapper
     				{
     					field.set(object, readObject(lexer, fieldType));
     				}
-                    else if (lexer.getRestOfNull())
+                    else if (next=='n')
                     {
+                        lexer.getRestOfNull();
                         field.set(object, null);
+                    }
+                    else
+                    {
+                        throw new Exception("error " + lexer.getPosition());
                     }
     			}
 			}

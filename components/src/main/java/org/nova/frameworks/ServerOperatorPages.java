@@ -32,6 +32,7 @@ import org.nova.configuration.ConfigurationItem;
 import org.nova.core.Utils;
 import org.nova.html.operator.Menu;
 import org.nova.html.tags.a;
+import org.nova.html.tags.button_button;
 import org.nova.html.tags.div;
 import org.nova.html.tags.fieldset;
 import org.nova.html.tags.form_get;
@@ -45,6 +46,7 @@ import org.nova.html.tags.input_text;
 import org.nova.html.tags.legend;
 import org.nova.html.tags.meta;
 import org.nova.html.tags.p;
+import org.nova.html.tags.span;
 import org.nova.html.tags.style;
 import org.nova.html.tags.td;
 import org.nova.html.tags.textarea;
@@ -63,6 +65,7 @@ import org.nova.html.widgets.Row;
 import org.nova.html.widgets.SelectOptions;
 import org.nova.html.widgets.Table;
 import org.nova.html.widgets.Text;
+import org.nova.html.widgets.TwoColumnTable;
 import org.nova.html.widgets.InputFeedBackForm.NameInputValueList;
 import org.nova.html.widgets.w3c.Accordion;
 import org.nova.html.widgets.w3c.VerticalMenu;
@@ -108,9 +111,13 @@ import org.nova.http.server.annotations.POST;
 import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.PathParam;
 import org.nova.http.server.annotations.QueryParam;
+import org.nova.logging.Item;
 import org.nova.logging.JSONBufferedLZ4Queue;
 import org.nova.logging.LogDirectoryInfo;
 import org.nova.logging.LogDirectoryManager;
+import org.nova.logging.LogEntry;
+import org.nova.logging.Logger;
+import org.nova.logging.SourceQueueLogger;
 import org.nova.metrics.AverageAndRate;
 import org.nova.metrics.CategoryMeters;
 import org.nova.metrics.CountAverageRateMeter;
@@ -223,6 +230,7 @@ public class ServerOperatorPages
         menuBar.add("/operator/tracing/lastExceptions","Tracing","Last Exception Traces");
 
         menuBar.add("/operator/logging/status","Logging","Status");
+        menuBar.add("/operator/logging/categories","Logging","Category Loggers");
 
         menuBar.add("/operator/httpServer/status/public","Servers","Public","Status");
         menuBar.add("/operator/httpServer/performance/public","Servers","Public","Performance");
@@ -275,12 +283,134 @@ public class ServerOperatorPages
         OperatorPage page=this.serverApplication.buildOperatorPage("Futures");
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
 
-        table.setHeadRowItems("Category","Number","Duration (ms)","Executing","Ended");
+        table.setHeadRowItems("Category","Number","Duration","Waiting","Executing","Completed");
         Future<?>[] array = this.serverApplication.getFutureScheduler().getFutureSnapshot();
+        long now=System.currentTimeMillis();
         for (Future<?> item : array)
         {
             table.addBodyRowItems(item.getTrace().getCategory(),item.getTrace().getNumber()
-                    ,Utils.nanosToDurationString(item.getTrace().getDurationNs()),item.getExecuting(),item.getCompleted());
+                    ,Utils.millisToNiceDurationString((now-item.getTrace().getCreated())),item.getWaiting(),item.getExecuting(),item.getCompleted());
+        }
+        return page;
+    }
+
+    @GET
+    @Path("/operator/logging/categories")
+    public Element viewLogCategories(@QueryParam("samplingInterval") @DefaultValue("10") double samplingInterval) throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Log Categories");
+        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
+
+        table.setHeadRowItems("Category","Active","Count","Rate","Log Failures","Last Failure","");
+        Logger[] loggers=this.serverApplication.getCoreEnvironment().getLoggers();
+        for (Logger item : loggers)
+        {
+            Row row=new Row();
+            row.add(item.getCategory());
+            if (item instanceof SourceQueueLogger)
+            {
+                SourceQueueLogger sourceQueueLogger=(SourceQueueLogger)item;
+                div div=new div();
+                div.addInner(sourceQueueLogger.isActive()+"&nbsp;");
+                if (sourceQueueLogger.isActive())
+                {
+                    div.addInner(new button_button()
+                            .addInner("Disable")
+                            .onclick(HtmlUtils
+                            .location(new PathAndQueryBuilder("/operator/logging/category/status")
+                                .addQuery("active", false)
+                                .addQuery("category", sourceQueueLogger.getCategory())
+                            )));
+                }
+                else
+                {
+                    div.addInner(new button_button()
+                            .addInner("Enable")
+                            .onclick(HtmlUtils
+                            .location(new PathAndQueryBuilder("/operator/logging/category/status")
+                                .addQuery("active", true)
+                                .addQuery("category", sourceQueueLogger.getCategory())
+                            )));
+                }
+                row.add(div);
+                row.add(sourceQueueLogger.getRateMeter().getCount());
+                row.add(sourceQueueLogger.getRateMeter().sampleRate(samplingInterval));
+                row.add(sourceQueueLogger.getLogFailures().getCount());
+                Throwable exception=sourceQueueLogger.getLogFailureThrowable();
+                if (exception!=null)
+                {
+                    row.add(Utils.toString(exception));
+                }
+                row.addDetailButton(new PathAndQueryBuilder("/operator/logging/category/lastEntries").addQuery("category",item.getCategory()).toString());
+                
+            }
+            table.addBodyRow(row);
+        }
+        return page;
+    }
+    @GET
+    @Path("/operator/logging/category/status")
+    public Element setLoggerCategoryStatus(@QueryParam("category") String category,@QueryParam("active") boolean active,@QueryParam("samplingInterval") @DefaultValue("10") double samplingInterval) throws Throwable
+    {
+        SourceQueueLogger logger=(SourceQueueLogger)this.serverApplication.getCoreEnvironment().getLogger(category);
+        logger.setActive(active);
+        return viewLogCategories(samplingInterval);
+    }
+    @GET
+    @Path("/operator/logging/category/lastEntries")
+    public Element viewLastEntries(Trace parent,@QueryParam("category") String category) throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Last Entries: Category="+category);
+
+        SourceQueueLogger logger=(SourceQueueLogger)this.serverApplication.getCoreEnvironment().getLogger(category);
+        List<LogEntry> entries=logger.getLastLogEntries();
+        for (LogEntry entry:entries)
+        {
+            Panel panel=page.content().returnAddInner(new Level2Panel(page.head(), "Number:"+entry.getNumber()));
+            WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
+            Row headRow=new Row()
+//                .addWithTitle("Number", "Sequence number")
+                .add("Created")
+                .add("LogLevel")
+                .add("Message")
+                ;
+            table.setHeadRow(headRow);
+            Row row=new Row();
+//            row.addInner(new td().style("width:3em;").addInner(entry.getNumber()));
+            row.addInner(new td().style("width:12em;").addInner(Utils.millisToLocalDateTimeString(entry.getCreated())));
+            row.addInner(new td().style("width:5em;").addInner(entry.getLogLevel()));
+            row.add(entry.getMessage());
+            table.addBodyRow(row);
+            
+            if (entry.getItems().length>0)
+            {
+                //TwoColumnTable itemTable=panel.content().returnAddInner(new TwoColumnTable(":"));
+                Table itemTable=panel.content().returnAddInner(new Table());
+                for (Item item:entry.getItems())
+                {
+                    tr tr=itemTable.tbody().returnAddInner(new tr());
+                    tr.addInner(new td().style("width:12em;").addInner(item.getName()));
+                    if (item.getValue()!=null)
+                    {
+                        tr.addInner(new td().style("width:100%;").addInner(new textarea().style("width:100%;").readonly().addInner(HtmlUtils.escapeXmlBrackets(item.getValue().toString()))));
+                    }
+                    else
+                    {
+                        tr.addInner(new td());
+                    }
+                }
+            }
+            
+            if (entry.getException()!=null)
+            {
+                writeContent(page.head(),"Exception",page.content(),Utils.toString(entry.getException()),false);
+            }
+            
+            if (entry.getTrace()!=null)
+            {
+                writeTrace(page.head(),panel,entry.getTrace());
+            }
+            
         }
         return page;
     }
@@ -533,8 +663,8 @@ public class ServerOperatorPages
         }
         if (found != null)
         {
-            
-            WideTable table=page.content().returnAddInner(new WideTable(page.head()));
+            Level2Panel tracePanel=page.content().returnAddInner(new Level2Panel(page.head(),"Trace"));
+            WideTable table=tracePanel.content().returnAddInner(new WideTable(page.head()));
             table.setHeadRow(new Row()
                     .addWithTitle("T", "*=target trace, A=ancestor, C:n=Child")
                     .add("Category","Number","Created")
@@ -573,15 +703,17 @@ public class ServerOperatorPages
             {
                 write(table, trace, "A");
             }
-            Accordion accordion=new Accordion(page.head(), null, true, "Stack Trace");
+            Level2Panel stackTracePanel=page.content().returnAddInner(new Level2Panel(page.head(),"Stack Trace"));
             StackTraceElement[] stackTrace = found.getThread().getStackTrace();
-            accordion.content().addInner(toString(stackTrace, 0));
+            stackTracePanel.content().addInner(toString(stackTrace, 0));
 
         }
         else
         {
             page.content().addInner("trace ended");
         }
+
+        
         return page;
     }
 
@@ -592,17 +724,41 @@ public class ServerOperatorPages
         OperatorPage page=this.serverApplication.buildOperatorPage("Active Trace Stats");
         Trace[] traces = this.serverApplication.getTraceManager().getActiveSnapshot();
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
-        table.setHeadRow(new Row().add("Category","Number").addWithTitle("Active", "milliseconds").addWithTitle("Wait", "milliseconds").addWithTitle("Duration", "milliseconds").add("Waiting","Details","Created",""));
+        table.setHeadRow(new Row().add("Category","Number","Thread").addWithTitle("Active", "milliseconds").addWithTitle("Wait", "milliseconds").addWithTitle("Duration", "milliseconds").add("Waiting","Details","Created",""));
         for (Trace trace : traces)
         {
             Row row=new Row()
-                    .add(trace.getCategory(),trace.getNumber(),trace.getActiveNs() / 1000000,trace.getWaitNs() / 1000000,trace.getDurationNs() / 1000000,trace.isWaiting(),trace.getDetails(),Utils.millisToLocalDateTime(trace.getCreated()));
+                    .add(trace.getCategory(),trace.getNumber(),
+                            trace.getThread().getName(),
+                            trace.getActiveNs() / 1000000,trace.getWaitNs() / 1000000,trace.getDurationNs() / 1000000,trace.isWaiting(),trace.getDetails(),Utils.millisToLocalDateTime(trace.getCreated()));
             row.addDetailButton(new PathAndQueryBuilder("./activeTrace").addQuery("number", trace.getNumber()).toString());
             table.addBodyRow(row);
         }
         return page;
     }
 
+
+    private Element formatCategory(TraceStats item)
+    {
+        span span=new span();
+        String category=item.getCategory();
+        int max=160;
+        if (category!=null)
+        {
+            if (category.length()>max)
+            {
+                span.style("color:#00D;width:100%;");
+                span.addInner(category.substring(0,max)+"...");
+                span.title(category);
+            }
+            else
+            {
+                span.addInner(category);
+            }
+        }
+        return span;
+    }
+    
     @GET
     @Path("/operator/tracing/lastStats")
     public Element lastStats() throws Throwable
@@ -619,9 +775,10 @@ public class ServerOperatorPages
         {
             CountAverageRateMeter meter = item.getMeter();
             AverageAndRate ar = meter.getMarkCountAverage(this.rateSamplingDuration);
+            
             Row row=new Row()
-                    .add(item.getCategory()
-                    ,meter.getCount()
+                    .add(formatCategory(item))
+                    .add(meter.getCount()
                     ,nanoToDefaultFormat(ar.getAverage())
                     ,nanoToDefaultFormat(ar.getStandardDeviation())
                     ,nanoToDefaultFormat(meter.getTotal()));

@@ -9,31 +9,20 @@ public class FutureTask<RESULT>
 	private TaskStatus status;
 	private RESULT result;
 	private Throwable throwable;
-	final private Trace parent;
+	final private Trace scheduleTrace;
 	final private TraceManager traceManager;
 	final private String traceCategory;
 	final private TraceCallable<RESULT> callable;
 	
-	public FutureTask(TraceManager traceManager,Trace parent,String traceCategory,TraceCallable<RESULT> callable)
+	public FutureTask(TraceManager traceManager,Trace scheduleTrace,String traceCategory,TraceCallable<RESULT> callable)
 	{
 		this.traceCategory=traceCategory;
-		this.parent=parent;
+		this.scheduleTrace=scheduleTrace;
 		this.traceManager=traceManager;
 		this.callable=(TraceCallable<RESULT>)callable;
 		this.status=status.READY;
 	}
 
-	void ready()
-	{
-		synchronized (this)
-		{
-			if (this.status==TaskStatus.COMPLETED)
-			{
-				this.status=TaskStatus.READY;
-			}
-		}
-	}
-	
 	@SuppressWarnings("unchecked")
 	void execute()
 	{
@@ -47,7 +36,7 @@ public class FutureTask<RESULT>
 		}
 		RESULT result=null;
 		Throwable throwable=null;
-		try (Trace trace=new Trace(this.traceManager,this.parent,this.traceCategory,false))
+		try (Trace trace=new Trace(this.traceManager,this.scheduleTrace,this.traceCategory,false))
 		{
 			try
 			{
@@ -56,6 +45,7 @@ public class FutureTask<RESULT>
 			catch (Throwable t)
 			{
 				throwable=t;
+//				t.printStackTrace();
 				trace.close(t);
 			}
 		}

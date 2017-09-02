@@ -56,25 +56,6 @@ public class Accessor extends Resource
 		}
 	}
 
-	private Throwable closeConnection(Throwable cause)
-	{
-        this.connection = null;
-		try
-		{
-			this.connection.close();
-		}
-		catch (Throwable t)
-		{
-            this.connector.logger.log(t);
-			return new MultiException(cause, t);
-		}
-		finally
-		{
-			this.connection = null;
-		}
-		return cause;
-	}
-
 	void commit() throws Throwable
 	{
 		synchronized (this)

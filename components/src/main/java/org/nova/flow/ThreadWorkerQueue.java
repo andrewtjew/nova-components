@@ -50,7 +50,6 @@ public class ThreadWorkerQueue extends Node
 		{
 			if (this.thread==null)
 			{
-                Testing.setTimeBase(System.currentTimeMillis());
 				this.stop=false;
 				this.thread=new Thread(()->
 				{
