@@ -3,6 +3,7 @@ package org.nova.html.widgets;
 import java.io.OutputStream;
 
 import org.nova.html.elements.Element;
+import org.nova.html.elements.Inner;
 import org.nova.html.elements.InnerElement;
 import org.nova.html.tags.a;
 import org.nova.html.tags.td;

@@ -50,10 +50,10 @@ public class Distributor extends Node
 
     private void _send(Packet container) throws Throwable
     {
-        if ((this.strictSize==false)||(this.currentRoundSize + container.size() <= this.sizePerReceiver))
+        if ((this.strictSize==false)||(this.currentRoundSize + container.sizeOrType() <= this.sizePerReceiver))
         {
             this.receivers[this.index].process(container);
-            this.currentRoundSize += container.size();
+            this.currentRoundSize += container.sizeOrType();
             if (this.currentRoundSize >= this.sizePerReceiver)
             {
                 switchReceiver();
@@ -62,9 +62,9 @@ public class Distributor extends Node
         }
         Object[] array=container.get();
         int sent = 0;
-        while (sent<container.size())
+        while (sent<container.sizeOrType())
         {
-            int receiverContainerSize=container.size()-sent-this.currentRoundSize;
+            int receiverContainerSize=container.sizeOrType()-sent-this.currentRoundSize;
             if (receiverContainerSize>=this.sizePerReceiver-this.currentRoundSize)
             {
                 receiverContainerSize=this.sizePerReceiver-this.currentRoundSize;

@@ -3,10 +3,14 @@ package org.nova.html.widgets;
 import org.nova.html.enums.http_equiv;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
 
 import org.nova.html.elements.Element;
 import org.nova.html.tags.meta;
 import org.nova.http.client.PathAndQueryBuilder;
+import org.nova.http.server.Context;
 import org.nova.json.ObjectMapper;
 
 public class HtmlUtils
@@ -71,6 +75,47 @@ public class HtmlUtils
     public static String confirmAndExecuteOnServer(String title,String text,String executeUrl) throws Exception
     {
         return confirmAndExecuteOnServer(title, text, executeUrl,null);
+    }
+    
+    public static List<String> getCheckedNames(Context context,String prefix)
+    {
+        ArrayList<String> names=new ArrayList<>();
+        for (Entry<String, String[]> entry:context.getHttpServletRequest().getParameterMap().entrySet())
+        {
+            String[] values=entry.getValue();
+            if ((values.length==1)&&("on".equals(values[0])))
+            {
+                if (prefix==null)
+                {
+                    names.add(entry.getKey());
+                }
+                else
+                {
+                    String key=entry.getKey();
+                    if (key.startsWith(prefix))
+                    {
+                        names.add(key.substring(prefix.length()));
+                    }
+                }
+            }
+        }
+        return names;
+    }
+
+    public static List<Long> getLongCheckedNames(Context context,String prefix)
+    {
+        ArrayList<Long> longs=new ArrayList<>();
+        for (String name:getCheckedNames(context, prefix))
+        {
+            try
+            {
+                longs.add(Long.parseLong(name));
+            }
+            catch (Throwable t)
+            {
+            }
+        }
+        return longs;
     }
     
     public static String callScriptFunction(String method,Object...parameters)

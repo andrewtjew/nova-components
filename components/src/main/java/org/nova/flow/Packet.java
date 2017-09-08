@@ -44,7 +44,7 @@ public class Packet
         this.array[this.size++]=item;
         return true;
     }
-    public int size()
+    public int sizeOrType()
     {
         return size;
     }

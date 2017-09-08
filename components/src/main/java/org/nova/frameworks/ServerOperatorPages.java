@@ -30,9 +30,11 @@ import org.nova.concurrent.TimerTask;
 import org.nova.configuration.Configuration;
 import org.nova.configuration.ConfigurationItem;
 import org.nova.core.Utils;
+import org.nova.flow.Tapper;
 import org.nova.html.operator.Menu;
 import org.nova.html.tags.a;
 import org.nova.html.tags.button_button;
+import org.nova.html.tags.button_submit;
 import org.nova.html.tags.div;
 import org.nova.html.tags.fieldset;
 import org.nova.html.tags.form_get;
@@ -43,6 +45,7 @@ import org.nova.html.tags.input_hidden;
 import org.nova.html.tags.input_number;
 import org.nova.html.tags.input_submit;
 import org.nova.html.tags.input_text;
+import org.nova.html.tags.label;
 import org.nova.html.tags.legend;
 import org.nova.html.tags.meta;
 import org.nova.html.tags.p;
@@ -231,6 +234,7 @@ public class ServerOperatorPages
 
         menuBar.add("/operator/logging/status","Logging","Status");
         menuBar.add("/operator/logging/categories","Logging","Category Loggers");
+//        menuBar.add("/operator/logging/capture","Logging","Capture");
 
         menuBar.add("/operator/httpServer/status/public","Servers","Public","Status");
         menuBar.add("/operator/httpServer/performance/public","Servers","Public","Performance");
@@ -290,6 +294,31 @@ public class ServerOperatorPages
         {
             table.addBodyRowItems(item.getTrace().getCategory(),item.getTrace().getNumber()
                     ,Utils.millisToNiceDurationString((now-item.getTrace().getCreated())),item.getWaiting(),item.getExecuting(),item.getCompleted());
+        }
+        return page;
+    }
+    @GET
+    @Path("/operator/logging/capture")
+    public Element captureLogging(@QueryParam("capacity") @DefaultValue("100") int capacity) throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Capture Logs");
+        JSONBufferedLZ4Queue logger=(JSONBufferedLZ4Queue)this.serverApplication.getCoreEnvironment().getLogQueue();
+        form_get form=page.content().returnAddInner(new form_get());
+        form.action("/operator/logging/capture");
+        label label=form.returnAddInner(new label());
+        input_checkbox checkBox=label.returnAddInner(new input_checkbox());
+        checkBox.name("overwrite");
+        label.addInner("Overwrite");
+        form.addInner("Buffer capacity:&nbsp;");
+        input_number capacityInput=form.returnAddInner(new input_number());
+        capacityInput.name("capacity");
+        capacityInput.min(1).max(1000).value(capacity);
+        
+        Tapper tapper=logger.getTapper();
+        if (tapper.getTap()==null)
+        {
+            button_submit submit=form.returnAddInner(new button_submit());
+            submit.addInner("Start");
         }
         return page;
     }
@@ -1217,7 +1246,7 @@ public class ServerOperatorPages
         panel.content().addInner(new p());
         if (trace.getThrowable() != null)
         {
-            Accordion accordion=panel.content().returnAddInner(new Accordion(head, null, true, "Exception: "+trace.getThrowable().getMessage()));
+            Accordion accordion=panel.content().returnAddInner(new Accordion(head, null, true, "Exception"));
             accordion.content().addInner(Utils.toString(trace.getThrowable()));
             panel.content().addInner(new p());
         }

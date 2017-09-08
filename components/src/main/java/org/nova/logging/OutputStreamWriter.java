@@ -2,8 +2,8 @@ package org.nova.logging;
 
 import java.io.OutputStream;
 
-import org.nova.flow.DataPacket;
 import org.nova.flow.Node;
+import org.nova.flow.Packet;
 import org.nova.logging.Formatter;
 import org.nova.logging.LogEntry;
 import org.nova.metrics.RateMeter;
@@ -69,7 +69,7 @@ public abstract class OutputStreamWriter extends Node
     }
 
     @Override
-    public void process(DataPacket container) throws Throwable
+    public void process(Packet container) throws Throwable
     {
         synchronized(this)
         {
@@ -77,7 +77,7 @@ public abstract class OutputStreamWriter extends Node
             {
                 try
                 {
-                    for (int i = 0; i < container.size(); i++)
+                    for (int i = 0; i < container.sizeOrType(); i++)
                     {
                         Object object = container.get()[i];
                         if ((object != null) && (object instanceof LogEntry))

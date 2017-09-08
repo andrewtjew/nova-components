@@ -15,7 +15,7 @@ public class ActionBar extends div
         }
         if (head!=null)
         {
-            head.add(id, new style().addInner(".optionsBar{width:100%;display:inline-block;background-color:#bbb;padding-top:0.3em;padding-bottom:0.3em;padding-left:0.3em;}"));
+            head.add(id, new style().addInner(".optionsBar{width:100%;display:inline-block;background-color:#bbb;padding-top:0.3em;padding-bottom:0.3em;padding-left:0.3em;padding-right:0.3em;}"));
         }
         class_("optionsBar");
     }

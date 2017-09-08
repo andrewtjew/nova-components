@@ -83,7 +83,6 @@ public class ConfigurationReader
     			lexeme=lexer.expectPunctuator('=');
                 checkError(lexeme);
     
-                String value=null;
                 character=lexer.skipWhiteSpaceAndBegin();
                 if (character == '{')
                 {
@@ -95,7 +94,7 @@ public class ConfigurationReader
                 }
                 else
                 {
-                    lexeme=lexer.produceTerminatedText('\r','\n');
+                    lexeme=lexer.produceTerminatedTextAndSkipTerminator('\r','\n',';');
                 }
                 int line=new LineAndColumn(text,lexeme.getSnippet().getAbsolutePosition()).getLine()+1;
     			this.configuration.add(new ConfigurationItem(name, lexeme.getValue().trim(), ConfigurationSource.FILE,fileName+"("+line+")", description));

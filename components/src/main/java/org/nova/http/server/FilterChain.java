@@ -60,6 +60,10 @@ public class FilterChain
 		}
 		if ((type==boolean.class)||(type==Boolean.class))
 		{
+            if ("on".equals(value))
+            {
+                return true;
+            }
 		    return !("false".equals(value));
 		}
         if (type.isEnum())

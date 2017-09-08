@@ -74,4 +74,8 @@ public class RingBuffer<ITEM>
 		}
 		return list;
 	}
+	public void clear()
+	{
+	    this.readIndex=this.writeIndex=this.size=0;
+	}
 }
