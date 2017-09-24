@@ -202,6 +202,35 @@ public class InputValidator
         return value;
     }    
     
+    public int parseInteger(String id,Integer min,Integer max) throws Throwable
+    {
+        int value=0;
+        Object valueObject=getValue(id);
+        try
+        {
+            value=Integer.parseInt(valueObject.toString());
+            if (min!=null)
+            {
+                if (value<min)
+                {
+                    this.inputFeedbacks.add(new InputFeedback(id,"Minimum is "+min+"."));
+                }
+            }
+            if (max!=null)
+            {
+                if (value>max)
+                {
+                    this.inputFeedbacks.add(new InputFeedback(id,"Maximum is "+max+"."));
+                }
+            }
+        }
+        catch (Throwable t)
+        {
+            this.inputFeedbacks.add(new InputFeedback(id,"Integer (int) value expected."));
+        }
+        return value;
+    }    
+    
     
     public double parseDouble(String id,String feedback) throws Throwable
     {

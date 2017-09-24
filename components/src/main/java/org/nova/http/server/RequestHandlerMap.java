@@ -36,10 +36,8 @@ import org.nova.http.server.annotations.PathParam;
 import org.nova.http.server.annotations.QueryParam;
 import org.nova.http.server.annotations.StateParam;
 import org.nova.http.server.annotations.TRACE;
+import org.nova.http.server.annotations.Test;
 import org.nova.tracing.Trace;
-
-import com.amazonaws.HandlerContextAware;
-import com.sun.mail.handlers.handler_base;
 
 //TODO!!! Resolve Consumes and ContentReaders just like produces and contentwriters
 
@@ -70,9 +68,11 @@ class RequestHandlerMap
 	final private Map headMap;
 	final private Map traceMap;
 	final private HashMap<String, RequestHandler> requestHandlers;
+	final private boolean test;
 
-	RequestHandlerMap()
+	RequestHandlerMap(boolean test)
 	{
+	    this.test=test;
 		this.putMap = new Map();
 		this.getMap = new Map();
 		this.postMap = new Map();
@@ -118,7 +118,7 @@ class RequestHandlerMap
 		return null;
 	}
 
-	void register(String root, Object object, Transformers transformers) throws Exception
+	void registerObject(String root, Object object, Transformers transformers) throws Exception
 	{
 		Annotations classAnnotations = new Annotations();
 		for (Class<?> classType=object.getClass();classType!=null;classType=classType.getSuperclass())
@@ -158,17 +158,21 @@ class RequestHandlerMap
                 {
                     classAnnotations.path= (Path) annotation;
                 }
+                else if (type==Test.class)
+                {
+                    classAnnotations.test=(Test)annotation;
+                }
     		}
 		}
 		for (Method method : object.getClass().getMethods())
 		{
-			register(root, object, method, new Annotations(classAnnotations), transformers);
+			registerMethod(root, object, method, new Annotations(classAnnotations), transformers);
 		}
 	}
 
-	void register(String root, Object object, Method method, Transformers transformers) throws Exception
+	void registerObjectMethod(String root, Object object, Method method, Transformers transformers) throws Exception
 	{
-		register(root, object, method, new Annotations(), transformers);
+		registerMethod(root, object, method, new Annotations(), transformers);
 	}
 
 	private boolean isSimpleParameterType(Class<?> type)
@@ -258,7 +262,7 @@ class RequestHandlerMap
 	    }
 	}
 	
-	private void register(String root, Object object, Method method, Annotations handlerAnnotations, Transformers transformers) throws Exception
+	private void registerMethod(String root, Object object, Method method, Annotations handlerAnnotations, Transformers transformers) throws Exception
 	{
 		String httpMethod = null;
 		int verbs = 0;
@@ -291,6 +295,10 @@ class RequestHandlerMap
             else if (type == Log.class)
             {
                 handlerAnnotations.log = (Log) annotation;
+            }
+            else if (type == Test.class)
+            {
+                handlerAnnotations.test= (Test) annotation;
             }
 			else if (type == GET.class)
 			{
@@ -337,7 +345,10 @@ class RequestHandlerMap
 				handlerAnnotations.path = (Path) annotation;
 			}
 		}
-
+		if ((handlerAnnotations.test!=null)&&(this.test==false))
+		{
+		    return;
+		}
 		if (verbs == 0)
 		{
 			return;
@@ -386,27 +397,28 @@ class RequestHandlerMap
 			Class<?> parameterType = parameterTypes[parameterIndex];
 			if (parameterType == Trace.class)
 			{
-				parameterInfos.add(new ParameterInfo(ParameterSource.TRACE, null, parameterIndex, parameterType, null));
+				parameterInfos.add(new ParameterInfo(ParameterSource.TRACE, null,null, parameterIndex, parameterType, null));
 				continue;
 			}
 
 			// Process parameter annotations
 			Annotation[] parameterAnnotations = annotations[parameterIndex];
 
-			DefaultValue default_ = null;
+			DefaultValue defaultValue = null;
 			ContentParam contentParam = null;
 			CookieParam cookieParam = null;
 			HeaderParam headerParam = null;
 			PathParam pathParam = null;
 			QueryParam queryParam = null;
 			StateParam stateParam = null;
+			
 
 			for (Annotation annotation : parameterAnnotations)
 			{
 				Class<?> type = annotation.annotationType();
 				if (type == DefaultValue.class)
 				{
-					default_ = (DefaultValue) annotation;
+					defaultValue = (DefaultValue) annotation;
 				}
 				else if (type == ContentParam.class)
 				{
@@ -432,10 +444,10 @@ class RequestHandlerMap
 				{
 					queryParam = (QueryParam) annotation;
 				}
-				else if (type == StateParam.class)
-				{
-					stateParam = (StateParam) annotation;
-				}
+                else if (type == StateParam.class)
+                {
+                    stateParam = (StateParam) annotation;
+                }
 			}
 
 			// Check if there are multiple param annotations
@@ -470,45 +482,53 @@ class RequestHandlerMap
 			}
 			else if (params.size() == 0)
 			{
-				if (parameterType != Context.class)
+				if ((parameterType != Context.class)&&(parameterType!=Trace.class)&&(parameterType!=QueryParameters.class))
 				{
-					throw new Exception("No param annotation. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
+					throw new Exception("Annotation required for param. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
 				}
 			}
 
 			// No multiple param annotations. Check each and add.
 			if (parameterType == Context.class)
 			{
-				if (default_ != null)
+				if (defaultValue != null)
 				{
-					throw new Exception("@Default annotation not allowed parameter of type RequestState. Site=" + object.getClass().getCanonicalName() + "."
+					throw new Exception("@DefaultValue annotation not allowed for Context parameters. Site=" + object.getClass().getCanonicalName() + "."
 							+ method.getName());
 				}
-				parameterInfos.add(new ParameterInfo(ParameterSource.CONTEXT, null, parameterIndex, parameterType, null));
+				parameterInfos.add(new ParameterInfo(ParameterSource.CONTEXT, null, null, parameterIndex, parameterType, null));
 			}
+            else if (parameterType==QueryParameters.class)
+            {
+                if (defaultValue != null)
+                {
+                    throw new Exception("@DefaultValue annotation not allowed with @StateParam annotation. Site=" + method.getName());
+                }
+                parameterInfos.add(new ParameterInfo(ParameterSource.CHECKMAP, null, null, parameterIndex, parameterType, null));
+            }
 			else if (contentParam != null)
 			{
-				if (default_ != null)
+				if (defaultValue != null)
 				{
-					throw new Exception("@Default annotation not allowed for @ContentParam parameter. Site=" + method.getName());
+					throw new Exception("@DefaultValue annotation not allowed with @ContentParam annnotation. Site=" + method.getName());
 				}
-				parameterInfos.add(new ParameterInfo(ParameterSource.CONTENT, null, parameterIndex, parameterType, null));
+				parameterInfos.add(new ParameterInfo(ParameterSource.CONTENT, contentParam, null, parameterIndex, parameterType,null));
 			}
 			else if (stateParam != null)
 			{
-				if (default_ != null)
+				if (defaultValue != null)
 				{
-					throw new Exception("@Default annotation not allowed for @StateParam parameter. Site=" + method.getName());
+					throw new Exception("@DefaultValue annotation not allowed with @StateParam annotation. Site=" + method.getName());
 				}
-				parameterInfos.add(new ParameterInfo(ParameterSource.STATE, null, parameterIndex, parameterType, null));
+				parameterInfos.add(new ParameterInfo(ParameterSource.STATE, stateParam, null, parameterIndex, parameterType, null));
 			}
 			else if (cookieParam != null)
 			{
 				if (parameterType == Cookie.class)
 				{
-					if (default_ != null)
+					if (defaultValue != null)
 					{
-						throw new Exception("@Default annotation not allowed for @CookieParam parameter with type Cookie. Site="
+						throw new Exception("@DefaultValue annotation not allowed with @CookieParam parameter with type Cookie. Site="
 								+ object.getClass().getCanonicalName() + "." + method.getName());
 					}
 				}
@@ -516,8 +536,8 @@ class RequestHandlerMap
 				{
 					throw new Exception("Only simple types allowed for parameter. Site=" + method.getName());
 				}
-				parameterInfos.add(new ParameterInfo(ParameterSource.COOKIE, cookieParam.value(), parameterIndex, parameterType,
-						getDefaultValue(method, default_, parameterType)));
+				parameterInfos.add(new ParameterInfo(ParameterSource.COOKIE, cookieParam, cookieParam.value(), parameterIndex, parameterType,
+						getDefaultValue(method, defaultValue, parameterType)));
 			}
 			else if (pathParam != null)
 			{
@@ -525,8 +545,8 @@ class RequestHandlerMap
 				{
 					throw new Exception("Only simple types allowed for parameter. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
 				}
-				parameterInfos.add(new ParameterInfo(ParameterSource.PATH, pathParam.value(), parameterIndex, parameterType,
-						getDefaultValue(method, default_, parameterType)));
+				parameterInfos.add(new ParameterInfo(ParameterSource.PATH, pathParam, pathParam.value(), parameterIndex, parameterType,
+						getDefaultValue(method, defaultValue, parameterType)));
 			}
 			else if (queryParam != null)
 			{
@@ -534,8 +554,8 @@ class RequestHandlerMap
 				{
 					throw new Exception("Only simple types allowed for parameter. Site=" + method.getName());
 				}
-				parameterInfos.add(new ParameterInfo(ParameterSource.QUERY, queryParam.value(), parameterIndex, parameterType,
-						getDefaultValue(method, default_, parameterType)));
+				parameterInfos.add(new ParameterInfo(ParameterSource.QUERY, queryParam, queryParam.value(), parameterIndex, parameterType,
+						getDefaultValue(method, defaultValue, parameterType)));
 			}
 			else if (headerParam != null)
 			{
@@ -543,8 +563,8 @@ class RequestHandlerMap
 				{
 					throw new Exception("Only simple types allowed for parameter. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
 				}
-				parameterInfos.add(new ParameterInfo(ParameterSource.HEADER, headerParam.value(), parameterIndex, parameterType,
-						getDefaultValue(method, default_, parameterType)));
+				parameterInfos.add(new ParameterInfo(ParameterSource.HEADER, headerParam, headerParam.value(), parameterIndex, parameterType,
+						getDefaultValue(method, defaultValue, parameterType)));
 			}
 		}
 

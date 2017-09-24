@@ -2,9 +2,9 @@ package org.nova.metrics;
 
 import org.nova.annotations.Description;
 
-public class CountAverageRateMeterBox extends MeterBox<CountAverageRateMeter>
+public class CountAverageRateMeterBox extends MeterBox<ValueRateMeter>
 {
-	CountAverageRateMeterBox(String category, String name, Description description,CountAverageRateMeter meter) throws Exception 
+	CountAverageRateMeterBox(String category, String name, Description description,ValueRateMeter meter) throws Exception 
 	{
 		super(category, name,description, meter);
 	}

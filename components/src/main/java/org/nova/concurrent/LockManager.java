@@ -8,25 +8,26 @@ import org.nova.tracing.TraceManager;
 public class LockManager<KEY>
 {
 	final private HashMap<KEY,Slot> slots;
-	private String categoryPrefix;
+	private String category;
 	private final TraceManager traceManager;
 	
-	public LockManager(TraceManager traceManager,String categoryPrefix)
+	public LockManager(TraceManager traceManager,String category)
 	{
 		this.slots=new HashMap<>();
-		this.traceManager=new TraceManager();
-		this.categoryPrefix=this.getClass().getSimpleName()+":"+categoryPrefix+":";
+		this.traceManager=traceManager;
+		this.category=category+"@"+this.getClass().getSimpleName();
 	}
 	
-	public Lock<KEY> waitForLock(KEY key) throws Exception
+	public Lock<KEY> waitForLock(Trace parent,KEY key) throws Exception
 	{
-	    return waitForLock(key,Long.MAX_VALUE);
+	    return waitForLock(parent,key,Long.MAX_VALUE);
 	}
 
-	public Lock<KEY> waitForLock(KEY key,long timeoutMs)
+	public Lock<KEY> waitForLock(Trace parent,KEY key,long timeoutMs)
     {
         Slot slot;
-        Trace trace=new Trace(this.traceManager, this.categoryPrefix+key,true);
+        Trace trace=new Trace(parent, this.category,true);
+        trace.setDetails(key.toString());
         synchronized (this)
         {
             slot=this.slots.get(key);
@@ -36,15 +37,15 @@ public class LockManager<KEY>
                 this.slots.put(key, slot);
             }
         }
-        final Slot finalSlot=slot;
-        synchronized (finalSlot)
+        final Slot slot_=slot;
+        synchronized (slot_)
         {
-            if (finalSlot.locked)
+            if (slot_.locked)
             {
                 slot.waiting++;
                 try
                 {
-                    if (Synchronization.waitForNoThrow(slot, ()->{return finalSlot.locked==false;},timeoutMs)==false)
+                    if (Synchronization.waitForNoThrow(slot, ()->{return slot_.locked==false;},timeoutMs)==false)
                     {
                         trace.close();
                         return null;
@@ -55,7 +56,7 @@ public class LockManager<KEY>
                     slot.waiting--;
                 }
             }
-            finalSlot.locked=true;
+            slot_.locked=true;
         }
         trace.endWait();
         return new Lock<KEY>(key,this,slot,trace);
@@ -65,11 +66,13 @@ public class LockManager<KEY>
 	{
 		synchronized (slot)
 		{
+		    slot.locked=false;
             if (slot.waiting==0)
             {
                 synchronized (this)
                 {
                     this.slots.remove(key);
+                    
                     return;
                 }
             }

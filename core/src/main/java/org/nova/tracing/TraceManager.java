@@ -1,5 +1,6 @@
 package org.nova.tracing;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,13 +9,15 @@ import java.util.Map.Entry;
 import org.nova.annotations.Description;
 import org.nova.logging.Logger;
 import org.nova.metrics.CountMeter;
+import org.nova.metrics.ValueRateMeter;
+import org.nova.metrics.ValueRateSample;
 import org.nova.operations.OperatorVariable;
 
 // Don't track Trace in Thread Local Store. The problem is figuring out after closing a Trace which trace to make current
 public class TraceManager
 {
 	final private HashMap<Long,Trace> traces;
-	final private HashMap<String,TraceStats> stats;
+	final private HashMap<String,ValueRateMeter> meters;
 	final private HashMap<String,TraceNode> traceRoots;
 	final private TraceBuffer lastExceptions;
 	final private TraceBuffer lastTraces;
@@ -27,8 +30,11 @@ public class TraceManager
 	@Description("The number of times maximum actives is exceeded. Traces exceeding the maximum are not tracked.")
 	final private CountMeter maximumExceeded=new CountMeter();
 	
-	@OperatorVariable(description="Capture the stackTrace when trace is created and closed. WARNING: Application performance may drop.")
-	private boolean captureStackTrace;
+    @OperatorVariable(description="Capture the stackTrace when trace is closed. WARNING: Application performance may drop.")
+    private boolean captureCreateStackTrace;
+
+    @OperatorVariable(description="Capture the stackTrace when trace is closed. WARNING: Application performance may drop.")
+    private boolean captureCloseStackTrace;
 	@OperatorVariable(description="Log traces. WARNING: Application performance may drop. Logger may become stressed.")
 	private boolean logTraces;
 	@OperatorVariable(description="Log exception traces. WARNING: Logger may become stressed.")
@@ -51,7 +57,7 @@ public class TraceManager
 	public TraceManager(Logger logger,TraceManagerConfiguration configuration)
 	{
 		this.traces=new HashMap<>();
-		this.stats=new HashMap<>();
+		this.meters=new HashMap<>();
 		this.traceRoots=new HashMap<>();
 		if (configuration.lastExceptionBufferSize>0)
 		{
@@ -78,14 +84,16 @@ public class TraceManager
 		this.enableTraceStats=configuration.enableTraceStats;
 		this.enableLastTraces=configuration.enableLastTraces;
 		this.enableWatchListLastTraces=configuration.enableWatchListLastTraces;
-		this.captureStackTrace=configuration.captureStackTrace;
+        this.captureCreateStackTrace=configuration.captureCreateStackTrace;
+        this.captureCloseStackTrace=configuration.captureCloseStackTrace;
 		this.maximumActives=configuration.maximumActives;
 		this.logTracesWithGreaterDuration=configuration.logSlowTraceDurationMs;
 		this.logger=logger;
 	}
 	public TraceManager(Logger logger)
 	{
-		this(logger, new TraceManagerConfiguration());
+//        this(logger, new TraceManagerConfiguration());
+        this(logger, TraceManagerConfiguration.NormalApplicationConfiguration());
 	}
 	public TraceManager()
 	{
@@ -93,7 +101,7 @@ public class TraceManager
 	}
 	
 	
-	long open(Trace trace)
+	TraceSettings open(Trace trace)
 	{
 		synchronized(this.traces)
 		{
@@ -106,11 +114,7 @@ public class TraceManager
 			{
 				this.maximumExceeded.increment();
 			}
-			if (this.captureStackTrace)
-			{
-				return -number;
-			}
-			return number;
+			return new TraceSettings(number,this.captureCreateStackTrace,this.captureCloseStackTrace);
 		}
 	}
 	
@@ -172,34 +176,38 @@ public class TraceManager
 		{
 			if (this.enableTraceStats)
 			{
-				TraceStats stats=this.stats.get(trace.getCategory());
-				if (stats==null)
-				{
-					stats=new TraceStats(trace.getCategory());
-					this.stats.put(trace.getCategory(), stats);
-				}
-				stats.update(trace.getDurationNs());
+			    synchronized (traces)
+			    {
+    				ValueRateMeter meter=this.meters.get(trace.getCategory());
+    				if (meter==null)
+    				{
+    				    meter=new ValueRateMeter();
+    					this.meters.put(trace.getCategory(), meter);
+    				}
+    				meter.update(trace.getDurationNs());
+			    }
 			}
+			
 		}
 		if (enableTraceGraph)
 		{
-			Trace[] traces=null;
 			int count=1;
 			for (Trace t=trace.getParent();t!=null;t=t.getParent())
 			{
 				count++;
 			}
-			traces=new Trace[count];
+            Trace[] traces=new Trace[count];
 			int index=traces.length-1;
 			for (Trace t=trace;t!=null;t=t.getParent())
 			{
 				traces[index]=t;
 				index--;
 			}
+            TraceNode node;
 			synchronized(this.traceRoots)
 			{
 				Trace rootTrace=traces[0];
-				TraceNode node=this.traceRoots.get(rootTrace.getCategory());
+				node=this.traceRoots.get(rootTrace.getCategory());
 				if (node==null)
 				{
 					node=new TraceNode();
@@ -226,8 +234,8 @@ public class TraceManager
 					}
 					node=childNode;
 				}
-				node.update(trace.getDurationNs(),trace.getWaitNs());
 			}
+            node.update(trace);
 		}
 
 		if (logTraces||logExceptionTraces||((logTracesWithGreaterDuration>=0)&&(trace.getDurationNs()>=logTracesWithGreaterDuration*1000000)))
@@ -246,24 +254,26 @@ public class TraceManager
 			return this.traces.values().toArray(new Trace[this.traces.size()]);
 		}
 	}
-	public TraceStats[] getStatsSnapshot()
-	{
-		synchronized (traces)
-		{
-			return this.stats.values().toArray(new TraceStats[this.stats.size()]);
-		}
-	}
-	public TraceStats[] getStatsSnapshotAndReset()
+	public TraceSample[] sampleTraceMeters()
 	{
 		synchronized (traces)
 		{
 			try
 			{
-				return this.stats.values().toArray(new TraceStats[this.stats.size()]);
+			    ArrayList<TraceSample> results=new ArrayList<>(this.meters.size());
+			    for (Entry<String, ValueRateMeter> entry:this.meters.entrySet())
+			    {
+			        ValueRateSample result=entry.getValue().sample();
+			        if (result.getCount()>0)
+			        {
+			            results.add(new TraceSample(entry.getKey(),result));
+			        }
+			    }
+			    return results.toArray(new TraceSample[results.size()]);
 			}
 			finally
 			{
-				this.stats.clear();
+				this.meters.clear();
 			}
 		}
 	}
@@ -272,28 +282,39 @@ public class TraceManager
 		HashMap<String,TraceNode> traceRoots=new HashMap<>();
 		synchronized (this.traceRoots)
 		{
-			for (Entry<String, TraceNode> entry:this.traceRoots.entrySet())
-			{
-				traceRoots.put(entry.getKey(), new TraceNode(entry.getValue()));
-			}
+		    traceRoots.putAll(this.traceRoots);
 		}
 		return traceRoots;
 		
 	}
-	public boolean isCaptureStackTrace()
+	public boolean isCaptureCreateStackTrace()
 	{
 		synchronized(this.traces)
 		{
-			return this.captureStackTrace;
+			return this.captureCreateStackTrace;
 		}
 	}
-	public void setCaptureStackTrace(boolean captureStackTrace)
+	public void setCaptureCreateStackTrace(boolean captureCreateStackTrace)
 	{
 		synchronized(this.traces)
 		{
-			this.captureStackTrace=captureStackTrace;
+			this.captureCreateStackTrace=captureCreateStackTrace;
 		}
 	}
+    public boolean isCaptureCloseStackTrace()
+    {
+        synchronized(this.traces)
+        {
+            return this.captureCloseStackTrace;
+        }
+    }
+    public void setCaptureCloseStackTrace(boolean captureCloseStackTrace)
+    {
+        synchronized(this.traces)
+        {
+            this.captureCloseStackTrace=captureCloseStackTrace;
+        }
+    }
 	public boolean isLogTraces()
 	{
 		synchronized(this.traces)

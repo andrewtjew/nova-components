@@ -130,8 +130,9 @@ public class Accessor extends Resource
     {
         for (int i = 0; i < parameters.length; i++)
         {
-            statement.setObject(i + 1, parameters[i]);
-            context.addLogItem(new Item("param"+i,parameters[i]));
+            Object parameter=parameters[i];
+            statement.setObject(i + 1, parameter);
+            context.addLogItem(new Item("param"+i,parameter));
         }
     }
 

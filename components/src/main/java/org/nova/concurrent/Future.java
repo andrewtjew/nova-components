@@ -20,10 +20,10 @@ public class Future<RESULT>
 		
 		this.tasks=new FutureTask<?>[executables.length];
 		
-		this.trace=new Trace(traceManager,parent,traceCategory,true);
+		this.trace=new Trace(traceManager,parent,"scheduler@"+traceCategory,true);
 		for (int i=0;i<executables.length;i++)
 		{
-			this.tasks[i]=new FutureTask(traceManager,this.trace,i+"/"+executables.length+"@"+traceCategory+"@Scheduler",executables[i]);
+			this.tasks[i]=new FutureTask(traceManager,this.trace,"runner@"+traceCategory,executables[i],i);
 		}
 	}
 	

@@ -103,14 +103,14 @@ public class MeterManager
 				field.setAccessible(true);
 				countMeters.put(key, new CountMeterBox(category, key, description, (CountMeter) field.get(object)));
 			}
-			else if (Utils.isDerivedFrom(field.getType(), CountAverageRateMeter.class))
+			else if (Utils.isDerivedFrom(field.getType(), ValueRateMeter.class))
 			{
 				if (countAverageRateMeters.containsKey(key))
 				{
 					throw new Exception("Name conflict. Site=" + object.getClass().getName() + "." + field.getName());
 				}
 				field.setAccessible(true);
-				countAverageRateMeters.put(key, new CountAverageRateMeterBox(category, key, description,(CountAverageRateMeter) field.get(object)));
+				countAverageRateMeters.put(key, new CountAverageRateMeterBox(category, key, description,(ValueRateMeter) field.get(object)));
 			}
 		}
 	}

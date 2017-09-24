@@ -4,13 +4,12 @@ public class RateMeter
 {
 	private long lastCount;
     private double lastRate;
-    private double lastLastRate;
-	private long markTime;
+	private long markInstantNs;
 	private long markCount;
 	
 	public RateMeter()
 	{
-		this.markTime=System.currentTimeMillis();
+		this.markInstantNs=System.nanoTime();
 	}
 	
 	public void add(long count)
@@ -36,47 +35,44 @@ public class RateMeter
 			return this.markCount+this.lastCount;
 		}
 	}
-	public double sampleRate(double samplingInterval)
+	public double sampleRate(double samplingIntervalS)
 	{
-		long now=System.currentTimeMillis();
-		double interval=(now-markTime)/1000.0;
-		if (interval<=samplingInterval)
-		{
-			if (interval<=0)
-			{
-				return this.lastRate;
-			}
-			double markWeight=interval/samplingInterval;
-			return markWeight*this.markCount/interval+(1.0-markWeight)*this.lastRate;
-		}
-		this.lastLastRate=this.lastLastRate;
-		this.lastRate=this.markCount/interval;
-		this.lastCount+=this.markCount;
-		this.markTime=now;
-		this.markCount=0;
-		return this.lastRate;
-	}
-	
-	/*
-	public Rates sampleRates()
-	{
-        long now=System.currentTimeMillis();
-        double interval=(now-markTime)/1000.0;
-        if (interval<=samplingInterval)
+		long now=System.nanoTime();
+        synchronized(this)
         {
-            if (interval<=0)
+    		double intervalS=(now-this.markInstantNs)/1.0e9;
+    		if (intervalS<=samplingIntervalS)
+    		{
+    			if (intervalS<=0)
+    			{
+    				return this.lastRate;
+    			}
+    			double markWeight=intervalS/samplingIntervalS;
+    			return markWeight*this.markCount/intervalS+(1.0-markWeight)*this.lastRate;
+    		}
+    		this.lastRate=this.markCount/intervalS;
+    		this.lastCount+=this.markCount;
+    		this.markInstantNs=now;
+    		this.markCount=0;
+            return this.lastRate;
+        }
+	}
+    public double sampleRate()
+    {
+        long now=System.nanoTime();
+        synchronized(this)
+        {
+            if (now<=this.markInstantNs)
             {
                 return this.lastRate;
             }
-            double markWeight=interval/samplingInterval;
-            markWeight*this.markCount/interval+(1.0-markWeight)*this.lastRate;
+            double intervalS=(now-this.markInstantNs)/1.0e9;
+            this.lastRate=this.markCount/intervalS;
+            this.lastCount+=this.markCount;
+            this.markInstantNs=now;
+            this.markCount=0;
+            return this.lastRate;
         }
-        this.lastLastRate=this.lastLastRate;
-        this.lastRate=this.markCount/interval;
-        this.lastCount+=this.markCount;
-        this.markTime=now;
-        this.markCount=0;
-        return this.lastRate;
-	}
-	*/
+    }
+	
 }

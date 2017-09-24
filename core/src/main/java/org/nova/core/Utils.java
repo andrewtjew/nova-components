@@ -330,6 +330,10 @@ public class Utils
 
 	public static String millisToNiceDurationString(long millis)
     {
+	    if (millis==0)
+	    {
+	        return "0";
+	    }
         StringBuilder sb=new StringBuilder();
         long days=millis/(1000*3600*24);
         if (days>1)

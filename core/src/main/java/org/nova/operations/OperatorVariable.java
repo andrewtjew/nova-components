@@ -12,7 +12,7 @@ public @interface OperatorVariable
 	String description() default "";
 	String minimum() default "";
 	String maximum() default "";
+    String[] options() default "";
 	String alias() default "";
 	Class<? extends Validator> validator() default DefaultValidator.class;
-	String[] options() default "";
 }

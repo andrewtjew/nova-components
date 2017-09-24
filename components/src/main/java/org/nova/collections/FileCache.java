@@ -14,7 +14,7 @@ public class FileCache extends ContentCache<String,byte[]>
 
 	public FileCache(FileCacheConfiguration configuration) throws Exception
 	{
-		super(configuration.capacity,configuration.maxAge,configuration.maxSize);
+		super(configuration.capacity,configuration.maxAgeMs,configuration.maxSize);
         this.sharedDirectory=Utils.toNativePath(configuration.sharedDirectory);
         this.localDirectory=Utils.toNativePath(configuration.localDirectory);
 	}

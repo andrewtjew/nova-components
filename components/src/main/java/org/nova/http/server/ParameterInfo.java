@@ -1,5 +1,7 @@
 package org.nova.http.server;
 
+import java.lang.annotation.Annotation;
+
 public class ParameterInfo
 {
 	final private ParameterSource source;
@@ -8,10 +10,11 @@ public class ParameterInfo
 	final private Object defaultValue;
 	final private int pathIndex;
 	final private String name;
-	
-	public ParameterInfo(ParameterSource source,String name,int index,Class<?> type,Object defaultValue)
+	final private Annotation annotation;
+	public ParameterInfo(ParameterSource source,Annotation annotation,String name,int index,Class<?> type,Object defaultValue)
 	{
 		this.source=source;
+        this.annotation=annotation;
 		this.name=name;
 		this.index=index;
 		this.type=type;
@@ -21,6 +24,7 @@ public class ParameterInfo
 	public ParameterInfo(ParameterInfo info,int pathIndex)
 	{
 		this.source=info.source;
+        this.annotation=info.annotation;
 		this.name=info.name;
 		this.index=info.index;
 		this.type=info.type;
@@ -51,6 +55,12 @@ public class ParameterInfo
 	{
 		return name;
 	}
-	
-	
+	public Class<?> getParameterType()
+	{
+	    return this.type;
+	}
+	public Annotation getAnnotation()
+	{
+	    return this.annotation;
+	}
 }

@@ -12,7 +12,8 @@ public class TraceManagerConfiguration
 	public boolean enableTraceGraph=true;
 	public boolean logTraces=true;
 	public boolean logExceptionTraces=true;
-	public boolean captureStackTrace=true;
+    public boolean captureCreateStackTrace=true;
+    public boolean captureCloseStackTrace=true;
 	public int logSlowTraceDurationMs=1000*30; //30 seconds
 	
 	
@@ -20,20 +21,21 @@ public class TraceManagerConfiguration
 	{
 	}
 
-	static public TraceManagerConfiguration getPerformanceConfiguration(int bufferSize)
+	static public TraceManagerConfiguration NormalApplicationConfiguration()
 	{
 		TraceManagerConfiguration configuration=new TraceManagerConfiguration();
 		configuration.maximumActives=10000;
 		configuration.enableLastExceptions=true;
-		configuration.enableLastTraces=false;
-		configuration.enableTraceGraph=false;
+		configuration.enableLastTraces=true;
+		configuration.enableTraceGraph=true;
 		configuration.enableTraceStats=true;
 		configuration.enableWatchListLastTraces=false;
-		configuration.lastExceptionBufferSize=bufferSize;
-		configuration.lastTraceBufferSize=bufferSize;
-		configuration.logExceptionTraces=false;
+		configuration.lastExceptionBufferSize=100;
+		configuration.lastTraceBufferSize=100;
+		configuration.logExceptionTraces=true;
 		configuration.logTraces=false;
-		configuration.captureStackTrace=false;
+        configuration.captureCreateStackTrace=false;
+        configuration.captureCloseStackTrace=false;
 		return configuration;
 	}
 }

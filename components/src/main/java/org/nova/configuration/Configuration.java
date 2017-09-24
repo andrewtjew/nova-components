@@ -381,7 +381,7 @@ public class Configuration
 		}
 	}
 	
-	public <OBJECT> OBJECT getConfiguration(String namespace,Class<OBJECT> type) throws Exception
+	public <OBJECT> OBJECT getNamespaceObject(String namespace,Class<OBJECT> type) throws Exception
 	{
 	    OBJECT object=type.newInstance();
 	    for (Field field:type.getDeclaredFields())

@@ -11,6 +11,7 @@ import org.nova.html.enums.link_rel;
 import org.nova.html.tags.ul;
 import org.nova.html.tags.a;
 import org.nova.html.tags.div;
+import org.nova.html.tags.hr;
 import org.nova.html.tags.li;
 import org.nova.html.tags.link;
 import org.nova.html.tags.span;
@@ -48,7 +49,7 @@ public class MenuBar extends Element
     {
         for (Item item:items)
         {
-            if (name.equals(item.name))
+            if ((name!=null)&&(name.equals(item.name)))
             {
                 return item;
             }
@@ -59,6 +60,13 @@ public class MenuBar extends Element
     public MenuBar add(String href,String...names)
     {
         add(href,names,0,rootItems);
+        return this;
+    }
+    public MenuBar addSeparator(String...names)
+    {
+        String[] namesWithSeparator=new String[names.length+1];
+        System.arraycopy(names, 0, namesWithSeparator, 0, names.length);
+        add(null,namesWithSeparator,0,rootItems);
         return this;
     }
     
@@ -103,10 +111,13 @@ public class MenuBar extends Element
             for (Item item:items)
             {
                 ArrayList<Item> subItems=item.subItems;
-                int length=item.name.length();
-                if (length>longestSubMenu)
+                if (item.name!=null)
                 {
-                    longestSubMenu=length;
+                    int length=item.name.length();
+                    if (length>longestSubMenu)
+                    {
+                        longestSubMenu=length;
+                    }
                 }
             }
         }
@@ -114,37 +125,45 @@ public class MenuBar extends Element
         for (Item item:items)
         {
             li li=ul.returnAddInner(new li());
-            a a=li.returnAddInner(new a());
             String href=item.href;
-            if (href==null)
-            {
-                a.href("#");
-            }
-            else
-            {
-                a.href(href);
-            }
             ArrayList<Item> subItems=item.subItems;
-            if ((subItems!=null)&&(level>0))
+            if ((subItems==null)&&(href==null))
             {
-                a.addInner(new span().class_("menu-expand").addInner("&#x27a4;"));
-                a.addInner(item.name);
-            //    a.addInner(new span().class_("menu-expand").addInner("&#9658;"));
-                ;            
+                li.style("height:100%;padding:0px;"); //TODO: Works, but should go to css
+                li.returnAddInner(new hr());
             }
             else
             {
-                a.addInner(item.name);
-            }
-            if (subItems!=null)
-            {
-                if (level>0)
+                a a=li.returnAddInner(new a());
+                if (href==null)
                 {
-                    li.style("width:"+longestSubMenu*0.7+"em;");
+                    a.href("#");
                 }
-                ul subMenu=li.returnAddInner(new ul());
-                subMenu.class_("menu-level-"+(level+1));
-                write(subMenu,level+1,subItems);
+                else
+                {
+                    a.href(href);
+                }
+                if ((subItems!=null)&&(level>0))
+                {
+                    a.addInner(new span().class_("menu-expand").addInner("&#x27a4;"));
+                    a.addInner(item.name);
+                //    a.addInner(new span().class_("menu-expand").addInner("&#9658;"));
+                    ;            
+                }
+                else
+                {
+                    a.addInner(item.name);
+                }
+                if (subItems!=null)
+                {
+                    if (level>0)
+                    {
+                        li.style("width:"+longestSubMenu*0.7+"em;");
+                    }
+                    ul subMenu=li.returnAddInner(new ul());
+                    subMenu.class_("menu-level-"+(level+1));
+                    write(subMenu,level+1,subItems);
+                }
             }
         }
     }

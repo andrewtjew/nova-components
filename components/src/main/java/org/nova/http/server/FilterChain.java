@@ -2,6 +2,7 @@ package org.nova.http.server;
 
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.util.HashMap;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -182,6 +183,9 @@ public class FilterChain
 			case TRACE:
 				parameters[i]=trace;
 				break;
+            case CHECKMAP:
+                parameters[i]=new QueryParameters(request);
+                break;
 			default:
 				break;
 			}

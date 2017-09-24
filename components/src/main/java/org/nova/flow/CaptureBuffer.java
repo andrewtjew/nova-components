@@ -82,15 +82,15 @@ public class CaptureBuffer extends Node
     }
 
     @Override
-    public void beginSegment(long segmentIndex) throws Throwable
+    public void beginGroup(long groupIdentifier) throws Throwable
     {
-        this.receiver.beginSegment(segmentIndex);
+        this.receiver.beginGroup(groupIdentifier);
     }
 
     @Override
-    public void endSegment() throws Throwable
+    public void endGroup() throws Throwable
     {
-        this.receiver.endSegment();
+        this.receiver.endGroup();
     }
 
     public Node getReceiver()

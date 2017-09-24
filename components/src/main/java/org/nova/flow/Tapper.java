@@ -64,27 +64,27 @@ public class Tapper extends Node
     }
 
     @Override
-    public void beginSegment(long segmentIndex) throws Throwable
+    public void beginGroup(long groupIdentifier) throws Throwable
     {
-        this.receiver.beginSegment(segmentIndex);
+        this.receiver.beginGroup(groupIdentifier);
         synchronized(this)
         {
             if (this.tap!=null)
             {
-                this.tap.beginSegment(segmentIndex);
+                this.tap.beginGroup(groupIdentifier);
             }
         }
     }
 
     @Override
-    public void endSegment() throws Throwable
+    public void endGroup() throws Throwable
     {
-        this.receiver.endSegment();
+        this.receiver.endGroup();
         synchronized(this)
         {
             if (this.tap!=null)
             {
-                this.tap.endSegment();
+                this.tap.endGroup();
             }
         }
     }

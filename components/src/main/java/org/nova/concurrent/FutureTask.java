@@ -13,14 +13,16 @@ public class FutureTask<RESULT>
 	final private TraceManager traceManager;
 	final private String traceCategory;
 	final private TraceCallable<RESULT> callable;
+	final private int index;
 	
-	public FutureTask(TraceManager traceManager,Trace scheduleTrace,String traceCategory,TraceCallable<RESULT> callable)
+	public FutureTask(TraceManager traceManager,Trace scheduleTrace,String traceCategory,TraceCallable<RESULT> callable,int index)
 	{
 		this.traceCategory=traceCategory;
 		this.scheduleTrace=scheduleTrace;
 		this.traceManager=traceManager;
 		this.callable=(TraceCallable<RESULT>)callable;
-		this.status=status.READY;
+		this.status=TaskStatus.READY;
+        this.index=index;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -28,7 +30,7 @@ public class FutureTask<RESULT>
 	{
 		synchronized (this)
 		{
-			if (this.status!=TaskStatus.READY)
+			if (this.status!=TaskStatus.READY) //We need this check to support abort methods.
 			{
 				return;
 			}
@@ -38,6 +40,7 @@ public class FutureTask<RESULT>
 		Throwable throwable=null;
 		try (Trace trace=new Trace(this.traceManager,this.scheduleTrace,this.traceCategory,false))
 		{
+		    trace.setDetails("runner:"+index);
 			try
 			{
 				result=this.callable.call(trace);
@@ -45,7 +48,6 @@ public class FutureTask<RESULT>
 			catch (Throwable t)
 			{
 				throwable=t;
-//				t.printStackTrace();
 				trace.close(t);
 			}
 		}

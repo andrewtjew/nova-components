@@ -37,11 +37,11 @@ public class Duplicator extends Node
 	{
         for (Node receiver:this.receivers)
 		{
-			receiver.endSegment();
+			receiver.endGroup();
 		}
 	}
 	@Override
-	public void endSegment() throws Throwable
+	public void endGroup() throws Throwable
 	{
 		if (this.lock!=null)
 		{
@@ -78,26 +78,26 @@ public class Duplicator extends Node
         }
     }
 
-    private void _beginSegment(long marker) throws Throwable
+    private void _beginGroup(long groupSequenceNumber) throws Throwable
     {
         for (Node receiver:this.receivers)
         {
-            receiver.beginSegment(marker);
+            receiver.beginGroup(groupSequenceNumber);
         }
     }
     @Override
-    public void beginSegment(long marker) throws Throwable
+    public void beginGroup(long marker) throws Throwable
     {
         if (this.lock!=null)
         {
             synchronized (this.lock)
             {
-                _beginSegment(marker);
+                _beginGroup(marker);
             }
         }
         else
         {
-            _beginSegment(marker);
+            _beginGroup(marker);
         }
     }
 }

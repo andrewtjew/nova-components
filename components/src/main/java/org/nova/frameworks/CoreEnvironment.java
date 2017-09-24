@@ -28,7 +28,7 @@ public class CoreEnvironment
 	final private Configuration configuration;
 	final private MeterManager meterManager;
 	final private Logger logger;
-	final HashMap<String,SourceQueueLogger> loggers;
+	final HashMap<String,Logger> loggers;
 	final SourceQueue<LogEntry> logSourceQueue;
 	final private LogDirectoryManager logDirectoryManager;
 	final private int logCategoryBufferSize;
@@ -96,11 +96,11 @@ public class CoreEnvironment
 	{
 		return timerScheduler;
 	}
-	public SourceQueueLogger getLogger(String category) throws Throwable
+	public Logger getLogger(String category) throws Throwable
 	{
 		synchronized (this.loggers)
 		{
-		    SourceQueueLogger logger=this.loggers.get(category);
+		    Logger logger=this.loggers.get(category);
 			if (logger==null)
 			{
 				logger=new SourceQueueLogger(this.logCategoryBufferSize,category, this.logSourceQueue);

@@ -118,9 +118,9 @@ public class SessionManager<SESSION extends Session>
             return this.userSessions.values();
         }
     }
-    Lock<String> waitForLock(String user)
+    Lock<String> waitForLock(Trace parent,String user)
     {
-        return lockManager.waitForLock(user,this.waitForLockTimeoutMs);
+        return lockManager.waitForLock(parent,user,this.waitForLockTimeoutMs);
     }
     
     private void timeoutSession(Trace trace, SESSION session) throws Throwable

@@ -74,6 +74,22 @@ public class RingBuffer<ITEM>
 		}
 		return list;
 	}
+    public ITEM getFromStart(int index) throws Exception
+    {
+        if (index>=this.size)
+        {
+            throw new Exception("Out of range. index="+index+", size="+size);
+        }
+        return this.array[(this.readIndex+index)%this.length];
+    }
+    public ITEM getFromEnd(int index) throws Exception
+    {
+        if (index>=this.size)
+        {
+            throw new Exception("Out of range. index="+index+", size="+size);
+        }
+        return this.array[(this.writeIndex+this.length-index)%this.length];
+    }
 	public void clear()
 	{
 	    this.readIndex=this.writeIndex=this.size=0;

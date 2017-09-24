@@ -62,7 +62,7 @@ public class SessionFilter extends Filter
     }
     
     @Override
-    public Response<?> executeNext(Trace trace, Context context, FilterChain filterChain) throws Throwable
+    public Response<?> executeNext(Trace parent, Context context, FilterChain filterChain) throws Throwable
     {
         String token=null;
         if (this.headerTokenKey!=null)
@@ -93,7 +93,7 @@ public class SessionFilter extends Filter
         {
             if (this.debugSession==null)
             {
-                session=getBestSessionRejectResponder(context).respondToNoSession(trace,this, context);
+                session=getBestSessionRejectResponder(context).respondToNoSession(parent,this, context);
                 if (session==null)
                 {
                     return null;
@@ -104,22 +104,22 @@ public class SessionFilter extends Filter
                 session=this.debugSession;
             }
         }
-        Lock<String> lock=sessionManager.waitForLock(session.getToken());
+        Lock<String> lock=sessionManager.waitForLock(parent,session.getToken());
         if (lock==null)
         {
-            getBestSessionRejectResponder(context).respondToNoLock(trace,this, session, context);
+            getBestSessionRejectResponder(context).respondToNoLock(parent,this, session, context);
             return null;
         }
         session.update(lock);
         try
         {
-            if (session.isAccessDeniedForCurrentRequest(trace,context))
+            if (session.isAccessDeniedForCurrentRequest(parent,context))
             {
-                getBestSessionRejectResponder(context).respondToAccessDenied(trace,this, session, context);
+                getBestSessionRejectResponder(context).respondToAccessDenied(parent,this, session, context);
                 return null;
             }
             context.setState(session);
-            return filterChain.next(trace, context);
+            return filterChain.next(parent, context);
         }
         finally
         {

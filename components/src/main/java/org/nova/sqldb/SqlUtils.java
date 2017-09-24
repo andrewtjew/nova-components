@@ -5,6 +5,23 @@ import org.nova.tracing.Trace;
 
 public class SqlUtils
 {
+    static public int multiAttemptExecuteUpdate(Trace parent,String traceCategoryOverride,int attempts,long betweenRetriesWaitMs,Accessor accessor,String sql,Object...parameters) throws Throwable
+    {
+        Throwable throwable=null;
+        for (int i=0;i<attempts;i++)
+        {
+            try
+            {
+                return accessor.executeUpdate(parent, traceCategoryOverride, parameters, sql);
+            }
+            catch (Throwable t)
+            {
+                throwable=t;
+            }
+            Thread.sleep(betweenRetriesWaitMs);
+        }
+        throw throwable;
+    }
     static public String insert(String table,String...values)
     {
         StringBuilder sb=new StringBuilder();

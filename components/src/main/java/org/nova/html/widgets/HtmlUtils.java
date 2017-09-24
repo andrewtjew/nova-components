@@ -102,6 +102,24 @@ public class HtmlUtils
         return names;
     }
 
+    public static boolean isChecked(Context context,String value)
+    {
+        ArrayList<String> names=new ArrayList<>();
+        for (Entry<String, String[]> entry:context.getHttpServletRequest().getParameterMap().entrySet())
+        {
+            String[] values=entry.getValue();
+            if ((values.length==1)&&("on".equals(values[0])))
+            {
+                String key=entry.getKey();
+                if (value.equals(key))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static List<Long> getLongCheckedNames(Context context,String prefix)
     {
         ArrayList<Long> longs=new ArrayList<>();

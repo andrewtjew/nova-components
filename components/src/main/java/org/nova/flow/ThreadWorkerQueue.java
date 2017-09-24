@@ -130,7 +130,7 @@ public class ThreadWorkerQueue extends Node
                             {
                                 Testing.oprintln("ThreadWorkerQueue="+this.id+":receiver.beginSegment="+packet.get()[0]);
                             }
-                            this.receiver.beginSegment((long)packet.get()[0]);
+                            this.receiver.beginGroup((long)packet.get()[0]);
                         }
                         else if (size==Packet.END_SEGMENT)
                         {
@@ -138,7 +138,7 @@ public class ThreadWorkerQueue extends Node
                             {
                                 Testing.oprintln("ThreadWorkerQueue="+this.id+":receiver.endSegment");
                             }
-                            this.receiver.endSegment();
+                            this.receiver.endGroup();
                         }
                         else if (size==Packet.FLUSH)
                         {
@@ -218,7 +218,7 @@ public class ThreadWorkerQueue extends Node
     }
 
     @Override
-    public void beginSegment(long marker) throws Throwable
+    public void beginGroup(long marker) throws Throwable
     {
         synchronized (this.lock)
         {
@@ -244,7 +244,7 @@ public class ThreadWorkerQueue extends Node
     }
 
     @Override
-    public void endSegment() throws Throwable
+    public void endGroup() throws Throwable
     {
         synchronized (this.lock)
         {

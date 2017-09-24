@@ -179,7 +179,7 @@ public class SourceQueue<ITEM>
         {
             boolean flush = false;
             long lastRollOver = System.currentTimeMillis();
-            this.receiver.beginSegment(lastRollOver);
+            this.receiver.beginGroup(lastRollOver);
 
             if (TESTING)
             {
@@ -295,8 +295,8 @@ public class SourceQueue<ITEM>
                                 rollOver = lastRollOver + 1;
                             }
                             lastRollOver = rollOver;
-                            this.receiver.endSegment();
-                            this.receiver.beginSegment(rollOver);
+                            this.receiver.endGroup();
+                            this.receiver.beginGroup(rollOver);
                             flush = false;
                         }
                         else if (packet.sizeOrType() == Packet.FLUSH)
@@ -346,8 +346,8 @@ public class SourceQueue<ITEM>
                         {
                             Testing.oprintln("SourceQueue:rollover");
                         }
-                        this.receiver.endSegment();
-                        this.receiver.beginSegment(rollOver);
+                        this.receiver.endGroup();
+                        this.receiver.beginGroup(rollOver);
                         lastRollOver = rollOver;
                     }
                 }

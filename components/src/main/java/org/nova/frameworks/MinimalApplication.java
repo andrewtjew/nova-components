@@ -14,7 +14,6 @@ public class MinimalApplication
 	{
 		this.logger=Loggers.createConsoleLogger();
 		this.traceManager=new TraceManager(this.logger);
-		this.traceManager.setCaptureStackTrace(true);
 	}
 	
 	public TraceManager getTraceManager()

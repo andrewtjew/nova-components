@@ -52,6 +52,10 @@ public abstract class InnerElement<ELEMENT extends InnerElement<ELEMENT>> extend
     {
         if (object!=null)
         {
+            if (object instanceof Element)
+            {
+                return addInner((Element)object);
+            }
             return addInner(new Text(object.toString()));
         }
         return (ELEMENT)this;

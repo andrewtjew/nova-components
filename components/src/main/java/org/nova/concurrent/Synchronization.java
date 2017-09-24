@@ -2,6 +2,8 @@ package org.nova.concurrent;
 
 import org.nova.core.NoThrowPredicate;
 import org.nova.core.Predicate;
+import org.nova.html.tags.pre;
+import org.nova.tracing.Trace;
 
 public class Synchronization
 {
@@ -89,6 +91,19 @@ public class Synchronization
 		}
 	}
 
+	public static void waitForNoThrow(Trace trace,Object synchronizationObject,NoThrowPredicate predicate)
+    {
+	    trace.beginWait();
+	    try
+	    {
+	       waitForNoThrow(synchronizationObject,predicate);
+	    }
+	    finally
+	    {
+	        trace.endWait();
+	    }
+    }
+
 	public static boolean waitForNoThrow(Object synchronizationObject,NoThrowPredicate predicate,long timeout)
 	{
         if (timeout==Long.MAX_VALUE)
@@ -119,6 +134,19 @@ public class Synchronization
 		return true;
 	}
 
+	public static boolean waitForNoThrow(Trace trace,Object synchronizationObject,NoThrowPredicate predicate,long timeout)
+    {
+	    trace.beginWait();
+	    try
+	    {
+	        return waitForNoThrow(synchronizationObject,predicate,timeout);
+	    }
+	    finally
+	    {
+	        trace.endWait();
+	    }
+    }
+
 	public static void sleep(Object synchronizationObject,long timeout)
     {
 	    if (timeout<0)
@@ -143,4 +171,16 @@ public class Synchronization
         }
     }
 
+	public static void sleep(Trace trace,Object synchronizationObject,long timeout)
+    {
+        trace.beginWait();
+        try
+        {
+            sleep(synchronizationObject,timeout);
+        }
+        finally
+        {
+            trace.endWait();
+        }
+    }
 }

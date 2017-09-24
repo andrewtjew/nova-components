@@ -1,16 +1,14 @@
 package org.nova.metrics;
 
-public class Rates
+public class RateResult
 {
     final private double currentRate;
     final private double lastRate;
-    final private double lastLastRate;
     
-    public Rates(double currentRate,double lastRate,double lastLastRate)
+    public RateResult(double currentRate,double lastRate)
     {
         this.currentRate=currentRate;
         this.lastRate=lastRate;
-        this.lastLastRate=lastLastRate;
     }
 
     public double getCurrentRate()
@@ -23,9 +21,4 @@ public class Rates
         return lastRate;
     }
 
-    public double getLastLastRate()
-    {
-        return lastLastRate;
-    }
-    
 }

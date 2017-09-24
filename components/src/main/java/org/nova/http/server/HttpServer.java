@@ -53,7 +53,7 @@ public class HttpServer
 	@OperatorVariable()
 	private boolean debug;
 	
-	public HttpServer(TraceManager traceManager, Logger logger,HttpServerConfiguration configuration,Server[] servers) throws Exception
+	public HttpServer(TraceManager traceManager, Logger logger,boolean test,HttpServerConfiguration configuration,Server[] servers) throws Exception
 	{
 	    this.logger=logger;
 	    this.ports=new int[servers.length];
@@ -62,7 +62,7 @@ public class HttpServer
 	        this.ports[i]=((ServerConnector)((servers[i].getConnectors())[0])).getPort();
 	    }
 		this.categoryPrefix=configuration.categoryPrefix+"@";
-		this.requestHandlerMap = new RequestHandlerMap();
+		this.requestHandlerMap = new RequestHandlerMap(test);
 		this.traceManager = traceManager;
 		this.servers = servers;
 		this.requestRateMeter = new RateMeter();
@@ -75,9 +75,9 @@ public class HttpServer
 		this.transformers=new Transformers();
 	}
 
-	public HttpServer(TraceManager traceManager, Logger logger,Server server) throws Exception
+	public HttpServer(TraceManager traceManager, Logger logger,boolean test,Server server) throws Exception
 	{
-		this(traceManager, logger ,new HttpServerConfiguration(),  new Server[]{server});
+		this(traceManager, logger ,test,new HttpServerConfiguration(),  new Server[]{server});
 	}
 	
 
@@ -138,19 +138,19 @@ public class HttpServer
 	    return this.transformers;
 	}
 	
-	public void register(Object object) throws Exception
+	public void registerHandlers(Object object) throws Exception
 	{
-		register(null, object);
+		registerHandlers(null, object);
 	}
 
-	public void register(String root, Object object) throws Exception
+	public void registerHandlers(String root, Object object) throws Exception
 	{
-		this.requestHandlerMap.register(root, object, this.transformers);
+		this.requestHandlerMap.registerObject(root, object, this.transformers);
 	}
 
-	public void register(String root, Object object, Method method) throws Exception
+	public void registerHandler(String root, Object object, Method method) throws Exception
 	{
-		this.requestHandlerMap.register(root, object, method, this.transformers);
+		this.requestHandlerMap.registerObjectMethod(root, object, method, this.transformers);
 	}
 
 	public RequestHandler[] getRequestHandlers()
