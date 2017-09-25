@@ -17,9 +17,11 @@ public class Trace implements AutoCloseable
 	private Thread thread;
 	private String toLink;
 	private String fromLink;
+	TraceNode traceNode;
 	final private StackTraceElement[] createStackTrace;
 	private StackTraceElement[] closeStackTrace;
-	private TraceSettings settings;
+	private TraceContext context;
+	
 	public Trace(TraceManager traceManager,Trace parent,String category,String details,boolean waiting)
 	{
 		this.thread=Thread.currentThread();
@@ -30,14 +32,18 @@ public class Trace implements AutoCloseable
 		this.created=System.currentTimeMillis();
 		this.waitStart=this.start=System.nanoTime();
 		this.waiting=waiting;
-		this.settings=this.traceManager.open(this);
-		if (this.settings.captureCreateStack)
+		this.context=this.traceManager.open(this);
+		if (this.context.captureCreateStack)
 		{
 			this.createStackTrace=this.thread.getStackTrace();
 		}
 		else
 		{
 			this.createStackTrace=null;
+		}
+		if (this.context.enableTraceGraph)
+		{
+		    this.traceNode=traceManager.getTraceNode(category, parent);
 		}
 	}
 	public Trace(TraceManager traceManager,Trace parent,String category,boolean waiting)
@@ -87,7 +93,7 @@ public class Trace implements AutoCloseable
 
 	public long getNumber()
 	{
-		return this.settings.number;
+		return this.context.number;
 	}
 	
 	public boolean isClosed()
@@ -140,7 +146,7 @@ public class Trace implements AutoCloseable
 		    }
 			if (this.traceManager!=null)
 			{
-				if (this.settings.captureCloseStack)
+				if (this.context.captureCloseStack)
 				{
 					this.closeStackTrace=this.thread.getStackTrace();
 				}
@@ -154,6 +160,10 @@ public class Trace implements AutoCloseable
 					this.duration=System.nanoTime()-this.start;
 				}
 				this.traceManager=null;
+				if (this.context.valueRateMeter!=null)
+				{
+				    this.context.valueRateMeter.update(System.nanoTime()-this.start);
+				}
 			}
 		}
 	}

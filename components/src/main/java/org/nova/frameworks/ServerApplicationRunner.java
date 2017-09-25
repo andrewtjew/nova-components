@@ -48,7 +48,7 @@ public class ServerApplicationRunner //
     {
         int threads=configuration.getIntegerValue("HttpServer.operator.threads",10);
         int operatorPort=configuration.getIntegerValue("HttpServer.operator.port",10051);
-        boolean test=configuration.getBooleanValue("Syste.test",false);
+        boolean test=configuration.getBooleanValue("System.test",false);
         HttpServer operatorServer=new HttpServer(traceManager,logger, test,JettyServerFactory.createServer(threads, operatorPort));
         operatorServer.addContentDecoders(new GzipContentDecoder());
         operatorServer.addContentEncoders(new GzipContentEncoder());

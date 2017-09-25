@@ -53,12 +53,4 @@ public class CountMeter
 		}
 	}
 	
-	public CountMeter getSnapshot()
-	{
-		synchronized (this)
-		{
-			return new CountMeter(this.count);
-		}
-		
-	}
 }

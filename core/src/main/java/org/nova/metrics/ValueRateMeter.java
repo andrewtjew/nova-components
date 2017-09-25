@@ -15,6 +15,7 @@ public class ValueRateMeter
 
 	private long allTimeTotal;
     private long allTimeCount;
+    private double minimalResetDurationMs;
 
 	public ValueRateMeter()
 	{
@@ -53,7 +54,8 @@ public class ValueRateMeter
 	        return this.allTimeTotal;
 	    }
 	}
-    public ValueRateSample sample()
+
+	public ValueRateSample sampleAndReset()
     {
         long nowNs=System.nanoTime();
         synchronized (this)
@@ -79,11 +81,20 @@ public class ValueRateMeter
             return sample;
         }
     }
+	public ValueRateSample sample()
+	{
+	    synchronized(this)
+	    {
+	        return sample(this.minimalResetDurationMs);
+	    }
+	}
+	
     public ValueRateSample sample(double minimalResetDurationS)
     {
         long nowNs=System.nanoTime();
         synchronized (this)
         {
+            this.minimalResetDurationMs=minimalResetDurationS;
             long durationNs=nowNs-this.markNs;
             if (durationNs<=0)
             {

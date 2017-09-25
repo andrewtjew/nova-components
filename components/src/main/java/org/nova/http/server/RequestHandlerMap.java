@@ -345,9 +345,12 @@ class RequestHandlerMap
 				handlerAnnotations.path = (Path) annotation;
 			}
 		}
-		if ((handlerAnnotations.test!=null)&&(this.test==false))
+		if (handlerAnnotations.test!=null)
 		{
-		    return;
+		    if (this.test==false)
+		    {
+		        return;
+		    }
 		}
 		if (verbs == 0)
 		{
@@ -482,7 +485,7 @@ class RequestHandlerMap
 			}
 			else if (params.size() == 0)
 			{
-				if ((parameterType != Context.class)&&(parameterType!=Trace.class)&&(parameterType!=QueryParameters.class))
+				if ((parameterType != Context.class)&&(parameterType!=Trace.class)&&(parameterType!=QueryParams.class))
 				{
 					throw new Exception("Annotation required for param. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
 				}
@@ -498,7 +501,7 @@ class RequestHandlerMap
 				}
 				parameterInfos.add(new ParameterInfo(ParameterSource.CONTEXT, null, null, parameterIndex, parameterType, null));
 			}
-            else if (parameterType==QueryParameters.class)
+            else if (parameterType==QueryParams.class)
             {
                 if (defaultValue != null)
                 {

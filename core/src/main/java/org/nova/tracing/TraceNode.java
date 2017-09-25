@@ -19,7 +19,7 @@ public class TraceNode
 	private long count;
 	private Trace lastExceptionTrace;
 	private long exceptionCount;
-	HashMap<String,TraceNode> childTraces;
+	private HashMap<String,TraceNode> childTraceNodes;
 	
 	TraceNode()
 	{
@@ -33,12 +33,12 @@ public class TraceNode
 		this.totalDurationNs=node.totalDurationNs;
 		this.totalWaitNs=node.totalWaitNs;
 		this.count=node.count;
-		if (node.childTraces!=null)
+		if (node.childTraceNodes!=null)
 		{
-			this.childTraces=new HashMap<>();
-			for (Entry<String, TraceNode> entry:node.childTraces.entrySet())
+			this.childTraceNodes=new HashMap<>();
+			for (Entry<String, TraceNode> entry:node.childTraceNodes.entrySet())
 			{
-				this.childTraces.put(entry.getKey(), new TraceNode(entry.getValue()));
+				this.childTraceNodes.put(entry.getKey(), new TraceNode(entry.getValue()));
 			}
 		}
 	}
@@ -79,9 +79,40 @@ public class TraceNode
     		this.count++;
 	    }
 	}
-	public Map<String,TraceNode> getChildTraces()
+	public Map<String,TraceNode> getChildTraceNodesSnapshot()
 	{
-		return this.childTraces;
+        HashMap<String,TraceNode> childTraces=new HashMap<>();
+	    synchronized(this)
+	    {
+	        if (this.childTraceNodes==null)
+	        {
+	            return null;
+	        }
+	        childTraces.putAll(this.childTraceNodes);
+	    }
+        return childTraces;
+	}
+	public TraceNode getOrCreateChildTraceNode(String category)
+	{
+        synchronized(this)
+        {
+            if (this.childTraceNodes==null)
+            {
+                this.childTraceNodes=new HashMap<>();
+                TraceNode childNode=new TraceNode();
+                this.childTraceNodes.put(category, childNode);
+                return childNode;
+            }
+            TraceNode childNode=this.childTraceNodes.get(category);
+            if (childNode==null)
+            {
+                childNode=new TraceNode();
+                this.childTraceNodes.put(category, childNode);
+            }
+            return childNode;
+        }
+	    
+	    
 	}
 	public TraceNodeSample sample()
 	{

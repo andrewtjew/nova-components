@@ -184,7 +184,7 @@ public class FilterChain
 				parameters[i]=trace;
 				break;
             case CHECKMAP:
-                parameters[i]=new QueryParameters(request);
+                parameters[i]=new QueryParams(request);
                 break;
 			default:
 				break;

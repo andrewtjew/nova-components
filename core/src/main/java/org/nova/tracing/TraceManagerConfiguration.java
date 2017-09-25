@@ -3,7 +3,8 @@ package org.nova.tracing;
 public class TraceManagerConfiguration
 {
 	public int maximumActives=10000;
-	public int lastTraceBufferSize=100;
+    public int lastTraceBufferSize=100;
+    public int watchListLastTraceBufferSize=100;
 	public boolean enableLastTraces=true;
 	public boolean enableWatchListLastTraces=true;
 	public int lastExceptionBufferSize=100;
@@ -31,11 +32,13 @@ public class TraceManagerConfiguration
 		configuration.enableTraceStats=true;
 		configuration.enableWatchListLastTraces=false;
 		configuration.lastExceptionBufferSize=100;
-		configuration.lastTraceBufferSize=100;
+        configuration.lastTraceBufferSize=100;
+        configuration.watchListLastTraceBufferSize=100;
 		configuration.logExceptionTraces=true;
 		configuration.logTraces=false;
         configuration.captureCreateStackTrace=false;
         configuration.captureCloseStackTrace=false;
+        configuration.logSlowTraceDurationMs=-1000;
 		return configuration;
 	}
 }

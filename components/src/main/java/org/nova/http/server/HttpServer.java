@@ -51,7 +51,7 @@ public class HttpServer
 	private boolean started;
 	
 	@OperatorVariable()
-	private boolean debug;
+	private boolean test;
 	
 	public HttpServer(TraceManager traceManager, Logger logger,boolean test,HttpServerConfiguration configuration,Server[] servers) throws Exception
 	{
@@ -68,7 +68,7 @@ public class HttpServer
 		this.requestRateMeter = new RateMeter();
 		this.identityContentDecoder = new IdentityContentDecoder();
 		this.identityContentEncoder = new IdentityContentEncoder();
-		this.debug=true;
+		this.test=test;
 		this.lastRequestsLogEntries=new RingBuffer<>(new RequestLogEntry[configuration.lastRequestLogEntryBufferSize]);
 		this.lastExceptionRequestsLogEntries=new RingBuffer<>(new RequestLogEntry[configuration.lastExceptionRequestLogEntryBufferSize]);
 		this.lastRequestHandlerNotFoundLogEntries=new RingBuffer<>(new RequestHandlerNotFoundLogEntry[configuration.lastNotFoundBufferSize]);
@@ -398,7 +398,7 @@ public class HttpServer
 		{
 			trace.close(e);
 			servletResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
-			if (this.debug)
+			if (this.test)
 			{
 				e.printStackTrace();
 			}

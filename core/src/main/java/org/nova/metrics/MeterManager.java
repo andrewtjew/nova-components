@@ -11,7 +11,7 @@ public class MeterManager
 	final private HashMap<String, HashMap<String, LevelMeterBox>> levelMeterCategories;
 	final private HashMap<String, HashMap<String, RateMeterBox>> rateMeterCategories;
 	final private HashMap<String, HashMap<String, CountMeterBox>> countMeterCategories;
-	final private HashMap<String, HashMap<String, CountAverageRateMeterBox>> countAverageRateMeterCategories;
+	final private HashMap<String, HashMap<String, ValueRateMeterBox>> countAverageRateMeterCategories;
 
 	public MeterManager()
 	{
@@ -48,7 +48,7 @@ public class MeterManager
 				countMeters = new HashMap<>();
 				this.countMeterCategories.put(category, countMeters);
 			}
-			HashMap<String, CountAverageRateMeterBox> countAverageRateMeters = this.countAverageRateMeterCategories.get(category);
+			HashMap<String, ValueRateMeterBox> countAverageRateMeters = this.countAverageRateMeterCategories.get(category);
 			if (countAverageRateMeters == null)
 			{
 				countAverageRateMeters = new HashMap<>();
@@ -62,7 +62,7 @@ public class MeterManager
 			,HashMap<String, LevelMeterBox> levelMeters 
 			,HashMap<String, RateMeterBox> rateMeters 
 			,HashMap<String, CountMeterBox> countMeters
-			,HashMap<String, CountAverageRateMeterBox> countAverageRateMeters
+			,HashMap<String, ValueRateMeterBox> countAverageRateMeters
 			) throws Exception
 	{
 		Class<?> superClass = type.getSuperclass();
@@ -110,7 +110,7 @@ public class MeterManager
 					throw new Exception("Name conflict. Site=" + object.getClass().getName() + "." + field.getName());
 				}
 				field.setAccessible(true);
-				countAverageRateMeters.put(key, new CountAverageRateMeterBox(category, key, description,(ValueRateMeter) field.get(object)));
+				countAverageRateMeters.put(key, new ValueRateMeterBox(category, key, description,(ValueRateMeter) field.get(object)));
 			}
 		}
 	}

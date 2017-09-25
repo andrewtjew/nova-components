@@ -40,4 +40,13 @@ public class TopDoubleValues
         return value>=this.sorted.first();
             
     }
+    public boolean isInsideTop(double value)
+    {
+        if (this.sorted.size()==0)
+        {
+            return false;
+        }
+        return value>this.sorted.first();
+            
+    }
 }

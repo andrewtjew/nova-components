@@ -109,21 +109,13 @@ public class ValueRateSample
         return this.total;
     }
 
-    public long getMinNs()
+    public long getMin()
     {
         return this.min;
     }
-    public double getMinS()
-    {
-        return this.min/1.0e9;
-    }
-    public long getMaxNs()
+    public long getMax()
     {
         return this.max;
-    }
-    public double getMaxS()
-    {
-        return this.max/1.0e9;
     }
     
     

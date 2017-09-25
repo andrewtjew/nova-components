@@ -46,6 +46,7 @@ import org.nova.http.server.annotations.GET;
 import org.nova.http.server.annotations.POST;
 import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.QueryParam;
+import org.nova.metrics.RateSample;
 import org.nova.tracing.Trace;
 
 import com.google.common.base.Strings;
@@ -80,8 +81,9 @@ public class SessionOperatorPages<SESSION extends Session>
             long duration=System.currentTimeMillis()-session.getCreated();
             long idle=System.currentTimeMillis()-session.getLastAccess();
             Row row=new Row();
+            RateSample sample=session.getAccessRateMeter().sample();
             row.add(session.getToken(),session.getUser(),Utils.millisToLocalDateTimeString(session.getCreated()),Utils.millisToLocalDateTimeString(session.getLastAccess()),Utils.millisToDurationString(duration),Utils.millisToDurationString(idle)
-                    ,session.getAccessRateMeter().getCount(),String.format("%.2f",session.getAccessRateMeter().sampleRate(10)
+                    ,sample.getCount(),String.format("%.2f",sample.getRate()
                             ));
             /*
             row.addRemoveAndDetailButtons("window.location='"+new PathAndQueryBuilder("/operator/sessions/remove").addQuery("token", session.getToken()).toString()+"';"

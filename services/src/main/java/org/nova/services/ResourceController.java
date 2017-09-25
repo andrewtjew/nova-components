@@ -85,7 +85,7 @@ import org.nova.logging.LogDirectoryManager;
 import org.nova.metrics.ValueRateSample;
 import org.nova.metrics.CategoryMeters;
 import org.nova.metrics.ValueRateMeter;
-import org.nova.metrics.CountAverageRateMeterBox;
+import org.nova.metrics.ValueRateMeterBox;
 import org.nova.metrics.CountMeter;
 import org.nova.metrics.CountMeterBox;
 import org.nova.metrics.LevelMeter;

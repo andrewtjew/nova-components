@@ -1,6 +1,7 @@
 package org.nova.html.widgets;
 
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 import org.nova.html.elements.Element;
 import org.nova.html.elements.Inner;
@@ -86,6 +87,26 @@ public class Row extends tr
     {
         td data=returnAddInner(new td());
         data.addInner(new RowDetailButton(detailLocation));
+        return this;
+    }
+    public Row addInner(Element element)
+    {
+        super.addInner(element);
+        return this;
+    }
+    public Row setInner(Element element)
+    {
+        super.setInner(element);
+        return this;
+    }
+    public Row addInners(Element...elements)
+    {
+        super.addInners(elements);
+        return this;
+    }
+    public Row addInner(Object object)
+    {
+        super.addInner(object);
         return this;
     }
     /*

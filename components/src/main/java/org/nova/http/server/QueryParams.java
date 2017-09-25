@@ -6,10 +6,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.HttpRequest;
 
-public class QueryParameters
+public class QueryParams
 {
     final private HttpServletRequest request;
-    QueryParameters(HttpServletRequest request)
+    QueryParams(HttpServletRequest request)
     {
         this.request=request;
     }

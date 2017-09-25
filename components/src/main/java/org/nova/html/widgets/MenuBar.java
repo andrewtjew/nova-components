@@ -105,7 +105,7 @@ public class MenuBar extends Element
     
     private void write(ul ul,int level,ArrayList<Item> items)
     {
-        int longestSubMenu=0;
+        double longestSubMenu=0;
         if (level>0)
         {
             for (Item item:items)
@@ -121,7 +121,19 @@ public class MenuBar extends Element
                 }
             }
         }
-        longestSubMenu=longestSubMenu+2; //to be safe
+        if (longestSubMenu>20)
+        {
+            longestSubMenu=longestSubMenu*0.7+1;
+        }
+        if (longestSubMenu>15)
+        {
+            longestSubMenu=longestSubMenu*0.7+2;
+        }
+        else
+        {
+            longestSubMenu=longestSubMenu*0.8+2;
+        }
+            
         for (Item item:items)
         {
             li li=ul.returnAddInner(new li());
@@ -129,7 +141,8 @@ public class MenuBar extends Element
             ArrayList<Item> subItems=item.subItems;
             if ((subItems==null)&&(href==null))
             {
-                li.style("height:100%;padding:0px;"); //TODO: Works, but should go to css
+                //Seperator
+                li.style("height:2px;padding:0px;margin-top:0px;margin-left:0px;margin-right:0px;margin-bottom:6px;"); //TODO: Works, but should go to css
                 li.returnAddInner(new hr());
             }
             else
@@ -158,7 +171,7 @@ public class MenuBar extends Element
                 {
                     if (level>0)
                     {
-                        li.style("width:"+longestSubMenu*0.7+"em;");
+                        li.style("width:"+longestSubMenu+"em;");
                     }
                     ul subMenu=li.returnAddInner(new ul());
                     subMenu.class_("menu-level-"+(level+1));

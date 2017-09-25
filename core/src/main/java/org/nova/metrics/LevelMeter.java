@@ -3,12 +3,11 @@ package org.nova.metrics;
 public class LevelMeter
 {
 	private long level;
-	private long highestLevel;
-	private long highestLevelTimeStamp;
+	private long maxLevel;
+	private long maxLevelInstantMs;
 	
 	public LevelMeter()
 	{
-		this.highestLevelTimeStamp=System.currentTimeMillis();
 	}
 	
 	public void add(long value)
@@ -16,10 +15,10 @@ public class LevelMeter
 		synchronized (this)
 		{
 			this.level+=value;
-			if (this.level>=this.highestLevel)
+			if (this.level>=this.maxLevel)
 			{
-				this.highestLevel=level;
-				this.highestLevelTimeStamp=System.currentTimeMillis();
+				this.maxLevel=level;
+				this.maxLevelInstantMs=System.currentTimeMillis();
 			}
 		}
 	}
@@ -29,10 +28,10 @@ public class LevelMeter
 		synchronized (this)
 		{
 			this.level=value;
-			if (this.level>=this.highestLevel)
+			if (this.level>=this.maxLevel)
 			{
-				this.highestLevel=level;
-				this.highestLevelTimeStamp=System.currentTimeMillis();
+				this.maxLevel=level;
+				this.maxLevelInstantMs=System.currentTimeMillis();
 			}
 		}
 	}
@@ -42,10 +41,10 @@ public class LevelMeter
 		synchronized (this)
 		{
 			this.level++;
-			if (this.level>=this.highestLevel)
+			if (this.level>=this.maxLevel)
 			{
-				this.highestLevel=level;
-				this.highestLevelTimeStamp=System.currentTimeMillis();
+				this.maxLevel=level;
+				this.maxLevelInstantMs=System.currentTimeMillis();
 			}
 		}
 	}
@@ -58,40 +57,32 @@ public class LevelMeter
 		}
 	}
 
-	public long getMaximumLevel()
-	{
-		synchronized (this)
-		{
-			return highestLevel;
-		}
-	}
-
-	public long getHighestLevelTimeStamp()
-	{
-		synchronized (this)
-		{
-			return highestLevelTimeStamp;
-		}
-	}
-
-	public long getLevel()
-	{
-		synchronized (this)
-		{
-			return level;
-		}
-	}
-	
 	public void reset()
 	{
 		synchronized (this)
 		{
-			this.highestLevel=0;
-			this.highestLevelTimeStamp=System.currentTimeMillis();
-			if (this.level>=this.highestLevel)
+			this.maxLevel=0;
+			this.maxLevelInstantMs=System.currentTimeMillis();
+			if (this.level>=this.maxLevel)
 			{
-				this.highestLevel=level;
+				this.maxLevel=level;
 			}
 		}
 	}
+	
+	public LevelSample sample()
+	{
+	    synchronized (this)
+	    {
+	        return new LevelSample(this.level,this.maxLevel,this.maxLevelInstantMs);
+	    }
+	}
+
+	public long getLevel()
+    {
+        synchronized (this)
+        {
+            return this.level;
+        }
+    }
 }
