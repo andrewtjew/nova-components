@@ -16,13 +16,13 @@ public class MeterSnapshot
 	final private HashMap<String, HashMap<String, LevelMeterBox>> levelMeterCategories;
 	final private HashMap<String, HashMap<String, RateMeterBox>> rateMeterCategories;
 	final private HashMap<String, HashMap<String, CountMeterBox>> countMeterCategories;
-	final private HashMap<String, HashMap<String, ValueRateMeterBox>> valueRateMeterCategories;
+	final private HashMap<String, HashMap<String, LongRateMeterBox>> valueRateMeterCategories;
 
 	MeterSnapshot(
 			HashMap<String, HashMap<String, LevelMeterBox>> levelMeterCategories
 			,HashMap<String, HashMap<String, RateMeterBox>> rateMeterCategories
 			,HashMap<String, HashMap<String, CountMeterBox>> countMeterCategories
-			,HashMap<String, HashMap<String, ValueRateMeterBox>> valueRateMeterCategories)
+			,HashMap<String, HashMap<String, LongRateMeterBox>> valueRateMeterCategories)
 	{
 		this.levelMeterCategories=levelMeterCategories;
 		this.rateMeterCategories = rateMeterCategories;
@@ -87,18 +87,18 @@ public class MeterSnapshot
 		return tracks;
 	}
 
-	public ValueRateMeterBox[] getValueRateMeterBoxes()
+	public LongRateMeterBox[] getValueRateMeterBoxes()
 	{
 		int total = 0;
-		for (HashMap<String, ValueRateMeterBox> value : this.valueRateMeterCategories.values())
+		for (HashMap<String, LongRateMeterBox> value : this.valueRateMeterCategories.values())
 		{
 			total += value.size();
 		}
-		ValueRateMeterBox[] tracks = new ValueRateMeterBox[total];
+		LongRateMeterBox[] tracks = new LongRateMeterBox[total];
 		int index = 0;
-		for (HashMap<String, ValueRateMeterBox> value : this.valueRateMeterCategories.values())
+		for (HashMap<String, LongRateMeterBox> value : this.valueRateMeterCategories.values())
 		{
-			for (ValueRateMeterBox caller : value.values())
+			for (LongRateMeterBox caller : value.values())
 			{
 				tracks[index++] = caller;
 			}
@@ -139,11 +139,11 @@ public class MeterSnapshot
 			countMeterBoxes = new CountMeterBox[countMeters.size()];
 			countMeters.values().toArray(countMeterBoxes);
 		}
-		ValueRateMeterBox[] ValueRateMeterBoxes = null;
-		HashMap<String, ValueRateMeterBox> valueRateMeters = this.valueRateMeterCategories.get(category);
+		LongRateMeterBox[] ValueRateMeterBoxes = null;
+		HashMap<String, LongRateMeterBox> valueRateMeters = this.valueRateMeterCategories.get(category);
 		if (valueRateMeters != null)
 		{
-			ValueRateMeterBoxes = new ValueRateMeterBox[valueRateMeters.size()];
+			ValueRateMeterBoxes = new LongRateMeterBox[valueRateMeters.size()];
 			valueRateMeters.values().toArray(ValueRateMeterBoxes);
 		}
 		return new CategoryMeters(levelMeterBoxes,rateMeterBoxes, countMeterBoxes, ValueRateMeterBoxes);
@@ -168,7 +168,7 @@ public class MeterSnapshot
 	}
 
 
-	public HashMap<String, HashMap<String, ValueRateMeterBox>> getValueRateMeterCategories()
+	public HashMap<String, HashMap<String, LongRateMeterBox>> getValueRateMeterCategories()
 	{
 		return valueRateMeterCategories;
 	}

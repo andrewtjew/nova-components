@@ -7,7 +7,10 @@ public class Trace implements AutoCloseable
 	final private long created;
 	final private Trace parent;
 	final long start;
-	private long duration;
+    final TraceNode traceNode;
+    final private StackTraceElement[] createStackTrace;
+
+    private long duration;
 	private long wait;
 	private long waitStart;
 	private Throwable throwable;
@@ -17,8 +20,6 @@ public class Trace implements AutoCloseable
 	private Thread thread;
 	private String toLink;
 	private String fromLink;
-	TraceNode traceNode;
-	final private StackTraceElement[] createStackTrace;
 	private StackTraceElement[] closeStackTrace;
 	private TraceContext context;
 	
@@ -41,10 +42,7 @@ public class Trace implements AutoCloseable
 		{
 			this.createStackTrace=null;
 		}
-		if (this.context.enableTraceGraph)
-		{
-		    this.traceNode=traceManager.getTraceNode(category, parent);
-		}
+		this.traceNode=traceManager.getTraceNode(category, parent);
 	}
 	public Trace(TraceManager traceManager,Trace parent,String category,boolean waiting)
 	{
@@ -103,7 +101,7 @@ public class Trace implements AutoCloseable
 			return this.traceManager==null;
 		}
 	}
-	public long getCreated()
+	public long getCreatedMs()
 	{
 		return this.created;
 	}
@@ -154,16 +152,14 @@ public class Trace implements AutoCloseable
 				if (this.waiting)
 				{
 					this.wait+=System.nanoTime()-this.waitStart;
+					this.waiting=false;
 				}
 				else
 				{
 					this.duration=System.nanoTime()-this.start;
 				}
+                this.traceNode.update(this);
 				this.traceManager=null;
-				if (this.context.valueRateMeter!=null)
-				{
-				    this.context.valueRateMeter.update(System.nanoTime()-this.start);
-				}
 			}
 		}
 	}
@@ -183,6 +179,10 @@ public class Trace implements AutoCloseable
 	{
 		synchronized(this)
 		{
+		    if (this.traceManager==null)
+		    {
+		        return false;
+		    }
 			if (this.waiting)
 			{
 				return false;
@@ -196,6 +196,10 @@ public class Trace implements AutoCloseable
 	{
 		synchronized(this)
 		{
+            if (this.traceManager==null)
+            {
+                return false;
+            }
 			if (this.waiting==false)
 			{
 				return false;

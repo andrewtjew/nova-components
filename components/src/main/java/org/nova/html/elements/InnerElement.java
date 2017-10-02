@@ -35,7 +35,6 @@ public abstract class InnerElement<ELEMENT extends InnerElement<ELEMENT>> extend
     }
     public ELEMENT setInner(Element element)
     {
-        
         this.inners=null;
         this.inner=element;
         return (ELEMENT)this;

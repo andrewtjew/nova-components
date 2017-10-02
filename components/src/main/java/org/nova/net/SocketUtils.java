@@ -13,10 +13,12 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import org.nova.core.Utils;
 import org.nova.frameworks.ServerApplication;
 
 public class SocketUtils
 {
+    /*
     public static KeyManager[] getKeyManagers(ServerApplication application) throws Exception
     {
         String keyStorePath = application.getConfiguration().getValue("KeyManager.keyStorePath");
@@ -29,6 +31,7 @@ public class SocketUtils
         }
         return null;
     }
+    */
 
     public static KeyManager[] getKeyManagers(String keyStorePassword, String keyStorePath, String keyManagerPassword, String algorithm) throws Exception
     {
@@ -40,7 +43,7 @@ public class SocketUtils
             }
 
             KeyStore keyStore = KeyStore.getInstance("JKS");
-            try (FileInputStream inputStream = new FileInputStream(keyStorePath))
+            try (FileInputStream inputStream = new FileInputStream(Utils.toNativePath(keyStorePath)))
             {
                 keyStore.load(inputStream, keyStorePassword.toCharArray());
             }
@@ -52,6 +55,7 @@ public class SocketUtils
         return null;
     }
 
+    /*
     public static TrustManager[] getTrustManagers(ServerApplication application) throws Exception
     {
         String keyStorePath = application.getConfiguration().getValue("TrustManager.keyStorePath");
@@ -63,6 +67,7 @@ public class SocketUtils
         }
         return getTrustAllManagers();
     }
+    */
 
     public static TrustManager[] getTrustManagers(String keyStorePassword, String keyStorePath, String algorithm) throws Exception
     {
@@ -74,7 +79,7 @@ public class SocketUtils
             }
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(algorithm);
             KeyStore keyStore = KeyStore.getInstance("JKS");
-            try (FileInputStream inputStream = new FileInputStream(keyStorePath))
+            try (FileInputStream inputStream = new FileInputStream(Utils.toNativePath(keyStorePath)))
             {
                 keyStore.load(inputStream, keyStorePassword.toCharArray());
             }

@@ -10,7 +10,7 @@ import org.nova.html.tags.a;
 import org.nova.html.tags.td;
 import org.nova.html.tags.tr;
 
-public class Row extends tr
+public class Row extends tr implements Inner<Row>
 {
     public Row add(String...items)
     {

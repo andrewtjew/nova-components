@@ -1,8 +1,8 @@
 package org.nova.metrics;
 
-public class ValueRateSample
+public class LongRateSample
 {
-    ValueRateSample lastSample;
+    LongRateSample lastSample;
     final private long min;
     final private long minInstantMs;
     final private long max;
@@ -15,7 +15,7 @@ public class ValueRateSample
     final private long allTimeTotal;
     final private long allTimeCount;
 
-    public ValueRateSample(ValueRateSample lastSample, long min, long minInstantMs, long max, long maxInstantMs, long durationNs, long count, long total, double total2, long allTimeTotal,long allTimeCount)
+    public LongRateSample(LongRateSample lastSample, long min, long minInstantMs, long max, long maxInstantMs, long durationNs, long count, long total, double total2, long allTimeTotal,long allTimeCount)
     {
         this.lastSample = lastSample;
         this.min = min;
@@ -39,7 +39,7 @@ public class ValueRateSample
     {
         return this.allTimeTotal;
     }
-    public ValueRateSample getLastSample()
+    public LongRateSample getLastSample()
     {
         return this.lastSample;
     }
@@ -67,7 +67,7 @@ public class ValueRateSample
         {
             return 0;
         }
-        return (1.0e9*count)/this.durationNs;
+        return (1.0e9*this.count)/this.durationNs;
     }
     private double blend(double value,double last)
     {

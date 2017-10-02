@@ -40,6 +40,7 @@ import org.nova.logging.LogDirectoryManager;
 import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
 import org.nova.logging.SourceQueueLogger;
+import org.nova.logging.StatusBoard;
 import org.nova.metrics.MeterManager;
 import org.nova.operations.OperatorVariable;
 import org.nova.operations.OperatorVariableManager;
@@ -86,7 +87,7 @@ public abstract class ServerApplication
 		//Discover base directory. This is important to know for troubleshooting errors with file paths, so we output this info and we put this in the configuration. 
         File baseDirectory=new File(".");
         this.baseDirectory=baseDirectory.getCanonicalPath();
-        configuration.add("System.baseDirectory",this.baseDirectory,"The base directory");
+        CoreEnvironment.STATUS_BOARD.set("Application.baseDirectory",this.baseDirectory);
         System.out.println("base directory: "+this.baseDirectory);
 
         this.test=configuration.getBooleanValue("System.test",false);
@@ -242,13 +243,23 @@ public abstract class ServerApplication
 	
 	public void start() throws Throwable
 	{
+        try (Trace trace=new Trace(this.getTraceManager(),"postStart"))
+        {
+            preStart(trace);
+        }
+
         this.startTime=System.currentTimeMillis();
-        try (Trace trace=new Trace(this.getTraceManager(),"OnStart"))
+        try (Trace trace=new Trace(this.getTraceManager(),"onStart"))
         {
             onStart(trace);
         }
-        this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName); //build again as sub classes may have added more items to menubar
+        buildOperatorPageTemplate();
         startServers();
+
+        try (Trace trace=new Trace(this.getTraceManager(),"postStart"))
+        {
+            postStart(trace);
+        }
 	}
 
 	public DisruptorManager getDisruptorManager()
@@ -256,7 +267,14 @@ public abstract class ServerApplication
 	    return this.disruptorManager;
 	}
 	
+    public void preStart(Trace trace) throws Throwable
+    {
+    }
     public abstract void onStart(Trace parent) throws Throwable;
+
+    public void postStart(Trace trace) throws Throwable
+    {
+    }
     
     public HttpServer getPublicServer()
 	{
@@ -310,6 +328,12 @@ public abstract class ServerApplication
     {
         return this.menuBar;
     }
+
+    public void buildOperatorPageTemplate() throws Throwable
+    {
+        this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName); 
+    }
+    
     
     public OperatorPage buildOperatorPage(String title) throws Throwable
     {
@@ -369,6 +393,10 @@ public abstract class ServerApplication
     public CoreEnvironment getCoreEnvironment()
     {
         return this.coreEnvironment;
+    }
+    public StatusBoard getStatusBoard()
+    {
+        return this.coreEnvironment.getStatusBoard();
     }
 	public String getName()
 	{

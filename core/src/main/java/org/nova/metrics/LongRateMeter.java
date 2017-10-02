@@ -1,8 +1,8 @@
 package org.nova.metrics;
 
-public class ValueRateMeter 
+public class LongRateMeter 
 {
-    private ValueRateSample lastSample;
+    private LongRateSample lastSample;
     
     private long min;
     private long max;
@@ -17,11 +17,11 @@ public class ValueRateMeter
     private long allTimeCount;
     private double minimalResetDurationMs;
 
-	public ValueRateMeter()
+	public LongRateMeter()
 	{
 	    this.min=Long.MAX_VALUE;
 	    this.max=Long.MIN_VALUE;
-	    this.lastSample=new ValueRateSample(null, 0,0,0,0,0,0,0,0,this.allTimeTotal,this.allTimeCount);
+	    this.lastSample=new LongRateSample(null, 0,0,0,0,0,0,0,0,this.allTimeTotal,this.allTimeCount);
 	    this.markNs=System.nanoTime();
 	}
 	
@@ -55,7 +55,7 @@ public class ValueRateMeter
 	    }
 	}
 
-	public ValueRateSample sampleAndReset()
+	public LongRateSample sampleAndReset()
     {
         long nowNs=System.nanoTime();
         synchronized (this)
@@ -69,7 +69,7 @@ public class ValueRateMeter
             {
                 this.lastSample.lastSample=null;
             }
-            ValueRateSample sample=new ValueRateSample(this.lastSample, this.min, this.minInstantMs, this.max, this.maxInstantMs, durationNs, this.count, this.total, this.total2,this.allTimeTotal,this.allTimeCount);
+            LongRateSample sample=new LongRateSample(this.lastSample, this.min, this.minInstantMs, this.max, this.maxInstantMs, durationNs, this.count, this.total, this.total2,this.allTimeTotal,this.allTimeCount);
             this.lastSample=sample;
             
             this.min=Long.MAX_VALUE;
@@ -81,7 +81,7 @@ public class ValueRateMeter
             return sample;
         }
     }
-	public ValueRateSample sample()
+	public LongRateSample sample()
 	{
 	    synchronized(this)
 	    {
@@ -89,7 +89,7 @@ public class ValueRateMeter
 	    }
 	}
 	
-    public ValueRateSample sample(double minimalResetDurationS)
+    public LongRateSample sample(double minimalResetDurationS)
     {
         long nowNs=System.nanoTime();
         synchronized (this)
@@ -104,7 +104,7 @@ public class ValueRateMeter
             {
                 this.lastSample.lastSample=null;
             }
-            ValueRateSample result=new ValueRateSample(this.lastSample, this.min, this.minInstantMs, this.max, this.maxInstantMs, durationNs, this.count, this.total, this.total2,this.allTimeTotal,this.allTimeCount);
+            LongRateSample result=new LongRateSample(this.lastSample, this.min, this.minInstantMs, this.max, this.maxInstantMs, durationNs, this.count, this.total, this.total2,this.allTimeTotal,this.allTimeCount);
             if (durationNs>(long)(minimalResetDurationS*1.0e9))
             {
                 this.lastSample=result;

@@ -8,6 +8,7 @@ public class TopDoubleValues
 {
     final TreeSet<Double> sorted;
     final int count;
+    double total;
     public TopDoubleValues(int count)
     {
         this.count=count;
@@ -30,6 +31,11 @@ public class TopDoubleValues
             this.sorted.remove(this.sorted.first());
             this.sorted.add(value);
         }
+        this.total+=value;
+    }
+    public double getTotal()
+    {
+        return this.total;
     }
     public boolean isInTop(double value)
     {

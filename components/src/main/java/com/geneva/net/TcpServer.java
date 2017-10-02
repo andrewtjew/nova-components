@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.nova.logging.Logger;
-import org.nova.metrics.ValueRateMeter;
+import org.nova.metrics.LongRateMeter;
 import org.nova.test.Testing;
 import org.nova.testing.TestTraceClient;
 import org.nova.tracing.Trace;
@@ -30,8 +30,8 @@ public class TcpServer
 	final Connectable connectable;
 	final private HashMap<String,ClientConnection> clientConnections;
 	
-	final ValueRateMeter bytesSentMeter;
-	final ValueRateMeter bytesReceivedMeter;
+	final LongRateMeter bytesSentMeter;
+	final LongRateMeter bytesReceivedMeter;
 //	final CountMeter closeConnectionFailedMeter;
 //	final CountMeter closeConnectableFailedMeter;
 //	final CountMeter acceptConnectableFailedMeter;
@@ -45,8 +45,8 @@ public class TcpServer
 		this.executorService=executorService;
 		this.port=port;
 		this.receivable=receivable;
-		this.bytesSentMeter=new ValueRateMeter();
-		this.bytesReceivedMeter=new ValueRateMeter();
+		this.bytesSentMeter=new LongRateMeter();
+		this.bytesReceivedMeter=new LongRateMeter();
 		this.clientConnections=new HashMap<>();
 	}
 	

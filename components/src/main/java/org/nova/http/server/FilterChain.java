@@ -183,8 +183,11 @@ public class FilterChain
 			case TRACE:
 				parameters[i]=trace;
 				break;
-            case CHECKMAP:
-                parameters[i]=new QueryParams(request);
+            case QUERIES:
+                parameters[i]=new Queries(request);
+                break;
+            case CHECK:
+                parameters[i]=request.getParameter(parameterInfo.getName())!=null;
                 break;
 			default:
 				break;

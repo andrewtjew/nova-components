@@ -5,9 +5,9 @@ public class CategoryMeters
 	final private LevelMeterBox[] levelMeterBoxes;
 	final private RateMeterBox[] rateMeterBoxes;
 	final private CountMeterBox[] countMeterBoxes;
-	final private ValueRateMeterBox[] countAverageMeterBoxes;
+	final private LongRateMeterBox[] countAverageMeterBoxes;
 	
-	public CategoryMeters(LevelMeterBox[] levelMeterBoxes,RateMeterBox[] rateMeterBoxes,CountMeterBox[] countMeterBoxes,ValueRateMeterBox[] countAverageMeterBoxes)
+	public CategoryMeters(LevelMeterBox[] levelMeterBoxes,RateMeterBox[] rateMeterBoxes,CountMeterBox[] countMeterBoxes,LongRateMeterBox[] countAverageMeterBoxes)
 	{
 		this.levelMeterBoxes=levelMeterBoxes;
 		this.rateMeterBoxes=rateMeterBoxes;
@@ -33,7 +33,7 @@ public class CategoryMeters
 		return rateMeterBoxes;
 	}
 
-	public ValueRateMeterBox[] getCountAverageMeterBoxes()
+	public LongRateMeterBox[] getCountAverageMeterBoxes()
 	{
 		return countAverageMeterBoxes;
 	}

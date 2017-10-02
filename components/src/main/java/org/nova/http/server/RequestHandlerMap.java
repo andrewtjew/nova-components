@@ -15,6 +15,7 @@ import javax.servlet.http.Cookie;
 
 import org.nova.core.Utils;
 import org.nova.http.client.PathAndQueryBuilder;
+import org.nova.http.server.annotations.CheckParam;
 import org.nova.http.server.annotations.ContentDecoders;
 import org.nova.http.server.annotations.ContentEncoders;
 import org.nova.http.server.annotations.ContentParam;
@@ -414,8 +415,8 @@ class RequestHandlerMap
 			PathParam pathParam = null;
 			QueryParam queryParam = null;
 			StateParam stateParam = null;
+			CheckParam checkParam=null;
 			
-
 			for (Annotation annotation : parameterAnnotations)
 			{
 				Class<?> type = annotation.annotationType();
@@ -451,6 +452,10 @@ class RequestHandlerMap
                 {
                     stateParam = (StateParam) annotation;
                 }
+                else if (type==CheckParam.class)
+                {
+                    checkParam=(CheckParam)annotation;
+                }
 			}
 
 			// Check if there are multiple param annotations
@@ -479,13 +484,17 @@ class RequestHandlerMap
 			{
 				params.add(stateParam);
 			}
+            if (checkParam != null)
+            {
+                params.add(checkParam);
+            }
 			if (params.size() > 1)
 			{
 				throw new Exception("Only one param annotation allowed. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
 			}
 			else if (params.size() == 0)
 			{
-				if ((parameterType != Context.class)&&(parameterType!=Trace.class)&&(parameterType!=QueryParams.class))
+				if ((parameterType != Context.class)&&(parameterType!=Trace.class)&&(parameterType!=Queries.class))
 				{
 					throw new Exception("Annotation required for param. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
 				}
@@ -496,18 +505,19 @@ class RequestHandlerMap
 			{
 				if (defaultValue != null)
 				{
-					throw new Exception("@DefaultValue annotation not allowed for Context parameters. Site=" + object.getClass().getCanonicalName() + "."
+					throw new Exception("@DefaultValue annotation not allowed for Context parameter. Site=" + object.getClass().getCanonicalName() + "."
 							+ method.getName());
 				}
 				parameterInfos.add(new ParameterInfo(ParameterSource.CONTEXT, null, null, parameterIndex, parameterType, null));
 			}
-            else if (parameterType==QueryParams.class)
+            else if (parameterType==Queries.class)
             {
                 if (defaultValue != null)
                 {
-                    throw new Exception("@DefaultValue annotation not allowed with @StateParam annotation. Site=" + method.getName());
+                    throw new Exception("@DefaultValue annotation not allowed with @QueryParams annotation. Site=" + object.getClass().getCanonicalName() + "."
+                            + method.getName());
                 }
-                parameterInfos.add(new ParameterInfo(ParameterSource.CHECKMAP, null, null, parameterIndex, parameterType, null));
+                parameterInfos.add(new ParameterInfo(ParameterSource.QUERIES, null, null, parameterIndex, parameterType, null));
             }
 			else if (contentParam != null)
 			{
@@ -568,6 +578,20 @@ class RequestHandlerMap
 				}
 				parameterInfos.add(new ParameterInfo(ParameterSource.HEADER, headerParam, headerParam.value(), parameterIndex, parameterType,
 						getDefaultValue(method, defaultValue, parameterType)));
+			}
+			else if (checkParam!=null)
+			{
+                if (defaultValue != null)
+                {
+                    throw new Exception("@DefaultValue annotation not allowed with @CheckParam annotation. Site=" + object.getClass().getCanonicalName() + "."
+                            + method.getName());
+                }
+			    if (parameterType!=boolean.class)
+			    {
+                    throw new Exception("Only the boolean type is allowed for CheckParam parameter. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
+			    }
+                parameterInfos.add(new ParameterInfo(ParameterSource.CHECK, checkParam, checkParam.value(), parameterIndex, parameterType,
+                        null));
 			}
 		}
 

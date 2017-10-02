@@ -1,12 +1,12 @@
 package org.nova.concurrent;
 
-import org.nova.metrics.ValueRateMeter;
+import org.nova.metrics.LongRateMeter;
 
 public class Semaphore
 {
 	final private Object lock;
 	final private int count;
-	private ValueRateMeter meter=new ValueRateMeter();
+	private LongRateMeter meter=new LongRateMeter();
 	
 	private int running;
 	private int waiters;

@@ -33,7 +33,9 @@ import org.nova.core.Utils;
 import org.nova.flow.Tapper;
 import org.nova.html.operator.Menu;
 import org.nova.html.properties.Color;
+import org.nova.html.properties.Size;
 import org.nova.html.properties.Style;
+import org.nova.html.properties.unit;
 import org.nova.html.tags.a;
 import org.nova.html.tags.br;
 import org.nova.html.tags.button_button;
@@ -55,6 +57,7 @@ import org.nova.html.tags.link;
 import org.nova.html.tags.meta;
 import org.nova.html.tags.p;
 import org.nova.html.tags.span;
+import org.nova.html.tags.strong;
 import org.nova.html.tags.style;
 import org.nova.html.tags.td;
 import org.nova.html.tags.textarea;
@@ -85,7 +88,6 @@ import org.nova.http.client.PathAndQueryBuilder;
 import org.nova.http.client.TextClient;
 import org.nova.http.client.TextResponse;
 import org.nova.http.server.CSharpClassWriter;
-import org.nova.http.server.QueryParams;
 import org.nova.http.server.ContentDecoder;
 import org.nova.http.server.ContentEncoder;
 import org.nova.http.server.ContentReader;
@@ -100,6 +102,7 @@ import org.nova.http.server.JSONContentWriter;
 import org.nova.http.server.JSONPatchContentReader;
 import org.nova.http.server.ParameterInfo;
 import org.nova.http.server.ParameterSource;
+import org.nova.http.server.Queries;
 import org.nova.http.server.RequestHandler;
 import org.nova.http.server.RequestHandlerNotFoundLogEntry;
 import org.nova.http.server.RequestLogEntry;
@@ -110,6 +113,7 @@ import org.nova.html.elements.FormElement;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.elements.InnerElement;
 import org.nova.html.enums.http_equiv;
+import org.nova.http.server.annotations.CheckParam;
 import org.nova.http.server.annotations.ContentDecoders;
 import org.nova.http.server.annotations.ContentEncoders;
 import org.nova.http.server.annotations.ContentReaders;
@@ -128,12 +132,14 @@ import org.nova.logging.LogDirectoryManager;
 import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
 import org.nova.logging.SourceQueueLogger;
-import org.nova.metrics.ValueRateSample;
+import org.nova.logging.StatusEntry;
+import org.nova.metrics.LongRateSample;
 import org.nova.metrics.CategoryMeters;
-import org.nova.metrics.ValueRateMeter;
-import org.nova.metrics.ValueRateMeterBox;
+import org.nova.metrics.LongRateMeter;
+import org.nova.metrics.LongRateMeterBox;
 import org.nova.metrics.CountMeter;
 import org.nova.metrics.CountMeterBox;
+import org.nova.metrics.TraceSample;
 import org.nova.metrics.LevelMeter;
 import org.nova.metrics.LevelMeterBox;
 import org.nova.metrics.LevelSample;
@@ -144,15 +150,15 @@ import org.nova.metrics.RateMeterBox;
 import org.nova.metrics.RateSample;
 import org.nova.metrics.TopDoubleValues;
 import org.nova.metrics.TopLongValues;
+import org.nova.metrics.TraceMeter;
 import org.nova.operations.OperatorVariable;
 import org.nova.security.Vault;
 import org.nova.test.Testing;
 import org.nova.testing.TestTraceClient;
+import org.nova.tracing.CategorySample;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
 import org.nova.tracing.TraceNode;
-import org.nova.tracing.TraceNodeSample;
-import org.nova.tracing.TraceSample;
 
 import com.google.common.base.Strings;
 
@@ -211,22 +217,6 @@ public class ServerOperatorPages
         }
     }
 
-    final static TitleText TRACE_NUMBER_COLUMN=new TitleText("Trace number","#");
-    final static TitleText TRACE_CATEGORY_COLUMN=new TitleText("Trace category","Category");
-    final static TitleText TOTAL_DURATION_COLUMN=new TitleText("Total duration in milliseconds","Total &#x23F1;");
-    final static TitleText TOTAL_PERCENTAGE_DURATION_COLUMN=new TitleText("Total duration in milliseconds as percentage","Total % &#x23F1;");
-    final static TitleText TOTAL_WAIT_COLUMN=new TitleText("Total wait duration in milliseconds","Total &#8987;");
-    final static TitleText MIN_DURATION_COLUMN=new TitleText("Minimum duration in millisecond and last occurrance instant","Min &#x23F1;");
-    final static TitleText MAX_DURATION_COLUMN=new TitleText("Maximum duration in milliseconds and last occurance instant","Max &#x23F1;");
-    final static TitleText AVERAGE_DURATION_COLUMN=new TitleText("Average duration in milliseconds","Ave &#x23F1;");
-    final static TitleText MIN_WAIT_COLUMN=new TitleText("Minimum wait duration in milliseconds and last occurrance instant","Min &#8987;");
-    final static TitleText MAX_WAIT_COLUMN=new TitleText("Maximum wait duration in milliseconds and last occurrance instant","Max &#8987;");
-    final static TitleText AVERAGE_WAIT_COLUMN=new TitleText("Average wait duration in milliseconds","Ave &#8987;");
-
-    final static TitleText SAMPLE_COUNT_COLUMN=new TitleText("Sample count","Count");
-    final static TitleText TRACE_ROOT_COLUMN=new TitleText("Root of the trace graph","Root");
-    final static TitleText TRACE_NODE_COLUMN=new TitleText("The number of times the trace category occurs as nodes in the trace graph","&#9738;");
-    final static TitleText EXCEPTION_COUNT_COLUMN=new TitleText("Number of exceptions","&#9888;");
     final static String WARNING="&#9888;";
     
     public final ServerApplication serverApplication;
@@ -249,6 +239,7 @@ public class ServerOperatorPages
 
         MenuBar menuBar=serverApplication.getMenuBar();
         menuBar.add("/operator/application/configuration","Environment","Configuration");
+        menuBar.add("/operator/environment/statusBoard","Environment","Status Board");
         menuBar.addSeparator("Environment");       
         menuBar.add("/operator/application/futures","Environment","Futures");
         menuBar.add("/operator/application/timers","Environment","Timer Tasks");
@@ -260,20 +251,28 @@ public class ServerOperatorPages
         menuBar.addSeparator("Environment");       
         menuBar.add("/operator/exception","Environment","Startup Exception");
 
-        menuBar.add("/operator/tracing/currentTraceSummary","Tracing","Current Trace Summary");
-        menuBar.add("/operator/tracing/currentNonWaitingTraceSummary","Tracing","Current Non Waiting Trace Summary");
-        menuBar.add("/operator/tracing/currentTraces","Tracing","Current Trace Details");
+        menuBar.add("/operator/tracing/sampleCurrent?excludeWaiting=false","Tracing","Sample Current Traces");
+        menuBar.add("/operator/tracing/sampleCurrent?excludeWaiting=true","Tracing","Sample Current Non Waiting Traces");
+//        menuBar.add("/operator/tracing/currentTraceSummary","Tracing","Current Trace Stats");
+//        menuBar.add("/operator/tracing/currentNonWaitingTraceSummary","Tracing","Current Non Waiting Trace Stats");
+        menuBar.add("/operator/tracing/currentTraces","Tracing","Current Traces");
         menuBar.addSeparator("Tracing");       
-        menuBar.add("/operator/tracing/lastStats","Tracing","Last Trace Stats");
+        menuBar.add("/operator/tracing/sampleLast","Tracing","Sample Last Traces");
+        menuBar.add("/operator/tracing/sampleAndResetLast","Tracing","Sample And Reset Last Traces");
+        menuBar.add("/operator/tracing/sampleLastTraceBuffer","Tracing","Sample Last Trace Buffer");
         menuBar.add("/operator/tracing/lastTraces","Tracing","Last Traces");
         menuBar.add("/operator/tracing/lastExceptions","Tracing","Last Traces with Exceptions");
         menuBar.addSeparator("Tracing");
-        menuBar.add("/operator/tracing/traceGraph","Tracing","Trace Graph");
-        menuBar.add("/operator/tracing/traceRoots","Tracing","Root Categories");
-        menuBar.add("/operator/tracing/allCategories","Tracing","All Categories");
+        menuBar.add("/operator/tracing/sampleAll","Tracing","Sample All Trace Categories");
         menuBar.addSeparator("Tracing");
-        menuBar.add("/operator/tracing/watchList","Tracing","Set Watch List Categories");
-        menuBar.add("/operator/tracing/watchListLastTraces","Tracing","Watch List Last Traces");
+        menuBar.add("/operator/tracing/watchList","Tracing","Set Watch Categories");
+        menuBar.add(false,"/operator/tracing/sampleWatch","Tracing","Sample Watch Traces");
+        menuBar.add(false,"/operator/tracing/sampleAndResetWatch","Tracing","Sample And Reset Watch Traces");
+        menuBar.add(false,"/operator/tracing/sampleWatchTraceBuffer","Tracing","Sample Watch Trace Buffer");
+        menuBar.add(false,"/operator/tracing/watchListLastTraces","Tracing","Last Watch Traces");
+        menuBar.addSeparator("Tracing");
+        menuBar.add("/operator/tracing/traceGraph","Tracing","Trace Graph");
+        menuBar.add("/operator/tracing/traceRoots","Tracing","Trace Roots");
         menuBar.addSeparator("Tracing");
         menuBar.add("/operator/tracing/stats","Tracing","TraceManager","Stats");
         menuBar.add("/operator/tracing/settings","Tracing","TraceManager","Settings");
@@ -339,7 +338,23 @@ public class ServerOperatorPages
         for (Future<?> item : array)
         {
             table.addBodyRowItems(item.getTrace().getCategory(),item.getTrace().getNumber()
-                    ,Utils.millisToNiceDurationString((now-item.getTrace().getCreated())),item.getWaiting(),item.getExecuting(),item.getCompleted());
+                    ,Utils.millisToNiceDurationString((now-item.getTrace().getCreatedMs())),item.getWaiting(),item.getExecuting(),item.getCompleted());
+        }
+        return page;
+    }
+
+    @GET
+    @Path("/operator/environment/statusBoard")
+    public Element statusBoard() throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Status Board");
+        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
+        table.lengthMenu(-1,20,40,60);
+
+        table.setHeadRowItems("Name","Value","Created","Count","Source");
+        for (StatusEntry item : this.serverApplication.getStatusBoard().getStatusEntries())
+        {
+            table.addBodyRowItems(item.getName(),item.getValue(),Utils.millisToLocalDateTime(item.getCreatedMs()),item.getCount(),item.getSource());
         }
         return page;
     }
@@ -589,7 +604,7 @@ public class ServerOperatorPages
                 table.addBodyRowItems(box.getName(),meter.getCount(),box.getDescription());
             }
         }
-        ValueRateMeterBox[] countAverageRateBoxes = snapshot.getValueRateMeterBoxes();
+        LongRateMeterBox[] countAverageRateBoxes = snapshot.getValueRateMeterBoxes();
         if (countAverageRateBoxes.length>0)
         {
             Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"CountAverageRate Meters"));
@@ -598,10 +613,10 @@ public class ServerOperatorPages
                     .addWithTitle("StdDev", "Standard Deviation")
                     .addWithTitle("Rate", "per second")
                     .add("Count","Total","Description"));
-            for (ValueRateMeterBox box : countAverageRateBoxes)
+            for (LongRateMeterBox box : countAverageRateBoxes)
             {
-                ValueRateMeter meter = box.getMeter();
-                ValueRateSample result = meter.sample();
+                LongRateMeter meter = box.getMeter();
+                LongRateSample result = meter.sample();
                 table.addBodyRowItems(box.getName(),String.format("%.4f", result != null ? result.getAverage() : "-")
                         ,String.format("%.4f", result != null ? result.getStandardDeviation() : "-")
                         ,String.format("%.4f", result != null ? result.getRate() : "-")
@@ -670,7 +685,7 @@ public class ServerOperatorPages
                 table.addBodyRowItems(box.getName(),meter.getCount(),box.getDescription());
             }
         }
-        ValueRateMeterBox[] countAverageRateBoxes = categories.getCountAverageMeterBoxes();
+        LongRateMeterBox[] countAverageRateBoxes = categories.getCountAverageMeterBoxes();
         if (countAverageRateBoxes.length>0)
         {
             Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"CountAverageRate Meters"));
@@ -679,10 +694,10 @@ public class ServerOperatorPages
                     .addWithTitle("StdDev", "Standard Deviation")
                     .addWithTitle("Rate", "per second")
                     .add("Count","Total","Description"));
-            for (ValueRateMeterBox box : countAverageRateBoxes)
+            for (LongRateMeterBox box : countAverageRateBoxes)
             {
-                ValueRateMeter meter = box.getMeter();
-                ValueRateSample result  = meter.sample();
+                LongRateMeter meter = box.getMeter();
+                LongRateSample result  = meter.sample();
                 table.addBodyRowItems(box.getName(),String.format("%.4f", result  != null ? result .getAverage() : "-")
                         ,String.format("%.4f", result  != null ? result .getStandardDeviation() : "-")
                         ,String.format("%.4f", result  != null ? result .getRate() : "-")
@@ -715,10 +730,10 @@ public class ServerOperatorPages
                 add(new TitleText(trace.getCategory(),80)).
                 add(new TitleText(trace.getDetails(),80)).
                 add(
-                Utils.millisToLocalDateTime(trace.getCreated()),
-                formatDurationNsToMs(trace.getActiveNs()),
-                formatDurationNsToMs(trace.getWaitNs()),
-                formatDurationNsToMs(trace.getDurationNs()),
+                Utils.millisToLocalDateTime(trace.getCreatedMs()),
+                formatNsToMs(trace.getActiveNs()),
+                formatNsToMs(trace.getWaitNs()),
+                formatNsToMs(trace.getDurationNs()),
                 trace.isWaiting(),
                 trace.getThread().getName()
                 ).onclick("window.location='"+new PathAndQueryBuilder("./activeTrace").addQuery("number", trace.getNumber()).toString()+"'")
@@ -731,7 +746,7 @@ public class ServerOperatorPages
     public Element activeTrace(@QueryParam("number") long number) throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Active Trace");
-        Trace[] traces = this.serverApplication.getTraceManager().getActiveSnapshot();
+        Trace[] traces = this.serverApplication.getTraceManager().getCurrentTraces();
         Trace found = null;
         for (Trace trace : traces)
         {
@@ -802,7 +817,7 @@ public class ServerOperatorPages
     public Element currentTraces() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Current Trace Summary");
-        Trace[] traces = this.serverApplication.getTraceManager().getActiveSnapshot();
+        Trace[] traces = this.serverApplication.getTraceManager().getCurrentTraces();
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         table.setHeadRow(new Row().add("#","Category","Thread").addWithTitle("Active", "milliseconds").addWithTitle("Wait", "milliseconds").addWithTitle("Duration", "milliseconds").add("Waiting","Created",""));
         for (Trace trace : traces)
@@ -812,11 +827,11 @@ public class ServerOperatorPages
                     .add(new TitleText(trace.getCategory(),60))
                     .add(
                             trace.getThread().getName(),
-                            formatDurationNsToMs(trace.getActiveNs()),
-                            formatDurationNsToMs(trace.getWaitNs()),
-                            formatDurationNsToMs(trace.getDurationNs()),
+                            formatNsToMs(trace.getActiveNs()),
+                            formatNsToMs(trace.getWaitNs()),
+                            formatNsToMs(trace.getDurationNs()),
                             trace.isWaiting(),
-                            Utils.millisToLocalDateTime(trace.getCreated()));
+                            Utils.millisToLocalDateTime(trace.getCreatedMs()));
             row.addDetailButton(new PathAndQueryBuilder("./activeTrace").addQuery("number", trace.getNumber()).toString());
             table.addBodyRow(row);
         }
@@ -828,7 +843,7 @@ public class ServerOperatorPages
     public Element currentNonWaitingTraces() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Current Non Waiting Trace Summary");
-        Trace[] traces = this.serverApplication.getTraceManager().getActiveSnapshot();
+        Trace[] traces = this.serverApplication.getTraceManager().getCurrentTraces();
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         table.setHeadRow(new Row().add("#","Category","Details","Thread").addWithTitle("Active", "milliseconds").addWithTitle("Wait", "milliseconds").addWithTitle("Duration", "milliseconds").add("Waiting","Created",""));
         for (Trace trace : traces)
@@ -843,18 +858,19 @@ public class ServerOperatorPages
                     .add(new TitleText(trace.getDetails(),60))
                     .add(
                             trace.getThread().getName(),
-                            formatDurationNsToMs(trace.getActiveNs()),
-                            formatDurationNsToMs(trace.getWaitNs()),
-                            formatDurationNsToMs(trace.getDurationNs()),
+                            formatNsToMs(trace.getActiveNs()),
+                            formatNsToMs(trace.getWaitNs()),
+                            formatNsToMs(trace.getDurationNs()),
                             trace.isWaiting(),
-                            Utils.millisToLocalDateTime(trace.getCreated()));
+                            Utils.millisToLocalDateTime(trace.getCreatedMs()));
             row.addDetailButton(new PathAndQueryBuilder("./activeTrace").addQuery("number", trace.getNumber()).toString());
             table.addBodyRow(row);
         }
         return page;
     }
 
-    private Element formatCategory(TraceSample item)
+    /*
+    private Element formatCategory(CategoryTraceSample item)
     {
         span span=new span();
         String category=item.getCategory();
@@ -874,136 +890,148 @@ public class ServerOperatorPages
         }
         return span;
     }
+    */
     
     static String format_3(double value)
     {
         return String.format("%.3f", value);
     }
     
-    @GET
-    @Path("/operator/tracing/lastStats")
-    public Element lastStats() throws Throwable
+    static String format_2(double value)
     {
-        OperatorPage page=this.serverApplication.buildOperatorPage("Last Trace Stats");
-        TraceSample[] array = this.serverApplication.getTraceManager().sampleTraceMeters();
+        return String.format("%.2f", value);
+    }
+
+    @GET
+    @Path("/operator/tracing/sampleCurrent")
+    public Element sampleCurrent(@QueryParam("excludeWaiting") boolean excludeWaiting) throws Throwable
+    {
+        String heading=excludeWaiting?"Current Non Waiting Trace Samples":"Current Trace Samples";
+        OperatorPage page=this.serverApplication.buildOperatorPage(heading);
+        CategorySample[] samples=this.serverApplication.getTraceManager().sampleCurrentTraceCategories(excludeWaiting);
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
 
-        table.setHeadRow(new Row()
-                .add(TRACE_CATEGORY_COLUMN)
-                .addWithTitle("Rate", "1/seconds")
-                .add(SAMPLE_COUNT_COLUMN)
-                .add(AVERAGE_DURATION_COLUMN)
-                .add(TOTAL_DURATION_COLUMN)
-                .add(TOTAL_PERCENTAGE_DURATION_COLUMN)
-                .addWithTitle("Stddev", "Standard deviation in milliseconds")
-                .addWithTitle("Min", "Minimum duration in milliseconds")
-                .addWithTitle("Max", "Maximum duration in milliseconds")
-                .add("")
-                );
+        Row row=new Row();
+        addTraceSampleColumns(row);
+        row.add("");
+        table.setHeadRow(row);
 
-        long total=0;
-        int tops;
-        if (array.length>20)
+        SlowTraceSampleDetector detector=new SlowTraceSampleDetector(samples.length);
+        for (CategorySample sample:samples)
         {
-            tops=5;
+            detector.update(sample.getSample());
         }
-        else if (array.length>1)
+
+        for (CategorySample sample:samples)
         {
-            tops=1;
-        }
-        else 
-        {
-            tops=0;
-        }
-        TopLongValues topCounts=new TopLongValues(tops);
-        TopDoubleValues topAverages=new TopDoubleValues(tops);
-        TopLongValues topTotals=new TopLongValues(tops);
-        TopDoubleValues topOuts=new TopDoubleValues(tops);
-
-        for (TraceSample item : array)
-        {
-            ValueRateSample sample = item.getSample();
-            total+=sample.getTotal();
-            topCounts.update(sample.getCount());
-            topAverages.update(sample.getAverage());
-            topTotals.update(sample.getTotal());
-            double out=sample.getMax()-sample.getAverage();
-            if (sample.getStandardDeviation()>0)
-            {
-                out=out/sample.getStandardDeviation();
-            }
-            else
-            {
-                out=0;
-            }
-            topOuts.update(out);
-        }
-        
-        
-        for (TraceSample item : array)
-        {
-            ValueRateSample sample = item.getSample();
-            
-            double percentage=sample.getTotal()*100.0/total;
-            Row row=new Row().
-                    add(new TitleText(item.getCategory(),80)).
-                    add(format_3(sample.getRate()));
-            Style attentionStyle=new Style().background_color(Color.rgb(255, 255, 192));
-            if (topCounts.isInsideTop(sample.getCount()))
-            {
-                row.addInner(new td().style(attentionStyle).addInner(sample.getCount()));
-            }
-            else
-            {
-                row.add(sample.getCount());
-            }
-            if (topAverages.isInsideTop(sample.getAverage()))
-            {
-                row.addInner(new td().style(attentionStyle).addInner(formatDurationNsToMs(sample.getAverage())));
-            }
-            else
-            {
-                row.add(formatDurationNsToMs(sample.getAverage()));
-            }
-            if (topTotals.isInsideTop(sample.getTotal()))
-            {
-                row.addInner(new td().style(attentionStyle).addInner(formatDurationNsToMs(sample.getTotal())));
-            }
-            else
-            {
-                row.add(formatDurationNsToMs(sample.getTotal()));
-            }
-            row.add(format_3(percentage));
-            row.add(formatDurationNsToMs(sample.getStandardDeviation()));
-            row.add(new TitleText(Utils.millisToLocalDateTimeString(sample.getMinInstantMs()),format_3(sample.getMin()/1.0e6)));
-
-            double out=sample.getMax()-sample.getAverage();
-            if (sample.getStandardDeviation()>0)
-            {
-                out=out/sample.getStandardDeviation();
-            }
-            else
-            {
-                out=0;
-            }
-            if ((out>0)&&(topOuts.isInsideTop(out)))
-            {
-                row.addInner(new td().style(attentionStyle).addInner(new TitleText(Utils.millisToLocalDateTimeString(sample.getMaxInstantMs()),format_3(sample.getMax()/1.0e6))));
-            }
-            else
-            {
-                row.add(new TitleText(Utils.millisToLocalDateTimeString(sample.getMaxInstantMs()),format_3(sample.getMax()/1.0e6)));
-
-            }
-                    
-            
-
-            row.addDetailButton(new PathAndQueryBuilder("./trace").addQuery("category", item.getCategory()).toString());
-
+            row=new Row();
+            row.add(new TitleText(sample.getCategory(),80));
+            writeTraceSample(detector,row,sample.getSample());
+            String location=new PathAndQueryBuilder("/operator/tracing/sampleCurrent/category").addQuery("category", sample.getCategory()).toString();
+            row.addDetailButton(location);
             table.addBodyRow(row);
+
         }
         return page;
     }
+    @GET
+    @Path("/operator/tracing/sampleLast")
+    public Element sampleLast() throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Sample Last Traces");
+        CategorySample[] samples=this.serverApplication.getTraceManager().sampleLastCategories();
+        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
+
+        Row row=new Row();
+        addTraceSampleColumns(row);
+        row.add("");
+        table.setHeadRow(row);
+
+        SlowTraceSampleDetector detector=new SlowTraceSampleDetector(samples.length);
+        for (CategorySample sample:samples)
+        {
+            detector.update(sample.getSample());
+        }
+
+        for (CategorySample sample:samples)
+        {
+            row=new Row();
+            row.add(new TitleText(sample.getCategory(),80));
+            writeTraceSample(detector,row,sample.getSample());
+            String location=new PathAndQueryBuilder("./trace").addQuery("category", sample.getCategory()).toString();
+            row.addDetailButton(location);
+            table.addBodyRow(row);
+
+        }
+        return page;
+    }
+
+    @GET
+    @Path("/operator/tracing/sampleAndResetLast")
+    public Element sampleAndResetLast() throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Sample And Reset Last Traces");
+        CategorySample[] samples=this.serverApplication.getTraceManager().sampleAndResetLastCategories();
+        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
+
+        Row row=new Row();
+        addTraceSampleColumns(row);
+        row.add("");
+        table.setHeadRow(row);
+
+        SlowTraceSampleDetector detector=new SlowTraceSampleDetector(samples.length);
+        for (CategorySample sample:samples)
+        {
+            detector.update(sample.getSample());
+        }
+
+        for (CategorySample sample:samples)
+        {
+            row=new Row();
+            row.add(new TitleText(sample.getCategory(),80));
+            writeTraceSample(detector,row,sample.getSample());
+            String location=new PathAndQueryBuilder("./trace").addQuery("category", sample.getCategory()).toString();
+            row.addDetailButton(location);
+            table.addBodyRow(row);
+
+        }
+        return page;
+    }
+
+    @GET
+    @Path("/operator/tracing/sampleLastTraceBuffer")
+    public Element sampleLastTraceBuffer() throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Sample Last Trace Buffer");
+            
+        CategorySample[] samples=this.serverApplication.getTraceManager().sampleLastTraces();
+        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
+
+        Row row=new Row();
+        addTraceSampleColumns(row);
+        row.add("");
+        table.setHeadRow(row);
+
+        SlowTraceSampleDetector detector=new SlowTraceSampleDetector(samples.length);
+        for (CategorySample sample:samples)
+        {
+            detector.update(sample.getSample());
+        }
+
+        for (CategorySample sample:samples)
+        {
+            row=new Row();
+            row.add(new TitleText(sample.getCategory(),80));
+            writeTraceSample(detector,row,sample.getSample());
+            String location=new PathAndQueryBuilder("./trace").addQuery("category", sample.getCategory()).toString();
+            row.addDetailButton(location);
+            table.addBodyRow(row);
+
+        }
+        return page;
+    }
+    
+    
 
     void buildCategories(HashMap<String,Boolean> categories, Entry<String, TraceNode> entry)
     {
@@ -1023,15 +1051,16 @@ public class ServerOperatorPages
     @Path("/operator/tracing/watchList")
     public Element traceWatchList() throws Throwable
     {
-        OperatorPage page=this.serverApplication.buildOperatorPage("Set Watch List Categories");
+        OperatorPage page=this.serverApplication.buildOperatorPage("Set Watch Categories");
         TraceManager traceManager=this.serverApplication.getTraceManager();
-        if (traceManager.isEnableWatchListLastTraces())
+        String legendText;
+        if (traceManager.isEnableLastTraceWatching())
         {
-            page.content().addInner("Watch list is enabled.");
+            legendText="Select categories for watching - Trace watching is enabled.";
         }
         else
         {
-            page.content().addInner("Watch list is disabled.");
+            legendText="Select categories for watching - Trace watching is currently disabled.";
         }
                 
         Map<String,TraceNode> roots=traceManager.getTraceGraphRootsSnapshot();
@@ -1046,7 +1075,7 @@ public class ServerOperatorPages
         }
         form_post form=page.content().returnAddInner(new form_post()).action("/operator/tracing/watchList/set");
         fieldset fieldset=form.returnAddInner(new fieldset());
-        fieldset.addInner(new legend().addInner("Select Categories to Watch"));
+        fieldset.addInner(new legend().addInner(legendText));
         DataTable table=fieldset.returnAddInner(new DataTable(page.head()));
         table.setHeadRowItems("","Category");
         table.lengthMenu(-1,20,40,60);
@@ -1059,40 +1088,53 @@ public class ServerOperatorPages
         }
         
         fieldset.returnAddInner(new hr());
-        fieldset.returnAddInner(new p()).addInner(new input_checkbox().name("change")).addInner(new input_submit().value("Set Watch List")).addInner("&nbsp;&nbsp;&nbsp;").addInner(new input_reset());
+        fieldset.returnAddInner(new p()).addInner(new input_checkbox().name("change")).addInner("&nbsp;").addInner(new input_submit().value("Set")).addInner("&nbsp;&nbsp;&nbsp;").addInner(new input_reset());
 
-        if (traceManager.isEnableWatchListLastTraces())
+        if (traceManager.isEnableLastTraceWatching())
         {
             form_post disableForm=page.content().returnAddInner(new form_post()).action("/operator/tracing/watchList/disable");
             fieldset disableFieldset=disableForm.returnAddInner(new fieldset());
-            disableFieldset.addInner(new legend().addInner("Disable Watch List"));
-            disableFieldset.returnAddInner(new p()).addInner(new input_checkbox().name("change")).addInner(new input_submit().value("Disable"));
+            disableFieldset.addInner(new legend().addInner("Disable trace Watching"));
+            disableFieldset.returnAddInner(new p()).addInner(new input_checkbox().name("change")).addInner("&nbsp;").addInner(new input_submit().value("Disable"));
         }        
         return page;
     }
 
     @GET
     @Path("/operator/tracing/watchList/disable")
-    public Element disableTraceWatchList(QueryParams parameters) throws Throwable
+    public Element disableTraceWatchList(@CheckParam("change") boolean change) throws Throwable
     {
-        OperatorPage page=this.serverApplication.buildOperatorPage("Disable Watch List Last Traces");
-        if (parameters.containsName("change")==false)
+        if (change==false)
         {
             return traceWatchList();
         }
+        MenuBar menuBar=this.serverApplication.getMenuBar();
+        menuBar.setEnabled(false,"Tracing","Sample Watch Traces");
+        menuBar.setEnabled(false,"Tracing","Sample Watch Trace Buffer");
+        menuBar.setEnabled(false,"Tracing","Last Watch Traces");
+
+        OperatorPage page=this.serverApplication.buildOperatorPage("Disable Trace Watching");
+        this.serverApplication.buildOperatorPageTemplate();
         this.serverApplication.getTraceManager().disableWatchListLastTraces();
-        page.content().addInner("Watch list is now disabled.");
+        page.content().addInner("Trace watching is now disabled.");
         return page;
     }
     
     @GET
     @Path("/operator/tracing/watchList/set")
-    public Element setTraceWatchList(QueryParams parameters) throws Throwable
+    public Element setTraceWatchList(@CheckParam("change") boolean change,Queries parameters,Context context) throws Throwable
     {
-        if (parameters.containsName("change")==false)
+        if (change==false)
         {
             return traceWatchList();
         }
+
+        MenuBar menuBar=this.serverApplication.getMenuBar();
+        menuBar.setEnabled(true,"Tracing","Sample Watch Traces");
+        menuBar.setEnabled(true,"Tracing","Sample Watch Trace Buffer");
+        menuBar.setEnabled(true,"Tracing","Last Watch Traces");
+        this.serverApplication.buildOperatorPageTemplate();
+
         OperatorPage page=this.serverApplication.buildOperatorPage("Trace Watch List");
         TraceManager traceManager=this.serverApplication.getTraceManager();
         Map<String,TraceNode> roots=traceManager.getTraceGraphRootsSnapshot();
@@ -1102,18 +1144,26 @@ public class ServerOperatorPages
             buildCategories(categories,entry);
         }
         ArrayList<String> list=new ArrayList<>();
-        page.content().addInner("Categories in Watch List:");
-        page.content().addInner(new hr());
+        Level1Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Categories in watch list"));
+        panel.content().addInner(new hr());
         for (String category:categories.keySet())
         {
             if (parameters.containsName("~"+category))
             {
                 list.add(category);
-                page.content().addInner(category);
-                page.content().addInner(new hr());
+                panel.content().addInner(category);
+                panel.content().addInner(new hr());
             }
         }
-        
+        if (categories.size()==0)
+        {
+            menuBar.setEnabled(false,"Tracing","Sample Watch Traces");
+            menuBar.setEnabled(false,"Tracing","Sample Watch Trace Buffer");
+            menuBar.setEnabled(false,"Tracing","Last Watch Traces");
+            page=this.serverApplication.buildOperatorPage("Trace Watch List");
+            page.content().addInner(new strong().addInner("No category selected. Trace watching is disabled."));
+            return page;
+        }
         traceManager.enableWatchListLastTraces(list.toArray(new String[list.size()]));
         return page;
     }
@@ -1153,13 +1203,13 @@ public class ServerOperatorPages
         for (Entry<String, TraceNode> entry : map.entrySet())
         {
             TraceNode node = entry.getValue();
-            TraceNodeSample sample=node.sample();
+            TraceSample sample=node.sampleTrace();
             Row row=new Row()
                     .add(entry.getKey()
                     ,sample.getCount()
-                    ,formatDurationNsToMs(sample.getTotalDurationNs() / sample.getCount())
-                    ,formatDurationNsToMs(sample.getTotalDurationNs())
-                    ,formatDurationNsToMs(sample.getTotalWaitNs()));
+                    ,formatNsToMs(sample.getTotalDurationNs() / sample.getCount())
+                    ,formatNsToMs(sample.getTotalDurationNs())
+                    ,formatNsToMs(sample.getTotalWaitNs()));
             row.addDetailButton(new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString());
             table.addBodyRow(row);
         }
@@ -1187,15 +1237,19 @@ public class ServerOperatorPages
         return false;
     }
 
-    private TitleText formatDurationNsToMs(long durationNs)
+    private TitleText formatNsToMs(long ns,long instantMs)
+    {
+        return new TitleText(Utils.millisToNiceDurationString(ns/1000000)+" on "+Utils.millisToLocalDateTimeString(instantMs),format_3(ns/1.0e6));        
+    }
+    private TitleText formatNsToMs(long durationNs)
     {
         return new TitleText(Utils.millisToNiceDurationString(durationNs/1000000),String.format("%.3f",durationNs/1.0e6));
     }
-    private TitleText formatDurationNsToMs(double durationNs)
+    private TitleText formatNsToMs(double durationNs)
     {
         return new TitleText(Utils.millisToNiceDurationString((long)(durationNs/1.0e6)),String.format("%.3f",durationNs/1.0e6));
     }
-    private TitleText formatDurationMsToMs(double durationMs)
+    private TitleText formatMsToMs(double durationMs)
     {
         return new TitleText(Utils.millisToNiceDurationString((long)durationMs),String.format("%.3f",durationMs));
     }
@@ -1207,9 +1261,8 @@ public class ServerOperatorPages
     
     @GET
     @Path("/operator/jvm")
-    public Element jvm(QueryParams checks) throws Throwable
+    public Element jvm(@CheckParam("collect") boolean collect) throws Throwable
     {
-        boolean collect=checks.containsName("collect");
         OperatorPage page=this.serverApplication.buildOperatorPage("JVM");
         form_get form=page.content().returnAddInner(new form_get()).action("/operator/jvm");
         form.returnAddInner(new input_checkbox().name("collect"));
@@ -1227,7 +1280,7 @@ public class ServerOperatorPages
             System.gc();
             timer.stop();
             long freeAfter=Runtime.getRuntime().freeMemory();
-            list.add("Collection duration (ms)",formatDurationNsToMs(timer.getElapsedNs())); 
+            list.add("Collection duration (ms)",formatNsToMs(timer.getElapsedNs())); 
             list.add("Free memory after collection",formatMemorySize(freeAfter));
             list.add("Total memory after collection",formatMemorySize(Runtime.getRuntime().totalMemory()));
             list.add("Memory freed",formatMemorySize(freeAfter-freeBefore));
@@ -1246,11 +1299,12 @@ public class ServerOperatorPages
         return page;
     }
 
+    
     @GET
     @Path("/operator/tracing/trace")
     public Element trace(@QueryParam("category") String category) throws Throwable
     {
-        OperatorPage page=this.serverApplication.buildOperatorPage("Trace Category Nodes");
+        OperatorPage page=this.serverApplication.buildOperatorPage("Trace Category Details");
         Map<String, TraceNode> map = this.serverApplication.getTraceManager().getTraceGraphRootsSnapshot();
         for (Entry<String, TraceNode> entry : map.entrySet())
         {
@@ -1263,7 +1317,7 @@ public class ServerOperatorPages
               tr tr=new tr();
               table.addBodyRow(tr);
               writeTraceGraphNodeToCategory(page.head(),tr, category, entry, 0);
-              TraceNodeSample sample=entry.getValue().sample();
+              TraceSample sample=entry.getValue().sampleTrace();
               Trace lastExceptiontrace=sample.getLastExceptionTrace();
               if (lastExceptiontrace!=null)
               {
@@ -1316,14 +1370,14 @@ public class ServerOperatorPages
       private void writeNode(Panel panel,TraceNode node)
       {
           NameValueList list=panel.content().returnAddInner(new NameValueList());
-          TraceNodeSample sample=node.sample();
+          TraceSample sample=node.sampleTrace();
           list.add("Count", sample.getCount());
           if (sample.getCount()>0)
           {
-              list.add("Average (ms)", formatDurationNsToMs(sample.getTotalDurationNs() / sample.getCount()));  //Milliseconds
+              list.add("Average (ms)", formatNsToMs(sample.getTotalDurationNs() / sample.getCount()));  //Milliseconds
           }
-          list.add("Duration (ms)", formatDurationNsToMs(sample.getTotalDurationNs()));
-          list.add("Wait (ms)", formatDurationNsToMs(sample.getTotalWaitNs()));
+          list.add("Duration (ms)", formatNsToMs(sample.getTotalDurationNs()));
+          list.add("Wait (ms)", formatNsToMs(sample.getTotalWaitNs()));
       }
       
       private void writeTraceGraphNode(Head head,tr tr, Entry<String, TraceNode> entry, int level) throws Exception
@@ -1354,129 +1408,503 @@ public class ServerOperatorPages
       
       
     
-    void addToAll(HashMap<String, ArrayList<TraceNode>> all, Entry<String, TraceNode> entry)
+    void buildCategorySamples(HashMap<String, TraceSample> categorySamples, Entry<String, TraceNode> entry)
     {
-        ArrayList<TraceNode> list = all.get(entry.getKey());
-        if (list == null)
+        TraceNode traceNode=entry.getValue();
+        String category=entry.getKey();
+        TraceSample sample=categorySamples.get(category);
+        if (sample!=null)
         {
-            list = new ArrayList<>();
-            all.put(entry.getKey(), list);
+            traceNode.update(sample);
         }
-        TraceNode node = entry.getValue();
-        list.add(node);
-        if (node.getChildTraceNodesSnapshot() != null)
+        TraceSample result=traceNode.sampleTrace();
+        if (result.getCount()>0)
+        categorySamples.put(category, result);
+        if (traceNode.getChildTraceNodesSnapshot() != null)
         {
-            for (Entry<String, TraceNode> child : node.getChildTraceNodesSnapshot().entrySet())
+            for (Entry<String, TraceNode> child : traceNode.getChildTraceNodesSnapshot().entrySet())
             {
-                addToAll(all, child);
+                buildCategorySamples(categorySamples, child);
             }
         }
     }
     
+    final static TitleText TRACE_NUMBER_COLUMN=new TitleText("Trace number","#");
+    final static TitleText TRACE_CATEGORY_COLUMN=new TitleText("Trace category","Category");
+
+    final static TitleText TOTAL_DURATION_COLUMN=new TitleText("Total duration in milliseconds","Tot &#x23F1;");
+    final static TitleText TOTAL_PERCENTAGE_DURATION_COLUMN=new TitleText("Total duration in milliseconds as percentage","Tot% &#x23F1;");
+    final static TitleText TOTAL_WAIT_COLUMN=new TitleText("Total wait duration in milliseconds","Total &#8987;");
+    final static TitleText MIN_DURATION_COLUMN=new TitleText("Minimum duration in millisecond and last occurrance instant","Min &#x23F1;");
+    final static TitleText MAX_DURATION_COLUMN=new TitleText("Maximum duration in milliseconds and last occurance instant","Max &#x23F1;");
+    final static TitleText AVERAGE_DURATION_COLUMN=new TitleText("Average duration in milliseconds","Ave &#x23F1;");
+    final static TitleText STANDARDDEVIATION_DURATION_COLUMN=new TitleText("Average duration in milliseconds","Stddev &#x23F1;");
+    final static TitleText MIN_WAIT_COLUMN=new TitleText("Minimum wait duration in milliseconds and last occurrance instant","Min &#8987;");
+    
+    final static TitleText MAX_WAIT_COLUMN=new TitleText("Maximum wait duration in milliseconds and last occurrance instant","Max &#8987;");
+    final static TitleText AVERAGE_WAIT_COLUMN=new TitleText("Average wait duration in milliseconds","Ave &#8987;");
+
+    final static TitleText TS_COUNT=new TitleText("Sample count","Count");
+    final static TitleText TS_RATE=new TitleText("Per second","Rate");
+    final static TitleText TRACE_ROOT_COLUMN=new TitleText("Root of the trace graph","Root");
+    final static TitleText TRACE_NODE_COLUMN=new TitleText("The number of times the trace category occurs as nodes in the trace graph","&#9738;");
+    final static TitleText EXCEPTION_COUNT_COLUMN=new TitleText("Number of exceptions","&#9888;");
+
+    void addTraceSampleColumns(Row row)
+    {
+        row.add(new TitleText("Trace category","Category"));
+        row.add(new TitleText("Trace rate (per second)","Rate"));
+        row.add(new TitleText("Sample count","Ct"));
+
+        row.add(new TitleText("Average trace duration in milliseconds","Ave&#x23F1;"));
+        row.add(new TitleText("Total trace duration in category in milliseconds","Tot&#x23F1;"));
+        row.add(new TitleText("Standard deviation of trace duration in milliseconds","Std &#x23F1;"));
+        row.add(new TitleText("Minimum trace duration in milliseconds","min&#x23F1;"));
+        row.add(new TitleText("Maximum trace duration in milliseconds","max&#x23F1;"));
+
+        row.add(new TitleText("Average trace wait in milliseconds","Ave&#8987;"));
+        row.add(new TitleText("Total trace wait in category in milliseconds","Tot&#8987;"));
+        row.add(new TitleText("Standard deviation of trace wait in milliseconds","Std&#8987;"));
+        row.add(new TitleText("Minimum trace wait in milliseconds","min&#8987;"));
+        row.add(new TitleText("Maximum trace wait in milliseconds","max&#8987;"));
+
+        row.add(new TitleText("Exception count and rate (in popup)","&#9888;"));
+    }
+    
+    static final Style ATTENTION_STYLE=new Style().background_color(Color.rgb(255, 255, 192));
+    static final Style EXCEPTION_STYLE=new Style().background_color(Color.rgb(255, 216, 216));
+    void writeTraceSample(SlowTraceSampleDetector detector,Row row,TraceSample sample)
+    {
+        row.add(format_2(sample.getRate()));
+
+        //count
+        if (detector.isCountInsideTop(sample))
+        {
+            row.addInner(new td().style(ATTENTION_STYLE).addInner(sample.getCount()));
+        }
+        else
+        {
+            row.add(sample.getCount());
+        }
+
+        //average
+        TitleText averageDuration=formatNsToMs(sample.getAverageDurationNs());
+        if (detector.isAverageDurationInsideTop(sample))
+        {
+            row.addInner(new td().style(ATTENTION_STYLE).addInner(averageDuration));
+        }
+        else
+        {
+            row.add(averageDuration);
+        }
+        
+        //total duration
+        TitleText totalDuration=new TitleText(format_2(detector.getTotalDurationRatio(sample)*100.0)+"% "+Utils.millisToNiceDurationString(sample.getTotalDurationNs()/1000000),format_2(sample.getTotalDurationNs()/1.0e6));
+        if (detector.isTotalDurationInsideTop(sample))
+        {
+            row.addInner(new td().style(ATTENTION_STYLE).addInner(totalDuration));
+        }
+        else
+        {
+            row.add(totalDuration);
+        }
+        
+        //standard deviation
+        row.add(formatNsToMs(sample.getStandardDeviationDurationNs()));
+        
+        //min
+        row.add(formatNsToMs(sample.getMinDurationNs(),sample.getMinDurationInstantMs()));
+        
+        //max
+        TitleText maxDuration=formatNsToMs(sample.getMaxDurationNs(),sample.getMaxDurationInstantMs());
+        if (detector.isMaxDurationAnOutlier(sample))
+        {
+            row.addInner(new td().style(ATTENTION_STYLE).addInner(maxDuration));
+        }
+        else
+        {
+            row.add(maxDuration);
+        }
+//----
+        //average
+        TitleText averageWait=formatNsToMs(sample.getAverageWaitNs());
+        if (detector.isAverageWaitInsideTop(sample))
+        {
+            row.addInner(new td().style(ATTENTION_STYLE).addInner(averageWait));
+        }
+        else
+        {
+            row.add(averageWait);
+        }
+        //total wait
+        TitleText totalWait=new TitleText(format_2(detector.getTotalWaitRatio(sample)*100.0)+"% "+Utils.millisToNiceDurationString(sample.getTotalWaitNs()/1000000),format_2(sample.getTotalWaitNs()/1.0e6));
+        if (detector.isTotalWaitInsideTop(sample))
+        {
+            row.addInner(new td().style(ATTENTION_STYLE).addInner(totalWait));
+        }
+        else
+        {
+            row.add(totalWait);
+        }
+        
+        //standard deviation
+        row.add(formatNsToMs(sample.getStandardDeviationWaitNs()));
+        
+        //min
+        row.add(formatNsToMs(sample.getMinWaitNs(),sample.getMinWaitInstantMs()));
+        
+        //max
+        TitleText maxWait=formatNsToMs(sample.getMaxWaitNs(),sample.getMaxWaitInstantMs());
+        if (detector.isMaxWaitAnOutlier(sample))
+        {
+            row.addInner(new td().style(ATTENTION_STYLE).addInner(maxWait));
+        }
+        else
+        {
+            row.add(maxWait);
+        }
+
+        //exceptions 
+        TitleText exception=new TitleText("Rate (per second) "+format_2(sample.getExceptionRate()),Long.toString(sample.getExceptionCount()));
+        if (sample.getExceptionCount()>0)
+        {
+            row.addInner(new td().style(EXCEPTION_STYLE).addInner(exception));
+        }
+        else
+        {
+            row.add(exception);
+        }
+    }
+
+    
+
+    private HashMap<String, TraceSample> buildCategorySamples(Map<String, TraceNode> roots)
+    {
+        HashMap<String, TraceSample> categorySamples = new HashMap<>();
+        for (Entry<String, TraceNode> entry : roots.entrySet())
+        {
+            buildCategorySamples(categorySamples, entry);
+        }
+        return categorySamples;
+    }
+    
+    
     @GET
-    @Path("/operator/tracing/allCategories")
+    @Path("/operator/tracing/sampleAll")
     public Element traceAllCategories() throws Throwable
     {
-        OperatorPage page=this.serverApplication.buildOperatorPage("All Trace Categories");
-        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
-        Map<String, TraceNode> map = this.serverApplication.getTraceManager().getTraceGraphRootsSnapshot();
-        HashMap<String, ArrayList<TraceNode>> all = new HashMap<>();
-        for (Entry<String, TraceNode> entry : map.entrySet())
+        OperatorPage page=this.serverApplication.buildOperatorPage("All Trace Category Samples");
+
+        form_post form=page.content().returnAddInner(new form_post()).action("/operator/tracing/category/reset");
+        DataTable table=form.returnAddInner(new OperatorTable(page.head()));
+        Row row=new Row();
+        row.add("");
+        addTraceSampleColumns(row);
+        row.addInner(new td());
+        table.setHeadRow(row);
+
+        Map<String, TraceNode> roots = this.serverApplication.getTraceManager().getTraceGraphRootsSnapshot();
+        HashMap<String, TraceSample> categorySamples = buildCategorySamples(roots);
+        
+        SlowTraceSampleDetector detector=new SlowTraceSampleDetector(categorySamples.size());
+        for (TraceSample sample:categorySamples.values())
         {
-            addToAll(all, entry);
+            detector.update(sample);
         }
-        table.setHeadRow(
-                new Row().
-                add
-                (
-                        TRACE_CATEGORY_COLUMN,
-                        SAMPLE_COUNT_COLUMN,
-                        AVERAGE_DURATION_COLUMN,
-                        MIN_DURATION_COLUMN,
-                        MAX_DURATION_COLUMN,
-                        TOTAL_DURATION_COLUMN,
-                        AVERAGE_WAIT_COLUMN,
-                        MIN_WAIT_COLUMN,
-                        MAX_WAIT_COLUMN,
-                        TOTAL_WAIT_COLUMN,
-                        TRACE_NODE_COLUMN,
-                        TRACE_ROOT_COLUMN,
-                        EXCEPTION_COUNT_COLUMN
-                )
-                .add("")
-                );
 
-        for (Entry<String, ArrayList<TraceNode>> entry : all.entrySet())
+        for (Entry<String, TraceSample> entry:categorySamples.entrySet())
         {
-            long  totalDurationNs = 0;
-            long maxDurationNs = Long.MIN_VALUE;
-            long minDurationNs = Long.MAX_VALUE;
-            long maxDurationInstantMs=0;
-            long minDurationInstantMs=0;
-
-            long totalWaitNs = 0;
-            long maxWaitNs = Long.MIN_VALUE;
-            long minWaitNs = Long.MAX_VALUE;
-            long maxWaitInstantMs=0;
-            long minWaitInstantMs=0;
-            long exceptionCount=0;
-            
-            
-            long count = 0;
-            List<TraceNode> list = entry.getValue();
-            
-            for (TraceNode item : list)
-            {
-                TraceNodeSample sample=item.sample();
-                exceptionCount+=sample.getExceptionCount();
-                count += sample.getCount();
-                totalDurationNs += sample.getTotalDurationNs();
-                if (maxDurationNs<=sample.getMaxDurationNs())
-                {
-                    maxDurationNs=sample.getMaxDurationNs();
-                    maxDurationInstantMs=sample.getMaxInstantMs();
-                }
-                if (minDurationNs>=sample.getMinDurationNs())
-                {
-                    minDurationNs=sample.getMinDurationNs();
-                    minDurationInstantMs=sample.getMinInstantMs();
-                }
-                totalWaitNs += sample.getTotalWaitNs();
-                if (maxWaitNs<=sample.getMaxWaitNs())
-                {
-                    maxWaitNs=sample.getMaxWaitNs();
-                    maxWaitInstantMs=sample.getMaxInstantMs();
-                }
-                if (minWaitNs>=sample.getMinWaitNs())
-                {
-                    minWaitNs=sample.getMinWaitNs();
-                    minWaitInstantMs=sample.getMinInstantMs();
-                }
-            }
-
-            String location=new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString();
-            Row row=new Row().
-                    add(new TitleText(entry.getKey(),80)).
-                    add(count).
-                    add(formatDurationNsToMs((double)totalDurationNs/count)).
-                    add(new TitleText(Utils.millisToNiceDurationString(minDurationNs*1000000)+" on "+Utils.millisToLocalDateTimeString(minDurationInstantMs),Long.toString(minDurationNs))).
-                    add(new TitleText(Utils.millisToNiceDurationString(maxDurationNs*1000000)+" on "+Utils.millisToLocalDateTimeString(maxDurationInstantMs),Long.toString(maxDurationNs))).
-                    add(formatDurationNsToMs(totalDurationNs)).
-                    add(formatDurationNsToMs((double)totalWaitNs/count)).
-                    add(new TitleText(Utils.millisToNiceDurationString(minWaitNs*1000000)+" on "+Utils.millisToLocalDateTimeString(minWaitInstantMs),Long.toString(minWaitNs))).
-                    add(new TitleText(Utils.millisToNiceDurationString(maxWaitNs*1000000)+" on "+Utils.millisToLocalDateTimeString(maxWaitInstantMs),Long.toString(maxWaitNs))).
-                    add(formatDurationNsToMs(totalWaitNs)).
-                    add(list.size()).
-                    add(map.containsKey(entry.getKey())).
-                    add(exceptionCount);
-                     
+            TraceSample sample=entry.getValue();
+            row=new Row();
+            row.add(new input_checkbox());
+            row.add(new TitleText(entry.getKey(),80));
+            writeTraceSample(detector,row,sample);
+            String location=new PathAndQueryBuilder("/operator/tracing/sampleAll/category").addQuery("category", entry.getKey()).toString();
             row.addDetailButton(location);
             table.addBodyRow(row);
 
         }
+        form.addInner(new hr());
+        form.returnAddInner(new input_checkbox()).name("resetSelected");
+        form.addInner("&nbsp;");
+        form.returnAddInner(new input_submit()).value("Reset Selected").name("resetSelectedSubmit");
+
+//        form.returnAddInner(new input_checkbox()).name("resetAll");
+        form.addInner("&nbsp;");
+        form.returnAddInner(new input_submit()).value("Reset All").name("resetAllSubmit");
+        
+        
         return page;
     }
+    
+    
+    @GET
+    @Path("/operator/tracing/sampleWatchTraceBuffer")
+    public Element sampleLastWatchTraces() throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Sample Watch Trace Buffer");
+        if (this.serverApplication.getTraceManager().isEnableLastTraceWatching())
+        {
+            CategorySample[] samples=this.serverApplication.getTraceManager().sampleLastWatchTraces();
+            DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
 
+            Row row=new Row();
+            addTraceSampleColumns(row);
+            row.add("");
+            table.setHeadRow(row);
+
+            SlowTraceSampleDetector detector=new SlowTraceSampleDetector(samples.length);
+            for (CategorySample sample:samples)
+            {
+                detector.update(sample.getSample());
+            }
+
+            for (CategorySample sample:samples)
+            {
+                row=new Row();
+                row.add(new TitleText(sample.getCategory(),80));
+                writeTraceSample(detector,row,sample.getSample());
+                String location=new PathAndQueryBuilder("./trace").addQuery("category", sample.getCategory()).toString();
+                row.addDetailButton(location);
+                table.addBodyRow(row);
+
+            }
+            return page;
+        }
+        else
+        {
+            page.content().addInner("Trace watching is disabled.");
+            return page;
+        }
+
+    }
+    
+    @GET
+    @Path("/operator/tracing/sampleWatch")
+    public Element sampleWatch() throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Sample Watch Traces");
+        if (this.serverApplication.getTraceManager().isEnableLastTraceWatching())
+        {
+            CategorySample[] samples=this.serverApplication.getTraceManager().sampleWatchCategories();
+            DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
+
+            Row row=new Row();
+            addTraceSampleColumns(row);
+            row.add("");
+            table.setHeadRow(row);
+
+            SlowTraceSampleDetector detector=new SlowTraceSampleDetector(samples.length);
+            for (CategorySample sample:samples)
+            {
+                detector.update(sample.getSample());
+            }
+
+            for (CategorySample sample:samples)
+            {
+                row=new Row();
+                row.add(new TitleText(sample.getCategory(),80));
+                writeTraceSample(detector,row,sample.getSample());
+                String location=new PathAndQueryBuilder("./trace").addQuery("category", sample.getCategory()).toString();
+                row.addDetailButton(location);
+                table.addBodyRow(row);
+
+            }
+            return page;
+        }
+        else
+        {
+            page.content().addInner("Trace watching is disabled.");
+            return page;
+        }
+
+    }
+    
+    @GET
+    @Path("/operator/tracing/sampleWatchAndReset")
+    public Element sampleWatchAndReset() throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Sample And Reset Watch Traces");
+        if (this.serverApplication.getTraceManager().isEnableLastTraceWatching())
+        {
+            CategorySample[] samples=this.serverApplication.getTraceManager().sampleAndResetWatchCategories();
+            DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
+
+            Row row=new Row();
+            addTraceSampleColumns(row);
+            row.add("");
+            table.setHeadRow(row);
+
+            SlowTraceSampleDetector detector=new SlowTraceSampleDetector(samples.length);
+            for (CategorySample sample:samples)
+            {
+                detector.update(sample.getSample());
+            }
+
+            for (CategorySample sample:samples)
+            {
+                row=new Row();
+                row.add(new TitleText(sample.getCategory(),80));
+                writeTraceSample(detector,row,sample.getSample());
+                String location=new PathAndQueryBuilder("./trace").addQuery("category", sample.getCategory()).toString();
+                row.addDetailButton(location);
+                table.addBodyRow(row);
+
+            }
+            return page;
+        }
+        else
+        {
+            page.content().addInner("Trace watching is disabled.");
+            return page;
+        }
+
+    }
+    
+    
+    
+    
+    private div formatNsToMsWithInstantMsAsDiv(long ns,long instantMs)
+    {
+        double ms=ns/1.0e6;
+        return new div().addInner(formatNsToMs(ns)).addInner(" ms on "+Utils.millisToLocalDateTimeString(instantMs));
+    }
+    
+    private div divFormatNsToMs(double ns)
+    {
+        return new div().addInner(formatNsToMs(ns)).addInner(" ms");
+    }
+    private void writeTraceSample(Head head,InnerElement<?> content,TraceSample sample) throws Exception
+    {
+        Level2Panel panel=content.returnAddInner(new Level2Panel(head,"Stats"));
+        NameValueList list=panel.content().returnAddInner(new NameValueList(new Size(20,unit.em)));
+        list.add("Rate", String.format("%.3f", sample.getRate())+" per second");
+        list.add("Count", sample.getCount());
+        list.add("Average Duration", divFormatNsToMs(sample.getAverageDurationNs()));
+        list.add("Total Duration", divFormatNsToMs(sample.getTotalDurationNs()));
+        list.add("Duration standard deviation ", divFormatNsToMs(sample.getStandardDeviationDurationNs()));
+        list.add("Minimum Duration ", formatNsToMsWithInstantMsAsDiv(sample.getMinDurationNs(),sample.getMinDurationInstantMs()));
+        list.add("Maximum Duration ", formatNsToMsWithInstantMsAsDiv(sample.getMaxDurationNs(),sample.getMaxDurationInstantMs()));
+        list.add("Average Wait", divFormatNsToMs(sample.getAverageWaitNs()));
+        list.add("Total Wait", divFormatNsToMs(sample.getTotalWaitNs()));
+        list.add("Wait standard deviation ", divFormatNsToMs(sample.getStandardDeviationWaitNs()));
+        list.add("Minimum Wait ", formatNsToMsWithInstantMsAsDiv(sample.getMinWaitNs(),sample.getMinWaitInstantMs()));
+        list.add("Maximum Wait ", formatNsToMsWithInstantMsAsDiv(sample.getMaxWaitNs(),sample.getMaxWaitInstantMs()));
+        list.add("Exceptions", sample.getExceptionCount());
+        if (sample.getExceptionCount()==1)
+        {
+            writeTrace(head,content,"Exception Trace",sample.getFirstExceptionTrace());
+        }
+        else if (sample.getExceptionCount()>1)
+        {
+            writeTrace(head,content,"First Exception Trace",sample.getFirstExceptionTrace());
+            writeTrace(head,content,"Last Exception Trace",sample.getLastExceptionTrace());
+        }
+    }
+    
+    private Element formatStackTrace(Head head,String heading,StackTraceElement[] stackTrace)
+    {
+        Accordion accordion=new Accordion(head, false, heading);
+        accordion.content().addInner(new textarea().style("width:100%;border:0;").readonly().rows(stackTrace.length+1).addInner(Utils.toString(stackTrace)));
+        return accordion;
+    }
+    private Element formatThrowable(Head head,String heading,Throwable throwable) throws Exception
+    {
+        Accordion accordion=new Accordion(head, true, heading);
+        String text=Utils.getStrackTraceAsString(throwable);
+        int occurs=Utils.occurs(text,"\n");
+        accordion.content().addInner(new textarea().style("width:100%;border:0;").readonly().rows(occurs+1).addInner(text));
+        return accordion;
+    }
+    private void writeTrace(Head head,InnerElement<?> content,String title,Trace trace) throws Exception
+    {
+        Level2Panel panel=content.returnAddInner(new Level2Panel(head,title));
+        NameValueList list=panel.content().returnAddInner(new NameValueList(new Size(20,unit.em)));
+        list.add("Number",trace.getNumber());
+        list.add("Category",trace.getCategory());
+        list.add("Thread", "id: "+trace.getThread().getId()+", name: "+trace.getThread().getName());
+        list.add("Created",Utils.millisToLocalDateTime(trace.getCreatedMs())+", "+Utils.millisToNiceDurationString(System.currentTimeMillis()-trace.getCreatedMs())+" ago ");
+        list.add("Closed", trace.isClosed()); 
+        list.add("Duration", divFormatNsToMs(trace.getDurationNs()));
+        if (trace.isClosed()==false)
+        {
+            list.add("Waiting", trace.isWaiting());
+            list.add("Active", divFormatNsToMs(trace.getActiveNs()));
+        }
+        list.add("Wait", divFormatNsToMs(trace.getWaitNs()));
+        if (trace.getFromLink()!=null)
+        {
+            list.add("From Link", trace.getFromLink());
+        }
+        if (trace.getToLink()!=null)
+        {
+            list.add("To Link", trace.getToLink());
+        }
+        if (trace.getDetails()!=null)
+        {
+            list.add("Details",trace.getCategory());
+        }
+        if (trace.getParent()!=null)
+        {
+            list.add("Parent Number", trace.getParent().getNumber());
+            list.add("Parent Category", trace.getParent().getCategory());
+        }
+        if (trace.getRoot()!=null)
+        {
+            list.add("Root Number", trace.getRoot().getNumber());
+            list.add("Root Category", trace.getRoot().getCategory());
+        }
+        if (trace.getCreateStackTrace()!=null)
+        {
+            list.add("Create Stack Trace",formatStackTrace(head,null, trace.getCreateStackTrace()));
+        }
+        if (trace.getCloseStackTrace()!=null)
+        {
+            list.add("Close Stack Trace",formatStackTrace(head,null, trace.getCloseStackTrace()));
+        }
+        if (trace.getThrowable()!=null)
+        {
+            list.add("Exception",formatThrowable(head,null,trace.getThrowable()));
+        }
+        
+    }
+    
+    @GET
+    @Path("/operator/tracing/sampleCurrent/category")
+    public Element sampleCurrentCategory(@QueryParam("category") String category) throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Trace Category: "+category);
+        
+        CategorySample[] samples=this.serverApplication.getTraceManager().sampleCurrentTraceCategories(false);
+        for (CategorySample sample:samples)
+        {
+            if (Utils.equals(sample.getCategory(),category))
+            {
+                writeTraceSample(page.head(),page.content(),sample.getSample());
+                return page;
+            }
+        }
+        page.content().addInner(category+" has expired or does not exist.");
+        return page;
+    }
+    
+    @GET
+    @Path("/operator/tracing/sampleAll/category")
+    public Element sampleAllCategory(@QueryParam("category") String category) throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Trace Category: "+category);
+        Map<String, TraceNode> roots = this.serverApplication.getTraceManager().getTraceGraphRootsSnapshot();
+        HashMap<String, TraceSample> samples = buildCategorySamples(roots);
+        TraceSample sample=samples.get(category);
+        if (sample==null)
+        {
+            page.content().addInner(category+" has expired or does not exist.");
+            return page;
+        }
+        writeTraceSample(page.head(),page.content(),sample);
+        return page;
+    }
+    
     @GET
     @Path("/operator/tracing/settings")
     public Element traceManagerSettings() throws Throwable
@@ -1487,14 +1915,10 @@ public class ServerOperatorPages
         fieldset.addInner(new legend().addInner("Settings"));
         TraceManager traceManager=this.serverApplication.getTraceManager();
         
-        fieldset.returnAddInner(new p()).addInner(new input_checkbox().checked(traceManager.isCaptureCreateStackTrace()).name("isCaptureCreateStackTrace").addInner(("Capture stack trace when trace is created. Performance overhead: High "+WARNING)));
-        fieldset.returnAddInner(new p()).addInner(new input_checkbox().checked(traceManager.isCaptureCloseStackTrace()).name("isCaptureCloseStackTrace").addInner(("Capture stack trace when trace is closed. Performance overhead: High "+WARNING)));
-        fieldset.returnAddInner(new p()).addInner(new input_checkbox().checked(traceManager.isEnableLastExceptions()).name("isEnableLastExceptions").addInner(("Capture last exception traces. Performance overhead: Negligible")));
-        fieldset.returnAddInner(new p()).addInner(new input_checkbox().checked(traceManager.isEnableLastTraces()).name("isEnableLastTraces").addInner(("Capture last traces. Performance overhead: Negligible")));
-        fieldset.returnAddInner(new p()).addInner(new input_checkbox().checked(traceManager.isEnableTraceGraph()).name("isEnableTraceGraph").addInner(("Enable trace graph. Performance overhead: Low")));
-        fieldset.returnAddInner(new p()).addInner(new input_checkbox().checked(traceManager.isEnableTraceStats()).name("isEnableTraceStats").addInner(("Compute trace stats. Performance overhead: Minimal")));
-        fieldset.returnAddInner(new p()).addInner(new input_checkbox().checked(traceManager.isLogExceptionTraces()).name("isLogExceptionTraces").addInner(("Log exception traces. Performance overhead: depending on traces having exceptions, minimal to high "+WARNING)));
-        fieldset.returnAddInner(new p()).addInner(new input_checkbox().checked(traceManager.isLogTraces()).name("isLogTraces").addInner(("Log all traces. Performance overhead: High "+WARNING)));
+        fieldset.returnAddInner(new p()).addInner(new input_checkbox().checked(traceManager.isLogExceptionTraces()).name("isLogExceptionTraces").addInner(("Log exception traces. Performance overhead depends on traces having exceptions and ranges from minimal to high.")));
+        fieldset.returnAddInner(new p()).addInner(new input_checkbox().checked(traceManager.isCaptureCreateStackTrace()).name("isCaptureCreateStackTrace").addInner(("Capture stack trace when trace is created. Performance overhead is high.")));
+        fieldset.returnAddInner(new p()).addInner(new input_checkbox().checked(traceManager.isCaptureCloseStackTrace()).name("isCaptureCloseStackTrace").addInner(("Capture stack trace when trace is closed. Performance overhead is high.")));
+        fieldset.returnAddInner(new p()).addInner(new input_checkbox().checked(traceManager.isLogTraces()).name("isLogTraces").addInner(("Log all traces. Performance overhead is high.")));
         
         long logTracesWithGreaterDuration=traceManager.getLogTracesWithGreaterDuration();
         boolean enableLogTracesWithGreaterDuration;
@@ -1512,7 +1936,7 @@ public class ServerOperatorPages
         addInner(new input_checkbox().checked(enableLogTracesWithGreaterDuration).name("enableLogTracesWithGreaterDuration").
         addInner("Log traces with duration greater or equal to ").
         addInner(new input_number().min(0).value(logTracesWithGreaterDuration).style("width:6em;").name("logTracesWithGreaterDuration")).
-        addInner(" ms. Performance overhead: depending on traces logged, minimal to high "+WARNING));
+        addInner(" ms. Performance overhead depends on number of traces logged and ranges from minimal to high."));
         
         fieldset.returnAddInner(new hr());
         fieldset.returnAddInner(new p()).addInner(new input_checkbox().name("change")).addInner(new input_submit().value("Change")).addInner("&nbsp;&nbsp;&nbsp;").addInner(new input_reset());
@@ -1522,9 +1946,9 @@ public class ServerOperatorPages
 
     @GET
     @Path("/operator/tracing/settings/change")
-    public Element traceManagerChangeSettings(QueryParams parameters,@QueryParam ("logTracesWithGreaterDuration") long logTracesWithGreaterDuration) throws Throwable
+    public Element traceManagerChangeSettings(@CheckParam("change") boolean change,Queries parameters,@QueryParam ("logTracesWithGreaterDuration") long logTracesWithGreaterDuration) throws Throwable
     {
-        if (parameters.containsName("change")==false)
+        if (change==false)
         {
             return traceManagerSettings();
         }
@@ -1532,10 +1956,6 @@ public class ServerOperatorPages
         TraceManager traceManager=this.serverApplication.getTraceManager();
         traceManager.setCaptureCreateStackTrace(parameters.containsName("isCaptureCreateStackTrace"));
         traceManager.setCaptureCloseStackTrace(parameters.containsName("isCaptureCloseStackTrace"));
-        traceManager.setEnableLastExceptions(parameters.containsName("isEnableLastExceptions"));
-        traceManager.setEnableLastTraces(parameters.containsName("isEnableLastTraces"));
-        traceManager.setEnableTraceGraph(parameters.containsName("isEnableTraceGraph"));
-        traceManager.setEnableTraceStats(parameters.containsName("isEnableTraceStats"));
         traceManager.setLogExceptionTraces(parameters.containsName("isLogExceptionTraces"));
         traceManager.setLogTraces(parameters.containsName("isLogTraces"));
         if (parameters.containsName("enableLogTracesWithGreaterDuration"))
@@ -1607,15 +2027,15 @@ public class ServerOperatorPages
     @Path("/operator/tracing/watchListLastTraces")
     public Element watchListLastTraces() throws Throwable
     {
-        OperatorPage page=this.serverApplication.buildOperatorPage("Watch List Last Traces");
-        if (this.serverApplication.getTraceManager().isEnableWatchListLastTraces())
+        OperatorPage page=this.serverApplication.buildOperatorPage("Last Watch Traces");
+        if (this.serverApplication.getTraceManager().isEnableLastTraceWatching())
         {
-            page.content().addInner("Watch list is enabled.");
-            writeTraces(page, this.serverApplication.getTraceManager().getWatchListLastTraces());
+            page.content().addInner("Trace watching is enabled.");
+            writeTraces(page, this.serverApplication.getTraceManager().getLastWatchTraces());
         }
         else
         {
-            page.content().addInner("Watch list is disabled.");
+            page.content().addInner("Trace watching is disabled.");
         }
         return page;
     }
@@ -1634,11 +2054,11 @@ public class ServerOperatorPages
     public Element activeTraces() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Current Traces");
-        writeTraces(page, this.serverApplication.getTraceManager().getActiveSnapshot());
+        writeTraces(page, this.serverApplication.getTraceManager().getCurrentTraces());
         return page;
 
     }
-    private void writeTraces(OperatorPage page, Trace[] traces)
+    private void writeTraces(OperatorPage page, Trace[] traces) throws Exception
     {
         page.content().addInner(new p().addInner("Count: " + traces.length));
         for (int i = traces.length - 1; i >= 0; i--)
@@ -1682,11 +2102,11 @@ public class ServerOperatorPages
         double totalAll = 0;
         long totalCount = 0;
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
-        HashMap<String,Map<Integer, ValueRateSample>> statusResults=new HashMap<>();
+        HashMap<String,Map<Integer, LongRateSample>> statusResults=new HashMap<>();
         for (RequestHandler requestHandler : requestHandlers)
         {
-            Map<Integer, ValueRateSample> results = requestHandler.sampleStatusMeters();
-            for (ValueRateSample result : results.values())
+            Map<Integer, LongRateSample> results = requestHandler.sampleStatusMeters();
+            for (LongRateSample result : results.values())
             {
                 totalAll += result.getTotal();
                 totalCount += result.getCount();
@@ -1695,11 +2115,11 @@ public class ServerOperatorPages
         }
         for (RequestHandler requestHandler : requestHandlers)
         {
-            Map<Integer, ValueRateSample> results = statusResults.get(requestHandler.getKey());
+            Map<Integer, LongRateSample> results = statusResults.get(requestHandler.getKey());
             long total = 0;
             long count = 0;
             double rate = 0;
-            for (ValueRateSample result : results.values())
+            for (LongRateSample result : results.values())
             {
                 total += result.getTotal();
                 count += result.getCount();
@@ -1726,7 +2146,7 @@ public class ServerOperatorPages
         return page;
     }
 
-    private void writeTrace(Head head,InnerElement<?> content,Trace trace,boolean includeStackTraces)
+    private void writeTrace(Head head,InnerElement<?> content,Trace trace,boolean includeStackTraces) throws Exception
     {
         WideTable table=content.returnAddInner(new WideTable(head));
         Row headRow=new Row()
@@ -1735,19 +2155,18 @@ public class ServerOperatorPages
             .addWithTitle("Parent", "Parent sequence number if trace has parent")
             .addWithTitle("Duration", "Milliseconds")
             .addWithTitle("Wait", "Milliseconds")
-            .add("Waiting","Closed","Thread","ThreadId")
+            .add("Waiting","Closed","Thread")
             ;
         table.setHeadRow(headRow);
         Row row=new Row()
-                .add(Utils.millisToLocalDateTimeString(trace.getCreated())
+                .add(Utils.millisToLocalDateTimeString(trace.getCreatedMs())
                 ,trace.getNumber()
                 ,trace.getParent() == null ? "" : trace.getParent().getNumber()
-                ,formatDurationNsToMs(trace.getActiveNs())
-                ,formatDurationNsToMs(trace.getWaitNs())
+                ,formatNsToMs(trace.getActiveNs())
+                ,formatNsToMs(trace.getWaitNs())
                 ,trace.isWaiting()
                 ,trace.isClosed()
-                ,trace.getThread().getName()
-                ,trace.getThread().getId());
+                ,"id: "+trace.getThread().getId()+", name: "+trace.getThread().getName());
         table.addBodyRow(row);
 
         NameValueList list=null;
@@ -1789,32 +2208,34 @@ public class ServerOperatorPages
         content.addInner(new p());
         if (trace.getThrowable() != null)
         {
-            Accordion accordion=content.returnAddInner(new Accordion(head, null, true, "Exception"));
-            accordion.content().addInner(Utils.toString(trace.getThrowable()));
+            content.addInner(formatThrowable(head, "Exception Stack Trace" ,trace.getThrowable()));
             content.addInner(new p());
         }
         if (includeStackTraces)
         {
-    //        if (trace.isClosed()==false)
+            if (trace.isClosed()==false)
             {
                 StackTraceElement[] currentStackTrace = trace.getThread().getStackTrace();
                 if (currentStackTrace != null)
                 {
-                    Accordion accordion=content.returnAddInner(new Accordion(head, null, false, "Current Stack Trace"));
-                    accordion.content().addInner(toString(currentStackTrace, 0));
+                    content.addInner(formatStackTrace(head, "Current Stack Trace",currentStackTrace ));
+//                    Accordion accordion=content.returnAddInner(new Accordion(head, null, false, "Current Stack Trace"));
+//                    accordion.content().addInner(toString(currentStackTrace, 0));
                 }
             }
             StackTraceElement[] createStackTrace = trace.getCreateStackTrace();
             if (createStackTrace != null)
             {
-                Accordion accordion=content.returnAddInner(new Accordion(head, null, false, "Create Stack Trace"));
-                accordion.content().addInner(toString(createStackTrace, 0));
+                content.addInner(formatStackTrace(head, "Create Stack Trace",createStackTrace));
+//                Accordion accordion=content.returnAddInner(new Accordion(head, null, false, "Create Stack Trace"));
+//                accordion.content().addInner(toString(createStackTrace, 0));
             }
             StackTraceElement[] closeStackTrace = trace.getCloseStackTrace();
             if (closeStackTrace != null)
             {
-                Accordion accordion=content.returnAddInner(new Accordion(head, null, false, "Close Stack Trace"));
-                accordion.content().addInner(toString(closeStackTrace, 0));
+                content.addInner(formatStackTrace(head, "Close Stack Trace",closeStackTrace));
+//                Accordion accordion=content.returnAddInner(new Accordion(head, null, false, "Close Stack Trace"));
+//                accordion.content().addInner(toString(closeStackTrace, 0));
             }
         }
     }
@@ -1886,48 +2307,7 @@ public class ServerOperatorPages
         textAccodion.content().addInner(new textarea().readonly().style("width:100%;resize:none;").addInner(text).rows(rows));
     }
     
-    /*
-    private void writeContent(Head head,Panel panel,String text)
-    {
-        if (text==null)
-        {
-            return;
-        }
-        Accordion textAccodion=panel.content().returnAddInner(new Accordion(head,false,"Content (Length: "+text.length()+")"));
-        textAccodion.content().addInner(new textarea().readonly().style("width:100%;height:auto;resize:none;").addInner(text));
-    }
-
-    private void writeRequest(OperatorPage page,RequestLogEntry entry)
-    {
-        Head head=page.head();
-        Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),entry.getRequestHandler().getKey()));
-        Level2Panel tracePanel=panel.content().returnAddInner(new Level2Panel(head,"Trace"));
-        writeTrace(head,tracePanel,entry.getTrace());
-        
-        panel.content().addInner(new p());
-        Panel requestPanel=panel.content().returnAddInner(new Level2Panel(head,"Request"));
-        WideTable table=requestPanel.content().returnAddInner(new WideTable(head));
-        table.setHeadRow(new Row().add("Request","Query","Remote"));
-        table.addBodyRow(new Row().add(entry.getRequest(),entry.getQueryString(),entry.getRemoteEndPoint()));
-        writeHeaders(head,requestPanel,entry.getRequestHeaders());
-        writeContent(head,requestPanel,entry.getRequestContentText());
-
-        panel.content().addInner(new p());
-        Panel responsePanel=panel.content().returnAddInner(new Level2Panel(head,"Response - Status Code: "+entry.getStatusCode()));
-        writeHeaders(head,responsePanel,entry.getResponseHeaders());
-        writeContent(head, responsePanel, entry.getResponseContentText());
-    }    
-    
-    private void writeRequestLogEntries(OperatorPage page, RequestLogEntry[] entries) throws Exception
-    {
-        for (RequestLogEntry entry : entries)
-        {
-            writeRequest(page, entry);
-            page.content().addInner(new p());
-        }
-    }
-    */
-    private void writeRequest(DataTable dataTable,OperatorPage page,RequestLogEntry entry)
+    private void writeRequest(DataTable dataTable,OperatorPage page,RequestLogEntry entry) throws Exception
     {
         Head head=page.head();
         String title;
@@ -2027,8 +2407,8 @@ public class ServerOperatorPages
             statusCodes.put(300, 0L);
             statusCodes.put(400, 0L);
             statusCodes.put(500, 0L);
-            Map<Integer, ValueRateSample> results = requestHandler.sampleStatusMeters();
-            for (Entry<Integer, ValueRateSample> entry : results.entrySet())
+            Map<Integer, LongRateSample> results = requestHandler.sampleStatusMeters();
+            for (Entry<Integer, LongRateSample> entry : results.entrySet())
             {
                 int status = entry.getKey() / 100 * 100;
                 Long count = statusCodes.get(status);
@@ -2534,7 +2914,7 @@ public class ServerOperatorPages
         HttpServer httpServer=getHttpServer(server);
         RequestHandler requestHandler = httpServer.getRequestHandler(key);
 
-        Map<Integer, ValueRateSample> meters = requestHandler.sampleStatusMeters();
+        Map<Integer, LongRateSample> meters = requestHandler.sampleStatusMeters();
         if (meters.size()>0)
         {
             Panel durationPanel=page.content().returnAddInner(new Level1Panel(page.head(),"Durations"));
@@ -2548,9 +2928,9 @@ public class ServerOperatorPages
                         .addWithTitle("StdDev", "Standard Deviation")
                         .addWithTitle("Total","Total duration in milliseconds")
                         );
-            for (Entry<Integer, ValueRateSample> entry : meters.entrySet())
+            for (Entry<Integer, LongRateSample> entry : meters.entrySet())
             {
-                ValueRateSample result = entry.getValue();
+                LongRateSample result = entry.getValue();
                 if (result.getCount()!=0)
                 {
                     table.addBodyRow(new Row().add(
@@ -2592,8 +2972,8 @@ public class ServerOperatorPages
                     .addWithTitle("StDev", "Standard Deviation")
                     .add("Total Bytes","KB","MB","GB","TB"));
             
-            ValueRateMeter requestMeter = requestHandler.getRequestUncompressedContentSizeMeter();
-            ValueRateSample result = requestMeter.sample();
+            LongRateMeter requestMeter = requestHandler.getRequestUncompressedContentSizeMeter();
+            LongRateSample result = requestMeter.sample();
             if (result.getCount()>0)
             {
                 long total = requestUncompressed = requestMeter.getAllTimeTotal();
@@ -2621,7 +3001,7 @@ public class ServerOperatorPages
                         ,total / 1024 / 1024 / 1024 / 1024));
             }
     
-            ValueRateMeter compressedRequestMeter = requestHandler.getRequestCompressedContentSizeMeter();
+            LongRateMeter compressedRequestMeter = requestHandler.getRequestCompressedContentSizeMeter();
             result = compressedRequestMeter.sample();
             if (result.getCount()>0)
             {
@@ -2650,7 +3030,7 @@ public class ServerOperatorPages
                         ,total / 1024 / 1024 / 1024 / 1024));
             }
     
-            ValueRateMeter responseMeter = requestHandler.getResponseUncompressedContentSizeMeter();
+            LongRateMeter responseMeter = requestHandler.getResponseUncompressedContentSizeMeter();
             result = responseMeter.sample();
             if (result.getCount()>0)
             {
@@ -2679,7 +3059,7 @@ public class ServerOperatorPages
                         ,total / 1024 / 1024 / 1024 / 1024));
             }
     
-            ValueRateMeter compressedResponseMeter = requestHandler.getResponseCompressedContentSizeMeter();
+            LongRateMeter compressedResponseMeter = requestHandler.getResponseCompressedContentSizeMeter();
             result = compressedResponseMeter.sample();
             if (result.getCount()>0)
             {

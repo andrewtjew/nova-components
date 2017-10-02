@@ -1,8 +1,14 @@
 package org.nova.tracing;
 
+import org.nova.collections.RingBuffer;
 
-public class TraceBuffer
+public class TraceBuffer extends RingBuffer<Trace>
 {
+    public TraceBuffer(int capacity)
+    {
+        super(new Trace[capacity]);
+    }
+    /*
     private int readIndex;
     private int writeIndex;
     private int size;
@@ -33,6 +39,17 @@ public class TraceBuffer
         return this.size;
     }
     public Trace[] getSnapshot()
+    {
+        int size=size();
+        Trace[] snapshot=new Trace[size];
+        for (int i=0;i<size;i++)
+        {
+            snapshot[i]=this.array[(this.readIndex+i)%this.length];
+        }
+        return snapshot;
+    }
+    */
+    public Trace[] getSnapshotAsArray()
     {
         int size=size();
         Trace[] snapshot=new Trace[size];

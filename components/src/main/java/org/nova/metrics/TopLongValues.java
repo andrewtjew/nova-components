@@ -8,6 +8,8 @@ public class TopLongValues
 {
     final TreeSet<Long> sorted;
     final int count;
+    long total;
+    
     public TopLongValues(int count)
     {
         this.count=count;
@@ -30,6 +32,7 @@ public class TopLongValues
             this.sorted.remove(this.sorted.first());
             this.sorted.add(value);
         }
+        this.total+=value;
     }
     public boolean isInsideTop(long value)
     {
@@ -40,7 +43,7 @@ public class TopLongValues
         return value>this.sorted.first().longValue();
             
     }
-    public boolean isAtTop(long value)
+    public boolean isInTop(long value)
     {
         if (this.sorted.size()==0)
         {
@@ -48,5 +51,9 @@ public class TopLongValues
         }
         return value>=this.sorted.first().longValue();
             
+    }
+    public long getTotal()
+    {
+        return total;
     }
 }

@@ -12,6 +12,7 @@ import org.nova.html.tags.ul;
 import org.nova.html.tags.a;
 import org.nova.html.tags.div;
 import org.nova.html.tags.hr;
+import org.nova.html.tags.label;
 import org.nova.html.tags.li;
 import org.nova.html.tags.link;
 import org.nova.html.tags.span;
@@ -21,12 +22,14 @@ public class MenuBar extends Element
 {
     static class Item
     {
-        public ArrayList<Item> subItems;
-        public String href;
+        ArrayList<Item> subItems;
+        String href;
+        boolean enabled;
         final public String name;
-        public Item(String name)
+        public Item(String name,boolean enabled)
         {
             this.name=name;
+            this.enabled=enabled;
         }
     }
     
@@ -59,24 +62,58 @@ public class MenuBar extends Element
     
     public MenuBar add(String href,String...names)
     {
-        add(href,names,0,rootItems);
+        add(true,href,names,0,rootItems);
+        return this;
+    }
+    public MenuBar add(boolean enabled,String href,String...names)
+    {
+        add(enabled,href,names,0,rootItems);
         return this;
     }
     public MenuBar addSeparator(String...names)
     {
         String[] namesWithSeparator=new String[names.length+1];
         System.arraycopy(names, 0, namesWithSeparator, 0, names.length);
-        add(null,namesWithSeparator,0,rootItems);
+        add(true,null,namesWithSeparator,0,rootItems);
+        return this;
+    }
+
+    public MenuBar setEnabled(boolean enabled,String...names)
+    {
+        setEnabled(enabled,names,0,this.rootItems);
         return this;
     }
     
-    private void add(String href,String[] names,int level,ArrayList<Item> items)
+    private void setEnabled(boolean enabled,String[] names,int level,ArrayList<Item> items)
     {
         String name=names[level];
         Item item=find(items,name);
         if (item==null)
         {
-            item=new Item(name);
+            return;
+        }
+        if (level==names.length-1)
+        {
+            item.enabled=enabled;
+        }
+        else
+        {
+            if (item.subItems==null)
+            {
+                return;
+            }
+            setEnabled(enabled,names,level+1,item.subItems);
+        }
+    }
+
+    
+    private void add(boolean enabled,String href,String[] names,int level,ArrayList<Item> items)
+    {
+        String name=names[level];
+        Item item=find(items,name);
+        if (item==null)
+        {
+            item=new Item(name,enabled);
             items.add(item);
         }
         if (level==names.length-1)
@@ -89,9 +126,8 @@ public class MenuBar extends Element
             {
                 item.subItems=new ArrayList<>();
             }
-            add(href,names,level+1,item.subItems);
+            add(enabled,href,names,level+1,item.subItems);
         }
-        
     }
 
     @Override
@@ -136,36 +172,44 @@ public class MenuBar extends Element
             
         for (Item item:items)
         {
-            li li=ul.returnAddInner(new li());
             String href=item.href;
             ArrayList<Item> subItems=item.subItems;
             if ((subItems==null)&&(href==null))
             {
+                li li=ul.returnAddInner(new li());
                 //Seperator
-                li.style("height:2px;padding:0px;margin-top:0px;margin-left:0px;margin-right:0px;margin-bottom:6px;"); //TODO: Works, but should go to css
+                li.class_("menu-separator-item");
                 li.returnAddInner(new hr());
             }
             else
             {
-                a a=li.returnAddInner(new a());
-                if (href==null)
+                li li=ul.returnAddInner(new li());
+                if (item.enabled)
                 {
-                    a.href("#");
+                    a a=li.returnAddInner(new a());
+                    if (href==null)
+                    {
+                        a.href("#");
+                    }
+                    else
+                    {
+                        a.href(href);
+                    }
+                    if ((subItems!=null)&&(level>0))
+                    {
+                        a.addInner(new span().class_("menu-expand").addInner("&#x27a4;"));
+                        a.addInner(item.name);
+                    //    a.addInner(new span().class_("menu-expand").addInner("&#9658;"));
+                        ;            
+                    }
+                    else
+                    {
+                        a.addInner(item.name);
+                    }
                 }
                 else
                 {
-                    a.href(href);
-                }
-                if ((subItems!=null)&&(level>0))
-                {
-                    a.addInner(new span().class_("menu-expand").addInner("&#x27a4;"));
-                    a.addInner(item.name);
-                //    a.addInner(new span().class_("menu-expand").addInner("&#9658;"));
-                    ;            
-                }
-                else
-                {
-                    a.addInner(item.name);
+                    li.returnAddInner(new label().class_("menu-item-disabled").addInner(item.name));
                 }
                 if (subItems!=null)
                 {

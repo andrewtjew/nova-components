@@ -5,12 +5,12 @@ import java.util.List;
 
 public class RingBuffer<ITEM>
 {
-	private int readIndex;
-	private int writeIndex;
-	private int size;
+	protected int readIndex;
+	protected int writeIndex;
+	protected int size;
 	
-	final private ITEM[] array;
-	final private int length;
+	final protected ITEM[] array;
+	final protected  int length;
 	
 	public RingBuffer(ITEM[] array)
 	{
@@ -19,6 +19,10 @@ public class RingBuffer<ITEM>
 	}
 	public void add(ITEM item)
 	{
+	    if (this.length==0)
+	    {
+	        return;
+	    }
 		this.array[this.writeIndex]=item;
 		this.writeIndex=(this.writeIndex+1)%this.length;
 		if (this.size<this.length)

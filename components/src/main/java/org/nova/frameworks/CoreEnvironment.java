@@ -17,6 +17,7 @@ import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
 import org.nova.logging.SimpleFileWriter;
 import org.nova.logging.SourceQueueLogger;
+import org.nova.logging.StatusBoard;
 import org.nova.metrics.MeterManager;
 import org.nova.tracing.TraceManager;
 
@@ -32,11 +33,11 @@ public class CoreEnvironment
 	final SourceQueue<LogEntry> logSourceQueue;
 	final private LogDirectoryManager logDirectoryManager;
 	final private int logCategoryBufferSize;
+	final static public StatusBoard STATUS_BOARD=new StatusBoard();
 	
 	public CoreEnvironment(Configuration configuration) throws Throwable
 	{
         this.configuration=configuration;
-
         String directory=configuration.getValue("Logger.logDirectory","logs");
 		long maxFiles=configuration.getIntegerValue("Logger.logDirectory.maxFiles",100);
 		long reserve=configuration.getLongValue("Logger.logDirectory.reserveSpace",100_000_000_000L);
@@ -76,6 +77,11 @@ public class CoreEnvironment
 	{
 		return meterManager;
 	}
+	public StatusBoard getStatusBoard()
+	{
+	    return this.STATUS_BOARD;
+	}
+	
 
 	public FutureScheduler getFutureScheduler()
 	{

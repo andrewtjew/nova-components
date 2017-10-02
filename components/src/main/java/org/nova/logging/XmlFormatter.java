@@ -80,7 +80,7 @@ public class XmlFormatter extends Formatter
 		Trace trace=entry.getTrace();
 		if (trace!=null)
 		{
-			sb.append("<Trace number='"+trace.getNumber()+"' created='"+Utils.millisToLocalDateTimeString(trace.getCreated())+"' duration='"+trace.getDurationS()+"' wait='"+trace.getWaitS()+"' waiting='"+trace.isWaiting()+"' closed='"+trace.isClosed()+"'>\r\n");
+			sb.append("<Trace number='"+trace.getNumber()+"' created='"+Utils.millisToLocalDateTimeString(trace.getCreatedMs())+"' duration='"+trace.getDurationS()+"' wait='"+trace.getWaitS()+"' waiting='"+trace.isWaiting()+"' closed='"+trace.isClosed()+"'>\r\n");
 			write(sb,"category",trace.getCategory());
 			Trace parent=trace.getParent();
 			if (parent!=null)

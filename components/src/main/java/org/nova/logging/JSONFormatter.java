@@ -59,7 +59,7 @@ public class JSONFormatter extends Formatter
         {
             sb.append(",\"trace\":{");
             write(false,sb,"number",trace.getNumber());
-            writeString(true,sb,"created",Utils.millisToLocalDateTimeString(trace.getCreated()));
+            writeString(true,sb,"created",Utils.millisToLocalDateTimeString(trace.getCreatedMs()));
             writeString(true,sb,"category",trace.getCategory());
             write(true,sb,"duration",trace.getDurationS());
             Trace parent=trace.getParent();
