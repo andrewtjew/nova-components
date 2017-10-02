@@ -2,6 +2,7 @@ package org.nova.concurrent;
 
 import java.util.HashMap;
 
+import org.nova.core.NoThrowPredicate;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
 
@@ -58,6 +59,8 @@ public class LockManager<KEY>
             }
             slot_.locked=true;
         }
+
+        
         trace.endWait();
         return new Lock<KEY>(key,this,slot,trace);
     }
