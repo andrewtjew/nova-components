@@ -47,6 +47,9 @@ public abstract class Resource implements AutoCloseable
 	    return false;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.AutoCloseable#close()
+	 */
 	@Override
 	public void close() throws Exception
 	{
@@ -57,6 +60,7 @@ public abstract class Resource implements AutoCloseable
 				try
 				{
 					park();
+	                pool.release(this);
 					this.trace.close();
 				}
 				catch (Throwable t)
@@ -64,7 +68,6 @@ public abstract class Resource implements AutoCloseable
 					this.trace.close(t);
 				}
 				this.trace=null;
-				pool.release(this);
 			}
 		}
 	}

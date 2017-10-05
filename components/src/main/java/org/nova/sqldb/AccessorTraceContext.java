@@ -58,6 +58,7 @@ public class AccessorTraceContext extends DisruptorTraceContext
         connector.queryRate.increment();
     }
     
+    /*
     @Override
     public Throwable handleThrowable(Throwable throwable) 
     {
@@ -74,4 +75,5 @@ public class AccessorTraceContext extends DisruptorTraceContext
             return super.handleThrowable(new MultiException(t,throwable));
         }
     }
+    */
 }

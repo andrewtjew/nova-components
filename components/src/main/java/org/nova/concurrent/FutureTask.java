@@ -9,37 +9,28 @@ public class FutureTask<RESULT>
 	private TaskStatus status;
 	private RESULT result;
 	private Throwable throwable;
-	final private Trace parent;
+	final private Trace scheduleTrace;
 	final private TraceManager traceManager;
 	final private String traceCategory;
 	final private TraceCallable<RESULT> callable;
+	final private int index;
 	
-	public FutureTask(TraceManager traceManager,Trace parent,String traceCategory,TraceCallable<RESULT> callable)
+	public FutureTask(TraceManager traceManager,Trace scheduleTrace,String traceCategory,TraceCallable<RESULT> callable,int index)
 	{
 		this.traceCategory=traceCategory;
-		this.parent=parent;
+		this.scheduleTrace=scheduleTrace;
 		this.traceManager=traceManager;
 		this.callable=(TraceCallable<RESULT>)callable;
-		this.status=status.READY;
+		this.status=TaskStatus.READY;
+        this.index=index;
 	}
 
-	void ready()
-	{
-		synchronized (this)
-		{
-			if (this.status==TaskStatus.COMPLETED)
-			{
-				this.status=TaskStatus.READY;
-			}
-		}
-	}
-	
 	@SuppressWarnings("unchecked")
 	void execute()
 	{
 		synchronized (this)
 		{
-			if (this.status!=TaskStatus.READY)
+			if (this.status!=TaskStatus.READY) //We need this check to support abort methods.
 			{
 				return;
 			}
@@ -47,8 +38,9 @@ public class FutureTask<RESULT>
 		}
 		RESULT result=null;
 		Throwable throwable=null;
-		try (Trace trace=new Trace(this.traceManager,this.parent,this.traceCategory,false))
+		try (Trace trace=new Trace(this.traceManager,this.scheduleTrace,this.traceCategory,false))
 		{
+		    trace.setDetails("runner:"+index);
 			try
 			{
 				result=this.callable.call(trace);

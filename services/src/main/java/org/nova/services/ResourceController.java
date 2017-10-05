@@ -82,10 +82,10 @@ import org.nova.http.server.annotations.QueryParam;
 import org.nova.logging.JSONBufferedLZ4Queue;
 import org.nova.logging.LogDirectoryInfo;
 import org.nova.logging.LogDirectoryManager;
-import org.nova.metrics.AverageAndRate;
+import org.nova.metrics.LongRateSample;
 import org.nova.metrics.CategoryMeters;
-import org.nova.metrics.CountAverageRateMeter;
-import org.nova.metrics.CountAverageRateMeterBox;
+import org.nova.metrics.LongRateMeter;
+import org.nova.metrics.LongRateMeterBox;
 import org.nova.metrics.CountMeter;
 import org.nova.metrics.CountMeterBox;
 import org.nova.metrics.LevelMeter;
@@ -98,7 +98,7 @@ import org.nova.test.Testing;
 import org.nova.testing.TestTraceClient;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceNode;
-import org.nova.tracing.TraceStats;
+import org.nova.tracing.CategorySample;
 
 import com.google.common.base.Strings;
 
@@ -112,10 +112,11 @@ public class ResourceController
     public final ServerApplication serverApplication;
     private int cacheMaxAge = 300;
     private String cacheControlValue = "public";
+    public final static boolean TEST=false;
 
     public ResourceController(ServerApplication serverApplication) throws Throwable
     {
-        this.cacheMaxAge = serverApplication.getConfiguration().getIntegerValue("ResourceController.cache.maxAge", 300);
+        this.cacheMaxAge = serverApplication.getConfiguration().getIntegerValue("ResourceController.cache.maxAgeS", 3600*24);
         this.cacheControlValue = serverApplication.getConfiguration().getValue("ResourceController.cache.controlValue", "public");
         this.serverApplication = serverApplication;
     }
@@ -131,16 +132,16 @@ public class ResourceController
         try
         {
             bytes = this.serverApplication.getFileCache().get(trace, file);
-            if (this.serverApplication.isDebug())
+            if (TEST)
             {
-                System.out.println("Resource:"+file);
+                Testing.printf("Resource:"+file);
             }
         }
         catch (Throwable t)
         {
-            if (this.serverApplication.isDebug())
+            if (TEST)
             {
-                TestTraceClient.clientLog(file + " not found");
+                Testing.printf(file + " not found");
             }
             response.setStatus(HttpStatus.NOT_FOUND_404);
             return;

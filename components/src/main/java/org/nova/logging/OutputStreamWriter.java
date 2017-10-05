@@ -1,9 +1,11 @@
 package org.nova.logging;
 
+import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
-import org.nova.flow.Packet;
 import org.nova.flow.Node;
+import org.nova.flow.Packet;
 import org.nova.logging.Formatter;
 import org.nova.logging.LogEntry;
 import org.nova.metrics.RateMeter;
@@ -30,13 +32,20 @@ public abstract class OutputStreamWriter extends Node
     public abstract OutputStream openOutputStream(long marker) throws Throwable;
     public abstract void closeOutputStream(OutputStream outputStream) throws Throwable;
 	
+    public void write(String text) throws IOException
+    {
+        byte[] bytes=text.getBytes(StandardCharsets.UTF_8);
+        this.outputStream.write(bytes);
+        this.rateMeter.add(bytes.length);
+    }
+    
     @Override
-    public void beginSegment(long marker) throws Throwable
+    public void beginGroup(long groupIdentifier) throws Throwable
     {
         try
         {
-            this.outputStream=openOutputStream(marker);
-            this.rateMeter.add(this.formatter.outputBegin(outputStream));
+            this.outputStream=openOutputStream(groupIdentifier);
+            write(this.formatter.formatBegin());
         }
         catch (Throwable t)
         {
@@ -49,13 +58,13 @@ public abstract class OutputStreamWriter extends Node
     }
 
     @Override
-    public void endSegment() throws Throwable
+    public void endGroup() throws Throwable
     {
         synchronized(this)
         {
             try
             {
-                this.rateMeter.add(this.formatter.outputEnd(this.outputStream));
+                write(this.formatter.formatEnd());
                 closeOutputStream(this.outputStream);
                 this.outputStream = null;
                 return;
@@ -77,12 +86,12 @@ public abstract class OutputStreamWriter extends Node
             {
                 try
                 {
-                    for (int i = 0; i < container.size(); i++)
+                    for (int i = 0; i < container.sizeOrType(); i++)
                     {
                         Object object = container.get()[i];
                         if ((object != null) && (object instanceof LogEntry))
                         {
-                            this.rateMeter.add(this.formatter.output((LogEntry) object, this.outputStream));
+                            write(this.formatter.format((LogEntry)object));
                         }
                     }
                     return;

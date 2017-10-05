@@ -20,17 +20,23 @@ public class NameValueList extends div
     final private ArrayList<NameValue<Element>> list;
     private int longest;
     final private Size leftWidth;
+    final private boolean frame;
     
-    public NameValueList(Size leftWidth)
+    public NameValueList(Size leftWidth,boolean frame)
     {
         style("display:block;");
         this.list=new ArrayList<>();
         this.longest=0;
         this.leftWidth=leftWidth;
+        this.frame=frame;
+    }
+    public NameValueList(Size leftWidth)
+    {
+        this(leftWidth,true);
     }
     public NameValueList()
     {
-        this(null);
+        this(null,true);
     }
     public NameValueList add(String name,Element element)
     {
@@ -62,31 +68,57 @@ public class NameValueList extends div
            NameValue<Element> item=this.list.get(i);
 
            div line=returnAddInner(new div());
-           if (i<this.list.size())
+           if (this.frame)
            {
-               line.style("display:flex;text-align:right;width:100%;border-bottom:1px solid #bbb;");
+               if (i==0)
+               {
+                   line.style("display:flex;text-align:right;width:100%;border:1px solid #bbb;");
+               }
+               else if (i%2==0)
+               {
+                   line.style("display:flex;text-align:right;width:100%;border-bottom:1px solid #bbb;border-left:1px solid #bbb;border-right:1px solid #bbb;");
+               }
+               else 
+               {
+                   line.style("display:flex;text-align:right;width:100%;background-color:#f9f9f9;border-bottom:1px solid #bbb;border-left:1px solid #bbb;border-right:1px solid #bbb;");
+               }
            }
            else
            {
-               line.style("display:flex;text-align:right;width:100%;");
+               line.style("display:flex;text-align:right;");
            }
            String label=item.getName();
            if (label==null)
            {
                label="";
            }
-           line.addInner(new div().style
-                   (
-                       new Style()
-                       .width(size)
-                       .border_right(new Size(1,unit.px),border_style.solid,Color.rgb(176, 176, 176))
-                       .margin_right(new Size(4,unit.px))
-                       .padding_right(new Size(4,unit.px))
-                       .padding_top(new Size(0,unit.px))
-                       .padding(new Size(0.2,unit.em),new Size(4,unit.px),new Size(0.1,unit.em),new Size(0,unit.px))
-                       .font_weight(font_weight.bold)
-                   )
-                   .addInner(label));
+           if (this.frame)
+           {
+               line.addInner(new div().style
+                       (
+                           new Style()
+                           .width(size)
+                           .border_right(new Size(1,unit.px),border_style.solid,Color.rgb(176, 176, 176))
+                           .margin_right(new Size(4,unit.px))
+                           .padding_right(new Size(4,unit.px))
+                           .padding_top(new Size(0,unit.px))
+                           .padding(new Size(0.2,unit.em),new Size(4,unit.px),new Size(0.1,unit.em),new Size(0,unit.px))
+                       )
+                       .addInner(label));
+           }
+           else
+           {
+               line.addInner(new div().style
+                       (
+                           new Style()
+                           .width(size)
+                           .margin_right(new Size(4,unit.px))
+                           .padding_right(new Size(4,unit.px))
+                           .padding_top(new Size(0,unit.px))
+                           .padding(new Size(0.2,unit.em),new Size(4,unit.px),new Size(0.1,unit.em),new Size(0,unit.px))
+                       )
+                       .addInner(label));
+           }
            line.addInner(new div().style("width:100%;text-align:left;padding-top:0.2em;padding-bottom:0.1em;").addInner(item.getValue()));
        }
        super.compose(builder);

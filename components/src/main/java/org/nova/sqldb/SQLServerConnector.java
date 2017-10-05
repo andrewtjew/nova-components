@@ -31,8 +31,9 @@ public class SQLServerConnector extends Connector
 
 	private String buildConnectionString() throws Exception
 	{
-        return "jdbc:sqlserver://" + this.host + ":" + this.port+";databaseName="
-                +this.database+";user="+user+";password="+this.passwordVault.get(this.passwordKey);	    
+        return "jdbc:sqlserver://" + this.host + ":" + this.port+";databaseName="+
+                this.database+";user="+user+";password="+this.passwordVault.get(this.passwordKey)+
+                ";sendStringParametersAsUnicode=false;";
 	}
 	
 	private static Vault buildUnsecuredVault(String password)

@@ -8,7 +8,7 @@ import org.nova.tracing.Trace;
 
 abstract public class ContentCache<KEY,VALUE>
 {
-	final private long maxAge;
+	final private long maxAgeMs;
 	final private long maxSize;
 	private long totalContentSize;
 	
@@ -41,7 +41,7 @@ abstract public class ContentCache<KEY,VALUE>
 		}
 	}
 
-	public ContentCache(int capacity,long maxAge,long maxSize) throws Exception
+	public ContentCache(int capacity,long maxAgeMs,long maxSize) throws Exception
 	{
 		if (capacity<1)
 		{
@@ -54,7 +54,7 @@ abstract public class ContentCache<KEY,VALUE>
 		this.nodeMap=new HashMap<>();
 		this.first=null;
 		this.capacity=capacity;
-		this.maxAge=maxAge;
+		this.maxAgeMs=maxAgeMs;
 		this.maxSize=maxSize;
 	}
 	
@@ -89,7 +89,7 @@ abstract public class ContentCache<KEY,VALUE>
 			if (node!=null)
 			{
 				long now=System.currentTimeMillis();
-				if (now-node.accessed<this.maxAge)
+				if (now-node.accessed<this.maxAgeMs)
 				{
     				if (node.previous!=null)
     				{

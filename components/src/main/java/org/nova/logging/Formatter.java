@@ -6,7 +6,7 @@ import org.nova.logging.LogEntry;
 
 public abstract class Formatter
 {
-	abstract public long outputBegin(OutputStream outputStream) throws Throwable;
-	abstract public long outputEnd(OutputStream outputStream) throws Throwable;
-	abstract public long output(LogEntry entry,OutputStream outputStream) throws Throwable;
+	abstract public String formatBegin() throws Throwable;
+	abstract public String formatEnd() throws Throwable;
+	abstract public String format(LogEntry entry) throws Throwable;
 }

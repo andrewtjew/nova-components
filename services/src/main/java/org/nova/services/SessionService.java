@@ -38,7 +38,7 @@ public abstract class SessionService<SESSION extends Session> extends ServerAppl
         this.getMenuBar().add("/operator/sessions","Sessions","View All");
         this.getPublicServer().addFilters(this.sessionFilter);
         SessionOperatorPages<SESSION> sessionOperatorPages=new SessionOperatorPages<>(this.sessionManager,this);
-        this.getOperatorServer().register(sessionOperatorPages);
+        this.getOperatorServer().registerHandlers(sessionOperatorPages);
     }
 
     public SessionManager<SESSION> getSessionManager()
@@ -64,6 +64,11 @@ public abstract class SessionService<SESSION extends Session> extends ServerAppl
             token=this.tokenGenerator.generate();
         }
         return token;
+    }
+
+    public String generateToken()
+    {
+        return this.tokenGenerator.generate();
     }
     
 }

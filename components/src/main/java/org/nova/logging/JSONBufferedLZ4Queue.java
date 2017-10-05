@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 import org.nova.core.MultiException;
 import org.nova.flow.Distributor;
-import org.nova.flow.Packet;
 import org.nova.flow.Node;
 import org.nova.flow.SourceQueue;
 import org.nova.flow.SourceQueueConfiguration;
+import org.nova.flow.Tapper;
 import org.nova.flow.ThreadWorkerQueue;
 import org.nova.logging.Formatter;
 import org.nova.logging.LogDirectoryManager;
@@ -23,7 +23,7 @@ import org.nova.metrics.RateMeter;
 
 public class JSONBufferedLZ4Queue extends SourceQueue<LogEntry> 
 {
-	private static Distributor connect(LogDirectoryManager logDirectoryManager,JSONBufferedLZ4QueueConfiguration configuration) throws Throwable
+	private static Tapper connect(LogDirectoryManager logDirectoryManager,JSONBufferedLZ4QueueConfiguration configuration) throws Throwable
 	{
         CountMeter threadWorkerQueueDroppedMeter=new CountMeter();
         CountMeter threadWorkerQueueStalledMeter=new CountMeter();
@@ -52,7 +52,7 @@ public class JSONBufferedLZ4Queue extends SourceQueue<LogEntry>
             queue.start();
             queues[i]=queue;
         }
-        return new Distributor(null, configuration.writerSegmentSize, false,queues);
+        return new Tapper(new Distributor(null, configuration.writerSegmentSize, false,queues));
 	}
 	
     final private CountMeter threadWorkerQueueDroppedMeter;
@@ -62,13 +62,15 @@ public class JSONBufferedLZ4Queue extends SourceQueue<LogEntry>
     final private RateMeter writeRateMeter;
     final private BufferedLZ4FileWriter[] writers;
     final private ThreadWorkerQueue[] queues;
+    final private Tapper tapper;
 
     public JSONBufferedLZ4Queue(LogDirectoryManager logDirectoryManager, JSONBufferedLZ4QueueConfiguration configuration) throws Throwable
 	{
 		super(connect(logDirectoryManager,configuration),configuration);
         this.writers=new BufferedLZ4FileWriter[configuration.writerThreads];
         this.queues=new ThreadWorkerQueue[configuration.writerThreads];
-		Node[] receivers=((Distributor)this.getReceiver()).getReceivers();
+        this.tapper=(Tapper)this.getReceiver();
+		Node[] receivers=((Distributor)this.tapper.getReceiver()).getReceivers();
 		for (int i=0;i<this.writers.length;i++)
 		{
 		    this.queues[i]=(ThreadWorkerQueue)receivers[i];
@@ -122,5 +124,9 @@ public class JSONBufferedLZ4Queue extends SourceQueue<LogEntry>
     public RateMeter getWriteRateMeter()
     {
         return writeRateMeter;
+    }
+    public Tapper getTapper()
+    {
+        return this.tapper;
     }
 }

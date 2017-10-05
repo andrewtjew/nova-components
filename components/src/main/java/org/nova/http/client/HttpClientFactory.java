@@ -34,7 +34,7 @@ public class HttpClientFactory
 {
     static public HttpClient createDefaultClient()
     {
-        RequestConfig config=RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+        RequestConfig config=RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         HttpClients.custom().setDefaultRequestConfig(config);
         PoolingHttpClientConnectionManager connectionManager=new PoolingHttpClientConnectionManager();
         connectionManager.setDefaultMaxPerRoute(10);

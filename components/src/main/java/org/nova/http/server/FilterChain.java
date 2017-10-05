@@ -2,6 +2,7 @@ package org.nova.http.server;
 
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.util.HashMap;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -60,6 +61,10 @@ public class FilterChain
 		}
 		if ((type==boolean.class)||(type==Boolean.class))
 		{
+            if ("on".equals(value))
+            {
+                return true;
+            }
 		    return !("false".equals(value));
 		}
         if (type.isEnum())
@@ -178,6 +183,12 @@ public class FilterChain
 			case TRACE:
 				parameters[i]=trace;
 				break;
+            case QUERIES:
+                parameters[i]=new Queries(request);
+                break;
+            case CHECK:
+                parameters[i]=request.getParameter(parameterInfo.getName())!=null;
+                break;
 			default:
 				break;
 			}

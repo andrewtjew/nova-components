@@ -33,7 +33,7 @@ public class MultiException extends Exception
         return nodeExceptions[0];
     }
 
-	
+	//First is top of stack
 	public MultiException(String message,List<Throwable> throwables)
 	{
 		this(message,throwables.toArray(new Throwable[throwables.size()]));

@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.nova.metrics.CountAverageRateMeter;
+import org.nova.metrics.LongRateMeter;
+import org.nova.metrics.LongRateSample;
 import org.nova.metrics.RateMeter;
 
 import java.util.SortedMap;
@@ -33,11 +34,11 @@ public class RequestHandler
     final private boolean logLastRequestsInMemory;
 	
 	
-	final private HashMap<Integer,CountAverageRateMeter> meters;
-	final private CountAverageRateMeter requestUncompressedContentSizeMeter;
-	final private CountAverageRateMeter responseUncompressedContentSizeMeter;
-	final private CountAverageRateMeter requestCompressedContentSizeMeter;
-	final private CountAverageRateMeter responseCompressedContentSizeMeter;
+	final private HashMap<Integer,LongRateMeter> meters;
+	final private LongRateMeter requestUncompressedContentSizeMeter;
+	final private LongRateMeter responseUncompressedContentSizeMeter;
+	final private LongRateMeter requestCompressedContentSizeMeter;
+	final private LongRateMeter responseCompressedContentSizeMeter;
 	
 	RequestHandler(Object object,Method method,String httpMethod,String path,Filter[] filters,ParameterInfo[] parameterInfos,	Map<String,ContentDecoder> contentDecoders,Map<String,ContentEncoder> contentEncoders,Map<String,ContentReader<?>> contentReaders,Map<String,ContentWriter<?>> contentWriters,boolean log,boolean logRequestHeaders,boolean logRequestContent,boolean logResponseHeaders,boolean logResponseContent,boolean logLastRequestsInMemory,boolean public_)
 	{
@@ -54,10 +55,10 @@ public class RequestHandler
 		this.key=httpMethod+" "+path;
 		this.public_=public_;
 		this.meters=new HashMap<>();
-		this.requestUncompressedContentSizeMeter=new CountAverageRateMeter();
-		this.responseUncompressedContentSizeMeter=new CountAverageRateMeter();
-		this.requestCompressedContentSizeMeter=new CountAverageRateMeter();
-		this.responseCompressedContentSizeMeter=new CountAverageRateMeter();
+		this.requestUncompressedContentSizeMeter=new LongRateMeter();
+		this.responseUncompressedContentSizeMeter=new LongRateMeter();
+		this.requestCompressedContentSizeMeter=new LongRateMeter();
+		this.responseCompressedContentSizeMeter=new LongRateMeter();
 		
 		this.log=log;
 		this.logRequestHeaders=logRequestHeaders;
@@ -132,10 +133,10 @@ public class RequestHandler
 	{
 		synchronized (this)
 		{
-			CountAverageRateMeter meter=this.meters.get(statusCode);
+			LongRateMeter meter=this.meters.get(statusCode);
 			if (meter==null)
 			{
-				meter=new CountAverageRateMeter();
+				meter=new LongRateMeter();
 				this.meters.put(statusCode, meter);
 			}
 			meter.update(duration);
@@ -146,35 +147,35 @@ public class RequestHandler
 		this.responseCompressedContentSizeMeter.update(responseCompressedContentSize);
 	}
 
-	public Map<Integer,CountAverageRateMeter> getStatusMeters()
+	public Map<Integer,LongRateSample> sampleStatusMeters()
 	{
 		synchronized (this)
 		{
-			TreeMap<Integer,CountAverageRateMeter> statusMeters=new TreeMap<>();
-			for (Entry<Integer, CountAverageRateMeter> entry:this.meters.entrySet())
+			TreeMap<Integer,LongRateSample> results =new TreeMap<>();
+			for (Entry<Integer, LongRateMeter> entry:this.meters.entrySet())
 			{
-				statusMeters.put(entry.getKey(),entry.getValue());
+			    results.put(entry.getKey(), entry.getValue().sample());
 			}
-			return statusMeters;
+			return results;
 		}		
 	}
 
-	public CountAverageRateMeter getRequestUncompressedContentSizeMeter()
+	public LongRateMeter getRequestUncompressedContentSizeMeter()
 	{
 		return requestUncompressedContentSizeMeter;
 	}
 
-	public CountAverageRateMeter getResponseUncompressedContentSizeMeter()
+	public LongRateMeter getResponseUncompressedContentSizeMeter()
 	{
 		return responseUncompressedContentSizeMeter;
 	}
 
-	public CountAverageRateMeter getRequestCompressedContentSizeMeter()
+	public LongRateMeter getRequestCompressedContentSizeMeter()
 	{
 		return requestCompressedContentSizeMeter;
 	}
 
-	public CountAverageRateMeter getResponseCompressedContentSizeMeter()
+	public LongRateMeter getResponseCompressedContentSizeMeter()
 	{
 		return responseCompressedContentSizeMeter;
 	}

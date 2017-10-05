@@ -41,6 +41,7 @@ public class FutureScheduler
 		@Override
 		public void run()
 		{
+		    this.future.startTask();
 			this.task.execute();
 			complete(future);
 		}

@@ -15,19 +15,15 @@ public class XmlFormatter extends Formatter
 {
 
 	@Override
-	public long outputBegin(OutputStream outputStream) throws IOException
+	public String formatBegin() throws IOException
 	{
-		byte[] bytes="<Logs>\r\n".getBytes(StandardCharsets.UTF_8);
-		outputStream.write(bytes);
-		return bytes.length;
+		return "<Logs>\r\n";
 	}
 
 	@Override
-	public long outputEnd(OutputStream outputStream) throws IOException
+	public String formatEnd() throws IOException
 	{
-		byte[] bytes="</Logs>\r\n".getBytes(StandardCharsets.UTF_8);
-		outputStream.write(bytes);
-		return bytes.length;
+        return "</Logs>\r\n";
 	}
 
 	private void write(StringBuilder sb,String tag,String content)
@@ -55,7 +51,7 @@ public class XmlFormatter extends Formatter
 	}
 	
 	@Override
-	public long output(LogEntry entry, OutputStream outputStream) throws Throwable
+	public String format(LogEntry entry) throws Throwable
 	{
 		StringBuilder sb=new StringBuilder();
 		sb.append("<Entry category='"+entry.getCategory()+"' level='"+entry.getLogLevel()+"' number='"+entry.getNumber()+"' created='"+Utils.millisToLocalDateTimeString(entry.getCreated())+"'>\r\n");
@@ -84,7 +80,7 @@ public class XmlFormatter extends Formatter
 		Trace trace=entry.getTrace();
 		if (trace!=null)
 		{
-			sb.append("<Trace number='"+trace.getNumber()+"' created='"+Utils.millisToLocalDateTimeString(trace.getCreated())+"' duration='"+trace.getDuration()+"' wait='"+trace.getWait()+"' waiting='"+trace.isWaiting()+"' closed='"+trace.isClosed()+"'>\r\n");
+			sb.append("<Trace number='"+trace.getNumber()+"' created='"+Utils.millisToLocalDateTimeString(trace.getCreatedMs())+"' duration='"+trace.getDurationS()+"' wait='"+trace.getWaitS()+"' waiting='"+trace.isWaiting()+"' closed='"+trace.isClosed()+"'>\r\n");
 			write(sb,"category",trace.getCategory());
 			Trace parent=trace.getParent();
 			if (parent!=null)
@@ -120,9 +116,7 @@ public class XmlFormatter extends Formatter
 		}
 		sb.append("</Entry>\r\n");
 		sb.append("<---------------------------------------------------------------------------------------------------------------->\r\n");
-		byte[] bytes=sb.toString().getBytes(Charsets.UTF_8);
-		outputStream.write(bytes);
-		return bytes.length;
+		return sb.toString();
 	}
 
 }

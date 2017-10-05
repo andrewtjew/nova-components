@@ -11,7 +11,7 @@ public class Loggers
 	{
 		SourceQueue<LogEntry> queue=new SourceQueue<>(new ConsoleWriter(formatter,outputSegments),configuration);
 		queue.start();
-		return new SourceQueueLogger(category,queue);
+		return new SourceQueueLogger(0,category,queue);
 	}
 
 	public static SourceQueueLogger createConsoleLogger(String category) throws Throwable
@@ -29,7 +29,7 @@ public class Loggers
     {
         SourceQueue<LogEntry> queue=new SourceQueue<>(new SimpleFileWriter(logDirectoryManager,formatter),configuration);
         queue.start();
-        return new SourceQueueLogger(category,queue);
+        return new SourceQueueLogger(0,category,queue);
     }
 
     public static SourceQueueLogger createSimpleFileLogger(LogDirectoryManager logDirectoryManager,String category) throws Throwable

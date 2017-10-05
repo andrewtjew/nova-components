@@ -17,7 +17,7 @@ public class JSONFormatter extends Formatter
     private boolean commaNeededBetweenEntries=false;
 	@SuppressWarnings("resource")
     @Override
-	public long output(LogEntry entry, OutputStream outputStream) throws Exception
+	public String format(LogEntry entry) throws Exception
 	{
 		StringBuilder sb=new StringBuilder();
 	    if (this.commaNeededBetweenEntries)
@@ -59,9 +59,9 @@ public class JSONFormatter extends Formatter
         {
             sb.append(",\"trace\":{");
             write(false,sb,"number",trace.getNumber());
-            writeString(true,sb,"created",Utils.millisToLocalDateTimeString(trace.getCreated()));
+            writeString(true,sb,"created",Utils.millisToLocalDateTimeString(trace.getCreatedMs()));
             writeString(true,sb,"category",trace.getCategory());
-            write(true,sb,"duration",trace.getDuration());
+            write(true,sb,"duration",trace.getDurationS());
             Trace parent=trace.getParent();
             if (parent!=null)
             {
@@ -104,9 +104,7 @@ public class JSONFormatter extends Formatter
             sb.append('}');
         }
         sb.append("}\r\n");
-        byte[] bytes=sb.toString().getBytes(StandardCharsets.UTF_8);
-        outputStream.write(bytes);
-		return bytes.length;
+        return sb.toString();
 	}
 	
 	private void writeString(boolean comma,StringBuilder sb,String key,String value)
@@ -177,18 +175,16 @@ public class JSONFormatter extends Formatter
     static private byte[] END="\r\n]".getBytes(StandardCharsets.UTF_8);
 
     @Override
-	public long outputBegin(OutputStream outputStream) throws IOException
+	public String formatBegin() throws IOException
 	{
         this.commaNeededBetweenEntries=false;
-        outputStream.write(BEGIN);
-        return BEGIN.length;
+        return "[\r\n";
 	}
 
 	@Override
-	public long outputEnd(OutputStream outputStream) throws IOException
+	public String formatEnd() throws IOException
 	{
-        outputStream.write(END);
-        return END.length;
+        return "\r\n]";
 	}
 
 }

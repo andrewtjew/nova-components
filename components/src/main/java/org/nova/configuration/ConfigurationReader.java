@@ -83,7 +83,6 @@ public class ConfigurationReader
     			lexeme=lexer.expectPunctuator('=');
                 checkError(lexeme);
     
-                String value=null;
                 character=lexer.skipWhiteSpaceAndBegin();
                 if (character == '{')
                 {
@@ -95,7 +94,7 @@ public class ConfigurationReader
                 }
                 else
                 {
-                    lexeme=lexer.produceTerminatedText('\r','\n');
+                    lexeme=lexer.produceTerminatedTextAndSkipTerminator('\r','\n',';');
                 }
                 int line=new LineAndColumn(text,lexeme.getSnippet().getAbsolutePosition()).getLine()+1;
     			this.configuration.add(new ConfigurationItem(name, lexeme.getValue().trim(), ConfigurationSource.FILE,fileName+"("+line+")", description));
@@ -153,7 +152,7 @@ public class ConfigurationReader
 
         return search(args,candidates.toArray(new String[candidates.size()]));
     }
-	public static Configuration search(String[] args,String[] candidates)
+	private static Configuration search(String[] args,String[] candidates)
 	{
         for (int i=0;i<candidates.length;i++)
         {
@@ -174,7 +173,7 @@ public class ConfigurationReader
                     continue;
                 }
                 Configuration configuration=read(path);
-                configuration.addCommandLineConfigurations(args);
+                configuration.addArgs(args);
                 System.out.println("OK");
                 return configuration;
             }

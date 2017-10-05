@@ -11,6 +11,7 @@ import org.nova.test.Testing;
 
 public class ThreadWorkerQueue extends Node
 {
+    final private static boolean TESTING=false;
 	final private CountMeter droppedMeter;
 	final private CountMeter stalledMeter;
     final private LevelMeter threadInUseMeter;
@@ -50,7 +51,6 @@ public class ThreadWorkerQueue extends Node
 		{
 			if (this.thread==null)
 			{
-                Testing.setTimeBase(System.currentTimeMillis());
 				this.stop=false;
 				this.thread=new Thread(()->
 				{
@@ -92,17 +92,26 @@ public class ThreadWorkerQueue extends Node
         this.threadInUseMeter.increment();
 		try
 		{
-            Testing.oprintln("ThreadWorkerQueue="+this.id+":enter");
+		    if (TESTING)
+		    {
+		        Testing.oprintln("ThreadWorkerQueue="+this.id+":enter");
+		    }
 			for (;;)
 			{
 	            ArrayList<Packet> old=null;
 				synchronized (this.lock)
 				{
-                    Testing.oprintln("ThreadWorkerQueue="+this.id+":start wait");
+		            if (TESTING)
+		            {
+		                Testing.oprintln("ThreadWorkerQueue="+this.id+":start wait");
+		            }
                     this.threadInUseMeter.decrement();
 					Synchronization.waitForNoThrow(this.lock, ()->{return this.queue.size()>0||this.stop;});
                     this.threadInUseMeter.increment();
-                    Testing.oprintln("ThreadWorkerQueue="+this.id+":end wait");
+                    if (TESTING)
+                    {
+                        Testing.oprintln("ThreadWorkerQueue="+this.id+":end wait");
+                    }
 					if (this.stop)
 					{
 						return;
@@ -112,23 +121,32 @@ public class ThreadWorkerQueue extends Node
 				}
 				for (Packet packet:old)
 			    {
-				    int size=packet.size();
+				    int size=packet.sizeOrType();
 				    if (size<0)
 				    {
                         if (size==Packet.BEGIN_SEGMENT)
                         {
-                            Testing.oprintln("ThreadWorkerQueue="+this.id+":receiver.beginSegment="+packet.get()[0]);
-                            this.receiver.beginSegment((long)packet.get()[0]);
+                            if (TESTING)
+                            {
+                                Testing.oprintln("ThreadWorkerQueue="+this.id+":receiver.beginSegment="+packet.get()[0]);
+                            }
+                            this.receiver.beginGroup((long)packet.get()[0]);
                         }
                         else if (size==Packet.END_SEGMENT)
                         {
-                            Testing.oprintln("ThreadWorkerQueue="+this.id+":receiver.endSegment");
-                            this.receiver.endSegment();
+                            if (TESTING)
+                            {
+                                Testing.oprintln("ThreadWorkerQueue="+this.id+":receiver.endSegment");
+                            }
+                            this.receiver.endGroup();
                         }
                         else if (size==Packet.FLUSH)
                         {
                             this.receiver.flush();
-                            Testing.oprintln("ThreadWorkerQueue="+this.id+":receiver.flush");
+                            if (TESTING)
+                            {
+                                Testing.oprintln("ThreadWorkerQueue="+this.id+":receiver.flush");
+                            }
                         }
 				    }
 			        else 
@@ -187,17 +205,20 @@ public class ThreadWorkerQueue extends Node
                 this.stalledMeter.increment();
             }
             this.queue.add(container);
-            if (container.size()>0)
+            if (container.sizeOrType()>0)
             {
-                this.waitingMeter.add(container.size());
+                this.waitingMeter.add(container.sizeOrType());
             }
             this.lock.notify();
-            Testing.oprintln("ThreadWorkerQueue="+this.id+":notify, queue size="+this.queue.size());
+            if (TESTING)
+            {
+                Testing.oprintln("ThreadWorkerQueue="+this.id+":notify, queue size="+this.queue.size());
+            }
         }
     }
 
     @Override
-    public void beginSegment(long marker) throws Throwable
+    public void beginGroup(long marker) throws Throwable
     {
         synchronized (this.lock)
         {
@@ -223,7 +244,7 @@ public class ThreadWorkerQueue extends Node
     }
 
     @Override
-    public void endSegment() throws Throwable
+    public void endGroup() throws Throwable
     {
         synchronized (this.lock)
         {

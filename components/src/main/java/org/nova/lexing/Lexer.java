@@ -1,6 +1,7 @@
 package org.nova.lexing;
 
 import org.nova.lexing.Lexeme;
+import org.nova.test.Testing;
 
 public class Lexer
 {
@@ -18,6 +19,23 @@ public class Lexer
                 if (t==c)
                 {
                     Snippet snippet=this.source.endAndGetSnippet(1);
+                    return new Lexeme(Token.TEXT, snippet.getTarget(),snippet);
+                }
+            }
+        }
+        Snippet snippet=this.source.endAndGetSnippet(1);
+        return new Lexeme(Token.STRING, snippet.getTarget(),snippet);
+    }
+    public Lexeme produceTerminatedTextAndSkipTerminator(char... terminators) throws Throwable
+    {
+        for (char c=this.source.next();c!=0;c=this.source.next())
+        {
+            for (char t:terminators)
+            {
+                if (t==c)
+                {
+                    Snippet snippet=this.source.endAndGetSnippet(1);
+                    this.source.next();
                     return new Lexeme(Token.TEXT, snippet.getTarget(),snippet);
                 }
             }

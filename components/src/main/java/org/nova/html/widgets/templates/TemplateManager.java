@@ -12,6 +12,7 @@ import org.nova.concurrent.LockManager;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.StringComposer;
+import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
 
 public class TemplateManager
@@ -42,7 +43,7 @@ public class TemplateManager
         }
 	}
 	
-	public Template get(String key) throws Throwable
+	public Template get(Trace parent,String key) throws Throwable
 	{
 		synchronized (this)
 		{
@@ -52,7 +53,7 @@ public class TemplateManager
 				return new Template(sections);
 			}
 		}
-		try (Lock<String> lock=this.lockManager.waitForLock(key))
+		try (Lock<String> lock=this.lockManager.waitForLock(parent,key))
 		{
 			synchronized (this)
 			{

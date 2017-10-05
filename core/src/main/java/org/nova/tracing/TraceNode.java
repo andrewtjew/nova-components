@@ -4,50 +4,63 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.nova.metrics.TraceMeter;
+import org.nova.metrics.TraceSample;
+
 public class TraceNode
 {
-	private long totalDurationNs;
-	private long totalWaitNs;
-	private long count;
-	HashMap<String,TraceNode> childTraces;
+    private TraceMeter traceMeter;
+	private HashMap<String,TraceNode> childTraceNodes;
+	
 	TraceNode()
 	{
+	    this.traceMeter=new TraceMeter();
 	}
-	TraceNode(TraceNode node)
+	public Map<String,TraceNode> getChildTraceNodesSnapshot()
 	{
-		this.totalDurationNs=node.totalDurationNs;
-		this.totalWaitNs=node.totalWaitNs;
-		this.count=node.count;
-		if (node.childTraces!=null)
-		{
-			this.childTraces=new HashMap<>();
-			for (Entry<String, TraceNode> entry:node.childTraces.entrySet())
-			{
-				this.childTraces.put(entry.getKey(), new TraceNode(entry.getValue()));
-			}
-		}
+        HashMap<String,TraceNode> childTraces=new HashMap<>();
+	    synchronized(this)
+	    {
+	        if (this.childTraceNodes==null)
+	        {
+	            return null;
+	        }
+	        childTraces.putAll(this.childTraceNodes);
+	    }
+        return childTraces;
 	}
-	void update(long durationNs,long waitNs)
+	public TraceNode getOrCreateChildTraceNode(String category)
 	{
-		this.totalDurationNs+=durationNs;
-		this.totalWaitNs+=waitNs;
-		this.count++;
+        synchronized(this)
+        {
+            if (this.childTraceNodes==null)
+            {
+                this.childTraceNodes=new HashMap<>();
+                TraceNode childNode=new TraceNode();
+                this.childTraceNodes.put(category, childNode);
+                return childNode;
+            }
+            TraceNode childNode=this.childTraceNodes.get(category);
+            if (childNode==null)
+            {
+                childNode=new TraceNode();
+                this.childTraceNodes.put(category, childNode);
+            }
+            return childNode;
+        }
 	}
-	public long getTotalDurationNs()
+    public void update(Trace trace)
+    {
+        this.traceMeter.update(trace);
+    }
+    public void update(TraceSample sample)
+    {
+        this.traceMeter.update(sample);
+    }
+	
+	public TraceSample sampleTrace()
 	{
-		return totalDurationNs;
-	}
-	public long getTotalWaitNs()
-	{
-		return totalWaitNs;
-	}
-	public long getCount()
-	{
-		return count;
-	}
-	public Map<String,TraceNode> getChildTraces()
-	{
-		return this.childTraces;
+	    return traceMeter.sample();
 	}
 	
 }

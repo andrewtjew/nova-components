@@ -84,10 +84,10 @@ import org.nova.http.server.annotations.QueryParam;
 import org.nova.logging.JSONBufferedLZ4Queue;
 import org.nova.logging.LogDirectoryInfo;
 import org.nova.logging.LogDirectoryManager;
-import org.nova.metrics.AverageAndRate;
+import org.nova.metrics.LongRateSample;
 import org.nova.metrics.CategoryMeters;
-import org.nova.metrics.CountAverageRateMeter;
-import org.nova.metrics.CountAverageRateMeterBox;
+import org.nova.metrics.LongRateMeter;
+import org.nova.metrics.LongRateMeterBox;
 import org.nova.metrics.CountMeter;
 import org.nova.metrics.CountMeterBox;
 import org.nova.metrics.LevelMeter;
@@ -100,7 +100,7 @@ import org.nova.test.Testing;
 import org.nova.testing.TestTraceClient;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceNode;
-import org.nova.tracing.TraceStats;
+import org.nova.tracing.CategorySample;
 
 import com.google.common.base.Strings;
 

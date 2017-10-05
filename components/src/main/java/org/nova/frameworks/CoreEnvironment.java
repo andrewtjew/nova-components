@@ -17,6 +17,7 @@ import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
 import org.nova.logging.SimpleFileWriter;
 import org.nova.logging.SourceQueueLogger;
+import org.nova.logging.StatusBoard;
 import org.nova.metrics.MeterManager;
 import org.nova.tracing.TraceManager;
 
@@ -28,19 +29,21 @@ public class CoreEnvironment
 	final private Configuration configuration;
 	final private MeterManager meterManager;
 	final private Logger logger;
-	final HashMap<String,SourceQueueLogger> loggers;
+	final HashMap<String,Logger> loggers;
 	final SourceQueue<LogEntry> logSourceQueue;
 	final private LogDirectoryManager logDirectoryManager;
+	final private int logCategoryBufferSize;
+	final static public StatusBoard STATUS_BOARD=new StatusBoard();
 	
 	public CoreEnvironment(Configuration configuration) throws Throwable
 	{
         this.configuration=configuration;
-
         String directory=configuration.getValue("Logger.logDirectory","logs");
 		long maxFiles=configuration.getIntegerValue("Logger.logDirectory.maxFiles",100);
 		long reserve=configuration.getLongValue("Logger.logDirectory.reserveSpace",100_000_000_000L);
 		long maxDirectorySize=configuration.getLongValue("Logger.logDirectory.maxDirectorySize",10_000_000_000L);
 		int maxMakeSpaceRetries=configuration.getIntegerValue("Logger.logDirectory.maxMakeSpaceRetries",10);
+		this.logCategoryBufferSize=configuration.getIntegerValue("Logger.logCategoryBufferSize",10);
 		this.logDirectoryManager=new LogDirectoryManager(directory, maxMakeSpaceRetries, maxFiles, maxDirectorySize, reserve);
 
 		String loggerType=configuration.getValue("Logger.class","JSONBufferedLZ4Queue");
@@ -74,6 +77,11 @@ public class CoreEnvironment
 	{
 		return meterManager;
 	}
+	public StatusBoard getStatusBoard()
+	{
+	    return this.STATUS_BOARD;
+	}
+	
 
 	public FutureScheduler getFutureScheduler()
 	{
@@ -94,14 +102,14 @@ public class CoreEnvironment
 	{
 		return timerScheduler;
 	}
-	public SourceQueueLogger getLogger(String category) throws Throwable
+	public Logger getLogger(String category) throws Throwable
 	{
 		synchronized (this.loggers)
 		{
-		    SourceQueueLogger logger=this.loggers.get(category);
+		    Logger logger=this.loggers.get(category);
 			if (logger==null)
 			{
-				logger=new SourceQueueLogger(category, this.logSourceQueue);
+				logger=new SourceQueueLogger(this.logCategoryBufferSize,category, this.logSourceQueue);
 				this.loggers.put(category, logger);
 			}
 			return logger;
@@ -110,6 +118,13 @@ public class CoreEnvironment
 	public Logger getLogger() 
 	{
 		return this.logger;
+	}
+	public Logger[] getLoggers()
+	{
+	    synchronized (this.loggers)
+	    {
+	        return this.loggers.values().toArray(new Logger[this.loggers.size()]);
+	    }
 	}
 	public SourceQueue<LogEntry> getLogQueue()
 	{

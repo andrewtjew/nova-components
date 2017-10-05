@@ -33,7 +33,7 @@ public class TestTraceServer
 	{
 		this.maximumMessages=maximumMessages;
 		this.messages=new LinkedList<>();
-		this.server=new HttpServer(new TraceManager(), Loggers.createConsoleLogger(),JettyServerFactory.createServer(threads,port));
+		this.server=new HttpServer(new TraceManager(), Loggers.createConsoleLogger(),false,JettyServerFactory.createServer(threads,port));
 
 		Transformers transformers=new Transformers();
         transformers.add(new GzipContentDecoder());
@@ -41,7 +41,7 @@ public class TestTraceServer
         transformers.add(new JSONContentWriter());
         transformers.add(new HtmlContentWriter());
 		this.server.setTransformers(transformers);
-		this.server.register(this);
+		this.server.registerHandlers(this);
 		this.server.start();
 		System.out.println("TestTraceServer started: port="+port);
 	}

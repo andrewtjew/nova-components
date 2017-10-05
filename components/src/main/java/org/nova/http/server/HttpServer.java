@@ -48,11 +48,12 @@ public class HttpServer
 	final private int [] ports;
 	private Transformers transformers;
 	final private Logger logger;
+	private boolean started;
 	
 	@OperatorVariable()
-	private boolean debug;
+	private boolean test;
 	
-	public HttpServer(TraceManager traceManager, Logger logger,HttpServerConfiguration configuration,Server[] servers) throws Exception
+	public HttpServer(TraceManager traceManager, Logger logger,boolean test,HttpServerConfiguration configuration,Server[] servers) throws Exception
 	{
 	    this.logger=logger;
 	    this.ports=new int[servers.length];
@@ -61,27 +62,31 @@ public class HttpServer
 	        this.ports[i]=((ServerConnector)((servers[i].getConnectors())[0])).getPort();
 	    }
 		this.categoryPrefix=configuration.categoryPrefix+"@";
-		this.requestHandlerMap = new RequestHandlerMap();
+		this.requestHandlerMap = new RequestHandlerMap(test);
 		this.traceManager = traceManager;
 		this.servers = servers;
 		this.requestRateMeter = new RateMeter();
 		this.identityContentDecoder = new IdentityContentDecoder();
 		this.identityContentEncoder = new IdentityContentEncoder();
-		this.debug=true;
+		this.test=test;
 		this.lastRequestsLogEntries=new RingBuffer<>(new RequestLogEntry[configuration.lastRequestLogEntryBufferSize]);
 		this.lastExceptionRequestsLogEntries=new RingBuffer<>(new RequestLogEntry[configuration.lastExceptionRequestLogEntryBufferSize]);
 		this.lastRequestHandlerNotFoundLogEntries=new RingBuffer<>(new RequestHandlerNotFoundLogEntry[configuration.lastNotFoundBufferSize]);
 		this.transformers=new Transformers();
 	}
 
-	public HttpServer(TraceManager traceManager, Logger logger,Server server) throws Exception
+	public HttpServer(TraceManager traceManager, Logger logger,boolean test,Server server) throws Exception
 	{
-		this(traceManager, logger ,new HttpServerConfiguration(),  new Server[]{server});
+		this(traceManager, logger ,test,new HttpServerConfiguration(),  new Server[]{server});
 	}
 	
 
 	public void start() throws Exception
 	{
+	    if (started)
+	    {
+	        return;
+	    }
 		for (Server server:this.servers)
 		{
 	        AbstractHandler handler=new AbstractHandler()
@@ -95,6 +100,7 @@ public class HttpServer
 			server.setHandler(handler);
 			server.start();
 		}
+        this.started=true;
 	}
 	
 	public void setTransformers(Transformers transformers)
@@ -132,19 +138,19 @@ public class HttpServer
 	    return this.transformers;
 	}
 	
-	public void register(Object object) throws Exception
+	public void registerHandlers(Object object) throws Exception
 	{
-		register(null, object);
+		registerHandlers(null, object);
 	}
 
-	public void register(String root, Object object) throws Exception
+	public void registerHandlers(String root, Object object) throws Exception
 	{
-		this.requestHandlerMap.register(root, object, this.transformers);
+		this.requestHandlerMap.registerObject(root, object, this.transformers);
 	}
 
-	public void register(String root, Object object, Method method) throws Exception
+	public void registerHandler(String root, Object object, Method method) throws Exception
 	{
-		this.requestHandlerMap.register(root, object, method, this.transformers);
+		this.requestHandlerMap.registerObjectMethod(root, object, method, this.transformers);
 	}
 
 	public RequestHandler[] getRequestHandlers()
@@ -165,7 +171,8 @@ public class HttpServer
 		}
 		catch (Throwable t)
 		{
-			t.printStackTrace();
+		    this.logger.log(t);
+		//	t.printStackTrace();
 		}
 		finally
 		{
@@ -391,7 +398,7 @@ public class HttpServer
 		{
 			trace.close(e);
 			servletResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
-			if (this.debug)
+			if (this.test)
 			{
 				e.printStackTrace();
 			}

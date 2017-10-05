@@ -40,6 +40,7 @@ import org.nova.logging.LogDirectoryManager;
 import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
 import org.nova.logging.SourceQueueLogger;
+import org.nova.logging.StatusBoard;
 import org.nova.metrics.MeterManager;
 import org.nova.operations.OperatorVariable;
 import org.nova.operations.OperatorVariableManager;
@@ -72,7 +73,7 @@ public abstract class ServerApplication
 	final private String hostName;
 	private Template template;
 	@OperatorVariable
-	boolean debug;
+	boolean test;
 	
 	public ServerApplication(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer) throws Throwable 
 	{
@@ -86,10 +87,10 @@ public abstract class ServerApplication
 		//Discover base directory. This is important to know for troubleshooting errors with file paths, so we output this info and we put this in the configuration. 
         File baseDirectory=new File(".");
         this.baseDirectory=baseDirectory.getCanonicalPath();
-        configuration.add("System.baseDirectory",this.baseDirectory,"The base directory");
+        CoreEnvironment.STATUS_BOARD.set("Application.baseDirectory",this.baseDirectory);
         System.out.println("base directory: "+this.baseDirectory);
 
-        this.debug=configuration.getBooleanValue("System.debug",false);
+        this.test=configuration.getBooleanValue("System.test",false);
         this.disruptorManager=new DisruptorManager();
 
         //Setting up the vault
@@ -125,7 +126,7 @@ public abstract class ServerApplication
             if (unsecureVaultFile!=null)
             {
                 this.vault=new UnsecureFileVault(unsecureVaultFile);
-                this.getLogger().log(Level.FATAL,"Using UnsecureVault");
+                this.getLogger().log(Level.CRITICAL,"Using UnsecureVault");
             }
             else
             {
@@ -150,7 +151,7 @@ public abstract class ServerApplication
         if (privatePort>0)
         {
             int threads=configuration.getIntegerValue("httpServer.private.threads",1000);
-            this.privateServer=new HttpServer(this.getTraceManager(), getLogger("HttpServer.Operator"),JettyServerFactory.createServer(threads, privatePort));
+            this.privateServer=new HttpServer(this.getTraceManager(), getLogger("HttpServer.Operator"),this.isTest(),JettyServerFactory.createServer(threads, privatePort));
             this.privateServer.addContentDecoders(new GzipContentDecoder());
             this.privateServer.addContentEncoders(new GzipContentEncoder());
             this.privateServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
@@ -162,7 +163,7 @@ public abstract class ServerApplication
         }
         
         //Public http server
-        HttpServerConfiguration publicServerConfiguration=getConfiguration().getConfiguration("HttpServer.public", HttpServerConfiguration.class);
+        HttpServerConfiguration publicServerConfiguration=getConfiguration().getNamespaceObject("HttpServer.public", HttpServerConfiguration.class);
         int publicPort=configuration.getIntegerValue("HttpServer.public.port",-1);
         if (publicPort<0)
         {
@@ -171,7 +172,7 @@ public abstract class ServerApplication
         if (publicPort>0)
         {
             int threads=configuration.getIntegerValue("HttpServer.public.threads",100);
-            boolean useTestPort=isDebug();
+            boolean useTestPort=isTest();
             Server[] servers=new Server[useTestPort?2:1];
             if (useTestPort)
             {
@@ -192,7 +193,7 @@ public abstract class ServerApplication
             {
                 servers[0]=JettyServerFactory.createServer(threads, publicPort);
             }
-            this.publicServer=new HttpServer(this.getTraceManager(), this.getLogger("HttpServer"),publicServerConfiguration, servers);
+            this.publicServer=new HttpServer(this.getTraceManager(), this.getLogger("HttpServer"),isTest(),publicServerConfiguration, servers);
             
             this.publicServer.addContentDecoders(new GzipContentDecoder());
             this.publicServer.addContentEncoders(new GzipContentEncoder());
@@ -204,7 +205,7 @@ public abstract class ServerApplication
             this.publicServer=null;
         }
         
-        FileCacheConfiguration fileCacheConfiguration=configuration.getConfiguration("FileCache", FileCacheConfiguration.class);
+        FileCacheConfiguration fileCacheConfiguration=configuration.getNamespaceObject("FileCache", FileCacheConfiguration.class);
 		this.fileCache=new FileCache(fileCacheConfiguration);
 		
         this.getOperatorVariableManager().register("HttpServer.operator", this.operatorServer);
@@ -212,7 +213,7 @@ public abstract class ServerApplication
         this.getOperatorVariableManager().register("HttpServer.private", this.privateServer);
 
         this.menuBar=new MenuBar();
-        this.operatorServer.register(new ServerOperatorPages(this));
+        this.operatorServer.registerHandlers(new ServerOperatorPages(this));
         
         //Build template and start operator server so we can monitor the rest of the startup.
         this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName); 
@@ -234,16 +235,31 @@ public abstract class ServerApplication
 		}
 	}
 	
+	public void startServers() throws Throwable
+	{
+        startServer(this.privateServer);
+        startServer(this.publicServer);
+	}
+	
 	public void start() throws Throwable
 	{
+        try (Trace trace=new Trace(this.getTraceManager(),"postStart"))
+        {
+            preStart(trace);
+        }
+
         this.startTime=System.currentTimeMillis();
-        try (Trace trace=new Trace(this.getTraceManager(),"OnStart"))
+        try (Trace trace=new Trace(this.getTraceManager(),"onStart"))
         {
             onStart(trace);
         }
-        this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName); //build again as sub classes may have added more items to menubar
-        startServer(this.privateServer);
-        startServer(this.publicServer);
+        buildOperatorPageTemplate();
+        startServers();
+
+        try (Trace trace=new Trace(this.getTraceManager(),"postStart"))
+        {
+            postStart(trace);
+        }
 	}
 
 	public DisruptorManager getDisruptorManager()
@@ -251,7 +267,14 @@ public abstract class ServerApplication
 	    return this.disruptorManager;
 	}
 	
+    public void preStart(Trace trace) throws Throwable
+    {
+    }
     public abstract void onStart(Trace parent) throws Throwable;
+
+    public void postStart(Trace trace) throws Throwable
+    {
+    }
     
     public HttpServer getPublicServer()
 	{
@@ -305,10 +328,16 @@ public abstract class ServerApplication
     {
         return this.menuBar;
     }
+
+    public void buildOperatorPageTemplate() throws Throwable
+    {
+        this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName); 
+    }
+    
     
     public OperatorPage buildOperatorPage(String title) throws Throwable
     {
-        if (this.debug)
+        if (this.test)
         {
             Template template=new Template(OperatorPage.buildTemplate(this.menuBar, this.name, this.hostName));
             template.fill("title", title);
@@ -349,7 +378,7 @@ public abstract class ServerApplication
     {
         return this.coreEnvironment.getTimerScheduler();
     }
-    public SourceQueueLogger getLogger(String category) throws Throwable
+    public Logger getLogger(String category) throws Throwable
     {
         return this.coreEnvironment.getLogger(category);
     }
@@ -365,13 +394,17 @@ public abstract class ServerApplication
     {
         return this.coreEnvironment;
     }
+    public StatusBoard getStatusBoard()
+    {
+        return this.coreEnvironment.getStatusBoard();
+    }
 	public String getName()
 	{
 	    return this.name;
 	}
-	public boolean isDebug()
+	public boolean isTest()
 	{
-	    return this.debug;
+	    return this.test;
 	}
     public LogDirectoryManager getLogDirectoryManager()
     {

@@ -27,6 +27,7 @@ public class Lock<KEY> implements AutoCloseable
 				return;
 			}
 			this.lockManager.release(this.key,this.slot);
+			this.trace.close();
 			this.lockManager=null;
 		}
 	}

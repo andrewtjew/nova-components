@@ -13,24 +13,33 @@ public class RowSet
 {
 	final String[] columnNames;
 	final private Row[] rows;
+	final HashMap<String,Integer> mappings; 
 	RowSet(String[] columnNames,List<Object[]> list)
 	{
 		this.columnNames=columnNames;
-		HashMap<String,Integer> mappings=new HashMap<>();
+		this.mappings=new HashMap<>();
 		for (int i=0;i<columnNames.length;i++)
 		{
-			mappings.put(columnNames[i], i);
+		    this.mappings.put(columnNames[i], i);
 		}
 		this.rows=new Row[list.size()];
 		for (int i=0;i<this.rows.length;i++)
 		{
-			this.rows[i]=new Row(mappings,list.get(i));
+			this.rows[i]=new Row(this.mappings,list.get(i));
 		}
 	}
 	RowSet(String[] columnNames,Row[] rows)
 	{
 		this.columnNames=columnNames;
 		this.rows=rows;
+		if ((rows!=null)&&(rows.length>0))
+		{
+		    this.mappings=rows[0].mappings;
+		}
+		else
+		{
+		    this.mappings=null;
+		}
 	}
 	public int getColumns()
 	{
@@ -48,6 +57,10 @@ public class RowSet
 	{
 		return this.columnNames[index];
 	}
+    public int getColumnIndex(String columnName)
+    {
+        return this.mappings.get(columnName);
+    }
 	public int size()
 	{
 		return this.rows.length;

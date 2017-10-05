@@ -7,6 +7,7 @@ import org.nova.http.server.annotations.ContentWriters;
 import org.nova.http.server.annotations.Filters;
 import org.nova.http.server.annotations.Log;
 import org.nova.http.server.annotations.Path;
+import org.nova.http.server.annotations.Test;
 
 public class Annotations
 {
@@ -15,6 +16,7 @@ public class Annotations
 	ContentReaders contentReaders = null;
 	ContentEncoders contentEncoders=null;
 	ContentDecoders contentDecoders=null;
+	Test test=null;
 	Filters filters = null;
 	Log log=null;
 	
@@ -31,6 +33,7 @@ public class Annotations
 	    this.contentDecoders=that.contentDecoders;
 	    this.filters = that.filters;
 	    this.log=that.log;
+	    this.test=that.test;
 	}
 
 }

@@ -2,33 +2,44 @@ package org.nova.metrics;
 
 public class PrecisionTimer
 {
-	private long start; 
-	private long stop; 
+	private long startNs; 
+	private long stopNs;
+	private long elapsedNs;
 	public PrecisionTimer()
 	{
 		
 	}
 	public void start()
 	{
-		this.start=System.nanoTime();
+		this.startNs=System.nanoTime();
 	}
 	public long getCurrentElapsed()
 	{
-		return System.nanoTime()-this.start;
+		return System.nanoTime()-this.startNs;
 	}
-	public long stop()
+	public void stop()
 	{
-		this.stop=System.nanoTime();
-		return getElapsed();
+	    long now=System.nanoTime();
+	    this.elapsedNs+=now-this.startNs;
+	    this.startNs=now;
 	}
-	public long getElapsed()
+	public void reset()
 	{
-		return this.stop-this.start;
+	    this.elapsedNs=0;
 	}
-	public double getElapsedSeconds()
+	public long getElapsedNs()
 	{
-		return getElapsed()/1.0e9;
+		return this.elapsedNs;
 	}
+    public long getElapsedMs()
+    {
+        return getElapsedNs()/1000000;
+    }
+	
+    public double getElapsedS()
+    {
+        return getElapsedNs()/1.0e9;
+    }
 	
 	
 }

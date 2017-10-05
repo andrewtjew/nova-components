@@ -1,5 +1,7 @@
 package org.nova.tracing;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,84 +10,75 @@ import java.util.Map.Entry;
 import org.nova.annotations.Description;
 import org.nova.logging.Logger;
 import org.nova.metrics.CountMeter;
+import org.nova.metrics.TraceMeter;
+import org.nova.metrics.TraceSample;
+import org.nova.metrics.RateMeter;
+import org.nova.metrics.RateSample;
+import org.nova.metrics.LongRateMeter;
+import org.nova.metrics.LongRateSample;
 import org.nova.operations.OperatorVariable;
 
 // Don't track Trace in Thread Local Store. The problem is figuring out after closing a Trace which trace to make current
 public class TraceManager
 {
-	final private HashMap<Long,Trace> traces;
-	final private HashMap<String,TraceStats> stats;
-	final private HashMap<String,TraceNode> traceRoots;
+	final private HashMap<Long,Trace> currentTraces;
+    final private Object managerLock=new Object();
+    final private HashMap<String,TraceNode> traceRoots;
 	final private TraceBuffer lastExceptions;
-	final private TraceBuffer lastTraces;
-	final private HashSet<String> watchList;
-	
-	private Logger logger;
-	private long number;
+    final private TraceBuffer lastTraces;
+    final private TraceBuffer watchTraces;
+	final private HashSet<String> watchCategories;
+	final private RateMeter rateMeter;
+	final private Logger logger;
 	final private int maximumActives;
+    final private HashMap<String,TraceMeter> lastTraceMeters;
+    final private HashMap<String,TraceMeter> watchTraceMeters;
+    private long number;
 
 	@Description("The number of times maximum actives is exceeded. Traces exceeding the maximum are not tracked.")
 	final private CountMeter maximumExceeded=new CountMeter();
 	
-	@OperatorVariable(description="Capture the stackTrace when trace is created and closed. WARNING: Application performance may drop.")
-	private boolean captureStackTrace;
-	@OperatorVariable(description="Log traces. WARNING: Application performance may drop. Logger may become stressed.")
+    @OperatorVariable(description="Capture the stackTrace when trace is closed. WARNING: Application performance may drop.")
+    private boolean captureCreateStackTrace;
+
+    @OperatorVariable(description="Capture the stackTrace when trace is closed. WARNING: Application performance may drop.")
+    private boolean captureCloseStackTrace;
+	
+    @OperatorVariable(description="Log traces. WARNING: Application performance may drop. Logger may become stressed.")
 	private boolean logTraces;
+	
 	@OperatorVariable(description="Log exception traces. WARNING: Logger may become stressed.")
 	private boolean logExceptionTraces;
-	@OperatorVariable(description="Enable trace graph. WARNING: Application performance may drop.")
-	private boolean enableTraceGraph;
-	@OperatorVariable(description="Enable trace stats.")
-	private boolean enableTraceStats;
-	@OperatorVariable(description="Enable last exceptions to be captured.")
-	private boolean enableLastExceptions;
-	@OperatorVariable(description="Enable last traces in category watchlist to be captured. WARNING: Application performance may drop.")
-	private boolean enableWatchListLastTraces;
+	
+	@OperatorVariable(description="Enable last trace watching. WARNING: Application performance may drop.")
+	private boolean enableLastTraceWatching;
 
-    @OperatorVariable(description="Enable all last traces to be captured. WARNING: Application performance may drop.")
-    private boolean enableLastTraces;
-    
     @OperatorVariable(description="Log traces with greater duration in milliseconds. A negative value disables this form of logging. WARNING: Application performance may drop for small durations.")
     private long logTracesWithGreaterDuration;
 	
 	public TraceManager(Logger logger,TraceManagerConfiguration configuration)
 	{
-		this.traces=new HashMap<>();
-		this.stats=new HashMap<>();
+		this.currentTraces=new HashMap<>();
+		this.lastTraceMeters=new HashMap<>();
 		this.traceRoots=new HashMap<>();
-		if (configuration.lastExceptionBufferSize>0)
-		{
-			this.lastExceptions=new TraceBuffer(configuration.lastExceptionBufferSize);
-		}
-		else
-		{
-			this.lastExceptions=null;
-		}
-		if (configuration.lastTraceBufferSize>0)
-		{
-			this.lastTraces=new TraceBuffer(configuration.lastTraceBufferSize);
-			this.watchList=new HashSet<>();
-		}
-		else
-		{
-			this.lastTraces=null;
-			this.watchList=null;
-		}
-		this.enableLastExceptions=configuration.enableLastExceptions;
+		this.rateMeter=new RateMeter();
+		this.lastExceptions=new TraceBuffer(configuration.lastExceptionBufferSize);
+		this.lastTraces=new TraceBuffer(configuration.lastTraceBufferSize);
+        this.watchTraces=new TraceBuffer(configuration.lastTraceBufferSize);
+        this.watchCategories=new HashSet<>();
+        this.watchTraceMeters=new HashMap<>();
 		this.logExceptionTraces=configuration.logExceptionTraces;
 		this.logTraces=configuration.logTraces;
-		this.enableTraceGraph=configuration.enableTraceGraph;
-		this.enableTraceStats=configuration.enableTraceStats;
-		this.enableLastTraces=configuration.enableLastTraces;
-		this.enableWatchListLastTraces=configuration.enableWatchListLastTraces;
-		this.captureStackTrace=configuration.captureStackTrace;
+		this.enableLastTraceWatching=configuration.enableLastTraceWatching;
+        this.captureCreateStackTrace=configuration.captureCreateStackTrace;
+        this.captureCloseStackTrace=configuration.captureCloseStackTrace;
 		this.maximumActives=configuration.maximumActives;
 		this.logTracesWithGreaterDuration=configuration.logSlowTraceDurationMs;
 		this.logger=logger;
 	}
 	public TraceManager(Logger logger)
 	{
-		this(logger, new TraceManagerConfiguration());
+        this(logger, new TraceManagerConfiguration());
 	}
 	public TraceManager()
 	{
@@ -93,316 +86,238 @@ public class TraceManager
 	}
 	
 	
-	long open(Trace trace)
+	TraceContext open(Trace trace)
 	{
-		synchronized(this.traces)
+	    long number;
+		synchronized(this.managerLock)
 		{
-			long number=this.number++;
-			if (this.traces.size()<this.maximumActives)
+		    this.rateMeter.increment();
+			number=this.number++;
+			if (this.currentTraces.size()<this.maximumActives)
 			{
-				this.traces.put(number, trace);
+				this.currentTraces.put(number, trace);
 			}
 			else
 			{
 				this.maximumExceeded.increment();
 			}
-			if (this.captureStackTrace)
-			{
-				return -number;
-			}
-			return number;
 		}
+        return new TraceContext(number,this.captureCreateStackTrace,this.captureCloseStackTrace);
 	}
+	
+
+	TraceNode getTraceNode(String category,Trace parent)
+    {
+        if (parent!=null)
+        {
+            return parent.traceNode.getOrCreateChildTraceNode(category);
+        }
+        synchronized (this.managerLock)
+        {
+            TraceNode traceNode=this.traceRoots.get(category);
+            if (traceNode==null)
+            {
+                traceNode=new TraceNode(); //Make sure constructor does not use locks
+                this.traceRoots.put(category, traceNode);
+            }
+            return traceNode;
+        }
+    }
 	
 	void close(Trace trace)
 	{
-		boolean enableTraceGraph;
-		boolean enableTraceStats;
-		boolean logTraces;
-		boolean logExceptionTraces;
-		boolean enableLastExceptions;
-		boolean enableWatchListLastTraces;
-		boolean enableLastTraces;
-		long logTracesWithGreaterDuration;
-		synchronized(this.traces)
-		{
-			this.traces.remove(trace.getNumber());
-			enableTraceStats=this.enableTraceStats;
-			enableTraceGraph=this.enableTraceGraph;
-			logExceptionTraces=this.logExceptionTraces;
-			enableLastExceptions=this.enableLastExceptions;
-			logTraces=this.logTraces;
-			enableWatchListLastTraces=this.enableWatchListLastTraces;
-			enableLastTraces=this.enableLastTraces;
-			logTracesWithGreaterDuration=this.logTracesWithGreaterDuration;
-		}
-		if (enableLastTraces)
-		{
-			if (this.lastTraces!=null)
-			{
-				this.lastTraces.add(trace);
-			}			
-		} 
-		else if (enableWatchListLastTraces)
-		{
-			if (this.lastTraces!=null)
-			{
-				if (this.watchList.contains(trace.getCategory()))
-				{
-					this.lastTraces.add(trace);
-				}
-			}			
-		}
+	    boolean log=false;
+	    TraceMeter meter;
+	    TraceMeter watchMeter=null;
+	    synchronized(this.managerLock)
+	    {
+	        this.currentTraces.remove(trace.getNumber());
+   			this.lastTraces.add(trace);
+            meter=this.lastTraceMeters.get(trace.getCategory());
+            if (meter==null)
+            {
+                meter=new TraceMeter();
+                this.lastTraceMeters.put(trace.getCategory(), meter);
+            }
+    		if (this.enableLastTraceWatching)
+    		{
+                if (this.watchCategories.contains(trace.getCategory()))
+                {
+                    watchMeter=this.watchTraceMeters.get(trace.getCategory());
+                    if (watchMeter==null)
+                    {
+                        watchMeter=new TraceMeter();
+                        this.watchTraceMeters.put(trace.getCategory(), watchMeter);
+                    }
+                    this.watchTraces.add(trace);
+    			}
+    		}
 		
-		if (enableLastExceptions)
-		{
-			if (this.lastExceptions!=null)
+			if (trace.getThrowable()!=null)
 			{
-				if (trace.getThrowable()!=null)
-				{
-					synchronized (this.lastExceptions)
-					{
-						this.lastExceptions.add(trace);
-					}
-				}
+				this.lastExceptions.add(trace);
 			}
+    		log=logTraces||logExceptionTraces||((logTracesWithGreaterDuration>=0)&&(trace.getDurationNs()/10000000>=logTracesWithGreaterDuration));
 		}
-		
-		if (enableTraceStats)
+        if (log)
+        {
+            if (this.logger!=null)
+            {
+                this.logger.log(trace);
+            }
+        }
+        meter.update(trace);
+        if (watchMeter!=null)
+        {
+            watchMeter.update(trace);
+        }
+	}
+	
+	public Trace[] getCurrentTraces()
+	{
+		synchronized (this.managerLock)
 		{
-			if (this.enableTraceStats)
-			{
-				TraceStats stats=this.stats.get(trace.getCategory());
-				if (stats==null)
-				{
-					stats=new TraceStats(trace.getCategory());
-					this.stats.put(trace.getCategory(), stats);
-				}
-				stats.update(trace.getDurationNs());
-			}
-		}
-		if (enableTraceGraph)
-		{
-			Trace[] traces=null;
-			int count=1;
-			for (Trace t=trace.getParent();t!=null;t=t.getParent())
-			{
-				count++;
-			}
-			traces=new Trace[count];
-			int index=traces.length-1;
-			for (Trace t=trace;t!=null;t=t.getParent())
-			{
-				traces[index]=t;
-				index--;
-			}
-			synchronized(this.traceRoots)
-			{
-				Trace rootTrace=traces[0];
-				TraceNode node=this.traceRoots.get(rootTrace.getCategory());
-				if (node==null)
-				{
-					node=new TraceNode();
-					this.traceRoots.put(rootTrace.getCategory(),node);
-				}
-				for (int i=1;i<traces.length;i++)
-				{
-					Trace childTrace=traces[i];
-					TraceNode childNode;
-					if (node.childTraces==null)
-					{
-						node.childTraces=new HashMap<>();
-						childNode=new TraceNode();
-						node.childTraces.put(childTrace.getCategory(), childNode);
-					}
-					else
-					{
-						childNode=node.childTraces.get(childTrace.getCategory());
-						if (childNode==null)
-						{
-							childNode=new TraceNode();
-							node.childTraces.put(childTrace.getCategory(), childNode);
-						}
-					}
-					node=childNode;
-				}
-				node.update(trace.getDurationNs(),trace.getWaitNs());
-			}
-		}
-
-		if (logTraces||logExceptionTraces||((logTracesWithGreaterDuration>=0)&&(trace.getDurationNs()>=logTracesWithGreaterDuration*1000000)))
-		{
-			if (this.logger!=null)
-			{
-				this.logger.log(trace);
-			}
+			return this.currentTraces.values().toArray(new Trace[this.currentTraces.size()]);
 		}
 	}
 	
-	public Trace[] getActiveSnapshot()
+	public RateMeter getRateMeter()
 	{
-		synchronized (traces)
-		{
-			return this.traces.values().toArray(new Trace[this.traces.size()]);
-		}
+	    return this.rateMeter;
 	}
-	public TraceStats[] getStatsSnapshot()
+	public CategorySample[] getLastTraceCategorySamples()
 	{
-		synchronized (traces)
-		{
-			return this.stats.values().toArray(new TraceStats[this.stats.size()]);
-		}
-	}
-	public TraceStats[] getStatsSnapshotAndReset()
-	{
-		synchronized (traces)
+        synchronized (this.managerLock)
 		{
 			try
 			{
-				return this.stats.values().toArray(new TraceStats[this.stats.size()]);
+			    ArrayList<CategorySample> samples=new ArrayList<>(this.lastTraceMeters.size());
+			    for (Entry<String, TraceMeter> entry:this.lastTraceMeters.entrySet())
+			    {
+			        samples.add(new CategorySample(entry.getKey(),entry.getValue().sample()));
+			    }
+			    return samples.toArray(new CategorySample[samples.size()]);
 			}
 			finally
 			{
-				this.stats.clear();
+				this.lastTraceMeters.clear();
 			}
 		}
 	}
-	public Map<String,TraceNode> getTraceRootSnapshot()
+	public Map<String,TraceNode> getTraceGraphRootsSnapshot()
 	{
 		HashMap<String,TraceNode> traceRoots=new HashMap<>();
-		synchronized (this.traceRoots)
+        synchronized (this.managerLock)
 		{
-			for (Entry<String, TraceNode> entry:this.traceRoots.entrySet())
-			{
-				traceRoots.put(entry.getKey(), new TraceNode(entry.getValue()));
-			}
+		    traceRoots.putAll(this.traceRoots);
 		}
 		return traceRoots;
 		
 	}
-	public boolean isCaptureStackTrace()
+	public String[] getWatchList()
 	{
-		synchronized(this.traces)
+        synchronized (this.managerLock)
+	    {
+	        if (this.watchCategories==null)
+	        {
+	            return new String[0];
+	        }
+	        return this.watchCategories.toArray(new String[this.watchCategories.size()]);
+	    }
+	}
+	public boolean isCaptureCreateStackTrace()
+	{
+        synchronized (this.managerLock)
 		{
-			return this.captureStackTrace;
+			return this.captureCreateStackTrace;
 		}
 	}
-	public void setCaptureStackTrace(boolean captureStackTrace)
+	public void setCaptureCreateStackTrace(boolean captureCreateStackTrace)
 	{
-		synchronized(this.traces)
+        synchronized (this.managerLock)
 		{
-			this.captureStackTrace=captureStackTrace;
+			this.captureCreateStackTrace=captureCreateStackTrace;
 		}
 	}
+    public boolean isCaptureCloseStackTrace()
+    {
+        synchronized (this.managerLock)
+        {
+            return this.captureCloseStackTrace;
+        }
+    }
+    public void setCaptureCloseStackTrace(boolean captureCloseStackTrace)
+    {
+        synchronized (this.managerLock)
+        {
+            this.captureCloseStackTrace=captureCloseStackTrace;
+        }
+    }
 	public boolean isLogTraces()
 	{
-		synchronized(this.traces)
+        synchronized (this.managerLock)
 		{
 			return logTraces;
 		}
 	}
 	public void setLogTraces(boolean logTraces)
 	{
-		synchronized(this.traces)
+        synchronized (this.managerLock)
 		{
 			this.logTraces = logTraces;
 		}
 	}
 	public boolean isLogExceptionTraces()
 	{
-		synchronized(this.traces)
+        synchronized (this.managerLock)
 		{
 			return logExceptionTraces;
 		}
 	}
 	public void setLogExceptionTraces(boolean logExceptionTraces)
 	{
-		synchronized(this.traces)
+        synchronized (this.managerLock)
 		{
 			this.logExceptionTraces = logExceptionTraces;
 		}
 	}
-	public boolean isEnableTraceGraph()
+	public boolean isEnableLastTraceWatching()
 	{
-		synchronized(this.traces)
+        synchronized (this.managerLock)
 		{
-			return enableTraceGraph;
+			return enableLastTraceWatching;
 		}
 	}
-	public void setEnableTraceGraph(boolean enableTraceGraph)
+	public void enableWatchListLastTraces(String[] categories)
 	{
-		synchronized(this.traces)
-		{
-			this.enableTraceGraph = enableTraceGraph;
+        synchronized (this.managerLock)
+	    {
+	        for (String category:categories)
+	        {
+	            this.watchCategories.add(category);
+	        }
+			this.enableLastTraceWatching = true;
 		}
 	}
-	public boolean isEnableTraceStats()
-	{
-		synchronized(this.traces)
-		{
-			return enableTraceStats;
-		}
-	}
-	public void setEnableTraceStats(boolean enableTraceStats)
-	{
-		synchronized(this.traces)
-		{
-			this.enableTraceStats = enableTraceStats;
-		}
-	}
-	public boolean isEnableLastExceptions()
-	{
-		synchronized(this.traces)
-		{
-			return enableLastExceptions;
-		}
-	}
-	public void setEnableLastExceptions(boolean enableLastExceptions)
-	{
-		synchronized(this.traces)
-		{
-			this.enableLastExceptions = enableLastExceptions;
-		}
-	}
-	public boolean isEnableWatchListLastTraces()
-	{
-		synchronized(this.traces)
-		{
-			return enableWatchListLastTraces;
-		}
-	}
-	public void setEnableWatchListLastTraces(boolean enableWatchListLastTraces)
-	{
-		synchronized(this.traces)
-		{
-			this.enableWatchListLastTraces = enableWatchListLastTraces;
-		}
-	}
-	public boolean isEnableLastTraces()
-	{
-		synchronized(this.traces)
-		{
-			return enableLastTraces;
-		}
-	}
-	public void setEnableLastTraces(boolean enableLastTraces)
-	{
-		synchronized(this.traces)
-		{
-			this.enableLastTraces = enableLastTraces;
-		}
-	}
-	
+    public void disableWatchListLastTraces()
+    {
+        synchronized (this.managerLock)
+        {
+            this.enableLastTraceWatching = false;
+            this.watchCategories.clear();
+            this.watchTraceMeters.clear();
+        }
+    }
 	public void setLogTracesWithGreaterDuration(long durationMs)
 	{
-	    synchronized(this.traces)
+        synchronized (this.managerLock)
 	    {
 	        this.logTracesWithGreaterDuration=durationMs;
 	    }
 	}
 	public long getLogTracesWithGreaterDuration()
 	{
-        synchronized(this.traces)
+        synchronized (this.managerLock)
         {
             return this.logTracesWithGreaterDuration;
         }
@@ -410,27 +325,151 @@ public class TraceManager
 	
 	public Trace[] getLastExceptionTraces()
 	{
-		if (this.lastExceptions!=null)
+        synchronized (this.managerLock)
 		{
-			synchronized(this.lastExceptions)
-			{
-				return this.lastExceptions.getSnapshot();
-			}
+			return this.lastExceptions.getSnapshotAsArray();
 		}
-		return new Trace[0];
 	}
 	
 	public Trace[] getLastTraces()
 	{
-		if (this.lastTraces!=null)
+        synchronized (this.managerLock)
 		{
-			synchronized(this.lastTraces)
-			{
-			    return this.lastTraces.getSnapshot();
-			}
+		    return this.lastTraces.getSnapshotAsArray();
 		}
-		return new Trace[0];
 	}
+	
+    public CategorySample[] sampleLastCategories()
+    {
+        synchronized (this.managerLock)
+        {
+            CategorySample[] samples=new CategorySample[this.lastTraceMeters.size()];
+            {
+                int index=0;
+                for (Entry<String, TraceMeter> entry:this.lastTraceMeters.entrySet())
+                {
+                    samples[index++]=new CategorySample(entry.getKey(), entry.getValue().sample());
+                }
+            }
+            return samples;
+        }
+    }
+
+    public CategorySample[] sampleWatchCategories()
+    {
+        synchronized (this.managerLock)
+        {
+            CategorySample[] samples=new CategorySample[this.watchTraceMeters.size()];
+            {
+                int index=0;
+                for (Entry<String, TraceMeter> entry:this.watchTraceMeters.entrySet())
+                {
+                    samples[index++]=new CategorySample(entry.getKey(), entry.getValue().sample());
+                }
+            }
+            return samples;
+        }
+    }
+    public CategorySample[] sampleAndResetLastCategories()
+    {
+        synchronized (this.managerLock)
+        {
+            CategorySample[] samples=new CategorySample[this.lastTraceMeters.size()];
+            {
+                int index=0;
+                for (Entry<String, TraceMeter> entry:this.lastTraceMeters.entrySet())
+                {
+                    samples[index++]=new CategorySample(entry.getKey(), entry.getValue().sample());
+                }
+                this.lastTraceMeters.clear();
+            }
+            return samples;
+        }
+    }
+
+    public CategorySample[] sampleAndResetWatchCategories()
+    {
+        synchronized (this.managerLock)
+        {
+            CategorySample[] samples=new CategorySample[this.watchTraceMeters.size()];
+            {
+                int index=0;
+                for (Entry<String, TraceMeter> entry:this.watchTraceMeters.entrySet())
+                {
+                    samples[index++]=new CategorySample(entry.getKey(), entry.getValue().sample());
+                }
+                this.watchTraceMeters.clear();
+            }
+            return samples;
+        }
+    }
+
+    public CategorySample[] sampleLastWatchTraces()
+    {
+        if (this.enableLastTraceWatching==false)
+        {
+            return new CategorySample[0];
+        }
+        Trace[] traces;
+        synchronized (this.managerLock)
+        {
+            traces=this.watchTraces.getSnapshotAsArray();
+        }
+        return sampleCategories(traces, false);
+    }
+    
+    public CategorySample[] sampleLastTraces()
+    {
+        Trace[] traces;
+        synchronized (this.managerLock)
+        {
+            traces=this.lastTraces.getSnapshotAsArray();
+        }
+        return sampleCategories(traces, false);
+    }
+    
+    private CategorySample[] sampleCategories(Trace[] traces,boolean excludeWaiting)
+    {
+        HashMap<String,CategorySample> categories=new HashMap<>(traces.length);
+        for (Trace trace:traces)
+        {
+            if ((excludeWaiting)&&trace.isWaiting())
+            {
+                continue;
+            }
+            TraceMeter meter=new TraceMeter();
+            meter.update(trace);
+            CategorySample sample=categories.get(trace.getCategory());
+            if (sample!=null)
+            {
+                meter.update(sample.getSample());
+            }
+            categories.put(trace.getCategory(), new CategorySample(trace.getCategory(),meter.sample()));
+        }
+        return categories.values().toArray(new CategorySample[categories.size()]);
+    }        
+    
+    public CategorySample[] sampleCurrentTraceCategories(boolean excludeWaiting)
+    {
+        Trace[] traces=null;
+        synchronized (this.managerLock)
+        {
+            traces=this.currentTraces.values().toArray(new Trace[this.currentTraces.size()]);
+        }
+        return sampleCategories(traces, excludeWaiting);
+    }
+    
+    public Trace[] getLastWatchTraces()
+    {
+        if (this.watchTraces!=null)
+        {
+            synchronized(this.managerLock)
+            {
+                return this.watchTraces.getSnapshotAsArray();
+            }
+        }
+        return new Trace[0];
+    }
 	
 	
 }

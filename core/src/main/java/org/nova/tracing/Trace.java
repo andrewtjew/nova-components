@@ -5,10 +5,12 @@ public class Trace implements AutoCloseable
 	private TraceManager traceManager;
 	final private String category;
 	final private long created;
-	final private long number;
 	final private Trace parent;
 	final long start;
-	private long duration;
+    final TraceNode traceNode;
+    final private StackTraceElement[] createStackTrace;
+
+    private long duration;
 	private long wait;
 	private long waitStart;
 	private Throwable throwable;
@@ -18,8 +20,9 @@ public class Trace implements AutoCloseable
 	private Thread thread;
 	private String toLink;
 	private String fromLink;
-	final private StackTraceElement[] createStackTrace;
 	private StackTraceElement[] closeStackTrace;
+	private TraceContext context;
+	
 	public Trace(TraceManager traceManager,Trace parent,String category,String details,boolean waiting)
 	{
 		this.thread=Thread.currentThread();
@@ -30,17 +33,16 @@ public class Trace implements AutoCloseable
 		this.created=System.currentTimeMillis();
 		this.waitStart=this.start=System.nanoTime();
 		this.waiting=waiting;
-		long number=this.traceManager.open(this);
-		if (number<0)
+		this.context=this.traceManager.open(this);
+		if (this.context.captureCreateStack)
 		{
-			this.number=-number;
 			this.createStackTrace=this.thread.getStackTrace();
 		}
 		else
 		{
-			this.number=number;
 			this.createStackTrace=null;
 		}
+		this.traceNode=traceManager.getTraceNode(category, parent);
 	}
 	public Trace(TraceManager traceManager,Trace parent,String category,boolean waiting)
 	{
@@ -55,6 +57,14 @@ public class Trace implements AutoCloseable
 	{
 		this(traceManager,parent,category,false);
 	}
+    public Trace(Trace parent,String category,boolean waiting)
+    {
+        this(parent.traceManager,parent,category,waiting);
+    }
+    public Trace(Trace parent,String category)
+    {
+        this(parent,category,false);
+    }
 	public Trace(TraceManager traceManager,String category)
 	{
 		this(traceManager,null,category,null,false);
@@ -78,15 +88,10 @@ public class Trace implements AutoCloseable
 		return category;
 	}
 	
-	@Override
-	public void close() 
-	{
-		close(null);
-	}
 
 	public long getNumber()
 	{
-		return number;
+		return this.context.number;
 	}
 	
 	public boolean isClosed()
@@ -96,7 +101,7 @@ public class Trace implements AutoCloseable
 			return this.traceManager==null;
 		}
 	}
-	public long getCreated()
+	public long getCreatedMs()
 	{
 		return this.created;
 	}
@@ -133,10 +138,13 @@ public class Trace implements AutoCloseable
 	{
 		synchronized(this)
 		{
+		    if ((t!=null)&&(this.throwable==null))
+		    {
+		        this.throwable=t;
+		    }
 			if (this.traceManager!=null)
 			{
-				this.throwable=t;
-				if (this.createStackTrace!=null)
+				if (this.context.captureCloseStack)
 				{
 					this.closeStackTrace=this.thread.getStackTrace();
 				}
@@ -144,15 +152,22 @@ public class Trace implements AutoCloseable
 				if (this.waiting)
 				{
 					this.wait+=System.nanoTime()-this.waitStart;
+					this.waiting=false;
 				}
 				else
 				{
 					this.duration=System.nanoTime()-this.start;
 				}
+                this.traceNode.update(this);
 				this.traceManager=null;
 			}
 		}
 	}
+    @Override
+    public void close() 
+    {
+        close(null);
+    }
 	public boolean isWaiting()
 	{
 		synchronized (this)
@@ -164,6 +179,10 @@ public class Trace implements AutoCloseable
 	{
 		synchronized(this)
 		{
+		    if (this.traceManager==null)
+		    {
+		        return false;
+		    }
 			if (this.waiting)
 			{
 				return false;
@@ -177,6 +196,10 @@ public class Trace implements AutoCloseable
 	{
 		synchronized(this)
 		{
+            if (this.traceManager==null)
+            {
+                return false;
+            }
 			if (this.waiting==false)
 			{
 				return false;
@@ -213,14 +236,6 @@ public class Trace implements AutoCloseable
 			return this.duration;
 		}
 	}
-	public double getActive()
-	{
-		return ((double)getActive())/1.0e9;
-	}
-	public double getDuration()
-	{
-		return ((double)getDurationNs())/1.0e9;
-	}
 	public long getWaitNs()
 	{
 		synchronized(this)
@@ -235,10 +250,18 @@ public class Trace implements AutoCloseable
 			return this.wait;
 		}
 	}
-	public double getWait()
+	public double getWaitS()
 	{
 		return ((double)getWaitNs())/1.0e9;
 	}
+    public double getActiveS()
+    {
+        return ((double)getActiveS())/1.0e9;
+    }
+    public double getDurationS()
+    {
+        return ((double)getDurationNs())/1.0e9;
+    }
 	
 	public Throwable getThrowable()
 	{

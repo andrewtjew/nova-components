@@ -13,12 +13,7 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
     final private StringBuilder sb;
     final private String tag;
     
-    TagElement()
-    {
-        this.sb=null;
-        this.tag=null;
-    }
-    TagElement(String tag)
+    public TagElement(String tag)
     {
         this.tag=tag;
         this.sb=new StringBuilder();

@@ -8,7 +8,7 @@ public class Distributor extends Node
     private int sizePerReceiver;
     private boolean strictSize;
     private int currentRoundSize;
-    private long lastMarker;
+    private long lastGroupIdentifier;
 
     public Distributor(Object lock, int sizePerReceiver, boolean strictSize, Node[] receivers) throws Throwable
     {
@@ -20,15 +20,15 @@ public class Distributor extends Node
 
     private void switchReceiver() throws Throwable
     {
-        this.receivers[this.index].endSegment();
+        this.receivers[this.index].endGroup();
         this.index=(this.index+1)%this.receivers.length;
-        long marker=System.currentTimeMillis();
-        if (marker<this.lastMarker)
+        long now=System.currentTimeMillis();
+        if (now<this.lastGroupIdentifier)
         {
-            marker=this.lastMarker+1;
+            now=this.lastGroupIdentifier+1;
         }
-        this.lastMarker=marker;
-        this.receivers[this.index].beginSegment(marker);
+        this.lastGroupIdentifier=now;
+        this.receivers[this.index].beginGroup(now);
         this.currentRoundSize = 0;
     }
 
@@ -50,10 +50,10 @@ public class Distributor extends Node
 
     private void _send(Packet container) throws Throwable
     {
-        if ((this.strictSize==false)||(this.currentRoundSize + container.size() <= this.sizePerReceiver))
+        if ((this.strictSize==false)||(this.currentRoundSize + container.sizeOrType() <= this.sizePerReceiver))
         {
             this.receivers[this.index].process(container);
-            this.currentRoundSize += container.size();
+            this.currentRoundSize += container.sizeOrType();
             if (this.currentRoundSize >= this.sizePerReceiver)
             {
                 switchReceiver();
@@ -62,9 +62,9 @@ public class Distributor extends Node
         }
         Object[] array=container.get();
         int sent = 0;
-        while (sent<container.size())
+        while (sent<container.sizeOrType())
         {
-            int receiverContainerSize=container.size()-sent-this.currentRoundSize;
+            int receiverContainerSize=container.sizeOrType()-sent-this.currentRoundSize;
             if (receiverContainerSize>=this.sizePerReceiver-this.currentRoundSize)
             {
                 receiverContainerSize=this.sizePerReceiver-this.currentRoundSize;
@@ -100,51 +100,51 @@ public class Distributor extends Node
     }
 
 
-    private void _endSegment() throws Throwable
+    private void _endGroup() throws Throwable
     {
-        this.receivers[this.index].endSegment();
+        this.receivers[this.index].endGroup();
     }
 
     @Override
-    public void endSegment() throws Throwable
+    public void endGroup() throws Throwable
     {
         if (this.lock != null)
         {
             synchronized (this.lock)
             {
-                _endSegment();
+                _endGroup();
             }
         }
         else
         {
-            _endSegment();
+            _endGroup();
         }
     }
 
-    private void _beginSegment(long marker) throws Throwable
+    private void _beginGroup(long groupIdentifier) throws Throwable
     {
-        if (this.lastMarker > marker)
+        if (this.lastGroupIdentifier > groupIdentifier)
         {
-            marker = this.lastMarker + 1;
+            groupIdentifier = this.lastGroupIdentifier + 1;
         }
-        this.lastMarker = marker;
+        this.lastGroupIdentifier = groupIdentifier;
         this.index=(this.index+1)%this.receivers.length;
-        this.receivers[this.index].beginSegment(marker);
+        this.receivers[this.index].beginGroup(groupIdentifier);
     }
 
     @Override
-    public void beginSegment(long marker) throws Throwable
+    public void beginGroup(long groupSequenceNumber) throws Throwable
     {
         if (this.lock != null)
         {
             synchronized (this.lock)
             {
-                _beginSegment(marker);
+                _beginGroup(groupSequenceNumber);
             }
         }
         else
         {
-            _beginSegment(marker);
+            _beginGroup(groupSequenceNumber);
         }
     }
 
