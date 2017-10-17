@@ -18,6 +18,10 @@ import java.security.cert.Certificate;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -32,16 +36,6 @@ import org.nova.core.Utils;
 
 public class HttpClientFactory
 {
-    static public HttpClient createDefaultClient()
-    {
-        RequestConfig config=RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
-        HttpClients.custom().setDefaultRequestConfig(config);
-        PoolingHttpClientConnectionManager connectionManager=new PoolingHttpClientConnectionManager();
-        connectionManager.setDefaultMaxPerRoute(10);
-        connectionManager.setMaxTotal(10);
-        return HttpClients.custom().setConnectionManager(connectionManager).build();
-    }
-
     static private boolean verify(String name, SSLSession session)
     {
         try
@@ -54,11 +48,13 @@ public class HttpClientFactory
                     Collection<List<?>> alternativeNames=x509.getSubjectAlternativeNames();
                     if (alternativeNames!=null)
                     {
+                        //For now, we don't support alternate name in certficates
+                        //This is OK as long as we create our own certificates.
                         for (List<?> list:x509.getSubjectAlternativeNames())
                         {
                             for (Object object:list)
                             {
-                              //TODO: need to generate a certificate with alternate cn  
+                                //If we support alternate name, we check here...
                             }
                         }
                     }
@@ -119,11 +115,58 @@ public class HttpClientFactory
         @Override
         public boolean verify(String hostname, SSLSession session)
         {
+            if ("localhost".equals(hostname))
+            {
+                return true;
+            }
             return HttpClientFactory.verify(hostname, session);
         }
     };
     
     static public HttpClient createSSLClient(HttpClientConfiguration configuration,String clientCertficateStorePath, String clientCertficateStorePassword,String serverCertificateStorePath,String serverCertificateStorePassword,String clusterName) throws Throwable
+    {
+        return createSSLClient(configuration,clientCertficateStorePath, clientCertficateStorePassword,serverCertificateStorePath,serverCertificateStorePassword,clusterName,"TLSv1.2");
+    }
+
+    static private HttpClientConnectionManager buildConnectionManager(HttpClientConfiguration configuration,SSLConnectionSocketFactory sslConnectionSocketFactory)
+    {
+        if (configuration==null)
+        {
+            configuration=new HttpClientConfiguration();
+        }
+        PoolingHttpClientConnectionManager connectionManager=new PoolingHttpClientConnectionManager();
+        if (sslConnectionSocketFactory!=null)
+        {
+            Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder
+                    .<ConnectionSocketFactory> create().register("https", sslConnectionSocketFactory)
+                    .build(); 
+            connectionManager=new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+        }
+        else
+        {
+            connectionManager=new PoolingHttpClientConnectionManager();
+        }
+        connectionManager.setDefaultMaxPerRoute(configuration.maxPerRoute);
+        connectionManager.setMaxTotal(configuration.maxConnections);
+        return connectionManager;
+    }
+    
+    static private RequestConfig buildRequestConfig(HttpClientConfiguration configuration)
+    {
+        if (configuration==null)
+        {
+            configuration=new HttpClientConfiguration();
+        }
+        RequestConfig config=RequestConfig.custom().
+                setSocketTimeout(configuration.socketTimeoutMs).
+                setConnectTimeout(configuration.connectTimeoutMs).
+                setExpectContinueEnabled(configuration.expectContinueEnabled).
+                setConnectionRequestTimeout(configuration.connectionRequestTimeoutMs).
+                build();
+        return config;
+    }
+
+    static public HttpClient createSSLClient(HttpClientConfiguration configuration,String clientCertficateStorePath, String clientCertficateStorePassword,String serverCertificateStorePath,String serverCertificateStorePassword,String clusterName,String tls) throws Throwable
     {
         KeyStore clientCertficateStore=CertificateUtils.getKeyStore(new PathResource(new File(Utils.toNativePath(clientCertficateStorePath))), "JKS", null, clientCertficateStorePassword);
         KeyStore serverCertificateStore=CertificateUtils.getKeyStore(new PathResource(new File(Utils.toNativePath(serverCertificateStorePath))), "JKS", null, serverCertificateStorePassword);
@@ -131,12 +174,27 @@ public class HttpClientFactory
                 loadKeyMaterial(clientCertficateStore,clientCertficateStorePassword.toCharArray()).  
                 loadTrustMaterial(serverCertificateStore,null);
         HostnameVerifier verifier=clusterName!=null?new ClusterNameVerifier(clusterName):STRICT_HOSTNAME_VERIFIER;
-        SSLConnectionSocketFactory connectionSocketFactory=new SSLConnectionSocketFactory(contextBuilder.build(),new String[]{"TLSv1.2"},null,verifier);
+        SSLConnectionSocketFactory connectionSocketFactory=new SSLConnectionSocketFactory(contextBuilder.build(),new String[]{tls},null,verifier);
 
-        RequestConfig config=RequestConfig.custom().setSocketTimeout(configuration.socketTimeout).setConnectTimeout(configuration.connectionTimeout).build();
+        RequestConfig config=buildRequestConfig(configuration);
         HttpClients.custom().setDefaultRequestConfig(config);
+        HttpClientConnectionManager connectionManager=buildConnectionManager(configuration,connectionSocketFactory);
         
-        return HttpClients.custom().setSSLSocketFactory(connectionSocketFactory).build();
+        return HttpClients.custom().setConnectionManager(connectionManager).setDefaultRequestConfig(config).setSSLSocketFactory(connectionSocketFactory).build();
     }
     
+    
+    static public HttpClient createClient()
+    {
+        return createClient(new HttpClientConfiguration());
+    }
+
+    static public HttpClient createClient(HttpClientConfiguration configuration)
+    {
+        RequestConfig config=buildRequestConfig(configuration);
+        HttpClientConnectionManager connectionManager=buildConnectionManager(configuration,null);
+
+        return HttpClients.custom().setConnectionManager(connectionManager).setDefaultRequestConfig(config).build();
+    }
+
 }

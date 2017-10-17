@@ -48,10 +48,13 @@ public class Packet
     {
         return size;
     }
+    
+    /*
     public Object[] get()
     {
         return this.array;
     }
+    */
     public Object get(int index)
     {
         if (index>=this.size)

@@ -60,13 +60,13 @@ public abstract class Connector
 	abstract protected Connection createConnection() throws Throwable;
 	abstract public String getName();
 	
-	public Accessor openAccessor(Trace parent,String traceCategoryOverride,long timeout) throws Throwable
+	public Accessor openAccessor(Trace parent,String traceCategoryOverride,long timeoutMs) throws Throwable
 	{
 		if (traceCategoryOverride==null)
 		{
 			traceCategoryOverride="Connector."+getName()+".openAccessor";
 		}
-		return this.pool.waitForAvailable(parent, traceCategoryOverride, timeout);
+		return this.pool.waitForAvailable(parent, traceCategoryOverride, timeoutMs);
 	}
 	public Accessor openAccessor(Trace parent,String traceCategoryOverride) throws Throwable
 	{
@@ -76,6 +76,14 @@ public abstract class Connector
 		}
 		return this.pool.waitForAvailable(parent, traceCategoryOverride);
 	}
+    public Accessor openAccessor(Trace parent) throws Throwable
+    {
+        return openAccessor(parent,null);
+    }
+    public Accessor openAccessor(Trace parent,long timeoutMs) throws Throwable
+    {
+        return openAccessor(parent,null,timeoutMs);
+    }
 	
     public RowSet executeQuery(Trace parent, String traceCategoryOverride, String sql, Object... parameters) throws Throwable
     {
@@ -202,4 +210,65 @@ public abstract class Connector
             return accessor.executeCall(parent, traceCategoryOverride, returnType, name, parameters);
         }
     }
+    public CountMeter getCloseConnectionExceptions()
+    {
+        return closeConnectionExceptions;
+    }
+    public CountMeter getCreateConnectionExceptions()
+    {
+        return createConnectionExceptions;
+    }
+    public CountMeter getInitialConnectionExceptions()
+    {
+        return initialConnectionExceptions;
+    }
+    public CountMeter getOpenConnectionSuccesses()
+    {
+        return openConnectionSuccesses;
+    }
+    public RateMeter getRowsQueriedRate()
+    {
+        return rowsQueriedRate;
+    }
+    public RateMeter getRowsUpdatedRate()
+    {
+        return rowsUpdatedRate;
+    }
+    public RateMeter getQueryRate()
+    {
+        return queryRate;
+    }
+    public RateMeter getUpdateRate()
+    {
+        return updateRate;
+    }
+    public RateMeter getBeginTransactionRate()
+    {
+        return beginTransactionRate;
+    }
+    public RateMeter getCommitTransactionRate()
+    {
+        return commitTransactionRate;
+    }
+    public RateMeter getRollbackTransactionRate()
+    {
+        return rollbackTransactionRate;
+    }
+    public CountMeter getCommitFailures()
+    {
+        return commitFailures;
+    }
+    public CountMeter getRollbackFailures()
+    {
+        return rollbackFailures;
+    }
+    public CountMeter getExecuteFailures()
+    {
+        return executeFailures;
+    }
+    public RateMeter getCallRate()
+    {
+        return callRate;
+    }
+
 }

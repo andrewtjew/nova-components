@@ -98,15 +98,17 @@ public abstract class ServerApplication
         if (secureVaultFile!=null)
         {
             String password=null;
-            String passwordFile=configuration.getValue("System.vault.passwordFile",null);
+            String passwordFile=configuration.getValue("Application.commentFile",null);
             if (passwordFile!=null)
             {
                 password=Utils.readTextFile(passwordFile).trim();
+                /*
                 if (new File(passwordFile).delete()==false)
                 {
                     System.err.println("Unable to delete password file.");
                     System.exit(1);
                 }
+                */
             }
             else 
             {
@@ -117,7 +119,7 @@ public abstract class ServerApplication
                 }
                 password=new String(System.console().readPassword("Enter vault password:"));
             }
-            String salt=name;
+            String salt=configuration.getValue("System.vault.salt");
             this.vault=new SecureFileVault(password, salt, secureVaultFile);
         }
         else
@@ -137,6 +139,7 @@ public abstract class ServerApplication
         //Do not keep these vault information in configuration.
         configuration.remove("System.vault.secureVaultFile");
         configuration.remove("System.vault.passwordFile");
+        configuration.remove("System.vault.salt");
         
         this.operatorVariableManager=new OperatorVariableManager();
 		this.typeMappings=TypeMappings.DefaultTypeMappings();
@@ -163,35 +166,56 @@ public abstract class ServerApplication
         }
         
         //Public http server
-        HttpServerConfiguration publicServerConfiguration=getConfiguration().getNamespaceObject("HttpServer.public", HttpServerConfiguration.class);
-        int publicPort=configuration.getIntegerValue("HttpServer.public.port",-1);
-        if (publicPort<0)
+        boolean https=configuration.getBooleanValue("HttpServer.public.https",true);
+        boolean http=configuration.getBooleanValue("HttpServer.public.http",false);
+        int ports=0;
+        if (https)
         {
-            publicPort=operatorPort+2;
+            ports++;
         }
-        if (publicPort>0)
+        if (http)
+        {
+            ports++;
+        }
+        if (ports>0)
         {
             int threads=configuration.getIntegerValue("HttpServer.public.threads",100);
-            boolean useTestPort=isTest();
-            Server[] servers=new Server[useTestPort?2:1];
-            if (useTestPort)
-            {
-                servers[1]=JettyServerFactory.createServer(threads, publicPort+1);
-            }
-            boolean https=configuration.getBooleanValue("HttpServer.public.https",true);
+            HttpServerConfiguration publicServerConfiguration=getConfiguration().getNamespaceObject("HttpServer.public", HttpServerConfiguration.class);
+            
+            int publicHttpsPort=configuration.getIntegerValue("HttpServer.public.https.port",-1);
+            int publicHttpPort=configuration.getIntegerValue("HttpServer.public.http.port",-1);
+
+            Server[] servers=new Server[ports];
+            int portIndex=0;
             if (https)
             {
+                if (publicHttpsPort<0)
+                {
+                    publicHttpsPort=operatorPort+2;
+                }
                 String serverCertificatePassword=this.vault.get("KeyStore.serverCertificate.password");
                 String clientCertificatePassword=this.vault.get("KeyStore.clientCertificate.password");
                 String keyManagerPassword=this.vault.get("KeyManager.password");
 
                 String serverCertificateKeyStorePath=configuration.getValue("HttpServer.serverCertificate.keyStorePath",null);
                 String clientCertificateKeyStorePath=configuration.getValue("HttpServer.clientCertificate.keyStorePath",null);
-                servers[0]=JettyServerFactory.createHttpsServer(threads, publicPort, serverCertificateKeyStorePath, serverCertificatePassword,clientCertificateKeyStorePath,clientCertificatePassword,keyManagerPassword);
+                servers[portIndex]=JettyServerFactory.createHttpsServer(threads, publicHttpsPort, serverCertificateKeyStorePath, serverCertificatePassword,clientCertificateKeyStorePath,clientCertificatePassword,keyManagerPassword);
+                portIndex++;
             }
-            else
+            if (http)
             {
-                servers[0]=JettyServerFactory.createServer(threads, publicPort);
+                if (publicHttpPort<0)
+                {
+                    if (https)
+                    {
+                        publicHttpPort=publicHttpsPort+1;
+                    }
+                    else
+                    {
+                        publicHttpPort=operatorPort+2;
+                    }
+                }
+                servers[portIndex]=JettyServerFactory.createServer(threads, publicHttpPort);
             }
             this.publicServer=new HttpServer(this.getTraceManager(), this.getLogger("HttpServer"),isTest(),publicServerConfiguration, servers);
             
@@ -204,16 +228,24 @@ public abstract class ServerApplication
         {
             this.publicServer=null;
         }
-        
+
+
+        //File cache
         FileCacheConfiguration fileCacheConfiguration=configuration.getNamespaceObject("FileCache", FileCacheConfiguration.class);
 		this.fileCache=new FileCache(fileCacheConfiguration);
 		
         this.getOperatorVariableManager().register("HttpServer.operator", this.operatorServer);
-        this.getOperatorVariableManager().register("HttpServer.public", this.publicServer);
-        this.getOperatorVariableManager().register("HttpServer.private", this.privateServer);
+        if (this.privateServer!=null)
+        {
+            this.getOperatorVariableManager().register("HttpServer.private", this.privateServer);
+        }
+        if (this.publicServer!=null)
+        {
+            this.getOperatorVariableManager().register("HttpServer.public", this.publicServer);
+        }
 
         this.menuBar=new MenuBar();
-        this.operatorServer.registerHandlers(new ServerOperatorPages(this));
+        this.operatorServer.registerHandlers(new ServerApplicationPages(this));
         
         //Build template and start operator server so we can monitor the rest of the startup.
         this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName); 
@@ -410,4 +442,7 @@ public abstract class ServerApplication
     {
         return this.coreEnvironment.getLogDirectoryManager();
     }
+    
+    
+    
 }

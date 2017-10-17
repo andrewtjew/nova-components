@@ -39,7 +39,7 @@ public class TextClient
 
 	public TextClient(TraceManager traceManager,Logger logger,String endPoint)
 	{
-		this(traceManager,logger,endPoint,HttpClientFactory.createDefaultClient());
+		this(traceManager,logger,endPoint,HttpClientFactory.createClient());
 	}
 
 	public TextResponse get(Trace parent,String traceCategoryOverride,String pathAndQuery,Header...headers) throws Exception

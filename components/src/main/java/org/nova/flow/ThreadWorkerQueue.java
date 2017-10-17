@@ -14,21 +14,21 @@ public class ThreadWorkerQueue extends Node
     final private static boolean TESTING=false;
 	final private CountMeter droppedMeter;
 	final private CountMeter stalledMeter;
-    final private LevelMeter threadInUseMeter;
     final private LevelMeter waitingMeter;
+    final private int maxQueueSize;
     final private long stallWait;
     final private int stallSizeThreshold;
-    final private int maxQueueSize;
-    final private int id;
-
     final private Node receiver;
     final private Object lock;
     private Thread thread;
+    private ArrayList<Packet> queue;
+    private Throwable throwable;
+    private boolean stop;
 
-	private ArrayList<Packet> queue;
-	
-	private Throwable throwable;
-	private boolean stop;
+    final private LevelMeter threadInUseMeter;
+    final private int id;
+
+
 	
 	public ThreadWorkerQueue(Node receiver,long stallWait,int stallSizeThreshold,int maxQueueSize,int id,CountMeter droppedMeter,CountMeter stalledMeter,LevelMeter threadInUseMeter,LevelMeter waitingMeter)
 	{
@@ -128,9 +128,9 @@ public class ThreadWorkerQueue extends Node
                         {
                             if (TESTING)
                             {
-                                Testing.oprintln("ThreadWorkerQueue="+this.id+":receiver.beginSegment="+packet.get()[0]);
+                                Testing.oprintln("ThreadWorkerQueue="+this.id+":receiver.beginSegment="+packet.get(0));
                             }
-                            this.receiver.beginGroup((long)packet.get()[0]);
+                            this.receiver.beginGroup((long)packet.get(0));
                         }
                         else if (size==Packet.END_SEGMENT)
                         {

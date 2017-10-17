@@ -60,7 +60,6 @@ public class Distributor extends Node
             }
             return;
         }
-        Object[] array=container.get();
         int sent = 0;
         while (sent<container.sizeOrType())
         {
@@ -72,7 +71,7 @@ public class Distributor extends Node
             Packet packet=new Packet(receiverContainerSize);
             for (int i=sent;i<sent+receiverContainerSize;i++)
             {
-                packet.add(array[i]);
+                packet.add(container.get(i));
             }
             this.receivers[this.index].process(packet);
             this.currentRoundSize+=receiverContainerSize;

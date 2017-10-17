@@ -8,8 +8,8 @@ import org.nova.configuration.Configuration;
 import org.nova.flow.SourceQueue;
 import org.nova.flow.SourceQueueConfiguration;
 import org.nova.logging.ConsoleWriter;
-import org.nova.logging.JSONBufferedLZ4Queue;
-import org.nova.logging.JSONBufferedLZ4QueueConfiguration;
+import org.nova.logging.HighPerformanceLogger;
+import org.nova.logging.HighPerformanceConfiguration;
 import org.nova.logging.JSONFormatter;
 import org.nova.logging.Level;
 import org.nova.logging.LogDirectoryManager;
@@ -54,7 +54,7 @@ public class CoreEnvironment
                 break;
 
             case "JSONBufferedLZ4Queue":
-                this.logSourceQueue=new JSONBufferedLZ4Queue(logDirectoryManager, new JSONBufferedLZ4QueueConfiguration());
+                this.logSourceQueue=new HighPerformanceLogger(logDirectoryManager, new HighPerformanceConfiguration());
                 break;
                 
 		    default:

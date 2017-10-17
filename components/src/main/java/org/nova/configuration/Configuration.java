@@ -167,12 +167,83 @@ public class Configuration
         }
         return Float.parseFloat(value);
     }
+    
+    private long parseLong(String value)
+    {
+        value=value.trim();
+        long scale=1;
+        if (value.endsWith("k")||value.endsWith("K"))
+        {
+            scale=1000L;
+            value=value.substring(0, value.length()-1);
+        }        
+        else if (value.endsWith("m")||value.endsWith("M"))
+        {
+            scale=1000_000L;
+            value=value.substring(0, value.length()-1);
+        }        
+        else if (value.endsWith("g")||value.endsWith("G"))
+        {
+            scale=1000_000_000L;
+            value=value.substring(0, value.length()-1);
+        }        
+        else if (value.endsWith("t")||value.endsWith("T"))
+        {
+            scale=1000_000_000_000L;
+            value=value.substring(0, value.length()-1);
+        }        
+        else if (value.endsWith("p")||value.endsWith("B"))
+        {
+            scale=1000_000_000_000_000L;
+            value=value.substring(0, value.length()-1);
+        }        
+        long number=Long.parseLong(value);
+        long scaledNumber=number*scale;
+        if (scaledNumber/scale!=number)
+        {
+            throw new NumberFormatException("Overflow. value="+value);
+        }
+        return scaledNumber;
+        
+    }
+    private int parseInt(String value)
+    {
+        value=value.trim();
+        int scale=1;
+        if (value.endsWith("k")||value.endsWith("K"))
+        {
+            scale=1000;
+            value=value.substring(0, value.length()-1);           
+        }        
+        else if (value.endsWith("m")||value.endsWith("M"))
+        {
+            scale=1000_000;
+            value=value.substring(0, value.length()-1);
+        }        
+        else if (value.endsWith("g")||value.endsWith("G"))
+        {
+            scale=1000_000_000;
+            value=value.substring(0, value.length()-1);
+        }        
+        int number=Integer.parseInt(value);
+        int scaledNumber=number*scale;
+        if (scaledNumber/scale!=number)
+        {
+            throw new NumberFormatException("Overflow. value="+value);
+        }
+        return scaledNumber;
+        
+    }
+    
+    
+    
 	public long getLongValue(String name)
 	{
 		String value=getValue(name);
-		return Long.parseLong(value);
+		return parseLong(value);
 	}
 
+	
 	public long getLongValue(String name,long defaultValue)
 	{
         String value=getValue(name);
@@ -180,7 +251,7 @@ public class Configuration
         {
             return defaultValue;
         }
-		return Long.parseLong(value);
+		return parseLong(value);
 	}
     public Long getNullableLongValue(String name)
     {
@@ -189,7 +260,7 @@ public class Configuration
         {
             return null;
         }
-        return Long.parseLong(value);
+        return parseLong(value);
     }
 
     public Long getNullableLongValue(String name,Long defaultValue)
@@ -199,13 +270,13 @@ public class Configuration
         {
             return defaultValue;
         }
-        return Long.parseLong(value);
+        return parseLong(value);
     }
 	
     public int getIntegerValue(String name)
     {
         String value=getValue(name);
-        return Integer.parseInt(value);
+        return parseInt(value);
     }
 
     public int getIntegerValue(String name,int defaultValue)
@@ -215,7 +286,7 @@ public class Configuration
         {
             return defaultValue;
         }
-        return Integer.parseInt(value);
+        return parseInt(value);
     }
     public Integer getNullableIntegerValue(String name)
     {
@@ -224,7 +295,7 @@ public class Configuration
         {
             return null;
         }
-        return Integer.parseInt(value);
+        return parseInt(value);
     }
 
     public Integer getNullableIntegerValue(String name,Integer defaultValue)
@@ -234,7 +305,7 @@ public class Configuration
         {
             return defaultValue;
         }
-        return Integer.parseInt(value);
+        return parseInt(value);
     }
     
 	public short getShortValue(String name)

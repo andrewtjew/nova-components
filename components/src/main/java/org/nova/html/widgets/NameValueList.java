@@ -38,6 +38,10 @@ public class NameValueList extends div
     {
         this(null,true);
     }
+    public NameValueList(boolean frame)
+    {
+        this(null,frame);
+    }
     public NameValueList add(String name,Element element)
     {
         this.list.add(new NameValue<Element>(name,element));

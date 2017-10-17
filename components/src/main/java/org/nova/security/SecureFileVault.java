@@ -65,19 +65,19 @@ public class SecureFileVault extends Vault
 		String[] lines=text.split("\n");
 		for (String line:lines)
 		{
-			if (line.indexOf("=")<0)
+		    int index=line.indexOf('=');
+			if (index<0)
 			{
 				continue;
 			}
-			String[] keyValue=line.trim().split("=");
-			String key=keyValue[0].trim();
-			String value=keyValue[1].trim();
+			String key=line.substring(0, index).trim();
+			String value=line.substring(index+1).trim();
 			
 			Cipher AesCipher = Cipher.getInstance("AES");
 			AesCipher.init(Cipher.ENCRYPT_MODE, this.secretKey);
 			byte[] byteText = value.getBytes();
 			byte[] byteCipherText = AesCipher.doFinal(byteText);
-			this.map.put(key, byteCipherText);
+			this.map.put(key.trim(), byteCipherText);
 		}
 	}
 
@@ -91,7 +91,7 @@ public class SecureFileVault extends Vault
 		Cipher AesCipher = Cipher.getInstance("AES");
 		AesCipher.init(Cipher.DECRYPT_MODE, secretKey);
 		byte[] bytePlainText = AesCipher.doFinal(bytes);
-		return new String(bytePlainText);
+		return new String(bytePlainText).trim();
 	}
 
 }

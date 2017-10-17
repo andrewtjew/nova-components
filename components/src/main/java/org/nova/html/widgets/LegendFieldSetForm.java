@@ -29,6 +29,10 @@ public class LegendFieldSetForm extends InnerElement<LegendFieldSetForm>
         this.fieldset=this.form.returnAddInner(new fieldset());
         this.legend=this.fieldset.returnAddInner(new legend()).addInner(heading);
     }
+    public LegendFieldSetForm(String heading,String actionURL)
+    {
+        this(heading,actionURL,true);
+    }
     
     @Override
     public LegendFieldSetForm addInner(Element element)

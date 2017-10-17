@@ -34,9 +34,8 @@ public class TraceManager
     final private HashMap<String,TraceMeter> lastTraceMeters;
     final private HashMap<String,TraceMeter> watchTraceMeters;
     private long number;
+    private long currentTracesOverflowCount;
 
-	@Description("The number of times maximum actives is exceeded. Traces exceeding the maximum are not tracked.")
-	final private CountMeter maximumExceeded=new CountMeter();
 	
     @OperatorVariable(description="Capture the stackTrace when trace is closed. WARNING: Application performance may drop.")
     private boolean captureCreateStackTrace;
@@ -99,7 +98,7 @@ public class TraceManager
 			}
 			else
 			{
-				this.maximumExceeded.increment();
+				this.currentTracesOverflowCount++;
 			}
 		}
         return new TraceContext(number,this.captureCreateStackTrace,this.captureCloseStackTrace);
@@ -204,7 +203,7 @@ public class TraceManager
 			}
 		}
 	}
-	public Map<String,TraceNode> getTraceGraphRootsSnapshot()
+	public Map<String,TraceNode> getTraceMeterCategories()
 	{
 		HashMap<String,TraceNode> traceRoots=new HashMap<>();
         synchronized (this.managerLock)
@@ -214,6 +213,36 @@ public class TraceManager
 		return traceRoots;
 		
 	}
+    public Map<String,TraceNode> getTraceGraphRootsSnapshot()
+    {
+        HashMap<String,TraceNode> traceRoots=new HashMap<>();
+        synchronized (this.managerLock)
+        {
+            traceRoots.putAll(this.traceRoots);
+        }
+        return traceRoots;
+        
+    }
+
+    public void resetTraceGraph()
+    {
+        synchronized (this.managerLock)
+        {
+            this.traceRoots.clear();
+        }
+    }
+    /*
+    public void resetTraceGraphNodes(String[] categories)
+    {
+        synchronized (this.managerLock)
+        {
+            for (int entry:this.traceRoots)
+            {
+                
+            }
+        }
+    }
+    */
 	public String[] getWatchList()
 	{
         synchronized (this.managerLock)
@@ -471,5 +500,12 @@ public class TraceManager
         return new Trace[0];
     }
 	
-	
+    public long getCurrentTracesOverflowCount()
+    {
+        synchronized (this)
+        {
+            return this.currentTracesOverflowCount;
+        }
+    }
+    
 }

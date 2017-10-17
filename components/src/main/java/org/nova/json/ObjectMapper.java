@@ -824,11 +824,19 @@ public class ObjectMapper
     			else if (fieldType.isArray())
     			{
     				next = lexer.getNextCharacter();
-    				if (next != '[')
+    				if (next=='[')
+    				{
+                        field.set(object, readArray(lexer, fieldType.getComponentType()));
+    				}
+    				else if (next == 'n')
+                    {
+                        lexer.getRestOfNull();
+                        field.set(object, null);
+                    }
+    				else 
     				{
     					throw new Exception("Array expected at " + lexer.getPosition());
     				}
-    				field.set(object, readArray(lexer, fieldType.getComponentType()));
     			}
     			else if (fieldType == Boolean.class)
     			{

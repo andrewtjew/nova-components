@@ -13,11 +13,17 @@ import org.nova.core.Utils;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelShell;
+import com.jcraft.jsch.IdentityRepository;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
+import com.jcraft.jsch.agentproxy.AgentProxy;
+import com.jcraft.jsch.agentproxy.AgentProxyException;
+import com.jcraft.jsch.agentproxy.Identity;
+import com.jcraft.jsch.agentproxy.RemoteIdentityRepository;
+import com.jcraft.jsch.agentproxy.connector.PageantConnector;
 
 public class SshSession
 {
@@ -42,6 +48,23 @@ public class SshSession
 		this.channel = (ChannelSftp) session.openChannel("sftp");
 		this.channel.connect();
 	}
+
+	public SshSession(String host, int port, String user) throws JSchException, IOException, AgentProxyException
+    {
+	    PageantConnector connector=new PageantConnector();
+	    
+	    this.jsch = new JSch();
+        IdentityRepository identityRepository=new RemoteIdentityRepository(connector);
+        this.jsch.setIdentityRepository(identityRepository);
+        
+        this.session = jsch.getSession(user, host, port);
+        java.util.Properties config = new java.util.Properties();
+        config.put("StrictHostKeyChecking", "no");
+        session.setConfig(config);
+        this.session.connect();
+        this.channel = (ChannelSftp) session.openChannel("sftp");
+        this.channel.connect();
+    }
 
 	public String exec(boolean captureOutput,String command) throws IOException, JSchException
 	{
@@ -470,4 +493,6 @@ public class SshSession
 	{
 		return channel.lpwd();
 	}
+	
+	
 }

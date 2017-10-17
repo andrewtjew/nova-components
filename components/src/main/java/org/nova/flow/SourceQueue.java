@@ -14,23 +14,24 @@ public class SourceQueue<ITEM>
     final private CountMeter droppedMeter;
     final private CountMeter stalledMeter;
     final private LevelMeter waitingMeter;
-    final private int sendSizeThreshold;
-    final private long flushWait;
-    final private long sendWait;
-    final private int stallSizeThreshold;
-    final private long stallWait;
-    final private long endSegmentWait;
     final private int maxQueueSize;
-
+    final private long stallWait;
+    final private int stallSizeThreshold;
     final private Node receiver;
     final private Object lock;
     private Thread thread;
-
     private ArrayList<Packet> buffer;
-    private Packet current;
-
     private Throwable throwable;
     private boolean stop;
+
+    final private int sendSizeThreshold;
+    final private long flushWait;
+    final private long sendWait;
+    final private long endSegmentWait;
+
+
+    private Packet current;
+
     private boolean noWait = false;
 
     public SourceQueue(Node receiver, SourceQueueConfiguration configuration)
@@ -40,11 +41,11 @@ public class SourceQueue<ITEM>
         this.waitingMeter = new LevelMeter();
         this.receiver = receiver;
         this.sendSizeThreshold = configuration.sendSizeThreshold;
-        this.flushWait = configuration.flushWait;
-        this.sendWait = configuration.sendWait;
+        this.flushWait = configuration.flushWaitMs;
+        this.sendWait = configuration.sendWaitMs;
         this.stallSizeThreshold = configuration.stallSizeThreshold;
-        this.stallWait = configuration.stallWait;
-        this.endSegmentWait = configuration.rollOverWait;
+        this.stallWait = configuration.stallWaitMs;
+        this.endSegmentWait = configuration.rollOverWaitMs;
         this.maxQueueSize = configuration.maxQueueSize;
 
         this.lock = new Object();
@@ -314,10 +315,9 @@ public class SourceQueue<ITEM>
                         }
                         else
                         {
-                            Object[] array = packet.get();
                             for (int i = 0; i < packet.sizeOrType(); i++)
                             {
-                                sendPacket.add(array[i]);
+                                sendPacket.add(packet.get(i));
                             }
                             flush = true;
                         }

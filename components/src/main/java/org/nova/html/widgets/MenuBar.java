@@ -167,7 +167,7 @@ public class MenuBar extends Element
         }
         else
         {
-            longestSubMenu=longestSubMenu*0.8+2;
+            longestSubMenu=longestSubMenu*0.9+2;
         }
             
         for (Item item:items)

@@ -58,7 +58,7 @@ public class CaptureBuffer extends Node
                     {
                         this.spills++;
                     }
-                    this.buffer.add(packet.get()[i]);
+                    this.buffer.add(packet.get(i));
                 }
             }
             else
@@ -69,7 +69,7 @@ public class CaptureBuffer extends Node
                     {
                         return;
                     }
-                    this.buffer.add(packet.get()[i]);
+                    this.buffer.add(packet.get(i));
                 }
             }
         }

@@ -66,7 +66,7 @@ public class JSONClient
     }
 	public JSONClient(TraceManager traceManager,Logger logger,String endPoint)
 	{
-		this(traceManager,logger,null,endPoint,HttpClientFactory.createDefaultClient(),"application/json","application/merge-patch+json");
+		this(traceManager,logger,null,endPoint,HttpClientFactory.createClient(),"application/json","application/merge-patch+json");
 	}
 	
 	private void logHeaders(DisruptorTraceContext context,org.apache.http.Header[] headers)

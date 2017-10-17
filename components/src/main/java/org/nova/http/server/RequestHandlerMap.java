@@ -15,7 +15,7 @@ import javax.servlet.http.Cookie;
 
 import org.nova.core.Utils;
 import org.nova.http.client.PathAndQueryBuilder;
-import org.nova.http.server.annotations.CheckParam;
+import org.nova.http.server.annotations.ParamName;
 import org.nova.http.server.annotations.ContentDecoders;
 import org.nova.http.server.annotations.ContentEncoders;
 import org.nova.http.server.annotations.ContentParam;
@@ -415,7 +415,7 @@ class RequestHandlerMap
 			PathParam pathParam = null;
 			QueryParam queryParam = null;
 			StateParam stateParam = null;
-			CheckParam checkParam=null;
+			ParamName checkParam=null;
 			
 			for (Annotation annotation : parameterAnnotations)
 			{
@@ -452,9 +452,9 @@ class RequestHandlerMap
                 {
                     stateParam = (StateParam) annotation;
                 }
-                else if (type==CheckParam.class)
+                else if (type==ParamName.class)
                 {
-                    checkParam=(CheckParam)annotation;
+                    checkParam=(ParamName)annotation;
                 }
 			}
 

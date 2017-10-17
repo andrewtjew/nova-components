@@ -10,9 +10,9 @@ import org.nova.core.NameObject;
 import org.nova.core.Utils;
 import org.nova.frameworks.OperatorPage;
 import org.nova.frameworks.ServerApplication;
-import org.nova.frameworks.ServerOperatorPages;
-import org.nova.frameworks.ServerOperatorPages.OperatorTable;
-import org.nova.frameworks.ServerOperatorPages.WideTable;
+import org.nova.frameworks.ServerApplicationPages;
+import org.nova.frameworks.ServerApplicationPages.OperatorTable;
+import org.nova.frameworks.ServerApplicationPages.WideTable;
 import org.nova.html.HtmlWriter;
 import org.nova.html.elements.Element;
 import org.nova.html.operator.OperatorResult;
@@ -65,13 +65,19 @@ public class SessionOperatorPages<SESSION extends Session>
         this.serverApplication=serverApplication;
     }
     
+    public void bind() throws Exception
+    {
+        this.serverApplication.getMenuBar().add("/operator/sessions","Sessions","View All");
+        this.serverApplication.getOperatorServer().registerHandlers(this);
+    }
+    
     @GET
     @Path("/operator/sessions")
     public Element getAll(Trace parent) throws Exception, Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("All Sessions");
         page.content().addInner(new hr());
-        OperatorTable table=page.content().returnAddInner(new ServerOperatorPages.OperatorTable(page.head()));
+        OperatorTable table=page.content().returnAddInner(new ServerApplicationPages.OperatorTable(page.head()));
         table.setHeadRow(new Row()
                 .add("Token","User","Created","Last Accessed","Active","Idle","Accessed","Rate","")
                 );

@@ -22,7 +22,7 @@ import org.nova.metrics.RateMeter;
 
 public class SimpleFileLogger extends SourceQueue<LogEntry> 
 {
-	private static Distributor connect(LogDirectoryManager logDirectoryManager,JSONBufferedLZ4QueueConfiguration configuration) throws Throwable
+	private static Distributor connect(LogDirectoryManager logDirectoryManager,HighPerformanceConfiguration configuration) throws Throwable
 	{
         CountMeter threadWorkerQueueDroppedMeter=new CountMeter();
         CountMeter threadWorkerQueueStalledMeter=new CountMeter();
@@ -47,7 +47,7 @@ public class SimpleFileLogger extends SourceQueue<LogEntry>
         for (int i=0;i<threads;i++)
         {
             BufferedLZ4FileWriter writer=new BufferedLZ4FileWriter(logDirectoryManager, configuration.writerBufferInitialCapacity,logWriter,writeRateMeter);
-            ThreadWorkerQueue queue=new ThreadWorkerQueue(writer, configuration.writerStallWait,stallSizeThreshold,maxQueueSize,i,threadWorkerQueueStalledMeter,threadWorkerQueueDroppedMeter,threadWorkerQueueInUseMeter,threadWorkerQueueWaitingMeter);
+            ThreadWorkerQueue queue=new ThreadWorkerQueue(writer, configuration.writerStallWaitMs,stallSizeThreshold,maxQueueSize,i,threadWorkerQueueStalledMeter,threadWorkerQueueDroppedMeter,threadWorkerQueueInUseMeter,threadWorkerQueueWaitingMeter);
             queue.start();
             queues[i]=queue;
         }
@@ -62,7 +62,7 @@ public class SimpleFileLogger extends SourceQueue<LogEntry>
     final private BufferedLZ4FileWriter[] writers;
     final private ThreadWorkerQueue[] queues;
 
-    public SimpleFileLogger(LogDirectoryManager logDirectoryManager, JSONBufferedLZ4QueueConfiguration configuration) throws Throwable
+    public SimpleFileLogger(LogDirectoryManager logDirectoryManager, HighPerformanceConfiguration configuration) throws Throwable
 	{
 		super(connect(logDirectoryManager,configuration),configuration);
         this.writers=new BufferedLZ4FileWriter[configuration.writerThreads];

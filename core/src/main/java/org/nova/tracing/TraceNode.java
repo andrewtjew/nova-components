@@ -51,16 +51,31 @@ public class TraceNode
 	}
     public void update(Trace trace)
     {
-        this.traceMeter.update(trace);
+        synchronized(this)
+        {
+            this.traceMeter.update(trace);
+        }
     }
     public void update(TraceSample sample)
     {
-        this.traceMeter.update(sample);
+        synchronized(this)
+        {
+            this.traceMeter.update(sample);
+        }
     }
 	
 	public TraceSample sampleTrace()
 	{
-	    return traceMeter.sample();
+        synchronized(this)
+        {
+            return traceMeter.sample();
+        }
 	}
-	
+	public void reset()
+	{
+        synchronized(this)
+        {
+            this.traceMeter=new TraceMeter();
+        }
+	}
 }

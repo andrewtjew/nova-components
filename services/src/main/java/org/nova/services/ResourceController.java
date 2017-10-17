@@ -79,7 +79,7 @@ import org.nova.http.server.annotations.POST;
 import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.PathParam;
 import org.nova.http.server.annotations.QueryParam;
-import org.nova.logging.JSONBufferedLZ4Queue;
+import org.nova.logging.HighPerformanceLogger;
 import org.nova.logging.LogDirectoryInfo;
 import org.nova.logging.LogDirectoryManager;
 import org.nova.metrics.LongRateSample;

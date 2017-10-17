@@ -12,22 +12,23 @@ public class SqlConnectorFlatWriter extends Node
 {
     final private Connector connector;
     final private RateMeter rateMeter;
-    private Throwable throwable;
+    final private ThrowablesLog throwablesLog;
     final private Formatter formatter;
     final private String categoryOverride;
     final private String insert;
     
-    public SqlConnectorFlatWriter(Connector connector,String tableName,Formatter formatter,String categoryOverride)
+    public SqlConnectorFlatWriter(Connector connector,Formatter formatter,String tableName,String categoryOverride)
     {
-        this.insert="INSERT INTO "+tableName+" (Number,Created,LogLevel,Catetory,Text) VALUES(?,?,?,?,?)";
+        this.insert="INSERT INTO "+tableName+" (Number,Created,LogLevel,Category,Text) VALUES(?,?,?,?,?)";
         this.connector=connector;
         this.rateMeter=new RateMeter();
         this.formatter=formatter;
         this.categoryOverride=categoryOverride==null?this.getClass().getSimpleName():categoryOverride;
+        this.throwablesLog=new ThrowablesLog();
     }
-    public SqlConnectorFlatWriter(Connector connector)
+    public SqlConnectorFlatWriter(Connector connector,Formatter formatter)
     {
-        this(connector,"logs",new JSONFormatter(),null);
+        this(connector,formatter,"FlatLogs",null);
     }
     
     private void write(LogEntry[] entries,int count) throws Exception, Throwable
@@ -36,7 +37,7 @@ public class SqlConnectorFlatWriter extends Node
         for (int i=0;i<count;i++)
         {
             String text=this.formatter.format(entries[i]);
-            batchParameters[i]=new Object[1];
+            batchParameters[i]=new Object[5];
             int index=0;
             LogEntry entry=entries[i];
             batchParameters[i][index++]=entry.getNumber();
@@ -56,33 +57,30 @@ public class SqlConnectorFlatWriter extends Node
     {
         synchronized(this)
         {
-            if (this.throwable==null)
+            try
             {
-                try
+                int size=packet.sizeOrType();
+                if (size>0)
                 {
-                    int size=packet.sizeOrType();
-                    if (size>0)
+                    LogEntry[] entries=new LogEntry[size];
+                    int count=0;
+                    for (int i = 0; i < packet.sizeOrType(); i++)
                     {
-                        LogEntry[] entries=new LogEntry[size];
-                        int count=0;
-                        for (int i = 0; i < packet.sizeOrType(); i++)
+                        Object object = packet.get(i);
+                        if ((object != null) && (object instanceof LogEntry))
                         {
-                            Object object = packet.get()[i];
-                            if ((object != null) && (object instanceof LogEntry))
-                            {
-                                entries[count++]=(LogEntry)object;
-                            }
+                            entries[count++]=(LogEntry)object;
                         }
-                        write(entries,count);
                     }
-                    return;
+                    write(entries,count);
                 }
-                catch (Throwable t)
-                {
-                    this.throwable=t;
-                }
+                return;
             }
-            throw throwable;
+            catch (Throwable t)
+            {
+                this.throwablesLog.log(t);
+                throw t;
+            }
         }
     }
 
@@ -99,6 +97,11 @@ public class SqlConnectorFlatWriter extends Node
     @Override
     public void endGroup() throws Throwable
     {
+    }
+    
+    public ThrowablesLog getFirstAndLastThrowablesLog()
+    {
+        return this.throwablesLog;
     }
 
 }

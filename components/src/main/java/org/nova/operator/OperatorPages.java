@@ -14,8 +14,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.nova.frameworks.OperatorPage;
 import org.nova.frameworks.ServerApplication;
-import org.nova.frameworks.ServerOperatorPages.Level2Panel;
-import org.nova.frameworks.ServerOperatorPages.WideTable;
+import org.nova.frameworks.ServerApplicationPages.Level2Panel;
+import org.nova.frameworks.ServerApplicationPages.WideTable;
 import org.nova.html.Attribute;
 import org.nova.html.HtmlWriter;
 import org.nova.html.elements.Element;

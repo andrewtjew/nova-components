@@ -163,14 +163,13 @@ public class Lexer
             char c=this.reader.read();
             if (c=='"')
             {
-                for (;;)
+                c=skipWhiteSpace();
+                if (c==':')
                 {
-                    c=this.reader.read();
-                    if (c==':')
-                    {
-                        return sb.toString();
-                    }                       
+                    this.last=0;
+                    return sb.toString();
                 }
+                throw new Exception(": expected after name at "+getPosition());
             }
             sb.append(c);
         }

@@ -22,7 +22,7 @@ public class SqlUtils
         }
         throw throwable;
     }
-    static public String insert(String table,String...values)
+    static public String buildInsert(String table,String...values)
     {
         StringBuilder sb=new StringBuilder();
         sb.append("INSERT INTO ").append(table).append(" (");
@@ -63,7 +63,7 @@ public class SqlUtils
         return accessor.executeUpdateAndReturnGeneratedKeys(parent, categoryOverride, sb.toString(),parameters).getBigDecimal(0).longValue();
     }
 
-    static public void insert(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject...nameObjects) throws Throwable
+    static public int insert(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject...nameObjects) throws Throwable
     {
         StringBuilder sb=new StringBuilder();
         sb.append("INSERT INTO ").append(table).append(" (");
@@ -82,10 +82,10 @@ public class SqlUtils
             sb.append(",?");
         }
         sb.append(')');
-        accessor.executeUpdate(parent, categoryOverride, sb.toString(),parameters);
+        return accessor.executeUpdate(parent, categoryOverride, sb.toString(),parameters);
     }
     
-    static public void insertIfNotExist(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject[] keyObjects,NameObject[] additionalObjects) throws Throwable
+    static public int insertIfNotExist(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject[] keyObjects,NameObject[] additionalObjects) throws Throwable
     {
         StringBuilder sb=new StringBuilder();
         Object[] parameters=new Object[keyObjects.length];
@@ -103,7 +103,7 @@ public class SqlUtils
             if (rowSet.size()>0)
             {
                 transaction.rollback();
-                return;
+                return 0;
             }
 
             sb=new StringBuilder();
@@ -138,8 +138,9 @@ public class SqlUtils
                 }
             }
             sb.append(')');
-            accessor.executeUpdate(parent, categoryOverride, sb.toString(),parameters);
+            int inserted=accessor.executeUpdate(parent, categoryOverride, sb.toString(),parameters);
             transaction.commit();
+            return inserted;
         }
     }
 }

@@ -16,6 +16,10 @@ public class StatusBoard
         return element.getFileName()+"."+element.getLineNumber();
     }
 
+    public void set(Item item)
+    {
+        set(item.getName(),item.getValue());
+    }
     public void set(String name,String value)
     {
         synchronized(this)

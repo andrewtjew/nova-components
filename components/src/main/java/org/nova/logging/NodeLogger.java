@@ -6,14 +6,16 @@ import org.nova.tracing.Trace;
 
 public class NodeLogger extends Logger
 {
-    final private Node receiver;
-    private Throwable exception; 
+    final private Node[] receivers;
+    final private ThrowablesLog firstAndLastThrowablesLog; 
     private long number;
     
-    public NodeLogger(Node receiver,String category)
+    public NodeLogger(String category,Node...receivers)
     {
         super(category);
-        this.receiver=receiver;
+        this.receivers=receivers;
+        this.firstAndLastThrowablesLog=new ThrowablesLog(); 
+                
     }
 
     @Override
@@ -23,24 +25,24 @@ public class NodeLogger extends Logger
         {
             Packet packet=new Packet(1);
             packet.add(new LogEntry(this.number++,category,logLevel,System.currentTimeMillis(),throwable,trace,message,items));
-            try
+            for (Node receiver:this.receivers)
             {
-                this.receiver.process(packet);
-            }
-            catch (Throwable t)
-            {
-                if (this.exception==null)
+                try
                 {
-                    this.exception=t;
+                    receiver.process(packet);
+                }
+                catch (Throwable t)
+                {
+                    this.firstAndLastThrowablesLog.log(t);
                 }
             }
         }
     }
-    public Throwable getException()
+    public ThrowablesLog getFirstAndLastThrowablesLog()
     {
         synchronized(this)
         {
-            return this.exception;
+            return this.firstAndLastThrowablesLog;
         }
     }
 

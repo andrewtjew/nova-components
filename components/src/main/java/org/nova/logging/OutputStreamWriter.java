@@ -88,7 +88,7 @@ public abstract class OutputStreamWriter extends Node
                 {
                     for (int i = 0; i < container.sizeOrType(); i++)
                     {
-                        Object object = container.get()[i];
+                        Object object = container.get(i);
                         if ((object != null) && (object instanceof LogEntry))
                         {
                             write(this.formatter.format((LogEntry)object));

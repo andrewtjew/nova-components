@@ -10,14 +10,22 @@ public class KeyValueStore
     final private String insert;
     final private String select;
     final private String update;
+    final private int maxKeyLength;
+    final private int maxValueLength;
     
-    public KeyValueStore(Connector connector,String tableName)
+    public KeyValueStore(Connector connector,String tableName,int maxKeyLength,int maxValueLength)
     {
         this.connector=connector;
         this.tableName=tableName;
         this.insert="INSERT INTO "+tableName+" (k,v) VALUES (?,?)";
         this.select="SELECT v FROM "+tableName+" WHERE k=?";
         this.update="UPDATE "+tableName+" SET v=? WHERE k=?";
+        this.maxKeyLength=maxKeyLength;
+        this.maxValueLength=maxValueLength;
+    }
+    public KeyValueStore(Connector connector,String tableName)
+    {
+        this(connector,tableName,50,8000);
     }
     
     public void write(Trace parent,String key,String value) throws Throwable
@@ -31,6 +39,15 @@ public class KeyValueStore
     public void write(Trace parent,Accessor accessor,String key,String value) throws Throwable
     {
         int updated=0;
+        if ((key!=null)&&(key.length()>this.maxKeyLength))
+        {
+            throw new Exception("key length exceeds maximum. maxKeyLength="+this.maxKeyLength+", key length="+key.length());
+            
+        }
+        if ((value!=null)&&(value.length()>this.maxValueLength))
+        {
+            throw new Exception("value length exceeds maximum. maxValueLength="+this.maxValueLength+", value length="+value.length());
+        }
         try
         {
             updated=accessor.executeUpdate(parent, null, insert, key,value);

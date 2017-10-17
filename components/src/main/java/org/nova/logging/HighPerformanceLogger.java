@@ -21,9 +21,9 @@ import org.nova.metrics.RateMeter;
  * compared to the logging-in-a-file.
  */
 
-public class JSONBufferedLZ4Queue extends SourceQueue<LogEntry> 
+public class HighPerformanceLogger extends SourceQueue<LogEntry> 
 {
-	private static Tapper connect(LogDirectoryManager logDirectoryManager,JSONBufferedLZ4QueueConfiguration configuration) throws Throwable
+	private static Tapper connect(LogDirectoryManager logDirectoryManager,HighPerformanceConfiguration configuration) throws Throwable
 	{
         CountMeter threadWorkerQueueDroppedMeter=new CountMeter();
         CountMeter threadWorkerQueueStalledMeter=new CountMeter();
@@ -48,7 +48,7 @@ public class JSONBufferedLZ4Queue extends SourceQueue<LogEntry>
         for (int i=0;i<threads;i++)
         {
             BufferedLZ4FileWriter writer=new BufferedLZ4FileWriter(logDirectoryManager, configuration.writerBufferInitialCapacity,logWriter,writeRateMeter);
-            ThreadWorkerQueue queue=new ThreadWorkerQueue(writer, configuration.writerStallWait,stallSizeThreshold,maxQueueSize,i,threadWorkerQueueStalledMeter,threadWorkerQueueDroppedMeter,threadWorkerQueueInUseMeter,threadWorkerQueueWaitingMeter);
+            ThreadWorkerQueue queue=new ThreadWorkerQueue(writer, configuration.writerStallWaitMs,stallSizeThreshold,maxQueueSize,i,threadWorkerQueueStalledMeter,threadWorkerQueueDroppedMeter,threadWorkerQueueInUseMeter,threadWorkerQueueWaitingMeter);
             queue.start();
             queues[i]=queue;
         }
@@ -64,7 +64,7 @@ public class JSONBufferedLZ4Queue extends SourceQueue<LogEntry>
     final private ThreadWorkerQueue[] queues;
     final private Tapper tapper;
 
-    public JSONBufferedLZ4Queue(LogDirectoryManager logDirectoryManager, JSONBufferedLZ4QueueConfiguration configuration) throws Throwable
+    public HighPerformanceLogger(LogDirectoryManager logDirectoryManager, HighPerformanceConfiguration configuration) throws Throwable
 	{
 		super(connect(logDirectoryManager,configuration),configuration);
         this.writers=new BufferedLZ4FileWriter[configuration.writerThreads];

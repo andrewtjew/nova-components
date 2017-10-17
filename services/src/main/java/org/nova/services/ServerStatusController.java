@@ -33,6 +33,7 @@ import org.nova.configuration.Configuration;
 import org.nova.configuration.ConfigurationItem;
 import org.nova.core.Utils;
 import org.nova.frameworks.ServerApplication;
+import org.nova.frameworks.ServerApplicationUtils;
 import org.nova.html.Attribute;
 import org.nova.html.HtmlWriter;
 import org.nova.html.Selection;
@@ -81,7 +82,9 @@ import org.nova.http.server.annotations.POST;
 import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.PathParam;
 import org.nova.http.server.annotations.QueryParam;
-import org.nova.logging.JSONBufferedLZ4Queue;
+import org.nova.logging.HighPerformanceLogger;
+import org.nova.logging.Item;
+import org.nova.logging.Level;
 import org.nova.logging.LogDirectoryInfo;
 import org.nova.logging.LogDirectoryManager;
 import org.nova.metrics.LongRateSample;
@@ -102,6 +105,7 @@ import org.nova.tracing.Trace;
 import org.nova.tracing.TraceNode;
 import org.nova.tracing.CategorySample;
 
+import com.amazonaws.services.iot.model.LogLevel;
 import com.google.common.base.Strings;
 
 @Description("Handlers for server operator pages")
@@ -114,7 +118,6 @@ public class ServerStatusController
 {
     public final ServerApplication serverApplication;
     private int statusCode; 
-    final private String monitorEndPoint; 
     final private long interval;
     final private CountMeter checkMeter;
     final private JSONClient client;
@@ -122,14 +125,14 @@ public class ServerStatusController
     {
         this.serverApplication = serverApplication;
         setStatusCode(HttpStatus.OK_200);
-        this.monitorEndPoint=serverApplication.getConfiguration().getValue("Application.Monitoring.remoteServerMonitorEndpoint",null);
         this.checkMeter=new CountMeter();
         this.interval=this.serverApplication.getConfiguration().getLongValue("Application.Monitoring.checkInterval",10*1000);
-        if (this.monitorEndPoint!=null)
+        
+        this.client=ServerApplicationUtils.createJSONClient(this.serverApplication, "Application.Monitoring.serviceEndPointConfiguration");
+        if (this.client!=null)
         {
             this.serverApplication.getTimerScheduler().schedule("RegisterWithRemoteServerMonitor", TimeBase.FREE, this.interval/2,this.interval,(trace,event)->{register(trace,event);});
         }
-        this.client=new JSONClient(this.serverApplication.getTraceManager(), this.serverApplication.getLogger(), this.monitorEndPoint);
         
     }
     public void setStatusCode(int statusCode)
@@ -181,6 +184,9 @@ public class ServerStatusController
         if (this.client.post(parent, null, "/server/add",request)<300)
         {
             event.cancel();
+            Item item=new Item(this.getClass().getSimpleName()+".registration","Success");
+            this.serverApplication.getStatusBoard().set(item);
+            this.serverApplication.getLogger().log(Level.NOTICE,"Monitoring",item);
         }
     }
     
