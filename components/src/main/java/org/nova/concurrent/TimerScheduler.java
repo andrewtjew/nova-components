@@ -69,20 +69,27 @@ public class TimerScheduler
 		}
 	}
 	
-	public void stop() throws Exception
+	public void stop() 
 	{
+	    Thread thread;
 		synchronized (this)
 		{
 			if (this.thread==null)
 			{
-				throw new Exception();
+				return;
 			}
+			thread=this.thread;
 			this.runState=RunState.STOPPING;
 			this.notifyAll();
-			Synchronization.waitForNoThrow(this, ()->{return this.runState==RunState.STOPPED;});
-			this.thread.join(0);
-			this.thread=null;
+            this.thread=null;
 		}
+		try
+        {
+            thread.join();
+        }
+        catch (InterruptedException e)
+        {
+        }
 	}
 
 	void run()
@@ -111,6 +118,8 @@ public class TimerScheduler
 							}
 							if (this.runState==RunState.STOPPING)
 							{
+							    this.runState=RunState.STOPPED;
+							    this.notify();
 								return;
 							}
 							continue;
@@ -131,6 +140,8 @@ public class TimerScheduler
 						}
 						if (this.runState==RunState.STOPPING)
 						{
+                            this.runState=RunState.STOPPED;
+                            this.notify();
 							return;
 						}
 					}

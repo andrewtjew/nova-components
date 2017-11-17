@@ -28,7 +28,8 @@ public class TraceManager
     final private TraceBuffer lastTraces;
     final private TraceBuffer watchTraces;
 	final private HashSet<String> watchCategories;
-	final private RateMeter rateMeter;
+    final private RateMeter rateMeter;
+    final private CountMeter gapMeter;
 	final private Logger logger;
 	final private int maximumActives;
     final private HashMap<String,TraceMeter> lastTraceMeters;
@@ -61,6 +62,7 @@ public class TraceManager
 		this.lastTraceMeters=new HashMap<>();
 		this.traceRoots=new HashMap<>();
 		this.rateMeter=new RateMeter();
+		this.gapMeter=new CountMeter();
 		this.lastExceptions=new TraceBuffer(configuration.lastExceptionBufferSize);
 		this.lastTraces=new TraceBuffer(configuration.lastTraceBufferSize);
         this.watchTraces=new TraceBuffer(configuration.lastTraceBufferSize);
@@ -368,6 +370,22 @@ public class TraceManager
 		}
 	}
 	
+    public void clearLastTraces()
+    {
+        synchronized (this.managerLock)
+        {
+            this.lastTraces.clear();
+        }
+    }
+
+    public void clearLastExceptionTraces()
+    {
+        synchronized (this.managerLock)
+        {
+            this.lastExceptions.clear();
+        }
+    }
+    
     public CategorySample[] sampleLastCategories()
     {
         synchronized (this.managerLock)

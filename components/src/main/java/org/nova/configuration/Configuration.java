@@ -102,6 +102,16 @@ public class Configuration
 		}
 		return item.getValue();
 	}
+
+	private String getValue(String name,Object defaultValue)
+    {
+        ConfigurationItem item=getConfigurationItem(name,defaultValue==null?null:defaultValue.toString());
+        if (item==null)
+        {
+            return null;
+        }
+        return item.getValue();
+    }
 	
 	public double getDoubleValue(String name)
 	{
@@ -110,7 +120,7 @@ public class Configuration
 	}
 	public double getDoubleValue(String name,double defaultValue)
 	{
-		String value=getValue(name);
+		String value=getValue(name,defaultValue);
 		if (value==null)
 		{
 		    return defaultValue;
@@ -128,7 +138,7 @@ public class Configuration
     }
     public Double getNulllableDoubleValue(String name,Double defaultValue)
     {
-        String value=getValue(name);
+        String value=getValue(name,defaultValue);
         if (value==null)
         {
             return defaultValue;
@@ -142,7 +152,7 @@ public class Configuration
 	}
 	public float getFloatValue(String name,float defaultValue)
 	{
-		String value=getValue(name);
+		String value=getValue(name,defaultValue);
         if (value==null)
         {
             return defaultValue;
@@ -246,7 +256,7 @@ public class Configuration
 	
 	public long getLongValue(String name,long defaultValue)
 	{
-        String value=getValue(name);
+        String value=getValue(name,defaultValue);
         if (value==null)
         {
             return defaultValue;
@@ -265,7 +275,7 @@ public class Configuration
 
     public Long getNullableLongValue(String name,Long defaultValue)
     {
-        String value=getValue(name);
+        String value=getValue(name,defaultValue);
         if (value==null)
         {
             return defaultValue;
@@ -281,7 +291,7 @@ public class Configuration
 
     public int getIntegerValue(String name,int defaultValue)
     {
-        String value=getValue(name);
+        String value=getValue(name,defaultValue);
         if (value==null)
         {
             return defaultValue;
@@ -300,7 +310,7 @@ public class Configuration
 
     public Integer getNullableIntegerValue(String name,Integer defaultValue)
     {
-        String value=getValue(name);
+        String value=getValue(name,defaultValue);
         if (value==null)
         {
             return defaultValue;
@@ -316,7 +326,7 @@ public class Configuration
 
 	public short getShortValue(String name,short defaultValue)
 	{
-        String value=getValue(name);
+        String value=getValue(name,defaultValue);
         if (value==null)
         {
             return defaultValue;
@@ -335,7 +345,7 @@ public class Configuration
 
     public Short getNullableShortValue(String name,Short defaultValue)
     {
-        String value=getValue(name);
+        String value=getValue(name,defaultValue);
         if (value==null)
         {
             return defaultValue;
@@ -351,7 +361,7 @@ public class Configuration
 
     public byte getByteValue(String name,byte defaultValue)
     {
-        String value=getValue(name);
+        String value=getValue(name,defaultValue);
         if (value==null)
         {
             return defaultValue;
@@ -386,7 +396,7 @@ public class Configuration
 
 	public boolean getBooleanValue(String name,boolean defaultValue)
 	{
-        String value=getValue(name);
+        String value=getValue(name,defaultValue);
         if (value==null)
         {
             return defaultValue;
@@ -405,7 +415,7 @@ public class Configuration
 
     public Boolean getNullableBooleanValue(String name,Boolean defaultValue)
     {
-        String value=getValue(name);
+        String value=getValue(name,defaultValue);
         if (value==null)
         {
             return defaultValue;
@@ -422,26 +432,44 @@ public class Configuration
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <ENUM> ENUM getEnumValue(String name,ENUM defaultValue,Class<ENUM> type)
 	{
-		return (ENUM) Enum.valueOf((Class<Enum>)type, getValue(name,defaultValue.toString()));
+		return (ENUM) Enum.valueOf((Class<Enum>)type, getValue(name,defaultValue));
 	}
 	
-	public <OBJECT> OBJECT getJSONObject(String name,Class<OBJECT> type) throws Exception
+	public <OBJECT> OBJECT getJSONObject(String name,Class<OBJECT> type) throws Throwable
 	{
-		return ObjectMapper.read(getValue(name),type);
+        synchronized (this)
+        {
+            return updateJSONObjectValue(name,ObjectMapper.read(getValue(name),type));
+        }
 	}
 
-	public <OBJECT> OBJECT getJSONObject(String name,OBJECT defaultValue,Class<OBJECT> type) throws Exception
+	public <OBJECT> OBJECT getJSONObject(String name,OBJECT defaultValue,Class<OBJECT> type) throws Throwable
 	{
-	    ConfigurationItem item=getConfigurationItem(name);
-	    if (item==null)
-	    {
-	        return defaultValue;
-	    }
-		return ObjectMapper.read(getValue(name),type);
+        synchronized (this)
+        {
+    	    String text=getValue(name,defaultValue==null?null:ObjectMapper.write(defaultValue));
+    	    if (text==null)
+    	    {
+    	        return defaultValue;
+    	    }
+    		return updateJSONObjectValue(name,ObjectMapper.read(text,type));
+        }
 	}
-    public <OBJECT> OBJECT getJSONObject(String name,Class<OBJECT> type,String defaultText) throws Exception
+        
+    public <OBJECT> OBJECT getJSONObject(String name,Class<OBJECT> type,String defaultText) throws Throwable
     {
-        return ObjectMapper.read(getValue(name,defaultText),type);
+        synchronized (this)
+        {
+            return updateJSONObjectValue(name,ObjectMapper.read(getValue(name,defaultText),type));
+        }
+    }
+    
+    private <OBJECT> OBJECT updateJSONObjectValue(String name,OBJECT object) throws Throwable
+    {
+        String text=ObjectMapper.write(object);
+        ConfigurationItem item=this.getConfigurationItem(name);
+        add(new ConfigurationItem(name, text, item.getSource(), item.getSourceContext(), item.getDescription()));
+        return object;
     }
 
 	public ConfigurationItem[] getConfigurationItemSnapshot()

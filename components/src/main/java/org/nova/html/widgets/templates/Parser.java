@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import org.nova.core.Utils;
 import org.nova.lexing.Lexeme;
-import org.nova.lexing.Lexer;
+import org.nova.lexing.Scanner;
 import org.nova.lexing.TextSource;
 import org.nova.lexing.Token;
 
@@ -14,7 +14,7 @@ public class Parser
 {
 	private StringBuilder sb;
 	final private ArrayList<Section> sections;
-    private Lexer lexer;
+    private Scanner lexer;
 
     public Parser()
     {
@@ -30,7 +30,7 @@ public class Parser
     Section[] parseText(String text) throws Throwable
     {
         TextSource source=new TextSource(text);
-        this.lexer = new Lexer(source);
+        this.lexer = new Scanner(source);
         parse();
         if (this.sb.length()>0)
         {

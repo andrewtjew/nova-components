@@ -24,54 +24,572 @@ import org.nova.json.Lexer.Reader;
 
 public class ObjectMapper
 {
-	static com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+    final static String NULL="null";
+    final private HashMap<String, ReadTypeInfo> readObjectCache=new HashMap<>();
+    final private HashMap<String, FieldWriter[]> fieldWriters=new HashMap<>();
+    final private HashMap<String, Writer> writers=new HashMap<>();
 
-	public static void write2(OutputStream outputStream, Object object) throws Exception
-	{
-		ObjectMapper.objectMapper.writeValue(outputStream, object);
-	}
+    static abstract class Writer
+    {
+        abstract void write(StringBuilder sb,Object object) throws Throwable;
+    }
+    static class PrimitiveWriter extends  Writer
+    {
+        void write(StringBuilder sb,Object object)
+        {
+            sb.append(object);
+        }
+    }
+    static class StringWriter extends  Writer
+    {
+        void write(StringBuilder sb,Object object)
+        {
+            sb.append('"');
+            writeString(sb, (String)object);
+            sb.append('"');
+        }
+    }
+    static class EnumWriter extends  Writer
+    {
+        void write(StringBuilder sb,Object object)
+        {
+            sb.append('"');
+            sb.append(object);
+            sb.append('"');
+        }
+    }
+    static class ObjectWriter extends  Writer
+    {
+        void write(StringBuilder sb,Object object) throws Throwable
+        {
+            sb.append('{');
+            boolean needComma = false;
+            FieldWriter[] fieldWriters = MAPPER.getFieldWriters(object.getClass());
+            for (FieldWriter fieldWriter:fieldWriters)
+            {
+                Object fieldObject = fieldWriter.field.get(object);
+                if (fieldObject!=null)
+                {
+                    fieldWriter.write(sb, needComma, fieldObject);
+                    needComma=true;
+                }
+            }
+            sb.append('}');
+        }
+    }
+    static class booleanArrayWriter extends  Writer
+    {
+        void write(StringBuilder sb,Object object)
+        {
+            sb.append('[');
+            boolean[] array = (boolean[]) object;
+            for (int i = 0; i < array.length; i++)
+            {
+                if (i>0)
+                {
+                    sb.append(',');
+                }
+                sb.append(array[i]);
+            }
+            sb.append(']');
+        }
+    }
+    static class byteArrayWriter extends  Writer
+    {
+        void write(StringBuilder sb,Object object)
+        {
+            sb.append('[');
+            byte[] array = (byte[]) object;
+            for (int i = 0; i < array.length; i++)
+            {
+                if (i>0)
+                {
+                    sb.append(',');
+                }
+                sb.append(array[i]);
+            }
+            sb.append(']');
+        }
+    }
+    static class charArrayWriter extends  Writer
+    {
+        void write(StringBuilder sb,Object object)
+        {
+            sb.append('[');
+            byte[] array = (byte[]) object;
+            for (int i = 0; i < array.length; i++)
+            {
+                if (i>0)
+                {
+                    sb.append(',');
+                }
+                sb.append(array[i]);
+            }
+            sb.append(']');
+        }
+    }
+    static class shortArrayWriter extends  Writer
+    {
+        void write(StringBuilder sb,Object object)
+        {
+            sb.append('[');
+            byte[] array = (byte[]) object;
+            for (int i = 0; i < array.length; i++)
+            {
+                if (i>0)
+                {
+                    sb.append(',');
+                }
+                sb.append(array[i]);
+            }
+            sb.append(']');
+        }
+    }
+    static class intArrayWriter extends  Writer
+    {
+        void write(StringBuilder sb,Object object)
+        {
+            sb.append('[');
+            int[] array = (int[]) object;
+            for (int i = 0; i < array.length; i++)
+            {
+                if (i>0)
+                {
+                    sb.append(',');
+                }
+                sb.append(array[i]);
+            }
+            sb.append(']');
+        }
+    }
+    static class longArrayWriter extends  Writer
+    {
+        void write(StringBuilder sb,Object object)
+        {
+            sb.append('[');
+            long[] array = (long[]) object;
+            for (int i = 0; i < array.length; i++)
+            {
+                if (i>0)
+                {
+                    sb.append(',');
+                }
+                sb.append(array[i]);
+            }
+            sb.append(']');
+        }
+    }
+    static class floatArrayWriter extends  Writer
+    {
+        void write(StringBuilder sb,Object object)
+        {
+            sb.append('[');
+            float[] array = (float[]) object;
+            for (int i = 0; i < array.length; i++)
+            {
+                if (i>0)
+                {
+                    sb.append(',');
+                }
+                sb.append(array[i]);
+            }
+            sb.append(']');
+        }
+    }
+    static class doubleArrayWriter extends  Writer
+    {
+        void write(StringBuilder sb,Object object)
+        {
+            sb.append('[');
+            double[] array = (double[]) object;
+            for (int i = 0; i < array.length; i++)
+            {
+                if (i>0)
+                {
+                    sb.append(',');
+                }
+                sb.append(array[i]);
+            }
+            sb.append(']');
+        }
+    }
 
-	public static String write2(Object object) throws Exception
-	{
-		return objectMapper.writeValueAsString(object);
-	}
+    static class StringArrayWriter extends  Writer
+    {
+        void write(StringBuilder sb,Object object)
+        {
+            sb.append('[');
+            String[] array = (String[]) object;
+            for (int i = 0; i < array.length; i++)
+            {
+                if (i>0)
+                {
+                    sb.append(',');
+                }
+                if (array[i]==null)
+                {
+                    sb.append(NULL);
+                }
+                else
+                {
+                    sb.append('"');
+                    writeString(sb,array[i]);
+                    sb.append('"');
+                }
+            }
+            sb.append(']');
+        }
+    }
+    static class EnumArrayWriter extends  Writer
+    {
+        void write(StringBuilder sb,Object object)
+        {
+            sb.append('[');
+            Enum<?>[] array = (Enum<?>[]) object;
+            for (int i = 0; i < array.length; i++)
+            {
+                if (i>0)
+                {
+                    sb.append(',');
+                }
+                if (array[i]==null)
+                {
+                    sb.append(NULL);
+                }
+                else
+                {
+                    sb.append(',');
+                    sb.append('"');
+                    sb.append(array[i]);
+                    sb.append('"');
+                }
+            }
+            sb.append(']');
+        }
+    }
+    static class NullablePrimitiveArrayWriter<TYPE> extends  Writer
+    {
+        void write(StringBuilder sb,Object object)
+        {
+            sb.append('[');
+            TYPE[] array = (TYPE[])object;
+            for (int i = 0; i < array.length; i++)
+            {
+                if (i>0)
+                {
+                    sb.append(',');
+                }
+                if (array[i]==null)
+                {
+                    sb.append(NULL);
+                }
+                else
+                {
+                    sb.append(array[i]);
+                }
+            }
+            sb.append(']');
+        }
+    }
+    static class ArrayWriter extends Writer
+    {
+        final Writer writer;
+        ArrayWriter(Class<?> componentType)
+        {
+            this.writer=MAPPER.getWriter(componentType);
+        }
+        void write(StringBuilder sb,Object object) throws Throwable
+        {
+            sb.append('[');
+            Object[] array = (Object[])object;
+            for (int i = 0; i < array.length; i++)
+            {
+                if (i>0)
+                {
+                    sb.append(',');
+                }
+                if (array[i]==null)
+                {
+                    sb.append(NULL);
+                }
+                else
+                {
+                    this.writer.write(sb, array[i]);
+                }
+            }
+            sb.append(']');
+        }
+    }
+    static class ObjectArrayWriter extends Writer
+    {
+        void write(StringBuilder sb,Object object) throws Throwable
+        {
+            sb.append('[');
+            Object[] array = (Object[])object;
+            for (int i = 0; i < array.length; i++)
+            {
+                Object element=array[i];
+                if (i>0)
+                {
+                    sb.append(',');
+                }
+                if (element==null)
+                {
+                    sb.append(NULL);
+                }
+                else
+                {
+                    MAPPER.getWriter(element.getClass()).write(sb, element);
+                }
+            }
+            sb.append(']');
+        }
+    }
+    
+    static class FieldWriter
+    {
+        final Field field;
+        final char[] jsonName;
+        final char[] commaJsonName;
+        final Writer writer;
 
-	public static <OBJECT> OBJECT read2(String jsonText, Class<OBJECT> type) throws Exception
-	{
-		return ObjectMapper.objectMapper.readValue(jsonText, type);
-	}
+        FieldWriter(Field field,Writer writer)
+        {
+            this.writer=writer;
+            this.field = field;
+            this.commaJsonName = (",\"" + field.getName() + '"' + ':').toCharArray();
+            this.jsonName = ('"' + field.getName() + '"' + ':').toCharArray();
+        }
+        void write(StringBuilder sb,boolean needComma,Object object) throws Throwable
+        {
+            if (needComma)
+            {
+                sb.append(commaJsonName);
+            }
+            else
+            {
+                sb.append(jsonName);
+            }
+            writer.write(sb, object);
+        }
+    }
 
-	public static <OBJECT> OBJECT read2(InputStream inputStream, Class<OBJECT> type) throws Exception
-	{
-		return ObjectMapper.objectMapper.readValue(inputStream, type);
-	}
+    private Writer getArrayWriter(Class<?> componentType)
+    {
+        if (componentType == boolean.class)
+        {
+            return new booleanArrayWriter();
+        }
+        else if (componentType == int.class)
+        {
+            return new intArrayWriter();
+        }
+        else if (componentType == long.class)
+        {
+            return new longArrayWriter();
+        }
+        else if (componentType == float.class)
+        {
+            return new floatArrayWriter();
+        }
+        else if (componentType == double.class)
+        {
+            return new doubleArrayWriter();
+        }
+        else if (componentType == byte.class)
+        {
+            return new byteArrayWriter();
+        }
+        else if (componentType == char.class)
+        {
+            return new charArrayWriter();
+        }
+        else if (componentType == short.class)
+        {
+            return new shortArrayWriter();
+        }
+        if (componentType == String.class)
+        {
+            return new StringArrayWriter();
+        }
+        if ((componentType.isEnum()))
+        {
+            return new EnumArrayWriter();
+        }
+        else if (componentType == Boolean.class)
+        {
+            return new NullablePrimitiveArrayWriter<Boolean>();
+        }
+        else if (componentType == Integer.class)
+        {
+            return new NullablePrimitiveArrayWriter<Integer>();
+        }
+        else if (componentType == Long.class)
+        {
+            return new NullablePrimitiveArrayWriter<Long>();
+        }
+        else if (componentType == Float.class)
+        {
+            return new NullablePrimitiveArrayWriter<Float>();
+        }
+        else if (componentType == Double.class)
+        {
+            return new NullablePrimitiveArrayWriter<Double>();
+        }
+        else if (componentType == Byte.class)
+        {
+            return new NullablePrimitiveArrayWriter<Byte>();
+        }
+        else if (componentType == Character.class)
+        {
+            return new NullablePrimitiveArrayWriter<Character>();
+        }
+        else if (componentType == Short.class)
+        {
+            return new NullablePrimitiveArrayWriter<Short>();
+        }
+        else if (componentType!=Object.class)
+        {
+            return new ArrayWriter(componentType);
+        }
+        else 
+        {
+            return new ObjectArrayWriter();
+        }
+        
+    }
+    
+    private Writer getWriter(Class<?> type)
+    {
+        Writer writer=this.writers.get(type.getName());
+        if (writer!=null)
+        {
+            return writer;
+        }
+        if (type.isPrimitive())
+        {
+            writer=new PrimitiveWriter();
+        }
+        else if (type == String.class)
+        {
+            writer=new StringWriter();
+        }
+        else if (type.isArray())
+        {
+            writer=getArrayWriter(type.getComponentType());
+        }
+        else if (type.isEnum())
+        {
+            writer=new EnumWriter();
+        }
+        else if (type == Boolean.class)
+        {
+            writer=new PrimitiveWriter();
+        }
+        else if (type == Integer.class)
+        {
+            writer=new PrimitiveWriter();
+        }
+        else if (type == Long.class)
+        {
+            writer=new PrimitiveWriter();
+        }
+        else if (type == Float.class)
+        {
+            writer=new PrimitiveWriter();
+        }
+        else if (type == Double.class)
+        {
+            writer=new PrimitiveWriter();
+        }
+        else if (type == Byte.class)
+        {
+            writer=new PrimitiveWriter();
+        }
+        else if (type == Character.class)
+        {
+            writer=new PrimitiveWriter();
+        }
+        else if (type == Short.class)
+        {
+            writer=new PrimitiveWriter();
+        }
+        else if (type == java.lang.Enum.class)
+        {
+            writer=new EnumWriter();
+        }
+        else if (type == BigDecimal.class)
+        {
+            writer=new PrimitiveWriter();
+        }
+        else
+        {
+            writer=new ObjectWriter();
+        }
+        this.writers.put(type.getName(), writer);
+        return writer;
+    }
+    
+    private FieldWriter[] getFieldWriters(Class<?> type) throws Exception
+    {
+        synchronized (this.fieldWriters)
+        {
+            FieldWriter[] fieldWriters = this.fieldWriters.get(type.getName());
+            if (fieldWriters == null)
+            {
+                HashMap<String, FieldWriter> map = new HashMap<>();
+                for (Class<?> c = type; c != null; c = c.getSuperclass())
+                {
+                    for (Field field : c.getDeclaredFields())
+                    {
+                        int modifiers = field.getModifiers();
+                        if (Modifier.isTransient(modifiers))
+                        {
+                            continue;
+                        }
+                        if (Modifier.isStatic(modifiers))
+                        {
+                            continue;
+                        }
+                        if (map.containsKey(field.getName()) == false)
+                        {
+                            field.setAccessible(true);
+                            Writer writer=getWriter(field.getType());
+                            map.put(field.getName(), new FieldWriter(field,writer));
+                        }
+                    }
+                }
+                fieldWriters = map.values().toArray(new FieldWriter[map.size()]);
+                this.fieldWriters.put(type.getName(), fieldWriters);
+            }
+            return fieldWriters;
+        }
+    }
 
-	
-	final private HashMap<String, ReadTypeInfo> readObjectCache=new HashMap<>();
-	final private HashMap<String, WriteTypeInfo> writeObjectCache=new HashMap<>();
-
-	final static ObjectMapper mapper=new ObjectMapper();
+	final static ObjectMapper MAPPER=new ObjectMapper();
 	
 	private ObjectMapper()
 	{
 	}
 
+	// read
+	
 	public static <OBJECT> OBJECT read(InputStream inputStream, Class<OBJECT> type) throws Exception
 	{
-		return mapper.readObject(inputStream,type);
+		return MAPPER.readObject(inputStream,type);
 	}
 
 	public static <OBJECT> OBJECT readFromFile(String fileName, Class<OBJECT> type) throws Exception
 	{
 		try (FileInputStream inputStream=new FileInputStream(fileName))
 		{
-			return mapper.readObject(inputStream,type);
+			return MAPPER.readObject(inputStream,type);
 		}
 	}
 
 	public static <OBJECT> OBJECT read(String text, Class<OBJECT> type) throws Exception
 	{
-		return mapper.readObject(text,type);
+		return MAPPER.readObject(text,type);
 	}
 	
 	
@@ -872,7 +1390,11 @@ public class ObjectMapper
     			}
                 else if (fieldType.isEnum())
                 {
-                    field.set(object, Enum.valueOf((Class<Enum>) fieldType, lexer.getString()));
+                    String value=lexer.getString();
+                    if (value!=null)
+                    {
+                        field.set(object, Enum.valueOf((Class<Enum>) fieldType, value));
+                    }
                 }
                 else if (fieldType==java.lang.Enum.class)
                 {
@@ -918,921 +1440,83 @@ public class ObjectMapper
 		return object;
 	}
 
-	static class WriteFieldInfo
-	{
-		final Field field;
-		final char[] jsonName;
-		final char[] commaJsonName;
 
-		WriteFieldInfo(Field field)
-		{
-			this.field = field;
-			this.commaJsonName = (",\"" + field.getName() + '"' + ':').toCharArray();
-			this.jsonName = ('"' + field.getName() + '"' + ':').toCharArray();
-		}
+	public static String write(Object object) throws Throwable
+	{
+		return MAPPER.writeObjectAsString(object);
+	}
+	public static void write(OutputStream outputStream,Object object) throws Throwable
+	{
+		MAPPER.writeObject(outputStream,object);
 	}
 
-	static class WriteTypeInfo
-	{
-		final WriteFieldInfo[] writeFieldInfos;
-
-		WriteTypeInfo(Field[] fields)
-		{
-			this.writeFieldInfos = new WriteFieldInfo[fields.length];
-			for (int i = 0; i < fields.length; i++)
-			{
-				writeFieldInfos[fields.length - i - 1] = new WriteFieldInfo(fields[i]);
-			}
-		}
-	}
-
-	private WriteTypeInfo getWriteTypeInfo(Class<?> type) throws Exception
-	{
-		synchronized (this.writeObjectCache)
-		{
-			WriteTypeInfo typeInfo = this.writeObjectCache.get(type.getName());
-			if (typeInfo == null)
-			{
-				//typeInfo = new WriteTypeInfo(type.getDeclaredFields());
-				HashMap<String, Field> fields = new HashMap<>();
-				for (Class<?> c = type; c != null; c = c.getSuperclass())
-				{
-					for (Field field : c.getDeclaredFields())
-					{
-						int modifiers = field.getModifiers();
-						if (Modifier.isTransient(modifiers))
-						{
-							continue;
-						}
-						if (Modifier.isStatic(modifiers))
-						{
-							continue;
-						}
-						if (fields.containsKey(field.getName()) == false)
-						{
-							field.setAccessible(true);
-							fields.put(field.getName(), field);
-						}
-					}
-				}
-				typeInfo = new WriteTypeInfo(fields.values().toArray(new Field[fields.size()]));
-				this.writeObjectCache.put(type.getName(), typeInfo);
-			}
-			return typeInfo;
-		}
-	}
-
-	public static String write(Object object) throws Exception
-	{
-		return mapper.writeObjectAsString(object);
-	}
-	public static void write(OutputStream outputStream,Object object) throws Exception
-	{
-		mapper.writeObject(outputStream,object);
-	}
-
-	public String writeObjectAsString(Object object) throws Exception
+	public String writeObjectAsString(Object object) throws Throwable
 	{
 	    if (object==null)
 	    {
 	        return "";
 	    }
 		StringBuilder sb = new StringBuilder();
-		writeObjectOrArray(sb,object,object.getClass());
+		Writer writer=MAPPER.getWriter(object.getClass());
+		writer.write(sb, object);
 		return sb.toString();
 	}
-	void writeObjectOrArray(StringBuilder sb,Object object,Class<?> type) throws Exception
-	{
-        if (type.isArray())
-        {
-            writeArray(sb, object, type.getComponentType());
-        }
-        else
-        {
-            writeObject(sb, object, type);
-        }
-	    
-	}
 	
-	public void writeObject(OutputStream outputStream,Object object) throws Exception
+	public void writeObject(OutputStream outputStream,Object object) throws Throwable
 	{
 		outputStream.write(writeObjectAsString(object).getBytes());
 		
 	}
 	
-	private char[] NULL_CHARS="null".toCharArray();
-	private char[] COMMA_NULL_CHARS=",null".toCharArray();
-	private char[] COMMA_DOUBLEQUOTE=",\"".toCharArray();
-
 	public static void writeString(StringBuilder sb,String text)
 	{
-		int mark=0;
-		int index;
-		char c;
-		for (index=0;index<text.length();index++)
+		for (int index=0;index<text.length();index++)
 		{
-			c=text.charAt(index);
+			char c=text.charAt(index);
 			if (c=='\\')
 			{
-				if (mark<index)
-				{
-					sb.append(text,mark,index);
-					mark=index+1;
-				}
 				sb.append(c);
 				sb.append(c);
 			}
 			else if (c>'"')
-			{
+			{ 
+                sb.append(c);
 			}
 			else if (c=='"')
 			{
-				if (mark<index)
-				{
-					sb.append(text,mark,index);
-				}
 				sb.append('\\');
 				sb.append('"');
-                mark=index+1;
 			}
 			else if (c=='\b')
 			{
-				if (mark<index)
-				{
-					sb.append(text,mark,index);
-				}
 				sb.append('\\');
 				sb.append('b');
-                mark=index+1;
 			}
 			else if (c=='\f')
 			{
-				if (mark<index)
-				{
-					sb.append(text,mark,index);
-				}
 				sb.append('\\');
 				sb.append('f');
-                mark=index+1;
 			}
 			else if (c=='\n')
 			{
-				if (mark<index)
-				{
-					sb.append(text,mark,index);
-				}
 				sb.append('\\');
 				sb.append('n');
-                mark=index+1;
 			}
 			else if (c=='\r')
 			{
-				if (mark<index)
-				{
-					sb.append(text,mark,index);
-				}
 				sb.append('\\');
 				sb.append('r');
-                mark=index+1;
 			}
 			else if (c=='\t')
 			{
-				if (mark<index)
-				{
-					sb.append(text,mark,index);
-				}
 				sb.append('\\');
 				sb.append('t');
-                mark=index+1;
 			}
 			else
 			{
-			    //Invalid characters are skipped.
+                sb.append(c);
 			}
-		}
-		if (mark<index)
-		{
-			sb.append(text,mark,index);
 		}
 	}
 	
-	
-	private void writeArray(StringBuilder sb, Object array, Class<?> componentType) throws Exception
-	{
-		sb.append('[');
-		if (componentType.isPrimitive())
-		{
-			if (componentType == boolean.class)
-			{
-				boolean[] values = (boolean[]) array;
-				if (values.length > 0)
-				{
-					sb.append(values[0]);
-					for (int i = 1; i < values.length; i++)
-					{
-						sb.append(',');
-						sb.append(values[i]);
-					}
-				}
-			}
-			else if (componentType == int.class)
-			{
-				int[] values = (int[]) array;
-				if (values.length > 0)
-				{
-					sb.append(values[0]);
-					for (int i = 1; i < values.length; i++)
-					{
-						sb.append(',');
-						sb.append(values[i]);
-					}
-				}
-			}
-			else if (componentType == long.class)
-			{
-				long[] values = (long[]) array;
-				if (values.length > 0)
-				{
-					sb.append(values[0]);
-					for (int i = 1; i < values.length; i++)
-					{
-						sb.append(',');
-						sb.append(values[i]);
-					}
-				}
-			}
-			else if (componentType == float.class)
-			{
-				float[] values = (float[]) array;
-				if (values.length > 0)
-				{
-					sb.append(values[0]);
-					for (int i = 1; i < values.length; i++)
-					{
-						sb.append(',');
-						sb.append(values[i]);
-					}
-				}
-			}
-			else if (componentType == double.class)
-			{
-				double[] values = (double[]) array;
-				if (values.length > 0)
-				{
-					sb.append(values[0]);
-					for (int i = 1; i < values.length; i++)
-					{
-						sb.append(',');
-						sb.append(values[i]);
-					}
-				}
-			}
-			else if (componentType == byte.class)
-			{
-				byte[] values = (byte[]) array;
-				if (values.length > 0)
-				{
-					sb.append(values[0]);
-					for (int i = 1; i < values.length; i++)
-					{
-						sb.append(',');
-						sb.append(values[i]);
-					}
-				}
-			}
-			else if (componentType == char.class)
-			{
-				char[] values = (char[]) array;
-				if (values.length > 0)
-				{
-					sb.append(values[0]);
-					for (int i = 1; i < values.length; i++)
-					{
-						sb.append(',');
-						sb.append(values[i]);
-					}
-				}
-			}
-			else if (componentType == short.class)
-			{
-				short[] values = (short[]) array;
-				if (values.length > 0)
-				{
-					sb.append(values[0]);
-					for (int i = 1; i < values.length; i++)
-					{
-						sb.append(',');
-						sb.append(values[i]);
-					}
-				}
-			}
-		}
-		else if (componentType == String.class)
-		{
-			String[] values = (String[]) array;
-			if (values.length > 0)
-			{
-				if (values[0]!=null)
-				{
-					sb.append('"');
-					sb.append(values[0]);
-					sb.append('"');
-				}
-				else
-				{
-					sb.append(NULL_CHARS);
-				}
-				for (int i = 1; i < values.length; i++)
-				{
-					if (values[i]!=null)
-					{
-						sb.append(COMMA_DOUBLEQUOTE);
-						writeString(sb,values[i]);
-						sb.append('"');
-					}
-					else
-					{
-						sb.append(COMMA_NULL_CHARS);
-					}
-				}
-			}
-		}
-		else if ((componentType.isEnum()))
-		{
-			Enum<?>[] values = (Enum<?>[]) array;
-			if (values.length > 0)
-			{
-				if (values[0]!=null)
-				{
-					sb.append('"');
-					sb.append(values[0]);
-					sb.append('"');
-				}
-				else
-				{
-					sb.append(NULL_CHARS);
-				}
-				for (int i = 1; i < values.length; i++)
-				{
-					if (values[i]!=null)
-					{
-						sb.append(COMMA_DOUBLEQUOTE);
-						sb.append(values[i]);
-						sb.append('"');
-					}
-					else
-					{
-						sb.append(COMMA_NULL_CHARS);
-					}
-				}
-			}
-		}
-		else if (componentType == Boolean.class)
-		{
-			Boolean[] values = (Boolean[]) array;
-			if (values.length > 0)
-			{
-				if (values[0]!=null)
-				{
-					sb.append((values[0].booleanValue()));
-				}
-				else
-				{
-					sb.append(NULL_CHARS);
-				}
-				for (int i = 1; i < values.length; i++)
-				{
-					if (values[i]!=null)
-					{
-						sb.append(',');
-						sb.append((values[i].booleanValue()));
-					}
-					else
-					{
-						sb.append(COMMA_NULL_CHARS);
-					}
-				}
-			}
-		}
-		else if (componentType == Integer.class)
-		{
-			Integer[] values = (Integer[]) array;
-			if (values.length > 0)
-			{
-				if (values[0]!=null)
-				{
-					sb.append((values[0].intValue()));
-				}
-				else
-				{
-					sb.append(NULL_CHARS);
-				}
-				for (int i = 1; i < values.length; i++)
-				{
-					if (values[i]!=null)
-					{
-						sb.append(',');
-						sb.append((values[i].intValue()));
-					}
-					else
-					{
-						sb.append(COMMA_NULL_CHARS);
-					}
-				}
-			}
-		}
-		else if (componentType == Long.class)
-		{
-			Long[] values = (Long[]) array;
-			if (values.length > 0)
-			{
-				if (values[0]!=null)
-				{
-					sb.append((values[0].longValue()));
-				}
-				else
-				{
-					sb.append(NULL_CHARS);
-				}
-				for (int i = 1; i < values.length; i++)
-				{
-					if (values[i]!=null)
-					{
-						sb.append(',');
-						sb.append((values[i].longValue()));
-					}
-					else
-					{
-						sb.append(COMMA_NULL_CHARS);
-					}
-				}
-			}
-		}
-		else if (componentType == Float.class)
-		{
-			Float[] values = (Float[]) array;
-			if (values.length > 0)
-			{
-				if (values[0]!=null)
-				{
-					sb.append((values[0].floatValue()));
-				}
-				else
-				{
-					sb.append(NULL_CHARS);
-				}
-				for (int i = 1; i < values.length; i++)
-				{
-					if (values[i]!=null)
-					{
-						sb.append(',');
-						sb.append((values[i].floatValue()));
-					}
-					else
-					{
-						sb.append(COMMA_NULL_CHARS);
-					}
-				}
-			}
-		}
-		else if (componentType == Double.class)
-		{
-			Double[] values = (Double[]) array;
-			if (values.length > 0)
-			{
-				if (values[0]!=null)
-				{
-					sb.append((values[0].doubleValue()));
-				}
-				else
-				{
-					sb.append(NULL_CHARS);
-				}
-				for (int i = 1; i < values.length; i++)
-				{
-					if (values[i]!=null)
-					{
-						sb.append(',');
-						sb.append((values[i].doubleValue()));
-					}
-					else
-					{
-						sb.append(COMMA_NULL_CHARS);
-					}
-				}
-			}
-		}
-		else if (componentType == Byte.class)
-		{
-			Byte[] values = (Byte[]) array;
-			if (values.length > 0)
-			{
-				if (values[0]!=null)
-				{
-					sb.append((values[0].byteValue()));
-				}
-				else
-				{
-					sb.append(NULL_CHARS);
-				}
-				for (int i = 1; i < values.length; i++)
-				{
-					if (values[i]!=null)
-					{
-						sb.append(',');
-						sb.append((values[i].byteValue()));
-					}
-					else
-					{
-						sb.append(COMMA_NULL_CHARS);
-					}
-				}
-			}
-		}
-		else if (componentType == Character.class)
-		{
-			Character[] values = (Character[]) array;
-			if (values.length > 0)
-			{
-				if (values[0]!=null)
-				{
-					sb.append((values[0].charValue()));
-				}
-				else
-				{
-					sb.append(NULL_CHARS);
-				}
-				for (int i = 1; i < values.length; i++)
-				{
-					if (values[i]!=null)
-					{
-						sb.append(',');
-						sb.append((values[i].charValue()));
-					}
-					else
-					{
-						sb.append(COMMA_NULL_CHARS);
-					}
-				}
-			}
-		}
-		else if (componentType == Short.class)
-		{
-			Short[] values = (Short[]) array;
-			if (values.length > 0)
-			{
-				if (values[0]!=null)
-				{
-					sb.append((values[0].shortValue()));
-				}
-				else
-				{
-					sb.append(NULL_CHARS);
-				}
-				for (int i = 1; i < values.length; i++)
-				{
-					if (values[i]!=null)
-					{
-						sb.append(',');
-						sb.append((values[i].shortValue()));
-					}
-					else
-					{
-                        sb.append(COMMA_NULL_CHARS);
-					}
-				}
-			}
-		}
-		else
-		{
-			int length=Array.getLength(array);
-			if (length > 0)
-			{
-				Object value=Array.get(array, 0);
-				if (value!=null)
-				{
-					writeObjectOrArray(sb,value,value.getClass());
-				}
-				else
-				{
-					sb.append(NULL_CHARS);
-				}
-				for (int i = 1; i < length; i++)
-				{
-					value=Array.get(array, i);
-					if (value!=null)
-					{
-	                    sb.append(',');
-						writeObjectOrArray(sb,value,value.getClass());
-					}
-					else
-					{
-                        sb.append(COMMA_NULL_CHARS);
-					}
-				}
-			}
-		}
-		sb.append(']');
-	}
-
-	private void writeObject(StringBuilder sb, Object object, Class<?> type) throws Exception
-	{
-		sb.append('{');
-		boolean needComma = false;
-		WriteTypeInfo typeInfo = getWriteTypeInfo(type);
-		for (WriteFieldInfo fieldInfo : typeInfo.writeFieldInfos)
-		{
-			Field field = fieldInfo.field;
-			Class<?> fieldType = field.getType();
-			if (fieldType.isPrimitive())
-			{
-				if (needComma == false)
-				{
-					needComma = true;
-					sb.append(fieldInfo.jsonName);
-				}
-				else
-				{
-					sb.append(fieldInfo.commaJsonName);
-				}
-				if (fieldType == boolean.class)
-				{
-					sb.append(field.getBoolean(object));
-				}
-				else if (fieldType == int.class)
-				{
-					sb.append(field.getInt(object));
-				}
-				else if (fieldType == long.class)
-				{
-					sb.append(field.getLong(object));
-				}
-				else if (fieldType == float.class)
-				{
-					sb.append(field.getFloat(object));
-				}
-				else if (fieldType == double.class)
-				{
-					sb.append(field.getDouble(object));
-				}
-				else if (fieldType == byte.class)
-				{
-					sb.append(field.getByte(object));
-				}
-				else if (fieldType == char.class)
-				{
-					sb.append(field.getChar(object));
-				}
-				else if (fieldType == short.class)
-				{
-					sb.append(field.getShort(object));
-				}
-			}
-			else if (fieldType == String.class)
-			{
-				String value = (String) field.get(object);
-				if (value != null)
-				{
-					if (needComma == false)
-					{
-						needComma = true;
-						sb.append(fieldInfo.jsonName);
-					}
-					else
-					{
-						sb.append(fieldInfo.commaJsonName);
-					}
-					sb.append('"');
-					writeString(sb,value);
-					sb.append('"');
-				}
-			}
-			else if (fieldType.isArray())
-			{
-				Object value = field.get(object);
-				if (value != null)
-				{
-					if (needComma == false)
-					{
-						needComma = true;
-						sb.append(fieldInfo.jsonName);
-					}
-					else
-					{
-						sb.append(fieldInfo.commaJsonName);
-					}
-					writeArray(sb, value, fieldType.getComponentType());
-				}
-			}
-			else if (fieldType.isEnum())
-			{
-				Object value = field.get(object);
-				if (value != null)
-				{
-					if (needComma == false)
-					{
-						needComma = true;
-						sb.append(fieldInfo.jsonName);
-					}
-					else
-					{
-						sb.append(fieldInfo.commaJsonName);
-					}
-					sb.append('"');
-					sb.append(value.toString());
-					sb.append('"');
-				}
-			}
-			else if (fieldType == Boolean.class)
-			{
-				Object value = field.get(object);
-				if (value != null)
-				{
-					if (needComma == false)
-					{
-						needComma = true;
-						sb.append(fieldInfo.jsonName);
-					}
-					else
-					{
-						sb.append(fieldInfo.commaJsonName);
-					}
-					sb.append(((Boolean) value).booleanValue());
-				}
-			}
-			else if (fieldType == Integer.class)
-			{
-				Object value = field.get(object);
-				if (value != null)
-				{
-					if (needComma == false)
-					{
-						needComma = true;
-						sb.append(fieldInfo.jsonName);
-					}
-					else
-					{
-						sb.append(fieldInfo.commaJsonName);
-					}
-					sb.append(((Integer) value).intValue());
-				}
-			}
-			else if (fieldType == Long.class)
-			{
-				Object value = field.get(object);
-				if (value != null)
-				{
-					if (needComma == false)
-					{
-						needComma = true;
-						sb.append(fieldInfo.jsonName);
-					}
-					else
-					{
-						sb.append(fieldInfo.commaJsonName);
-					}
-					sb.append(((Long) value).longValue());
-				}
-			}
-			else if (fieldType == Float.class)
-			{
-				Object value = field.get(object);
-				if (value != null)
-				{
-					if (needComma == false)
-					{
-						needComma = true;
-						sb.append(fieldInfo.jsonName);
-					}
-					else
-					{
-						sb.append(fieldInfo.commaJsonName);
-					}
-					sb.append(((Float) value).floatValue());
-				}
-			}
-			else if (fieldType == Double.class)
-			{
-				Object value = field.get(object);
-				if (value != null)
-				{
-					if (needComma == false)
-					{
-						needComma = true;
-						sb.append(fieldInfo.jsonName);
-					}
-					else
-					{
-						sb.append(fieldInfo.commaJsonName);
-					}
-					sb.append(((Double) value).doubleValue());
-				}
-			}
-			else if (fieldType == Byte.class)
-			{
-				Object value = field.get(object);
-				if (value != null)
-				{
-					if (needComma == false)
-					{
-						needComma = true;
-						sb.append(fieldInfo.jsonName);
-					}
-					else
-					{
-						sb.append(fieldInfo.commaJsonName);
-					}
-					sb.append(((Byte) value).byteValue());
-				}
-			}
-			else if (fieldType == Character.class)
-			{
-				Object value = field.get(object);
-				if (value != null)
-				{
-					if (needComma == false)
-					{
-						needComma = true;
-						sb.append(fieldInfo.jsonName);
-					}
-					else
-					{
-						sb.append(fieldInfo.commaJsonName);
-					}
-					sb.append(((Character) value).charValue());
-				}
-			}
-			else if (fieldType == Short.class)
-			{
-				Object value = field.get(object);
-				if (value != null)
-				{
-					if (needComma == false)
-					{
-						needComma = true;
-						sb.append(fieldInfo.jsonName);
-					}
-					else
-					{
-						sb.append(fieldInfo.commaJsonName);
-					}
-					sb.append(((Short) value).shortValue());
-				}
-			}
-            else if (fieldType == java.lang.Enum.class)
-            {
-                Object value = field.get(object);
-                if (value != null)
-                {
-                    if (needComma == false)
-                    {
-                        needComma = true;
-                        sb.append(fieldInfo.jsonName);
-                    }
-                    else
-                    {
-                        sb.append(fieldInfo.commaJsonName);
-                    }
-                    sb.append(value);
-                }
-                
-            }
-            else if (fieldType == BigDecimal.class)
-            {
-                Object value = field.get(object);
-                if (value != null)
-                {
-                    if (needComma == false)
-                    {
-                        needComma = true;
-                        sb.append(fieldInfo.jsonName);
-                    }
-                    else
-                    {
-                        sb.append(fieldInfo.commaJsonName);
-                    }
-                    String text=value.toString();
-                    sb.append(text);
-                }
-            }
-			else
-			{
-				Object value = field.get(object);
-				if (value != null)
-				{
-					if (needComma == false)
-					{
-						needComma = true;
-						sb.append(fieldInfo.jsonName);
-					}
-					else
-					{
-						sb.append(fieldInfo.commaJsonName);
-					}
-					writeObjectOrArray(sb, value, fieldType);
-				}
-			}
-		}
-		sb.append('}');
-	}
 }

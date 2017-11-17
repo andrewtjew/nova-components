@@ -69,17 +69,26 @@ public class SourceQueue<ITEM>
         }
     }
 
-    public void stop() throws InterruptedException
+    public void stop() 
     {
+        Thread thread;
         synchronized (this.lock)
         {
-            if (this.thread != null)
+            if (this.thread == null)
             {
-                this.stop = true;
-                this.lock.notifyAll();
-                this.thread.join();
-                this.thread = null;
+                return;
             }
+            thread=this.thread;
+            this.stop = true;
+            this.lock.notifyAll();
+            this.thread = null;
+        }
+        try
+        {
+            thread.join();
+        }
+        catch (InterruptedException e)
+        {
         }
     }
 

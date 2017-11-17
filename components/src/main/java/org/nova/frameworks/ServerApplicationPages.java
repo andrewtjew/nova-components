@@ -56,6 +56,7 @@ import org.nova.html.tags.legend;
 import org.nova.html.tags.link;
 import org.nova.html.tags.meta;
 import org.nova.html.tags.p;
+import org.nova.html.tags.script;
 import org.nova.html.tags.span;
 import org.nova.html.tags.strong;
 import org.nova.html.tags.style;
@@ -320,7 +321,13 @@ public class ServerApplicationPages
         table.setHeadRowItems("Name","Value","Description","Source","Source Context");
         for (ConfigurationItem item : this.serverApplication.getConfiguration().getConfigurationItemSnapshot())
         {
-            table.addBodyRowItems(item.getName(),item.getValue(),item.getDescription(),item.getSource(),item.getSourceContext());
+            org.nova.html.widgets.Row row=new Row();
+            row.add(item.getName());
+            row.add(new TitleText(item.getValue(), 32));
+            row.add(new TitleText(item.getDescription(), 64));
+            row.add(item.getSource());
+            row.add(item.getSourceContext());
+            table.addBodyRow(row);
         }
         return page;
     }
@@ -354,10 +361,17 @@ public class ServerApplicationPages
         table.setHeadRowItems("Name","Value","Created","Count","Source");
         for (StatusEntry item : this.serverApplication.getStatusBoard().getStatusEntries())
         {
-            table.addBodyRowItems(item.getName(),item.getValue(),Utils.millisToLocalDateTime(item.getCreatedMs()),item.getCount(),item.getSource());
+            org.nova.html.widgets.Row row=new Row();
+            row.add(item.getName());
+            row.add(new TitleText(item.getValue(),120));
+            row.add(Utils.millisToLocalDateTime(item.getCreatedMs()));
+            row.add(item.getCount());
+            row.add(item.getSource());
+            table.addBodyRow(row);
         }
         return page;
     }
+    
     @GET
     @Path("/operator/logging/capture")
     public Element captureLogging(@QueryParam("capacity") @DefaultValue("100") int capacity) throws Throwable
@@ -1112,7 +1126,7 @@ public class ServerApplicationPages
         return page;
     }
 
-    @GET
+    @POST
     @Path("/operator/tracing/watchList/disable")
     public Element disableTraceWatchList(@ParamName("change") boolean change) throws Throwable
     {
@@ -1122,7 +1136,7 @@ public class ServerApplicationPages
         }
         MenuBar menuBar=this.serverApplication.getMenuBar();
         menuBar.setEnabled(false,"Tracing","Sample Watch Traces");
-        menuBar.setEnabled(false,"Tracing","Sample and Reset Trace Buffer");
+        menuBar.setEnabled(false,"Tracing","Sample and Reset Watch Traces");
         menuBar.setEnabled(false,"Tracing","Sample Watch Trace Buffer");
         menuBar.setEnabled(false,"Tracing","Last Watch Traces");
 
@@ -1133,7 +1147,7 @@ public class ServerApplicationPages
         return page;
     }
     
-    @GET
+    @POST
     @Path("/operator/tracing/watchList/set")
     public Element setTraceWatchList(@ParamName("change") boolean change,Queries parameters,Context context) throws Throwable
     {
@@ -1144,7 +1158,7 @@ public class ServerApplicationPages
 
         MenuBar menuBar=this.serverApplication.getMenuBar();
         menuBar.setEnabled(true,"Tracing","Sample Watch Traces");
-        menuBar.setEnabled(true,"Tracing","Sample and Reset Trace Buffer");
+        menuBar.setEnabled(true,"Tracing","Sample and Reset Watch Traces");
         menuBar.setEnabled(true,"Tracing","Sample Watch Trace Buffer");
         menuBar.setEnabled(true,"Tracing","Last Watch Traces");
         this.serverApplication.buildOperatorPageTemplate();
@@ -1680,7 +1694,7 @@ public class ServerApplicationPages
     }
     
     
-    @GET
+    @POST
     @Path("/operator/tracing/all/reset")
     public Element traceResetTraceGraph(
             @ParamName("checkSelected") boolean checkSelected,@ParamName("resetSelected") boolean resetSelected,
@@ -2090,7 +2104,7 @@ public class ServerApplicationPages
     public Element lastTraces() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Last Traces");
-        writeTraces(page, this.serverApplication.getTraceManager().getLastTraces());
+        writeTraces(page, this.serverApplication.getTraceManager().getLastTraces(),"/operator/traces/clear/lastTraces");
         return page;
     }
     @GET
@@ -2101,7 +2115,7 @@ public class ServerApplicationPages
         if (this.serverApplication.getTraceManager().isEnableLastTraceWatching())
         {
             page.content().addInner("Trace watching is enabled.");
-            writeTraces(page, this.serverApplication.getTraceManager().getLastWatchTraces());
+            writeTraces(page, this.serverApplication.getTraceManager().getLastWatchTraces(),"/operator/traces/clear/watchLastTraces");
         }
         else
         {
@@ -2115,7 +2129,7 @@ public class ServerApplicationPages
     public Element lastExeptions() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Last Exception Traces");
-        writeTraces(page, this.serverApplication.getTraceManager().getLastExceptionTraces());
+        writeTraces(page, this.serverApplication.getTraceManager().getLastExceptionTraces(),"/operator/traces/clear/lastExceptions");
         return page;
     }
 
@@ -2124,13 +2138,20 @@ public class ServerApplicationPages
     public Element activeTraces() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Current Traces");
-        writeTraces(page, this.serverApplication.getTraceManager().getCurrentTraces());
+        writeTraces(page, this.serverApplication.getTraceManager().getCurrentTraces(),null);
         return page;
-
     }
-    private void writeTraces(OperatorPage page, Trace[] traces) throws Exception
+
+    private void writeTraces(OperatorPage page, Trace[] traces,String action) throws Exception
     {
-        page.content().addInner(new p().addInner("Count: " + traces.length));
+        page.content().addInner(new span().addInner("Count: " + traces.length));
+        if (action!=null)
+        {
+            form_get form=page.content().returnAddInner(new form_get()).style("float:right;").action(action);
+            form.returnAddInner(new input_checkbox()).name("check");
+            form.returnAddInner(new input_submit()).value("Clear");
+        }
+        page.content().addInner(new hr());
         for (int i = traces.length - 1; i >= 0; i--)
         {
             Trace trace = traces[i];
@@ -2139,13 +2160,41 @@ public class ServerApplicationPages
         }
     }
 
+    @GET
+    @Path("/operator/traces/clear/lastTraces")
+    public Element clearLastTraces(@ParamName("check") boolean check) throws Throwable
+    {
+        if (check==false)
+        {
+            return lastTraces();
+        }
+        this.serverApplication.getTraceManager().clearLastTraces();
+        BasicPage page=new BasicPage();
+        page.body().returnAddInner(new script()).addInner("window.location='/operator/tracing/lastTraces';");
+        return page;
+    }
+
+    @GET
+    @Path("/operator/traces/clear/lastExceptions")
+    public Element clearLastExceptions(@ParamName("check") boolean check) throws Throwable
+    {
+        if (check==false)
+        {
+            return lastTraces();
+        }
+        this.serverApplication.getTraceManager().clearLastExceptionTraces();
+        BasicPage page=new BasicPage();
+        page.body().returnAddInner(new script()).addInner("window.location='/operator/tracing/lastExceptions';");
+        return page;
+    }
+    
 
 
     @GET
     @Path("/operator/httpServer/performance/{server}")
     public Element performance(@PathParam("server")String server) throws Throwable
     {
-        OperatorPage page=buildServerOperatorPage("Performance: ",server);
+        OperatorPage page=buildServerOperatorPage("Performance",server);
         HttpServer httpServer=getHttpServer(server);
         RateMeter requestRateMeter = httpServer.getRequestRateMeter();
         RateSample sample=requestRateMeter.sample();

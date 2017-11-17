@@ -28,16 +28,16 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 public class Accessor extends Resource
 {
-	final private long connectionIdleTimeout;
+	final private long connectionIdleTimeoutMs;
 	final Connector connector;
 	Connection connection;
-	private long lastExecute;
+	private long lastExecuteMs;
 	private Transaction transaction;
 
-	public Accessor(Pool<Accessor> pool, Connector connector, long connectionIdleTimeout)
+	public Accessor(Pool<Accessor> pool, Connector connector, long connectionIdleTimeoutMs)
 	{
 		super(pool);
-		this.connectionIdleTimeout = connectionIdleTimeout;
+		this.connectionIdleTimeoutMs = connectionIdleTimeoutMs;
 		this.connector = connector;
 	}
 
@@ -99,7 +99,7 @@ public class Accessor extends Resource
 		long now = System.currentTimeMillis();
 		if (this.connection != null)
 		{
-			if (now - this.lastExecute < connectionIdleTimeout)
+			if (now - this.lastExecuteMs < connectionIdleTimeoutMs)
 			{
 				return;
 			}
@@ -117,7 +117,7 @@ public class Accessor extends Resource
 		try
 		{
 			this.connection = this.connector.createConnection();
-			this.lastExecute = now;
+			this.lastExecuteMs = now;
 		}
 		catch (Throwable e)
 		{
@@ -163,7 +163,7 @@ public class Accessor extends Resource
 					}
 					finally
 					{
-						this.lastExecute = System.currentTimeMillis();
+						this.lastExecuteMs = System.currentTimeMillis();
 					}
 				}
 			}
@@ -207,7 +207,7 @@ public class Accessor extends Resource
                     }
                     finally
                     {
-                        this.lastExecute = System.currentTimeMillis();
+                        this.lastExecuteMs = System.currentTimeMillis();
                     }
                 }
             }
@@ -260,7 +260,7 @@ public class Accessor extends Resource
                     }
                     finally
                     {
-                        this.lastExecute = System.currentTimeMillis();
+                        this.lastExecuteMs = System.currentTimeMillis();
                     }
                 }
             }
@@ -452,7 +452,7 @@ public class Accessor extends Resource
 					}
 					finally
 					{
-						this.lastExecute = System.currentTimeMillis();
+						this.lastExecuteMs = System.currentTimeMillis();
 					}
 					try (ResultSet resultSet = statement.getResultSet())
 					{
@@ -494,7 +494,7 @@ public class Accessor extends Resource
 					}
 					finally
 					{
-						this.lastExecute = System.currentTimeMillis();
+						this.lastExecuteMs = System.currentTimeMillis();
 					}
 					try (ResultSet resultSet = statement.getResultSet())
 					{
@@ -537,7 +537,7 @@ public class Accessor extends Resource
 					}
 					finally
 					{
-						this.lastExecute = System.currentTimeMillis();
+						this.lastExecuteMs = System.currentTimeMillis();
 					}
 					try (ResultSet resultSet = statement.getResultSet())
 					{

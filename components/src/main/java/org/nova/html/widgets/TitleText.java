@@ -1,6 +1,7 @@
 package org.nova.html.widgets;
 
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 import org.nova.html.elements.Composer;
@@ -57,7 +58,7 @@ public class TitleText extends Element
             else
             {
                 span element=new span();
-                element.title(title).addInner(text);
+                element.title(title.replace("\"", "&quot;")).addInner(text);
                 element.compose(composer);
             }
         }

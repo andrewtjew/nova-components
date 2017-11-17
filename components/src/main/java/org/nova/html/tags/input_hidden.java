@@ -15,5 +15,10 @@ public class input_hidden extends InputElement<input_hidden>
     {
         return attr("value",text);
     }
+
+    public input_hidden value(Object object) //button, reset, submit, text, password, hidden, checkbox, radio, image
+    {
+        return attr("value",object);
+    }
     
 }

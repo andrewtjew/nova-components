@@ -41,6 +41,10 @@ public class SqlUtils
         return sb.toString();
     }
     
+    static public long insertAndGetLongKey(Trace parent,Accessor accessor,String table,NameObject...nameObjects) throws Throwable
+    {
+        return insertAndGetLongKey(parent, null,accessor, table, nameObjects);
+    }
     static public long insertAndGetLongKey(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject...nameObjects) throws Throwable
     {
         StringBuilder sb=new StringBuilder();
@@ -62,7 +66,10 @@ public class SqlUtils
         sb.append(')');
         return accessor.executeUpdateAndReturnGeneratedKeys(parent, categoryOverride, sb.toString(),parameters).getBigDecimal(0).longValue();
     }
-
+    static public int insert(Trace parent,Accessor accessor,String table,NameObject...nameObjects) throws Throwable
+    {
+        return insert(parent,null,accessor,table,nameObjects);
+    }
     static public int insert(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject...nameObjects) throws Throwable
     {
         StringBuilder sb=new StringBuilder();
@@ -84,7 +91,90 @@ public class SqlUtils
         sb.append(')');
         return accessor.executeUpdate(parent, categoryOverride, sb.toString(),parameters);
     }
-    
+
+    static public void save(Trace parent,String categoryOverride,Connector connector,String table,NameObject keyObject,NameObject activeStatusObject,Object inactiveStatusValue,NameObject...nameObjects) throws Throwable
+    {
+        try (Accessor accessor=connector.openAccessor(parent))
+        {
+            try (Transaction transaction=new Transaction(accessor, parent))
+            {
+                save(parent,categoryOverride,accessor,table,keyObject,activeStatusObject,inactiveStatusValue,nameObjects);
+                transaction.commit();
+            }
+        }
+    }
+
+    static public void save(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject keyObject,NameObject activeStatusObject,Object inactiveStatusValue,NameObject...nameObjects) throws Throwable
+    {
+        StringBuilder sb=new StringBuilder();
+        sb.append("INSERT INTO ").append(table).append(" (");
+        Object[] parameters=new Object[nameObjects.length+2];
+        sb.append(keyObject.getName());
+        parameters[0]=keyObject.getValue();
+        sb.append(',').append(activeStatusObject.getName());
+        parameters[1]=activeStatusObject.getValue();
+        for (int i=0;i<nameObjects.length;i++)
+        {
+            sb.append(',').append(nameObjects[i].getName());
+            parameters[i+2]=nameObjects[i].getValue();
+        }
+        sb.append(") VALUES(?,?");
+        for (int i=0;i<nameObjects.length;i++)
+        {
+            sb.append(",?");
+        }
+        sb.append(')');
+
+        accessor.executeUpdate(parent,categoryOverride,"UPDATE "+table+" SET "+activeStatusObject.getName()+"=? WHERE "+keyObject.getName()+"=?",
+                inactiveStatusValue,keyObject.getValue());
+        if (accessor.executeUpdate(parent, categoryOverride, sb.toString(),parameters)!=1)
+        {
+            throw new Exception("Unable to save");
+        }
+    }
+
+    static public long saveAndGetLongKey(Trace parent,String categoryOverride,Connector connector,String table,NameObject keyObject,NameObject activeStatusObject,Object inactiveStatusValue,NameObject...nameObjects) throws Throwable
+    {
+        try (Accessor accessor=connector.openAccessor(parent))
+        {
+            try (Transaction transaction=new Transaction(accessor, parent))
+            {
+                long key=saveAndGetLongKey(parent,categoryOverride,accessor,table,keyObject,activeStatusObject,inactiveStatusValue,nameObjects);
+                accessor.commit();
+                return key;
+            }
+        }
+    }
+
+    static public long saveAndGetLongKey(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject keyObject,NameObject activeStatusObject,Object inactiveStatusValue,NameObject...nameObjects) throws Throwable
+    {
+        StringBuilder sb=new StringBuilder();
+        sb.append("INSERT INTO ").append(table).append(" (");
+        Object[] parameters=new Object[nameObjects.length+2];
+        sb.append(keyObject.getName());
+        parameters[0]=keyObject.getValue();
+        sb.append(',').append(activeStatusObject.getName());
+        parameters[1]=activeStatusObject.getValue();
+        for (int i=0;i<nameObjects.length;i++)
+        {
+            sb.append(',').append(nameObjects[i].getName());
+            parameters[i+1]=nameObjects[i].getValue();
+        }
+        sb.append(") VALUES(?,?");
+        for (int i=0;i<nameObjects.length;i++)
+        {
+            sb.append(",?");
+        }
+        sb.append(')');
+
+        try (Transaction transaction=accessor.beginTransaction(parent,"saveAndGetLongKey"))
+        {
+            accessor.executeUpdate(parent,categoryOverride,"UPDATE "+table+" SET "+activeStatusObject.getName()+"=? WHERE "+keyObject.getName()+"=?",
+                    inactiveStatusValue,keyObject.getValue());
+            long key=accessor.executeUpdateAndReturnGeneratedKeys(parent, categoryOverride, sb.toString(),parameters).getBigDecimal(0).longValue();
+            return key;
+        }
+    }
     static public int insertIfNotExist(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject[] keyObjects,NameObject[] additionalObjects) throws Throwable
     {
         StringBuilder sb=new StringBuilder();

@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.nova.core.Utils;
+import org.nova.html.tags.table;
 import org.nova.http.Header;
 import org.nova.json.ObjectMapper;
 import org.nova.logging.Item;
@@ -80,45 +81,10 @@ public class JSONClient
 	{
 	    return new DisruptorTraceContext(parent, this.traceManager, this.logger, this.disruptor, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery,this.endPoint);
 	}
-	
-	public <TYPE> JSONResponse<TYPE> get(Trace parent,String traceCategoryOverride,String pathAndQuery,Class<TYPE> responseContentType) throws Throwable
-	{
-	    try (DisruptorTraceContext context=createDisruptorConext(parent, traceCategoryOverride, pathAndQuery))
-	    {
-            try 
-            {
-    			HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
-                context.addLogItem(new Item("endPoint",this.endPoint));
-                context.addLogItem(new Item("pathAndQuery",pathAndQuery));
-    
-    			if (this.headers!=null)
-    			{
-    				for (Header header:this.headers)
-    				{
-    					get.setHeader(header.getName(),header.getValue());
-    				}
-    			}
-                get.setHeader("Accept",this.contentType);
-                logHeaders(context,get.getAllHeaders());
-    
-                context.beginWait();
-                HttpResponse response=this.client.execute(get);
-                context.endWait();
-    			try
-    			{
-                    return processResponse(response, context,responseContentType);
-    			}
-    			finally
-    			{
-    				response.getEntity().getContent().close();
-    			}
-    		}		
-            catch (Throwable t)
-            {
-                throw context.handleThrowable(t);
-            }
-	    }
-	}
+    public <TYPE> JSONResponse<TYPE> get(Trace parent,String traceCategoryOverride,String pathAndQuery,Class<TYPE> responseContentType) throws Throwable
+    {
+        return get(parent,traceCategoryOverride,pathAndQuery,responseContentType);
+    }	
     private <TYPE> JSONResponse<TYPE> processResponse(HttpResponse response,DisruptorTraceContext context,Class<TYPE> responseContentType) throws Throwable
     {
        String json=processResponse(response, context);
@@ -130,9 +96,54 @@ public class JSONClient
        return new JSONResponse<TYPE>(statusCode,ObjectMapper.read(json, responseContentType));
     }
 
-	
+    public <TYPE> JSONResponse<TYPE> get(Trace parent,String traceCategoryOverride,String pathAndQuery,Class<TYPE> responseContentType,Header...headers) throws Throwable
+    {
+        try (DisruptorTraceContext context=createDisruptorConext(parent, traceCategoryOverride, pathAndQuery))
+        {
+            try 
+            {
+                HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
+                context.addLogItem(new Item("endPoint",this.endPoint));
+                context.addLogItem(new Item("pathAndQuery",pathAndQuery));
+    
+                if (this.headers!=null)
+                {
+                    for (Header header:this.headers)
+                    {
+                        get.setHeader(header.getName(),header.getValue());
+                    }
+                }
+                for (Header header:headers)
+                {
+                    get.setHeader(header.getName(),header.getValue());
+                }
+                get.setHeader("Accept",this.contentType);
+                logHeaders(context,get.getAllHeaders());
+    
+                context.beginWait();
+                HttpResponse response=this.client.execute(get);
+                context.endWait();
+                try
+                {
+                    return processResponse(response, context,responseContentType);
+                }
+                finally
+                {
+                    response.getEntity().getContent().close();
+                }
+            }       
+            catch (Throwable t)
+            {
+                throw context.handleThrowable(t);
+            }
+        }
+    }
 	
     public int get(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Throwable
+    {
+        return get(parent,traceCategoryOverride,pathAndQuery,new Header[0]);
+    }	
+    public int get(Trace parent,String traceCategoryOverride,String pathAndQuery,Header...headers) throws Throwable
     {
         try (DisruptorTraceContext context=new DisruptorTraceContext(parent, this.traceManager, this.logger, this.disruptor, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery,this.endPoint))
         {
@@ -148,6 +159,10 @@ public class JSONClient
                     {
                         get.setHeader(header.getName(),header.getValue());
                     }
+                }
+                for (Header header:headers)
+                {
+                    get.setHeader(header.getName(),header.getValue());
                 }
                 get.setHeader("Accept",this.contentType);
                 logHeaders(context,get.getAllHeaders());
@@ -171,8 +186,11 @@ public class JSONClient
             }
         }
     }
-
-	public int delete(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Throwable
+    public int delete(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Throwable
+    {
+        return delete(parent,traceCategoryOverride,pathAndQuery,new Header[0]);
+    }
+	public int delete(Trace parent,String traceCategoryOverride,String pathAndQuery,Header...headers) throws Throwable
 	{
         try (DisruptorTraceContext context=createDisruptorConext(parent, traceCategoryOverride, pathAndQuery))
         {
@@ -189,6 +207,10 @@ public class JSONClient
     					delete.setHeader(header.getName(),header.getValue());
     				}
     			}
+                for (Header header:headers)
+                {
+                    delete.setHeader(header.getName(),header.getValue());
+                }
                 logHeaders(context,delete.getAllHeaders());
                 
                 context.beginWait();
@@ -210,8 +232,11 @@ public class JSONClient
             }
         }
 	}
-
-	public int put(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Throwable
+    public int put(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Throwable
+    {
+        return put(parent,traceCategoryOverride,pathAndQuery,content,new Header[0]);
+    }
+	public int put(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Header...headers) throws Throwable
 	{
         try (DisruptorTraceContext context=createDisruptorConext(parent, traceCategoryOverride, pathAndQuery))
         {
@@ -234,6 +259,10 @@ public class JSONClient
                     {
                         put.setHeader(header.getName(),header.getValue());
                     }
+                }
+                for (Header header:headers)
+                {
+                    put.setHeader(header.getName(),header.getValue());
                 }
                 put.setHeader("Accept",this.contentType);
                 put.setHeader("Content-Type",this.contentType);
@@ -258,8 +287,13 @@ public class JSONClient
             }
         }
 	}
-
+    
 	public int patch(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Throwable
+    {
+	    return patch(parent,traceCategoryOverride,pathAndQuery,content,new Header[0]);
+    }
+	
+	public int patch(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Header...headers) throws Throwable
 	{
         try (DisruptorTraceContext context=createDisruptorConext(parent, traceCategoryOverride, pathAndQuery))
         {
@@ -282,6 +316,10 @@ public class JSONClient
                     {
                         patch.setHeader(header.getName(),header.getValue());
                     }
+                }
+                for (Header header:headers)
+                {
+                    patch.setHeader(header.getName(),header.getValue());
                 }
                 patch.setHeader("Accept",this.contentType);
                 patch.setHeader("Content-Type",this.patchType);
@@ -307,8 +345,7 @@ public class JSONClient
             }
         }
 	}
-
-	public <TYPE> JSONResponse<TYPE> post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Class<TYPE> responseContentType) throws Throwable
+	public <TYPE> JSONResponse<TYPE> post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Class<TYPE> responseContentType,Header...headers) throws Throwable
 	{
         try (DisruptorTraceContext context=createDisruptorConext(parent, traceCategoryOverride, pathAndQuery))
         {
@@ -331,6 +368,10 @@ public class JSONClient
     					post.setHeader(header.getName(),header.getValue());
     				}
     			}
+                for (Header header:headers)
+                {
+                    post.setHeader(header.getName(),header.getValue());
+                }
     			post.setHeader("Accept",this.contentType);
     			post.setHeader("Content-Type",this.contentType);
                 logHeaders(context,post.getAllHeaders());
@@ -352,6 +393,10 @@ public class JSONClient
     		}
         }
 	}
+    public <TYPE> JSONResponse<TYPE> post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Class<TYPE> responseContentType) throws Throwable
+    {
+        return post(parent,traceCategoryOverride,pathAndQuery,content,responseContentType,new Header[0]);
+    }
     public <TYPE> JSONResponse<TYPE> post(Trace parent,String traceCategoryOverride,String pathAndQuery,Class<TYPE> responseContentType) throws Throwable
     {
         return post(parent,traceCategoryOverride,pathAndQuery,null,responseContentType);
@@ -361,6 +406,10 @@ public class JSONClient
         return post(parent,traceCategoryOverride,pathAndQuery,null);
     }	
     public int post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Throwable
+    {
+        return post(parent,traceCategoryOverride,pathAndQuery,content,new Header[0]);
+    }
+    public int post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Header...headers) throws Throwable
     {
         try (DisruptorTraceContext context=createDisruptorConext(parent, traceCategoryOverride, pathAndQuery))
         {
@@ -382,6 +431,10 @@ public class JSONClient
                     {
                         post.setHeader(header.getName(),header.getValue());
                     }
+                }
+                for (Header header:headers)
+                {
+                    post.setHeader(header.getName(),header.getValue());
                 }
                 post.setHeader("Accept",this.contentType);
                 post.setHeader("Content-Type",this.contentType);

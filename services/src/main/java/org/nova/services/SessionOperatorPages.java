@@ -127,6 +127,11 @@ public class SessionOperatorPages<SESSION extends Session>
         }
         */
         SESSION session= this.sessionManager.getSessionByToken(token);
+        if (session==null)
+        {
+            page.content().addInner("Sesson not found");
+            return page;
+        }
         NameValueList list=page.content().returnAddInner(new NameValueList());
         for (NameObject item:session.getDisplayItems())
         {

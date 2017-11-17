@@ -2,18 +2,29 @@ package org.nova.html.properties;
 
 public class Size
 {
-    final private String size;
-    public Size(int size,unit unit)
+    final unit unit;
+    final double value;
+    public Size(int value,unit unit)
     {
-        this.size=size+unit.toString();
+        this.value=value;
+        this.unit=unit;
     }
-    public Size(double size,unit unit)
+    public Size(double value,unit unit)
     {
-        this.size=size+unit.toString();
+        this.value=value;
+        this.unit=unit;
     }
     @Override
     public String toString()
     {
-        return this.size;
+        return this.value+this.unit.toString();
+    }
+    public double value()
+    {
+        return value;
+    }
+    public unit unit()
+    {
+        return unit;
     }
 }

@@ -48,7 +48,6 @@ public class Packet
     {
         return size;
     }
-    
     /*
     public Object[] get()
     {
@@ -62,5 +61,14 @@ public class Packet
             throw new ArrayIndexOutOfBoundsException(index);
         }
         return this.array[index];
+    }
+    public Object getSegmentObject(int index)
+    {
+        if (size!=-1)
+        {
+            throw new ArrayIndexOutOfBoundsException(index);
+        }
+        return this.array[index];
+        
     }
 }

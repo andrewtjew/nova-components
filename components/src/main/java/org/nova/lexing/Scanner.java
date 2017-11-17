@@ -1,12 +1,14 @@
 package org.nova.lexing;
 
+import javax.swing.text.html.HTMLDocument.HTMLReader.CharacterAction;
+
 import org.nova.lexing.Lexeme;
 import org.nova.test.Testing;
 
-public class Lexer
+public class Scanner
 {
     protected final Source source;
-    public Lexer(Source source)
+    public Scanner(Source source)
     {
         this.source = source;
     }
@@ -55,13 +57,13 @@ public class Lexer
     }
     public Lexeme produceJSONString() throws Throwable
     {
-        return prduceQuotedEscapeString('"');
+        return produceQuotedEscapeString('"');
     }
     public Lexeme produceJavaString() throws Throwable
     {
-        return prduceQuotedEscapeString('"');
+        return produceQuotedEscapeString('"');
     }
-    public Lexeme prduceQuotedEscapeString(char endCharacter) throws Throwable
+    public Lexeme produceQuotedEscapeString(char endCharacter) throws Throwable
     {
         StringBuilder sb = new StringBuilder();
         for (char c=this.source.next();c!=0;c=this.source.next())
@@ -272,7 +274,6 @@ public class Lexer
     public Lexeme expectPunctuator(char punctuator) throws Throwable
     {
         char c=skipWhiteSpaceAndBegin();
-        this.source.end(0);
         if (c==punctuator)
         {
             Snippet snippet=this.source.endAndGetSnippet(0);
@@ -294,7 +295,37 @@ public class Lexer
         Snippet snippet=this.source.endAndGetSnippet(1);
         return new Lexeme(Token.TEXT, snippet.getTarget(),snippet);
     }
-    
+/*
+    public Lexeme expectWord(String word) throws Throwable
+    {
+        skipWhiteSpaceAndBegin();
+        Lexeme lexeme=produceWord();
+        if (word.equals(lexeme.getValue()))
+        {
+            return lexeme;
+        }
+        return new Lexeme(Token.ERROR,lexeme.getValue(),lexeme.getSnippet());
+    }
+    public Lexeme expectWordIgnoreCase(String word) throws Throwable
+    {
+        skipWhiteSpaceAndBegin();
+        Lexeme lexeme=produceWord();
+        if (word.equalsIgnoreCase(lexeme.getValue()))
+        {
+            return lexeme;
+        }
+        return new Lexeme(Token.ERROR,lexeme.getValue(),lexeme.getSnippet());
+    }
+*/
+    public Lexeme expectWord() throws Throwable
+    {
+        char c=skipWhiteSpaceAndBegin();
+        if (Character.isLetter(c)==false)
+        {
+            return new Lexeme(Token.ERROR,null,end(1));
+        }
+        return produceWord();
+    }
     
     public Lexeme produceWord() throws Throwable
     {
@@ -480,8 +511,11 @@ public class Lexer
         {
             if (Character.isWhitespace(c)==false)
             {
-                this.source.begin(1);
-                return c;
+                if (c!=65279) //BOM or zero width space
+                {
+                    this.source.begin(1);
+                    return c;
+                }
             }
         }
         return 0;

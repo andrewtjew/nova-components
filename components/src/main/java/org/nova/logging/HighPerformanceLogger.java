@@ -129,4 +129,13 @@ public class HighPerformanceLogger extends SourceQueue<LogEntry>
     {
         return this.tapper;
     }
+    public void stop()
+    {
+        super.stop();
+        for (ThreadWorkerQueue queue:this.queues)
+        {
+            queue.stop();
+        }
+         
+    }
 }

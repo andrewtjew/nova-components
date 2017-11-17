@@ -45,4 +45,8 @@ public class input_tel extends InputElement<input_tel>
         }
         return this;
     }
+    public input_tel value(String text) //button, reset, submit, text, password, hidden, checkbox, radio, image
+    {
+        return attr("value",text);
+    }
 }

@@ -9,7 +9,7 @@ public class form_post extends FormElement<form_post>
     public form_post()
     {
         super();
-        attr("form_post",method.get);    
+        attr("method",method.post);    
     }
     public form_post enctype(enctype enctype) 
     {

@@ -20,7 +20,7 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
         this.sb.append("<"+tag);
     }
     @SuppressWarnings("unchecked")
-    protected ELEMENT attr(String name,Object value)
+    public ELEMENT attr(String name,Object value)
     {
         if (value!=null)
         {
@@ -29,7 +29,7 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
         return (ELEMENT) this;
     }
     @SuppressWarnings("unchecked")
-    protected ELEMENT attr(String name)
+    public ELEMENT attr(String name)
     {
         sb.append(' ').append(name);
         return (ELEMENT) this;

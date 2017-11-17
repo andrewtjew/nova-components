@@ -21,6 +21,7 @@ public class SessionManager<SESSION extends Session>
     final private HashMap<String,SESSION> userSessions;
     final private LockManager<String> lockManager;
     final private long waitForLockTimeoutMs;
+    final private long sessionTimeoutMs;
     final private Logger logger;
     
     @Description("Counts how many times onClose throws exceptions. The exceptions are in the logs.")
@@ -37,6 +38,7 @@ public class SessionManager<SESSION extends Session>
     
     public SessionManager(TraceManager traceManager,Logger logger,TimerScheduler timerScheduler,long waitForLockTimeoutMs,long sessionTimeoutMs,int generations) throws Exception
     {
+        this.sessionTimeoutMs=sessionTimeoutMs;
         this.tokenSessions=new ExpireMap<>(this.getClass().getSimpleName(), timerScheduler, sessionTimeoutMs, generations,(Trace parent,String key,SESSION session)->{timeoutSession(parent,session);});
         this.logger=logger;
         this.userSessions=new HashMap<>();
@@ -48,9 +50,9 @@ public class SessionManager<SESSION extends Session>
         this.removeSessionMeter=new CountMeter();
         this.timeoutSessionMeter=new CountMeter();
     }
-    public void addSession(Trace trace,SESSION session)
+    public void addSession(Trace parent,SESSION session)
     {
-        removeSessionByUser(trace, session.getUser());
+        removeSessionByUser(parent, session.getUser());
         synchronized(this)
         {
             this.tokenSessions.put(session.getToken(),session);
@@ -118,7 +120,7 @@ public class SessionManager<SESSION extends Session>
             return this.userSessions.values();
         }
     }
-    Lock<String> waitForLock(Trace parent,String user)
+    public Lock<String> waitForLock(Trace parent,String user)
     {
         return lockManager.waitForLock(parent,user,this.waitForLockTimeoutMs);
     }
@@ -127,5 +129,9 @@ public class SessionManager<SESSION extends Session>
     {
         this.timeoutSessionMeter.increment();
         removeSession(trace,session);
+    }
+    public long getSessionTimeoutMs()
+    {
+        return this.sessionTimeoutMs;
     }
 }

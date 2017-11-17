@@ -171,7 +171,7 @@ public class FilterChain
 				}
 				catch (Throwable t)
 				{
-					throw new AbnormalException(Abnormal.BAD_QUERY,t);
+					throw new AbnormalException(Abnormal.BAD_QUERY,parameterInfo.getName(),t);
 				}
 				break;
 			case CONTEXT:

@@ -17,7 +17,7 @@ public abstract class SessionService<SESSION extends Session> extends ServerAppl
     public SessionService(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer) throws Throwable
     {
         super(name,coreEnvironment,operatorServer);
-        long lockTimeoutMs=this.getConfiguration().getLongValue("SessionService.session.lockTimeout", 1*1000);
+        long lockTimeoutMs=this.getConfiguration().getLongValue("SessionService.session.lockTimeout", 10*1000);
         long timeoutMs=this.getConfiguration().getLongValue("SessionService.session.timeout", 30*60*1000);
         int generations=this.getConfiguration().getIntegerValue("SessionService.session.timeoutGenerations", 10);
         this.sessionManager=new SessionManager<SESSION>(this.getTraceManager(),this.getLogger("SessionService"),this.getTimerScheduler(), lockTimeoutMs,timeoutMs, generations);

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 import org.nova.core.Utils;
 import org.nova.lexing.Lexeme;
-import org.nova.lexing.Lexer;
+import org.nova.lexing.Scanner;
 import org.nova.lexing.LineAndColumn;
 import org.nova.lexing.TextSource;
 
@@ -30,7 +30,7 @@ public class ConfigurationReader
 	{
 	    if (lexeme.isError())
 	    {
-            LineAndColumn lc=new LineAndColumn(lexeme.getSnippet().getContext(), lexeme.getSnippet().getAbsolutePosition());
+            LineAndColumn lc=new LineAndColumn(lexeme.getSnippet().getBuffer(), lexeme.getSnippet().getTargetAbsolutePosition());
             throw new Exception("Error at " + this.fileName + "(" + (lc.getLine()+1)+":"+(lc.getColumn()+1)+")");
 	    }
 	}
@@ -38,30 +38,34 @@ public class ConfigurationReader
 	{
 	    String text=Utils.readTextFile(this.fileName);
 	    TextSource source=new TextSource(text);
-	    Lexer lexer=new Lexer(source);
-	    lexer.skipWhiteSpace();
+	    Scanner scanner=new Scanner(source);
+	    scanner.skipWhiteSpace();
 	    String description=null;
 		for (;;)
 		{
-		    char character=lexer.skipWhiteSpaceAndBegin();
+		    char character=scanner.skipWhiteSpaceAndBegin();
 			if (character==0)
 			{
 				return;
 			}
 			if (character=='#')
 			{
-			    Lexeme lexeme=lexer.produceTerminatedText('\r','\n');
+			    Lexeme lexeme=scanner.produceTerminatedText('\r','\n');
 			    checkError(lexeme);
 			    description=lexeme.getValue().substring(1);
 			}
+            if (character==';')
+            {
+                continue;
+            }
 			else if (character=='/')
             {
-                Lexeme lexeme=lexer.produceSlashSlashComment();
+                Lexeme lexeme=scanner.produceSlashSlashComment();
                 checkError(lexeme);
             }
 			else if (character=='@')
             {
-                Lexeme lexeme=lexer.produceTerminatedText('\r','\n');
+                Lexeme lexeme=scanner.produceTerminatedText('\r','\n');
                 String file=lexeme.getValue().substring(1).trim();
                 int index=this.fileName.lastIndexOf('/');
                 if (index<0)
@@ -76,27 +80,27 @@ public class ConfigurationReader
             }
 			else
 			{
-    			Lexeme lexeme=lexer.produceTerminatedText('=');
+    			Lexeme lexeme=scanner.produceTerminatedText('=');
                 checkError(lexeme);
     			String name=lexeme.getValue().trim();
     
-    			lexeme=lexer.expectPunctuator('=');
+    			lexeme=scanner.expectPunctuator('=');
                 checkError(lexeme);
     
-                character=lexer.skipWhiteSpaceAndBegin();
+                character=scanner.skipWhiteSpaceAndBegin();
                 if (character == '{')
                 {
-                    lexeme=lexer.produceEnclosedJSONText('{', '}');
+                    lexeme=scanner.produceEnclosedJSONText('{', '}');
                 }
                 else if (character == '[')
                 {
-                    lexeme=lexer.produceEnclosedJSONText('[', ']');
+                    lexeme=scanner.produceEnclosedJSONText('[', ']');
                 }
                 else
                 {
-                    lexeme=lexer.produceTerminatedTextAndSkipTerminator('\r','\n',';');
+                    lexeme=scanner.produceTerminatedTextAndSkipTerminator('\r','\n',';');
                 }
-                int line=new LineAndColumn(text,lexeme.getSnippet().getAbsolutePosition()).getLine()+1;
+                int line=new LineAndColumn(text,lexeme.getSnippet().getTargetAbsolutePosition()).getLine()+1;
     			this.configuration.add(new ConfigurationItem(name, lexeme.getValue().trim(), ConfigurationSource.FILE,fileName+"("+line+")", description));
     			description=null;
 			}

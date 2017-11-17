@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.nova.concurrent.Synchronization;
+import org.nova.logging.ThrowablesLog;
 import org.nova.metrics.CountMeter;
 import org.nova.metrics.LevelMeter;
 import org.nova.test.Testing;
@@ -20,18 +21,19 @@ public class ThreadWorkerQueue extends Node
     final private int stallSizeThreshold;
     final private Node receiver;
     final private Object lock;
+    final private ThrowablesLog throwablesLog;
     private Thread thread;
     private ArrayList<Packet> queue;
-    private Throwable throwable;
     private boolean stop;
 
     final private LevelMeter threadInUseMeter;
     final private int id;
-
+    
 
 	
 	public ThreadWorkerQueue(Node receiver,long stallWait,int stallSizeThreshold,int maxQueueSize,int id,CountMeter droppedMeter,CountMeter stalledMeter,LevelMeter threadInUseMeter,LevelMeter waitingMeter)
 	{
+	    this.throwablesLog=new ThrowablesLog();
 		this.droppedMeter=droppedMeter;
 		this.stalledMeter=stalledMeter;
 		this.threadInUseMeter=threadInUseMeter;
@@ -60,18 +62,27 @@ public class ThreadWorkerQueue extends Node
 			}
 		}
 	}
-	public void stop() throws InterruptedException
+	public void stop() 
 	{
+	    Thread thread;
 		synchronized(this.lock)
 		{
-			if (this.thread!=null)
-			{
-				this.stop=true;
-				this.lock.notify();
-				this.thread.join();
-				this.thread=null;
-			}
+		    if (this.thread==null)
+		    {
+		        return;
+		    }
+		    thread=this.thread;
+			this.stop=true;
+			this.lock.notify();
+			this.thread=null;
 		}
+	    try
+        {
+            thread.join();
+        }
+        catch (InterruptedException e)
+        {
+        }
 	}
 
     public void flush()
@@ -90,14 +101,14 @@ public class ThreadWorkerQueue extends Node
 	private void main() 
 	{
         this.threadInUseMeter.increment();
-		try
-		{
-		    if (TESTING)
-		    {
-		        Testing.oprintln("ThreadWorkerQueue="+this.id+":enter");
-		    }
-			for (;;)
-			{
+        for (;;)
+        {
+    		try
+    		{
+    		    if (TESTING)
+    		    {
+    		        Testing.oprintln("ThreadWorkerQueue="+this.id+":enter");
+    		    }
 	            ArrayList<Packet> old=null;
 				synchronized (this.lock)
 				{
@@ -114,6 +125,7 @@ public class ThreadWorkerQueue extends Node
                     }
 					if (this.stop)
 					{
+		                this.threadInUseMeter.decrement();
 						return;
 					}
 					old=this.queue;
@@ -128,9 +140,9 @@ public class ThreadWorkerQueue extends Node
                         {
                             if (TESTING)
                             {
-                                Testing.oprintln("ThreadWorkerQueue="+this.id+":receiver.beginSegment="+packet.get(0));
+                                Testing.oprintln("ThreadWorkerQueue="+this.id+":receiver.beginSegment="+packet.getSegmentObject(0));
                             }
-                            this.receiver.beginGroup((long)packet.get(0));
+                            this.receiver.beginGroup((long)packet.getSegmentObject(0));
                         }
                         else if (size==Packet.END_SEGMENT)
                         {
@@ -156,26 +168,16 @@ public class ThreadWorkerQueue extends Node
                     }
 			    }
 			}
-		}
-		catch (Throwable t)
-		{
-			synchronized (this.lock)
-			{
-				this.throwable=t;
-			}			
-		}
-		finally
-		{
-		    this.threadInUseMeter.decrement();
-		}
+    		catch (Throwable t)
+    		{
+  			    this.throwablesLog.log(t);
+    		}
+        }
 	}
 	
-	public Throwable getThrowable()
+	public ThrowablesLog getThrowablesLog()
 	{
-        synchronized (this.lock)
-        {
-            return this.throwable;
-        }           
+        return this.throwablesLog;
 	}
 
     @Override

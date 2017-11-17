@@ -23,7 +23,7 @@ public abstract class Session
         this.lastAccess=this.created=System.currentTimeMillis();
         this.accessRateMeter=new RateMeter();
     }
-    void update(Lock<String> lock)
+    public void update(Lock<String> lock)
     {
         synchronized(this)
         {

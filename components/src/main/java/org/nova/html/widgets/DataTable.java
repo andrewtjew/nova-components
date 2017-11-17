@@ -12,6 +12,8 @@ import org.nova.html.tags.link;
 import org.nova.html.tags.script;
 import org.nova.json.ObjectMapper;
 
+//!!! Requires jquery
+
 public class DataTable extends Table
 {
     static class Objects extends Element
@@ -37,6 +39,7 @@ public class DataTable extends Table
                 StringBuilder sb=new StringBuilder();
                 sb.append("$(document).ready(function(){$('#").append(this.id).append("').DataTable(");
                 boolean commaNeeded=false;
+                sb.append('{');
                 for (NameObject item:this.list)
                 {
                     if (commaNeeded)
@@ -47,8 +50,58 @@ public class DataTable extends Table
                     {
                         commaNeeded=true;
                     }
-                    sb.append("{'"+item.getName()+"':"+ObjectMapper.write(item.getValue())+"}");
+                    sb.append('\''+item.getName()+"':");
+                    Object value=item.getValue();
+                    if (value==null)
+                    {
+                        sb.append("null");
+                        continue;
+                    }
+                    Class<?> type=value.getClass();
+                    if (type==Boolean.class)
+                    {
+                        sb.append(value);
+                        
+                    }
+                    else if (type==Float.class)
+                    {
+                        sb.append(value);
+                        
+                    }
+                    else if (type==Double.class)
+                    {
+                        sb.append(value);
+                        
+                    }
+                    else if (type==Short.class)
+                    {
+                        sb.append(value);
+                        
+                    }
+                    else if (type==Integer.class)
+                    {
+                        sb.append(value);
+                        
+                    }
+                    else if (type==Long.class)
+                    {
+                        sb.append(value);
+                        
+                    }
+                    else if (type==String.class)
+                    {
+                        //Properly do this the JSON way
+                        sb.append('"');
+                        sb.append(value);
+                        sb.append('"');
+                    }
+                    else
+                    {
+//                        sb.append("{'"+item.getName()+"':"+ObjectMapper.write(item.getValue())+"}");
+                        sb.append(ObjectMapper.write(value));
+                    }
                 }
+                sb.append('}');
                 /*
                 if ((this.lengthMenu!=null)&&(this.lengthMenu.length>0))
                 {
@@ -138,12 +191,66 @@ public class DataTable extends Table
         }
         return lengthMenu(lengths,labels);
     }
+
+    public DataTable order(DataTableColumnOrder...orders)
+    {
+        Object[][] objects=new Object[orders.length][];
+        for (int i=0;i<orders.length;i++)
+        {
+            DataTableColumnOrder order=orders[i];
+        
+            objects[i]=new Object[]{order.column,order};
+        }
+        this.objects.add("order", objects);
+        return this;
+    }
+
+    static class Orderable
+    {
+        boolean orderable=false;
+        int targets;
+    }
+    
+    public DataTable disableOrderables(int...columns)
+    {
+        Orderable[] orderables=new Orderable[columns.length];
+        for (int i=0;i<columns.length;i++)
+        {
+            Orderable orderable=new Orderable();
+            orderable.targets=columns[i];
+            orderables[i]=orderable;
+        }
+        this.objects.add("columnDefs", orderables);
+        return this;
+    }
+    
     
     public DataTable lengthMenu(int[] lengths,String[] labels)
     {
         this.objects.add("lengthMenu", new Object[]{lengths,labels});
         return this;
     }
+    public DataTable paginate(boolean on)
+    {
+        this.objects.add("bPaginate",on);
+        return this;
+    }
+    public DataTable filter(boolean on)
+    {
+        this.objects.add("bFilter",on);
+        return this;
+    }
+    public DataTable info(boolean on)
+    {
+        this.objects.add("bInfo",on);
+        return this;
+    }
+    public DataTable sort(boolean on)
+    {
+        this.objects.add("bSort",on);
+        return this;
+    }
+
     public DataTable addObject(String name,Object object)
     {
         this.objects.add(name, object);

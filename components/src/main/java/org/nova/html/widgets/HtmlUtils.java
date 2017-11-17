@@ -29,12 +29,12 @@ public class HtmlUtils
         page.head().addInner(new meta().http_equiv(http_equiv.refresh).content("0;URL='"+url+"'"));
         return page;
     }
-    public static String confirmPOST(String title,String text,PathAndQueryBuilder post,Object content,PathAndQueryBuilder success) throws Exception
+    public static String confirmPOST(String title,String text,PathAndQueryBuilder post,Object content,PathAndQueryBuilder success) throws Throwable
     {
         String data=content==null?null:ObjectMapper.write(content);
         return callScriptFunction("confirmPOST",title,text,post.toString(),data,success.toString());
     }
-    public static String confirmAndExecuteOnServer(String title,String text,String executeUrl,Object content) throws Exception
+    public static String confirmAndExecuteOnServer(String title,String text,String executeUrl,Object content) throws Throwable
     {
         String data=content==null?null:ObjectMapper.write(content);
         StringBuilder sb=new StringBuilder("confirmAndExecuteOnServer(");
@@ -72,7 +72,7 @@ public class HtmlUtils
         }
         return sb.toString();
     }
-    public static String confirmAndExecuteOnServer(String title,String text,String executeUrl) throws Exception
+    public static String confirmAndExecuteOnServer(String title,String text,String executeUrl) throws Throwable
     {
         return confirmAndExecuteOnServer(title, text, executeUrl,null);
     }

@@ -6,14 +6,11 @@ public enum Token
     PUNCTUATOR,
     TERMINATOR,
     SEPERATOR,
-//    START,
-//    NONE,
-    
     TEXT, //Any text that is not string, eg, keywords, delimited text, etc  
     STRING, 
     CHARACTER,
     NUMBER,
 	//specials
     ERROR,
-    END,
+//    END,
 }

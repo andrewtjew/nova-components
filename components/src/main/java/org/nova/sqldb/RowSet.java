@@ -20,7 +20,11 @@ public class RowSet
 		this.mappings=new HashMap<>();
 		for (int i=0;i<columnNames.length;i++)
 		{
-		    this.mappings.put(columnNames[i], i);
+		    Integer old=this.mappings.put(columnNames[i], i);
+		    if (old!=null)
+		    {
+		        this.mappings.put(columnNames[i], old);
+		    }
 		}
 		this.rows=new Row[list.size()];
 		for (int i=0;i<this.rows.length;i++)

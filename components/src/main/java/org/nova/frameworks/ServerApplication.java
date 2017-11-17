@@ -12,6 +12,7 @@ import org.eclipse.jetty.server.Server;
 import org.nova.collections.FileCache;
 import org.nova.collections.FileCacheConfiguration;
 import org.nova.concurrent.FutureScheduler;
+import org.nova.concurrent.Synchronization;
 import org.nova.concurrent.TimerScheduler;
 import org.nova.configuration.Configuration;
 import org.nova.core.Utils;
@@ -54,9 +55,8 @@ import org.nova.tracing.TraceManager;
 
 import com.nova.disrupt.DisruptorManager;
 
-public abstract class ServerApplication
+public abstract class ServerApplication extends CoreEnvironmentApplication
 {
-    final private CoreEnvironment coreEnvironment;
 	final private HttpServer publicServer;
 	final private HttpServer privateServer;
 	final private HttpServer operatorServer;
@@ -66,9 +66,7 @@ public abstract class ServerApplication
 	final private TypeMappings typeMappings;
 	final private TemplateManager operationTemplateManager;
 	final private DisruptorManager disruptorManager;
-	final private Vault vault;
 	private long startTime;
-	final private String name;
 	final private MenuBar menuBar;
 	final private String hostName;
 	private Template template;
@@ -77,9 +75,9 @@ public abstract class ServerApplication
 	
 	public ServerApplication(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer) throws Throwable 
 	{
-		this.name=name;
-		this.coreEnvironment=coreEnvironment;
-		this.hostName=Utils.getLocalHostName();
+	    super(name,coreEnvironment);
+
+	    this.hostName=Utils.getLocalHostName();
 		this.operatorServer=operatorServer;
 		
 		Configuration configuration=coreEnvironment.getConfiguration();
@@ -93,49 +91,6 @@ public abstract class ServerApplication
         this.test=configuration.getBooleanValue("System.test",false);
         this.disruptorManager=new DisruptorManager();
 
-        //Setting up the vault
-        String secureVaultFile=configuration.getValue("System.vault.secureVaultFile",null);
-        if (secureVaultFile!=null)
-        {
-            String password=null;
-            String passwordFile=configuration.getValue("Application.commentFile",null);
-            if (passwordFile!=null)
-            {
-                password=Utils.readTextFile(passwordFile).trim();
-                /*
-                if (new File(passwordFile).delete()==false)
-                {
-                    System.err.println("Unable to delete password file.");
-                    System.exit(1);
-                }
-                */
-            }
-            else 
-            {
-                if (System.console()==null)
-                {
-                    System.err.println("No console available to enter vault password");
-                    System.exit(1);
-                }
-                password=new String(System.console().readPassword("Enter vault password:"));
-            }
-            String salt=configuration.getValue("System.vault.salt");
-            this.vault=new SecureFileVault(password, salt, secureVaultFile);
-        }
-        else
-        {
-            String unsecureVaultFile=configuration.getValue("System.vault.unsecureVaultFile");
-            if (unsecureVaultFile!=null)
-            {
-                this.vault=new UnsecureFileVault(unsecureVaultFile);
-                this.getLogger().log(Level.CRITICAL,"Using UnsecureVault");
-            }
-            else
-            {
-                this.vault=new UnsecureVault();
-            }
-            printUnsecureVaultWarning(System.err);
-        }
         //Do not keep these vault information in configuration.
         configuration.remove("System.vault.secureVaultFile");
         configuration.remove("System.vault.passwordFile");
@@ -193,9 +148,10 @@ public abstract class ServerApplication
                 {
                     publicHttpsPort=operatorPort+2;
                 }
-                String serverCertificatePassword=this.vault.get("KeyStore.serverCertificate.password");
-                String clientCertificatePassword=this.vault.get("KeyStore.clientCertificate.password");
-                String keyManagerPassword=this.vault.get("KeyManager.password");
+                Vault vault=coreEnvironment.getVault();
+                String serverCertificatePassword=vault.get("KeyStore.serverCertificate.password");
+                String clientCertificatePassword=vault.get("KeyStore.clientCertificate.password");
+                String keyManagerPassword=vault.get("KeyManager.password");
 
                 String serverCertificateKeyStorePath=configuration.getValue("HttpServer.serverCertificate.keyStorePath",null);
                 String clientCertificateKeyStorePath=configuration.getValue("HttpServer.clientCertificate.keyStorePath",null);
@@ -248,15 +204,7 @@ public abstract class ServerApplication
         this.operatorServer.registerHandlers(new ServerApplicationPages(this));
         
         //Build template and start operator server so we can monitor the rest of the startup.
-        this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName); 
-	}
-	
-	private void printUnsecureVaultWarning(PrintStream stream)
-	{
-        stream.println("**************************************");
-        stream.println("**   WARNING: Using UnsecureVault   **");
-        stream.println("**   DO NOT USE IN PRODUCTION!!!!   **");
-        stream.println("**************************************");
+        this.template=OperatorPage.buildTemplate(this.menuBar,this.getName(),this.hostName); 
 	}
 	
 	private void startServer(HttpServer server) throws Throwable
@@ -291,6 +239,36 @@ public abstract class ServerApplication
         try (Trace trace=new Trace(this.getTraceManager(),"postStart"))
         {
             postStart(trace);
+        }
+	}
+	
+	static enum Status
+	{
+	    RUNNING,
+	    STOPPING,
+	    STOPPED,
+	}
+	
+	final private Object runLock=new Object();
+	private Status status;
+	
+	public void run(Trace parent)
+	{
+        synchronized (runLock)
+        {
+            Synchronization.waitForNoThrow(parent,this.runLock, ()->{return this.status!=Status.RUNNING;});
+            this.status=Status.STOPPED;
+            this.runLock.notify();
+        }
+	}
+	
+	public void stop()
+	{
+	    synchronized(this.runLock)
+        {
+	        this.status=Status.STOPPING;
+	        this.runLock.notify();
+	        Synchronization.waitForNoThrow(this.runLock, ()->{return this.status==Status.STOPPING;});
         }
 	}
 
@@ -353,7 +331,7 @@ public abstract class ServerApplication
 	
 	public Vault getVault()
 	{
-	    return this.vault;
+	    return this.getCoreEnvironment().getVault();
 	}
 	
     public MenuBar getMenuBar()
@@ -363,7 +341,7 @@ public abstract class ServerApplication
 
     public void buildOperatorPageTemplate() throws Throwable
     {
-        this.template=OperatorPage.buildTemplate(this.menuBar,this.name,this.hostName); 
+        this.template=OperatorPage.buildTemplate(this.menuBar,this.getName(),this.hostName); 
     }
     
     
@@ -371,7 +349,7 @@ public abstract class ServerApplication
     {
         if (this.test)
         {
-            Template template=new Template(OperatorPage.buildTemplate(this.menuBar, this.name, this.hostName));
+            Template template=new Template(OperatorPage.buildTemplate(this.menuBar, this.getName(), this.hostName));
             template.fill("title", title);
             template.fill("now", Utils.nowToLocalDateTimeString());
             return new OperatorPage(template);
@@ -386,63 +364,11 @@ public abstract class ServerApplication
         }
     }
     
-    public MeterManager getMeterManager()
-    {
-        return this.coreEnvironment.getMeterManager();
-    }
-
-    public FutureScheduler getFutureScheduler()
-    {
-        return this.coreEnvironment.getFutureScheduler();
-    }
-
-    public TraceManager getTraceManager()
-    {
-        return this.coreEnvironment.getTraceManager();
-    }
-
-    public Configuration getConfiguration()
-    {
-        return this.coreEnvironment.getConfiguration();
-    }
-
-    public TimerScheduler getTimerScheduler()
-    {
-        return this.coreEnvironment.getTimerScheduler();
-    }
-    public Logger getLogger(String category) throws Throwable
-    {
-        return this.coreEnvironment.getLogger(category);
-    }
-    public Logger getLogger() 
-    {
-        return this.coreEnvironment.getLogger();
-    }
-    public SourceQueue<LogEntry> getLogQueue()
-    {
-        return this.coreEnvironment.getLogQueue();
-    }
-    public CoreEnvironment getCoreEnvironment()
-    {
-        return this.coreEnvironment;
-    }
-    public StatusBoard getStatusBoard()
-    {
-        return this.coreEnvironment.getStatusBoard();
-    }
-	public String getName()
-	{
-	    return this.name;
-	}
-	public boolean isTest()
-	{
-	    return this.test;
-	}
-    public LogDirectoryManager getLogDirectoryManager()
-    {
-        return this.coreEnvironment.getLogDirectoryManager();
-    }
     
+    public boolean isTest()
+    {
+        return this.test;
+    }
     
     
 }

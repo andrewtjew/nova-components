@@ -21,17 +21,17 @@ public class TextSource extends Source
             return this.text.substring(this.start,this.end);
         }
         @Override
-        public String getContext()
+        public String getBuffer()
         {
             return this.text;
         }
         @Override
-        public int getContextPosition()
+        public int getTargetBufferPosition()
         {
             return this.start;
         }
         @Override
-        public int getAbsolutePosition()
+        public int getTargetAbsolutePosition()
         {
             return this.start;
         } 

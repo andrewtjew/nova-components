@@ -3,6 +3,7 @@ package org.nova.collections;
 import java.util.HashMap;
 
 import org.nova.annotations.Description;
+import org.nova.core.Utils;
 import org.nova.metrics.CountMeter;
 import org.nova.tracing.Trace;
 
@@ -113,6 +114,9 @@ abstract public class ContentCache<KEY,VALUE>
 				remove(key);
 			}
 		}
+//		StackTraceElement[] stack=Thread.currentThread().getStackTrace();
+//		System.out.println(Utils.toString(stack,2));
+//		System.out.println("Content miss:"+key);
 		this.misses.increment();
 		return preload(parent,key);
 	}

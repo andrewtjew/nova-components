@@ -14,7 +14,9 @@ public class TimerTask
 		FIXED,
 		FREE,
 		MINUTE,
-		HOUR,
+        HOUR,
+        HALF_HOUR,
+        QUARTER_HOUR,
 		DAY,
 		WEEK,
 		MONTH,
@@ -188,6 +190,28 @@ public class TimerTask
            LocalDateTime now=LocalDateTime.now();
            long currentTimeMillis=System.currentTimeMillis();
            LocalDateTime next=now.minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusHours(1);
+           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
+           this.due=currentTimeMillis+millis+this.offset;
+        }
+           break;
+           
+        case HALF_HOUR:
+        {
+           LocalDateTime now=LocalDateTime.now();
+           long currentTimeMillis=System.currentTimeMillis();
+           int add=(now.getMinute()/30)*30+30;
+           LocalDateTime next=now.minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusMinutes(add);
+           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
+           this.due=currentTimeMillis+millis+this.offset;
+        }
+           break;
+
+        case QUARTER_HOUR:
+        {
+           LocalDateTime now=LocalDateTime.now();
+           long currentTimeMillis=System.currentTimeMillis();
+           int add=(now.getMinute()/15)*15+15;
+           LocalDateTime next=now.minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusMinutes(add);
            long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
            this.due=currentTimeMillis+millis+this.offset;
         }

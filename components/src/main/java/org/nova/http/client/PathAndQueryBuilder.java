@@ -2,6 +2,8 @@ package org.nova.http.client;
 
 import java.net.URLEncoder;
 
+import org.nova.json.ObjectMapper;
+
 public class PathAndQueryBuilder
 {
 	private StringBuilder sb;
@@ -59,6 +61,10 @@ public class PathAndQueryBuilder
 		this.sb.append(key).append('=').append(value);
 		return this;
 	}
+    public PathAndQueryBuilder addJSONQuery(String key,Object value) throws Throwable
+    {
+        return addQuery(key,ObjectMapper.write(value));
+    }
 	public PathAndQueryBuilder addQuery(String key,int value) throws Exception
 	{
         if (this.separator=='#')

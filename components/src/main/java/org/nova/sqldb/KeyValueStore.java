@@ -36,7 +36,7 @@ public class KeyValueStore
         }
     }    
 
-    public void write(Trace parent,Accessor accessor,String key,String value) throws Throwable
+    private void write(Trace parent,Accessor accessor,String key,String value) throws Throwable
     {
         int updated=0;
         if ((key!=null)&&(key.length()>this.maxKeyLength))
@@ -48,16 +48,10 @@ public class KeyValueStore
         {
             throw new Exception("value length exceeds maximum. maxValueLength="+this.maxValueLength+", value length="+value.length());
         }
-        try
+        updated=accessor.executeUpdate(parent, null, update,value,key);
+        if (updated==0)
         {
             updated=accessor.executeUpdate(parent, null, insert, key,value);
-        }
-        catch (Throwable t)
-        {
-        }
-        if (updated!=1)
-        {
-            updated=accessor.executeUpdate(parent, null, update,value,key);
         }
         if (updated!=1)
         {
@@ -79,38 +73,23 @@ public class KeyValueStore
     {
         try (Accessor accessor=this.connector.openAccessor(parent, "KeyValueStore.read"))
         {
-            return read(parent,accessor,key);
+            RowSet rowSet=accessor.executeQuery(parent, null, select,key);
+            if (rowSet.size()==1)
+            {
+                return rowSet.getRow(0).getVARCHAR(0);
+            }
+            return null;
         }
     }    
 
-    public String read(Trace parent,Accessor accessor,String key) throws Throwable
-    {
-        RowSet rowSet=accessor.executeQuery(parent, null, select,key);
-        if (rowSet.size()==1)
-        {
-            return rowSet.getRow(0).getVARCHAR(0);
-        }
-        return null;
-    }    
-    
-    public <OBJECT> OBJECT read(Trace parent,Accessor accessor,String key,Class<OBJECT> type) throws Throwable
-    {
-        return ObjectMapper.read(read(parent,accessor,key), type);
-    }    
-    public <OBJECT> OBJECT read(Trace parent,Accessor accessor,Class<OBJECT> type) throws Throwable
-    {
-        return ObjectMapper.read(read(parent,accessor,type.getSimpleName()), type);
-    }    
     public <OBJECT> OBJECT read(Trace parent,String key,Class<OBJECT> type) throws Throwable
     {
-        try (Accessor accessor=this.connector.openAccessor(parent, "KeyValueStore.read"))
-        {
-            return ObjectMapper.read(read(parent,accessor,key), type);
-        }
+        return ObjectMapper.read(read(parent,key), type);
     }    
+
     public <OBJECT> OBJECT read(Trace parent,Class<OBJECT> type) throws Throwable
     {
-        return ObjectMapper.read(read(parent,type.getSimpleName()), type);
+        return read(parent,type.getSimpleName(), type);
     }    
     
 }

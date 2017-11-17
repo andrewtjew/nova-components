@@ -112,7 +112,7 @@ public class ResourceController
     public final ServerApplication serverApplication;
     private int cacheMaxAge = 300;
     private String cacheControlValue = "public";
-    public final static boolean TEST=false;
+    public final static boolean TEST=true;
 
     public ResourceController(ServerApplication serverApplication) throws Throwable
     {
@@ -141,8 +141,9 @@ public class ResourceController
         {
             if (TEST)
             {
-                Testing.printf(file + " not found");
+                Testing.printf("Resource: "+file + " not found");
             }
+            System.out.println("Resource: "+file + " not found");
             response.setStatus(HttpStatus.NOT_FOUND_404);
             return;
         }

@@ -28,17 +28,17 @@ public class InputStreamReaderSource extends Source
             return new String(this.buffer,this.start,this.end-this.start);
         }
         @Override
-        public String getContext()
+        public String getBuffer()
         {
             return new String(this.buffer,0,end);
         }
         @Override
-        public int getContextPosition()
+        public int getTargetBufferPosition()
         {
             return this.start;
         }
         @Override
-        public int getAbsolutePosition()
+        public int getTargetAbsolutePosition()
         {
             return this.position;
         } 

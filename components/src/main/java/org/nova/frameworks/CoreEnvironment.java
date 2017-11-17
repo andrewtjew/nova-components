@@ -1,10 +1,13 @@
 package org.nova.frameworks;
 
+import java.io.File;
+import java.io.PrintStream;
 import java.util.HashMap;
 
 import org.nova.concurrent.FutureScheduler;
 import org.nova.concurrent.TimerScheduler;
 import org.nova.configuration.Configuration;
+import org.nova.core.Utils;
 import org.nova.flow.SourceQueue;
 import org.nova.flow.SourceQueueConfiguration;
 import org.nova.logging.ConsoleWriter;
@@ -19,6 +22,10 @@ import org.nova.logging.SimpleFileWriter;
 import org.nova.logging.SourceQueueLogger;
 import org.nova.logging.StatusBoard;
 import org.nova.metrics.MeterManager;
+import org.nova.security.SecureFileVault;
+import org.nova.security.UnsecureFileVault;
+import org.nova.security.UnsecureVault;
+import org.nova.security.Vault;
 import org.nova.tracing.TraceManager;
 
 public class CoreEnvironment
@@ -34,19 +41,20 @@ public class CoreEnvironment
 	final private LogDirectoryManager logDirectoryManager;
 	final private int logCategoryBufferSize;
 	final static public StatusBoard STATUS_BOARD=new StatusBoard();
+    final private Vault vault;
 	
 	public CoreEnvironment(Configuration configuration) throws Throwable
 	{
         this.configuration=configuration;
-        String directory=configuration.getValue("Logger.logDirectory","logs");
-		long maxFiles=configuration.getIntegerValue("Logger.logDirectory.maxFiles",100);
-		long reserve=configuration.getLongValue("Logger.logDirectory.reserveSpace",100_000_000_000L);
-		long maxDirectorySize=configuration.getLongValue("Logger.logDirectory.maxDirectorySize",10_000_000_000L);
-		int maxMakeSpaceRetries=configuration.getIntegerValue("Logger.logDirectory.maxMakeSpaceRetries",10);
-		this.logCategoryBufferSize=configuration.getIntegerValue("Logger.logCategoryBufferSize",10);
+        String directory=configuration.getValue("Environment.Logger.logDirectory","logs");
+		long maxFiles=configuration.getIntegerValue("Environment.Logger.logDirectory.maxFiles",0);
+		long reserve=configuration.getLongValue("Environment.Logger.logDirectory.reserveSpace",100_000_000_000L);
+		long maxDirectorySize=configuration.getLongValue("Environment.Logger.logDirectory.maxDirectorySize",10_000_000_000L);
+		int maxMakeSpaceRetries=configuration.getIntegerValue("Environment.Logger.logDirectory.maxMakeSpaceRetries",10);
+		this.logCategoryBufferSize=configuration.getIntegerValue("Environment.Logger.logCategoryBufferSize",10);
 		this.logDirectoryManager=new LogDirectoryManager(directory, maxMakeSpaceRetries, maxFiles, maxDirectorySize, reserve);
 
-		String loggerType=configuration.getValue("Logger.class","JSONBufferedLZ4Queue");
+		String loggerType=configuration.getValue("Environment.Logger.class","JSONBufferedLZ4Queue");
 		switch (loggerType)
 		{
             case "SimpleFileWriter":
@@ -67,12 +75,80 @@ public class CoreEnvironment
 	
         this.meterManager=new MeterManager();
 		this.traceManager=new TraceManager(traceLogger);
-		this.futureScheduler=new FutureScheduler(traceManager,configuration.getIntegerValue("FutureScheduler.threads",1000));
+		this.futureScheduler=new FutureScheduler(traceManager,configuration.getIntegerValue("Environment.FutureScheduler.threads",1000));
 		this.timerScheduler=new TimerScheduler(traceManager, this.getLogger());
 		this.timerScheduler.start();
 		this.logger=getLogger("application");
+
+		//Setting up the vault
+        String secureVaultFile=configuration.getValue("Environment.Vault.secureVaultFile",null);
+        if (secureVaultFile!=null)
+        {
+            String password=null;
+            String passwordFile=configuration.getValue("Application.commentFile",null);
+            if (passwordFile!=null)
+            {
+                password=Utils.readTextFile(passwordFile).trim();
+            }
+            else 
+            {
+                if (System.console()==null)
+                {
+                    System.err.println("No console available to enter vault password");
+                    System.exit(1);
+                }
+                password=new String(System.console().readPassword("Enter vault password:"));
+            }
+            String salt=configuration.getValue("Environment.Vault.salt");
+            this.vault=new SecureFileVault(password, salt, secureVaultFile);
+            if (passwordFile!=null)
+            {
+                if ("false".equalsIgnoreCase(this.vault.get("DeletePasswordFile")))
+                {
+                }
+                else
+                {
+                    try
+                    {
+                        if (new File(passwordFile).delete()==false)
+                        {
+                            System.err.println("Unable to delete password file.");
+                            System.exit(1);
+                        }
+                    }
+                    catch (Throwable t)
+                    {
+                        System.err.println("Unable to delete password file.");
+                        t.printStackTrace(System.err);
+                        System.exit(1);
+                    }
+                }
+            }
+        }
+        else
+        {
+            String unsecureVaultFile=configuration.getValue("Environment.Vault.unsecureVaultFile");
+            if (unsecureVaultFile!=null)
+            {
+                this.vault=new UnsecureFileVault(unsecureVaultFile);
+                this.getLogger().log(Level.CRITICAL,"Using UnsecureVault");
+            }
+            else
+            {
+                this.vault=new UnsecureVault();
+            }
+            printUnsecureVaultWarning(System.err);
+        }
 	}
 	
+    private void printUnsecureVaultWarning(PrintStream stream)
+    {
+        stream.println("**************************************");
+        stream.println("**   WARNING: Using UnsecureVault   **");
+        stream.println("**   DO NOT USE IN PRODUCTION!!!!   **");
+        stream.println("**************************************");
+    }
+    
 	public MeterManager getMeterManager()
 	{
 		return meterManager;
@@ -133,5 +209,14 @@ public class CoreEnvironment
 	public LogDirectoryManager getLogDirectoryManager()
 	{
 		return this.logDirectoryManager;
+	}
+	public Vault getVault()
+	{
+	    return this.vault;
+	}
+	public void stop() 
+	{
+	    this.logSourceQueue.stop();
+	    this.timerScheduler.stop();
 	}
 }

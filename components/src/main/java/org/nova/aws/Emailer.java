@@ -8,6 +8,9 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.nova.logging.Item;
+import org.nova.logging.Logger;
+
 public class Emailer
 {
     final private String username;
@@ -16,13 +19,15 @@ public class Emailer
     final private String from;
     final int port;
     final Session session; 
-    public Emailer(String from,String username,String password,String host,int port)
+    final Logger logger;
+    public Emailer(String from,String username,String password,String host,int port,Logger logger)
     {
         this.username=username;
         this.password=password;
         this.host=host;
         this.port=port;
         this.from=from;
+        this.logger=logger;
         
         Properties props=System.getProperties();
         props.put("mail.transport.protocol", "smtps");
@@ -57,14 +62,15 @@ public class Emailer
         // Send the message.
         try
         {
-            System.out.println("Attempting to send an email through the Amazon SES SMTP interface...");
+//            System.out.println("Attempting to send an email through the Amazon SES SMTP interface...");
             
             // Connect to Amazon SES using the SMTP username and password you specified above.
             transport.connect(this.host, this.username, this.password);
             
             // Send the email.
             transport.sendMessage(msg, msg.getAllRecipients());
-            System.out.println("Email sent!");
+//            System.out.println("Email sent!");
+            this.logger.log("Emailer",new Item("from",from),new Item("to",to),new Item("subject",subject),new Item("mediaType",mediaType),new Item("content",content));
         }
         /*
         catch (Exception ex) 
