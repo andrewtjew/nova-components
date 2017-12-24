@@ -33,7 +33,7 @@ public class SqlServerConnector extends Connector
 	{
         return "jdbc:sqlserver://" + this.host + ":" + this.port+";databaseName="+
                 this.database+";user="+user+";password="+this.passwordVault.get(this.passwordKey)+
-                ";sendStringParametersAsUnicode=false;";
+                ";sendStringParametersAsUnicode=false;"; //If String parameters are in Unicode, the DB becomes very slooowwwwww........
 	}
 	
 	private static Vault buildUnsecuredVault(String password)

@@ -1,4 +1,4 @@
-package org.nova.lexing;
+package org.nova.scan;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

@@ -1,4 +1,4 @@
-package org.nova.lexing;
+package org.nova.scan;
 
 public class LineAndColumn
 {

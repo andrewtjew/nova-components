@@ -55,15 +55,8 @@ public class CoreEnvironmentApplicationRunner //
         logger.log(t);
     }
     
-    
-    public void run(String[] args,CoreEnvironmentApplicationInstantiator instantiator)
+    public void run(Configuration configuration,CoreEnvironmentApplicationInstantiator instantiator)
     {
-        Configuration configuration=ConfigurationReader.search(args);
-        if (configuration==null)
-        {
-            System.err.println("Cannot locate configuration files.");
-            return;
-        }
         CoreEnvironment coreEnvironment=null;
         try
         {
@@ -103,6 +96,17 @@ public class CoreEnvironmentApplicationRunner //
                 coreEnvironment.stop();
             }
         }
+    }
+    
+    public void run(String[] args,CoreEnvironmentApplicationInstantiator instantiator)
+    {
+        Configuration configuration=ConfigurationReader.search(args);
+        if (configuration==null)
+        {
+            System.err.println("Cannot locate configuration files.");
+            return;
+        }
+        run(configuration,instantiator);
     }
 
 }

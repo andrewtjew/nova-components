@@ -1,10 +1,16 @@
 package org.nova.sqldb;
 
+import java.sql.Timestamp;
+
 import org.nova.core.NameObject;
 import org.nova.tracing.Trace;
 
 public class SqlUtils
 {
+    static public Timestamp now()
+    {
+        return new Timestamp(System.currentTimeMillis());
+    }
     static public int multiAttemptExecuteUpdate(Trace parent,String traceCategoryOverride,int attempts,long betweenRetriesWaitMs,Accessor accessor,String sql,Object...parameters) throws Throwable
     {
         Throwable throwable=null;
@@ -66,6 +72,13 @@ public class SqlUtils
         sb.append(')');
         return accessor.executeUpdateAndReturnGeneratedKeys(parent, categoryOverride, sb.toString(),parameters).getBigDecimal(0).longValue();
     }
+    static public long insertAndGetLongKey(Trace parent,String categoryOverride,Connector connector,String table,NameObject...nameObjects) throws Throwable
+    {
+        try (Accessor accessor=connector.openAccessor(parent))
+        {
+            return insertAndGetLongKey(parent, accessor, table, nameObjects);
+        }
+    }
     static public int insert(Trace parent,Accessor accessor,String table,NameObject...nameObjects) throws Throwable
     {
         return insert(parent,null,accessor,table,nameObjects);
@@ -91,6 +104,34 @@ public class SqlUtils
         sb.append(')');
         return accessor.executeUpdate(parent, categoryOverride, sb.toString(),parameters);
     }
+    static public int[] insertBatch(Trace parent,String categoryOverride,Accessor accessor,String table,Object[][] parameters,String...columns) throws Throwable
+    {
+        StringBuilder sb=new StringBuilder();
+        sb.append("INSERT INTO ").append(table).append(" (");
+        sb.append(columns[0]);
+        for (int i=1;i<columns.length;i++)
+        {
+            sb.append(',').append(columns[i]);
+        }
+        sb.append(") VALUES(");
+        sb.append('?');
+        for (int i=1;i<columns.length;i++)
+        {
+            sb.append(",?");
+        }
+        sb.append(')');
+        return accessor.executeBatchUpdate(parent, categoryOverride, parameters,sb.toString());
+    }
+
+    static public int insert(Trace parent,String categoryOverride,Connector connector,String table,NameObject...nameObjects) throws Throwable
+    {
+        try (Accessor accessor=connector.openAccessor(parent))
+        {
+            return insert(parent,categoryOverride,accessor,table,nameObjects);
+        }
+    }
+    
+    
 
     static public void save(Trace parent,String categoryOverride,Connector connector,String table,NameObject keyObject,NameObject activeStatusObject,Object inactiveStatusValue,NameObject...nameObjects) throws Throwable
     {
@@ -167,7 +208,7 @@ public class SqlUtils
         }
         sb.append(')');
 
-        try (Transaction transaction=accessor.beginTransaction(parent,"saveAndGetLongKey"))
+        try (Transaction transaction=accessor.beginTransaction("saveAndGetLongKey"))
         {
             accessor.executeUpdate(parent,categoryOverride,"UPDATE "+table+" SET "+activeStatusObject.getName()+"=? WHERE "+keyObject.getName()+"=?",
                     inactiveStatusValue,keyObject.getValue());
@@ -187,7 +228,7 @@ public class SqlUtils
             sb.append(" AND ").append(keyObjects[i].getName()).append("=?");
             parameters[i]=keyObjects[i].getValue();
         }
-        try (Transaction transaction=accessor.beginTransaction(parent,"insertIfNotExist"))
+        try (Transaction transaction=accessor.beginTransaction("insertIfNotExist"))
         {
             RowSet rowSet=accessor.executeQuery(parent, categoryOverride, sb.toString(), parameters);
             if (rowSet.size()>0)
@@ -233,4 +274,14 @@ public class SqlUtils
             return inserted;
         }
     }
+    
+    public static RowSet getFirstRowSet(Trace parent,Connector connector,String call,Param...params) throws Throwable
+    {
+        try (Accessor accessor=connector.openAccessor(parent))
+        {
+            CallResult<Void> result=accessor.executeCall(parent, null, Void.class, call,params);
+            return result.getRowSet(0);
+        }
+    }
+    
 }

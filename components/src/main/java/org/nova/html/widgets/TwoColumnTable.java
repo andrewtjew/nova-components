@@ -20,19 +20,19 @@ public class TwoColumnTable extends Table
     
     public void addItems(Element first,Element second)
     {
-        this.addBodyRow(new tr().addInners(new td().addInner(first),this.seperator,new td().addInner(second)));
+        this.tbody().addInner(new tr().addInners(new td().addInner(first),this.seperator,new td().addInner(second)));
     }
     public void addItems(Object first,Element second)
     {
-        this.addBodyRow(new tr().addInners(new td().addInner(first),this.seperator,new td().addInner(second)));
+        this.tbody().addInner(new tr().addInners(new td().addInner(first),this.seperator,new td().addInner(second)));
     }
     public void addItems(Element first,Object second)
     {
-        this.addBodyRow(new tr().addInners(new td().addInner(first),this.seperator,new td().addInner(second)));
+        this.tbody().addInner(new tr().addInners(new td().addInner(first),this.seperator,new td().addInner(second)));
     }
     public void addItems(Object first,Object second)
     {
-        this.addBodyRow(new tr().addInners(new td().addInner(first),this.seperator,new td().addInner(second)));
+        this.tbody().addInner(new tr().addInners(new td().addInner(first),this.seperator,new td().addInner(second)));
     }
     public void addSecond(Element second,boolean noSeperator)
     {
@@ -49,7 +49,7 @@ public class TwoColumnTable extends Table
             }
         }
         tr.addInner(new td().addInner(second));
-        this.addBodyRow(tr);
+        this.tbody().addInner(tr);
     }
     public void addFirstItem(Element first,boolean noSeperator)
     {
@@ -66,7 +66,7 @@ public class TwoColumnTable extends Table
             }
         }
         tr.addInner(new td());
-        this.addBodyRow(tr);
+        this.tbody().addInner(tr);
     }
     
 

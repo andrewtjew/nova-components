@@ -12,7 +12,7 @@ public class TestTraceClient
 	
 	private static TestTraceClient instance;
 	
-	public static TestTraceClient getInstance()
+	public static TestTraceClient getInstance() throws Throwable
 	{
 		synchronized(TestTraceClient.class)
 		{
@@ -26,7 +26,7 @@ public class TestTraceClient
 	
 	private final JSONClient client; 
 	private final String printUrl;
-	public TestTraceClient(String serverEndPoint)
+	public TestTraceClient(String serverEndPoint) throws Throwable
 	{
 		this.client=new JSONClient(new TraceManager(), null,serverEndPoint);
 		this.printUrl="/print/message";	
@@ -56,9 +56,9 @@ public class TestTraceClient
 	{
 		if (Testing.ENABLED)
 		{
-			TestTraceClient client=getInstance();
 			try
 			{
+	            TestTraceClient client=getInstance();
 				Thread thread=Thread.currentThread();
 				StackTraceElement element=thread.getStackTrace()[2];
 				String category=element.getClassName();
@@ -76,9 +76,9 @@ public class TestTraceClient
 	{
 		if (Testing.ENABLED)
 		{
-			TestTraceClient client=getInstance();
 			try
 			{
+	            TestTraceClient client=getInstance();
 				Thread thread=Thread.currentThread();
 				StackTraceElement element=thread.getStackTrace()[2];
 				String category=element.getClassName();
@@ -96,9 +96,9 @@ public class TestTraceClient
 	{
 		if (Testing.ENABLED)
 		{
-			TestTraceClient client=getInstance();
 			try
 			{
+	            TestTraceClient client=getInstance();
 				Thread thread=Thread.currentThread();
 				StackTraceElement element=thread.getStackTrace()[2];
 				String category=element.getClassName();
@@ -116,9 +116,9 @@ public class TestTraceClient
 	{
 		if (Testing.ENABLED)
 		{
-			TestTraceClient client=getInstance();
 			try
 			{
+	            TestTraceClient client=getInstance();
 				Thread thread=Thread.currentThread();
 				StackTraceElement element=thread.getStackTrace()[2];
 				String category=element.getClassName();

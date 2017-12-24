@@ -39,7 +39,7 @@ public class UserSecurity
 
 		try (Accessor accessor=connector.openAccessor(parent, "addUser"))
 		{
-			try (Transaction transaction=accessor.beginTransaction(parent, "addUserTransaction"))
+			try (Transaction transaction=accessor.beginTransaction("addUserTransaction"))
 			{
 				if (accessor.executeQuery(parent, null, "SELECT user FROM user WHERE user=?",user).size()!=0)
 				{

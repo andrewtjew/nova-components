@@ -1,6 +1,8 @@
 package org.nova.http.client;
 
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -9,7 +11,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.entity.StringEntity;
+import org.nova.concurrent.TimerScheduler;
+import org.nova.concurrent.TimerTask;
+import org.nova.concurrent.TimerTask.TimeBase;
 import org.nova.core.Utils;
 import org.nova.html.tags.table;
 import org.nova.http.Header;
@@ -19,6 +25,7 @@ import org.nova.logging.Logger;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
 
+import com.amazonaws.util.IOUtils;
 import com.nova.disrupt.Disruptor;
 import com.nova.disrupt.DisruptorTraceContext;
 
@@ -33,8 +40,9 @@ public class JSONClient
 	final private String contentType;  
 	final private String patchType;  
 	final private Disruptor disruptor;
+    final private TimerTask timerTask;
 	
-	public JSONClient(TraceManager traceManager,Logger logger,Disruptor disruptor,String endPoint,HttpClient client,String contentType,String patchType,Header...headers)
+	public JSONClient(TraceManager traceManager,Logger logger,TimerScheduler scheduler,long idleConnectionTimeoutMs,Disruptor disruptor,String endPoint,HttpClient client,String contentType,String patchType,Header...headers) throws Throwable
 	{
 		this.traceManager=traceManager;
 		this.disruptor=disruptor;
@@ -48,10 +56,33 @@ public class JSONClient
 		}
 		this.contentType=contentType;
 		this.patchType=patchType;
+		if (scheduler!=null)
+		{
+		    this.timerTask=scheduler.schedule("JSONClient.closeIdleConnections",TimeBase.FREE,idleConnectionTimeoutMs,idleConnectionTimeoutMs,(trace,task)->{closeIdleConnections(trace);});
+		}
+		else
+		{
+		    this.timerTask=null;
+		}
 	}
-    public JSONClient(TraceManager traceManager,Logger logger,String endPoint,HttpClient client)
+	
+	public void closeIdleConnections(Trace parent)
+	{
+        HttpClientUtils.closeQuietly(this.client);
+	}
+	
+	
+    public JSONClient(TraceManager traceManager,Logger logger,TimerScheduler scheduler,long idleConnectionTimeoutMs,String endPoint,HttpClient client) throws Throwable
     {
-        this(traceManager,logger,null,endPoint,client,"application/json","application/merge-patch+json");
+        this(traceManager,logger,scheduler,idleConnectionTimeoutMs,null,endPoint,client,"application/json","application/merge-patch+json");
+    }
+    public JSONClient(TraceManager traceManager,Logger logger,String endPoint,HttpClient client) throws Throwable
+    {
+        this(traceManager,logger,null,0,endPoint,client);
+    }
+    public JSONClient(TraceManager traceManager,Logger logger,String endPoint) throws Throwable
+    {
+        this(traceManager,logger,endPoint,HttpClientFactory.createClient());
     }
     public void setHeader(Header header)
     {
@@ -65,10 +96,6 @@ public class JSONClient
         }
         this.headers.add(header);
     }
-	public JSONClient(TraceManager traceManager,Logger logger,String endPoint)
-	{
-		this(traceManager,logger,null,endPoint,HttpClientFactory.createClient(),"application/json","application/merge-patch+json");
-	}
 	
 	private void logHeaders(DisruptorTraceContext context,org.apache.http.Header[] headers)
 	{
@@ -142,7 +169,8 @@ public class JSONClient
     public int get(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Throwable
     {
         return get(parent,traceCategoryOverride,pathAndQuery,new Header[0]);
-    }	
+    }
+    
     public int get(Trace parent,String traceCategoryOverride,String pathAndQuery,Header...headers) throws Throwable
     {
         try (DisruptorTraceContext context=new DisruptorTraceContext(parent, this.traceManager, this.logger, this.disruptor, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery,this.endPoint))
@@ -401,10 +429,10 @@ public class JSONClient
     {
         return post(parent,traceCategoryOverride,pathAndQuery,null,responseContentType);
     }
-    public <TYPE> JSONResponse<TYPE> post(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Throwable
+    public int post(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Throwable
     {
-        return post(parent,traceCategoryOverride,pathAndQuery,null);
-    }	
+        return post(parent,traceCategoryOverride,pathAndQuery,null,new Header[0]);
+    }
     public int post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Throwable
     {
         return post(parent,traceCategoryOverride,pathAndQuery,content,new Header[0]);
@@ -556,4 +584,60 @@ public class JSONClient
 	{
 	    return this.endPoint;
 	}
+	
+	public void close()
+	{
+	    synchronized (this)
+	    {
+    	    if (this.timerTask!=null)
+    	    {
+    	        this.timerTask.cancel();
+    	    }
+	    }
+	    HttpClientUtils.closeQuietly(this.client);
+	}
+
+	public int get(Trace parent,String traceCategoryOverride,OutputStream outputStream,String pathAndQuery,Header...headers) throws Throwable
+    {
+        try (DisruptorTraceContext context=new DisruptorTraceContext(parent, this.traceManager, this.logger, this.disruptor, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery,this.endPoint))
+        {
+            try 
+            {
+                HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
+                context.addLogItem(new Item("endPoint",this.endPoint));
+                context.addLogItem(new Item("pathAndQuery",pathAndQuery));
+    
+                if (this.headers!=null)
+                {
+                    for (Header header:this.headers)
+                    {
+                        get.setHeader(header.getName(),header.getValue());
+                    }
+                }
+                for (Header header:headers)
+                {
+                    get.setHeader(header.getName(),header.getValue());
+                }
+                get.setHeader("Accept",this.contentType);
+                logHeaders(context,get.getAllHeaders());
+    
+                context.beginWait();
+                HttpResponse response=this.client.execute(get);
+                context.endWait();
+                try
+                {
+                    IOUtils.copy(response.getEntity().getContent(), outputStream);
+                    return response.getStatusLine().getStatusCode();
+                }
+                finally
+                {
+                    response.getEntity().getContent().close();
+                }
+            }       
+            catch (Throwable t)
+            {
+                throw context.handleThrowable(t);
+            }
+        }
+    }
 }

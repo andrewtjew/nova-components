@@ -1,13 +1,27 @@
 package org.nova.lexing;
 
-public abstract class Source
+public class Source
 {
-    public abstract char next() throws Throwable;
-    public abstract void begin(int revert);
-    public abstract void revert();
-    public abstract void end(int revert);
-    public abstract Snippet endAndGetSnippet(int revert);
-    public abstract String endContext();
-    public abstract void beginContext();
-    public abstract int getContextPosition();
+    final private String text;
+    final private String location;
+    
+    public Source(String text,String location)
+    {
+        this.text=text;
+        this.location=location;
+    }
+    public Source(String text)
+    {
+        this(text,null);
+    }
+    public String getText()
+    {
+        return text;
+    }
+    public String getLocation()
+    {
+        return location;
+    }
+    
+    
 }

@@ -41,7 +41,7 @@ public class Pool<RESOURCE extends Resource>
 					{
 						RESOURCE resource=container.pop();
 						this.inUseMeter.increment();
-						resource.activate(trace);
+						resource.activate(parent);
 						trace.endWait();
 						return resource;
 					}
@@ -56,8 +56,8 @@ public class Pool<RESOURCE extends Resource>
 		finally
 		{
 			this.waitingMeter.decrement();
+	        trace.close();
 		}
-		trace.close();
 		return null;
 	}
 	@SuppressWarnings("resource")

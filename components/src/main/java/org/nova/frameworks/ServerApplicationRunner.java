@@ -59,7 +59,6 @@ public class ServerApplicationRunner //
         logger.log(t);
     }
     
-    
     public void run(String[] args,ServerApplicationInstantiator instantiator)
     {
         Configuration configuration=ConfigurationReader.search(args);
@@ -68,6 +67,11 @@ public class ServerApplicationRunner //
             System.err.println("Cannot locate configuration files.");
             return;
         }
+        run(configuration,instantiator);
+    }
+    
+    public void run(Configuration configuration,ServerApplicationInstantiator instantiator)
+    {
         CoreEnvironment coreEnvironment=null;
         try
         {

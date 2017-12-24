@@ -1,7 +1,7 @@
 
 package org.nova.html.elements;
 
-
+/*
 public interface Inner<ELEMENT>
 {
     public ELEMENT addInner(Element element);
@@ -9,3 +9,4 @@ public interface Inner<ELEMENT>
     public ELEMENT addInners(Element...elements);
     public ELEMENT addInner(Object object);
 }
+*/

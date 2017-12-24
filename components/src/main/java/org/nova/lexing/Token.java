@@ -3,14 +3,12 @@ package org.nova.lexing;
 public enum Token
 {
     OPERATOR,
-    PUNCTUATOR,
+    SEPARATOR,
     TERMINATOR,
-    SEPERATOR,
-    TEXT, //Any text that is not string, eg, keywords, delimited text, etc  
+    KEYWORD,
+    IDENTIFIER,
     STRING, 
     CHARACTER,
     NUMBER,
-	//specials
-    ERROR,
-//    END,
+    EXTRA,
 }

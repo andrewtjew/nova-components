@@ -31,12 +31,12 @@ public class SelectOptions extends select
         String text=value.toString();
         return add(text,text,selected);
     }
-    public SelectOptions add(Object value)
-    {
-        String text=value.toString();
-        return add(text,text);
-    }
     public SelectOptions add(String value,String text)
+    {
+        addInner(new option().value(value).addInner(text));
+        return this;
+    }
+    public SelectOptions add(Object value,String text)
     {
         addInner(new option().value(value).addInner(text));
         return this;

@@ -18,14 +18,17 @@ import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
 import org.nova.core.Utils;
 
+import com.amazonaws.services.lambda.model.EC2AccessDeniedException;
+
 public class JettyServerFactory
 {
-    static Server createServer(ThreadPool threadPool, int port)
+    static public Server createServer(ThreadPool threadPool, int port)
     {
         Server server = new Server(threadPool);
         HttpConfiguration config = new HttpConfiguration();
         config.setOutputBufferSize(65536);
         ServerConnector connector = new ServerConnector(server,new HttpConnectionFactory(config));
+        connector.setIdleTimeout(30*60*1000);
         connector.setPort(port);
         server.addConnector(connector);
         return server;

@@ -2,6 +2,8 @@ package org.nova.concurrent;
 
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.nova.logging.Logger;
@@ -24,12 +26,16 @@ public class TimerScheduler
 	final private Logger logger;
 	final TraceManager traceManager;
 	final private TreeMap<Key, TimerTask> map;
-	private AtomicLong number;
+    final private ExecutorService executorService; 
+
+    private AtomicLong number;
 	private Thread thread;
 	private RunState runState;
 
 	public TimerScheduler(TraceManager traceManager, Logger logger) 
 	{
+	    this.executorService=Executors.newCachedThreadPool();
+	       
 		this.traceManager = traceManager;
 		this.logger = logger;
 		this.number=new AtomicLong();
@@ -91,6 +97,23 @@ public class TimerScheduler
         {
         }
 	}
+	
+    class Runner implements java.lang.Runnable
+    {
+        final TimerTask task;
+
+        Runner(TimerTask task)
+        {
+            this.task=task;
+        }
+
+        @Override
+        public void run()
+        {
+            task.execute();
+        }
+    }
+	
 
 	void run()
 	{
@@ -147,6 +170,9 @@ public class TimerScheduler
 					}
 				}
 			}
+			
+//			this.executorService.submit(
+			        
 			Key key=entry.getValue().execute();
 			synchronized(this)
 			{

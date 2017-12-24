@@ -1208,7 +1208,7 @@ public class ServerApplicationPages
         for (Entry<String, TraceNode> entry : map.entrySet())
         {
             tr tr=new tr();
-            table.addBodyRow(tr);
+            table.tbody().addInner(tr);
             writeTraceGraphNode(page.head(),tr,entry,0);
         }
         return page;
@@ -1343,7 +1343,7 @@ public class ServerApplicationPages
               Table table=treePanel.content().returnAddInner(new Table());
               table.style("border-collapse:collapse;");
               tr tr=new tr();
-              table.addBodyRow(tr);
+              table.tbody().addInner(tr);
               writeTraceGraphNodeToCategory(page.head(),tr, category, entry, 0);
               TraceSample sample=entry.getValue().sampleTrace();
               Trace lastExceptiontrace=sample.getLastExceptionTrace();
@@ -1388,7 +1388,7 @@ public class ServerApplicationPages
                   if (isChild(category, child))
                   {
                       tr=new tr();
-                      table.addBodyRow(tr);
+                      table.tbody().addInner(tr);
                       writeTraceGraphNodeToCategory(head,tr, category, child, level + 1);
                   }
               }
@@ -1428,7 +1428,7 @@ public class ServerApplicationPages
               for (Entry<String, TraceNode> child : node.getChildTraceNodesSnapshot().entrySet())
               {
                   tr=new tr();
-                  table.addBodyRow(tr);
+                  table.tbody().addInner(tr);
                   writeTraceGraphNode(head, tr, child, level + 1);
               }
           }
@@ -1874,14 +1874,14 @@ public class ServerApplicationPages
         list.add("Minimum Wait ", formatNsToMsWithInstantMsAsDiv(sample.getMinWaitNs(),sample.getMinWaitInstantMs()));
         list.add("Maximum Wait ", formatNsToMsWithInstantMsAsDiv(sample.getMaxWaitNs(),sample.getMaxWaitInstantMs()));
         list.add("Exceptions", sample.getExceptionCount());
-        if (sample.getExceptionCount()==1)
-        {
-            writeTrace(head,content,"Exception Trace",sample.getFirstExceptionTrace());
-        }
-        else if (sample.getExceptionCount()>1)
+        writeTrace(head,content,"Last Trace",sample.getLastTrace());
+        if (sample.getExceptionCount()>0)
         {
             writeTrace(head,content,"First Exception Trace",sample.getFirstExceptionTrace());
-            writeTrace(head,content,"Last Exception Trace",sample.getLastExceptionTrace());
+            if (sample.getExceptionCount()>1)
+            {
+                writeTrace(head,content,"Last Exception Trace",sample.getLastExceptionTrace());
+            }
         }
     }
     
@@ -2434,7 +2434,7 @@ public class ServerApplicationPages
 //        panel.content().addInner(new p());
 //        Panel textpanel=panel.content().returnAddInner(new Level3Panel(head,"Request Content (Length: "+text.length()+")"));
         Accordion textAccodion=content.returnAddInner(new Accordion(head,false,heading+", length: "+text.length()));
-        int rows=text.length()/120+1;
+        int rows=text.length()/120+2;
         if (rows>20)
         {
             rows=20;

@@ -817,8 +817,8 @@ class RequestHandlerMap
 		if (node.requestHandler != null)
 		{
 			throw new Exception(
-					"Path conflict. Existing Path=" + node.requestHandler.getPath() + ", existing requestHandler=" + node.requestHandler.getMethod().getName()
-							+ ", new Path" + requestHandler.getPath() + ", new request handler=" + requestHandler.getMethod().getName());
+					"Path conflict. Existing Path=" + node.requestHandler.getPath() + ", existing requestHandler=" + node.requestHandler.getObject().getClass().getName()+":"+node.requestHandler.getMethod().getName()
+							 +", new Path=" + requestHandler.getPath() + ", new request handler=" + requestHandler.getObject().getClass().getName()+":"+requestHandler.getMethod().getName());
 		}
 		ParameterInfo[] parameterInfos = requestHandler.getParameterInfos();
 		for (int i = 0; i < parameterInfos.length; i++)

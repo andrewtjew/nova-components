@@ -2,9 +2,9 @@ package org.nebula.sqlserver;
 
 import java.util.ArrayList;
 
-import org.nova.lexing.Lexeme;
-import org.nova.lexing.LexerException;
-import org.nova.lexing.TextSource;
+import org.nova.scan.Lexeme;
+import org.nova.scan.LexerException;
+import org.nova.scan.TextSource;
 
 public class ScriptParser
 {

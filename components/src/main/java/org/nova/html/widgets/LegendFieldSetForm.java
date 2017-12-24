@@ -3,7 +3,6 @@ package org.nova.html.widgets;
 import org.nova.html.elements.InnerElement;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.GlobalEventTagElement;
-import org.nova.html.elements.Inner;
 import org.nova.html.tags.fieldset;
 import org.nova.html.tags.form_get;
 import org.nova.html.tags.form_post;

@@ -58,5 +58,9 @@ public class input_date extends InputElement<input_date>
         }
         return this;
     }
+    public input_date value(String text) 
+    {
+        return attr("value",text);
+    }
     
 }

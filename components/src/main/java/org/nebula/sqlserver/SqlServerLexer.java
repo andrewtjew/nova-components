@@ -1,11 +1,11 @@
 package org.nebula.sqlserver;
 
-import org.nova.lexing.Lexeme;
-import org.nova.lexing.Scanner;
-import org.nova.lexing.LexerException;
-import org.nova.lexing.Snippet;
-import org.nova.lexing.Source;
-import org.nova.lexing.Token;
+import org.nova.scan.Lexeme;
+import org.nova.scan.LexerException;
+import org.nova.scan.Scanner;
+import org.nova.scan.Snippet;
+import org.nova.scan.Source;
+import org.nova.scan.Token;
 
 public class SqlServerLexer extends Scanner
 {
@@ -22,14 +22,17 @@ public class SqlServerLexer extends Scanner
         if (c=='[')
         {
             this.begin();
-            Lexeme lexeme=produceJavaIdentifier();
-            c=this.skipWhiteSpaceAndRead();
-            if (c!=']')
+            for (c=this.source.next();c!=']';c=this.source.next())
             {
-                Snippet snippet=this.source.endAndGetSnippet(0);
-                return new Lexeme(Token.ERROR, snippet.getTarget(),snippet);
+                if (c==0)
+                {
+                    Snippet snippet=this.source.endAndGetSnippet(0);
+                    throw new LexerException("Invalid name", new Lexeme(Token.ERROR, snippet.getTarget(),snippet));
+                }
             }
-            return lexeme;
+            Snippet snippet=this.source.endAndGetSnippet(1);
+            this.source.next();
+            return new Lexeme(Token.TEXT, snippet.getTarget(),snippet);
         }
         return produceJavaIdentifier();
     }

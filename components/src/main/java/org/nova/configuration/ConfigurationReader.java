@@ -8,10 +8,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.nova.core.Utils;
-import org.nova.lexing.Lexeme;
-import org.nova.lexing.Scanner;
-import org.nova.lexing.LineAndColumn;
-import org.nova.lexing.TextSource;
+import org.nova.scan.Lexeme;
+import org.nova.scan.LineAndColumn;
+import org.nova.scan.Scanner;
+import org.nova.scan.TextSource;
 
 public class ConfigurationReader
 {
@@ -48,13 +48,18 @@ public class ConfigurationReader
 			{
 				return;
 			}
-			if (character=='#')
+			else if (character=='#')
 			{
 			    Lexeme lexeme=scanner.produceTerminatedText('\r','\n');
 			    checkError(lexeme);
-			    description=lexeme.getValue().substring(1);
 			}
-            if (character==';')
+			else if (character=='!')
+            {
+                Lexeme lexeme=scanner.produceTerminatedText('\r','\n');
+                checkError(lexeme);
+                description=lexeme.getValue().substring(1);
+            }
+			else if (character==';')
             {
                 continue;
             }

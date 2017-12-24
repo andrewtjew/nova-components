@@ -20,17 +20,18 @@ public class StatusBoard
     {
         set(item.getName(),item.getValue());
     }
-    public void set(String name,String value)
+    public void set(String name,Object value)
     {
         synchronized(this)
         {
             int count=1;
+            String text=value==null?null:value.toString();
             StatusEntry existing=this.map.get(name);
             if (existing!=null)
             {
                 count+=existing.getCount();
             }
-            this.map.put(name,new StatusEntry(name,getSource(Thread.currentThread().getStackTrace()[2]),value,count));
+            this.map.put(name,new StatusEntry(name,getSource(Thread.currentThread().getStackTrace()[2]),text,count));
         }
     }
     public StatusEntry getStatusEntry(String name)

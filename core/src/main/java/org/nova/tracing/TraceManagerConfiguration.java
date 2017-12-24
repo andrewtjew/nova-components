@@ -2,11 +2,11 @@ package org.nova.tracing;
 
 public class TraceManagerConfiguration
 {
-	public int maximumActives=10000;
-    public int lastTraceBufferSize=1000;
-    public int watchListLastTraceBufferSize=1000;
+	public int maximumActives=2000;
+    public int lastTraceBufferSize=2000;
+    public int watchListLastTraceBufferSize=2000;
 	public boolean enableLastTraceWatching=false;
-	public int lastExceptionBufferSize=1000;
+	public int lastExceptionBufferSize=2000;
 	public boolean logTraces=true;
 	public boolean logExceptionTraces=true;
     public boolean captureCreateStackTrace=false;

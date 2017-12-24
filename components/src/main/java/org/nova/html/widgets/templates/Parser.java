@@ -5,10 +5,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import org.nova.core.Utils;
-import org.nova.lexing.Lexeme;
-import org.nova.lexing.Scanner;
-import org.nova.lexing.TextSource;
-import org.nova.lexing.Token;
+import org.nova.scan.Lexeme;
+import org.nova.scan.Scanner;
+import org.nova.scan.TextSource;
+import org.nova.scan.Token;
 
 public class Parser
 {

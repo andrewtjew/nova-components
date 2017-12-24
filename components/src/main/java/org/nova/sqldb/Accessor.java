@@ -34,14 +34,14 @@ public class Accessor extends Resource
 	private long lastExecuteMs;
 	private Transaction transaction;
 
-	public Accessor(Pool<Accessor> pool, Connector connector, long connectionIdleTimeoutMs)
+	Accessor(Pool<Accessor> pool, Connector connector, long connectionIdleTimeoutMs)
 	{
 		super(pool);
 		this.connectionIdleTimeoutMs = connectionIdleTimeoutMs;
 		this.connector = connector;
 	}
 
-	public Transaction beginTransaction(Trace parent, String traceCategory) throws Exception
+	public Transaction beginTransaction(String traceCategory) throws Exception
 	{
 		synchronized (this)
 		{
@@ -49,7 +49,7 @@ public class Accessor extends Resource
 			{
 				throw new Exception("Cannot begin more than one transaction. Existing transaction category=" + transaction.trace.getCategory());
 			}
-			this.transaction = new Transaction(this, new Trace(this.connector.traceManager, parent, traceCategory));
+			this.transaction = new Transaction(this, new Trace(this.connector.traceManager,this.getParent(), traceCategory));
 			this.connection.setAutoCommit(false);
             this.connector.beginTransactionRate.increment();
 			return this.transaction;
@@ -137,7 +137,7 @@ public class Accessor extends Resource
     }
 
     @Override
-	protected void park() throws Throwable
+	protected void park() throws Exception
 	{
 	}
 	public int executeUpdate(Trace parent, String traceCategoryOverride, String sql, Object... parameters) throws Throwable

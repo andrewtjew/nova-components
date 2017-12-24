@@ -79,12 +79,16 @@ public class ConnectorController
         row.add(sample.getCount());
     }
 
-    public Connector startDatabase(Trace parent,String keyFragment) throws Throwable
+    public Connector initializeConnector(Trace parent,String configurationNameFragment) throws Throwable
     {
         Configuration configuration=this.application.getConfiguration();
-        DatabaseUpdatePermissions permisssions=configuration.getJSONObject("Application.Database.MigrationPermission."+keyFragment,new DatabaseUpdatePermissions(),DatabaseUpdatePermissions.class);
+        DatabaseUpdatePermissions permisssions=configuration.getJSONObject("Application.Database.MigrationPermission."+configurationNameFragment,new DatabaseUpdatePermissions(),DatabaseUpdatePermissions.class);
         DatabaseUpdater migrator=new DatabaseUpdater(this.application.getCoreEnvironment(),permisssions);
-        ConnectorAndMigrationConfiguration connectorAndMigrationconfiguration=configuration.getJSONObject("Application.Database.ConnectorAndMigrationConfiguration."+keyFragment, ConnectorAndMigrationConfiguration.class);
+        ConnectorAndMigrationConfiguration connectorAndMigrationconfiguration=configuration.getJSONObject("Application.Database.ConnectorAndMigrationConfiguration."+configurationNameFragment, ConnectorAndMigrationConfiguration.class);
+        if (connectorAndMigrationconfiguration==null)
+        {
+            return null;
+        }
         Connector connector=migrator.connectAndMigrate(parent, this.application.getCoreEnvironment(), connectorAndMigrationconfiguration);
         track(connector);
         return connector;

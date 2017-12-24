@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ObjectMapper
+public class ObjectMapperNew
 {
     final static String NULL="null";
     final static private HashMap<String, FieldWriter[]> FIELD_WRITERS=new HashMap<>();

@@ -313,8 +313,7 @@ public class HttpServer
 			}
 			else
 			{
-			    ContentDecoder contentDecoder = getContentDecoder(servletRequest.getHeader("Content-Encoding"), handler);
-			    decoderContext = contentDecoder.open(servletRequest, servletResponse);
+                decoderContext = getContentDecoder(servletRequest.getHeader("Content-Encoding"), handler).open(servletRequest, servletResponse);
 			}
 			
 //			Object attribute=servletRequest.getAttribute("javax.servlet.request.X509Certificate");
@@ -435,6 +434,10 @@ public class HttpServer
             }
             if ((handler.isLogRequestHeaders()&&entry.requestHeaders!=null))
             {
+                if ("application/x-www-form-urlencoded".equals(servletRequest.getParameter("Content-Type")))
+                {
+                    items.add(new Item("queryString",servletRequest.getQueryString()));
+                }
                 if (entry.requestHeaders!=null)
                 {
                     items.add(new Item("requestHeaders",entry.requestHeaders));

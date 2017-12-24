@@ -8,13 +8,13 @@ import org.nova.frameworks.ServerApplication;
 import org.nova.http.server.HttpServer;
 import org.nova.tracing.Trace;
 
-public abstract class SessionService<SESSION extends Session> extends ServerApplication
+public abstract class SessionServerApplication<SESSION extends Session> extends ServerApplication
 {
     final private TokenGenerator tokenGenerator;
     final private SessionManager<SESSION> sessionManager;
     private SessionFilter sessionFilter;
 
-    public SessionService(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer) throws Throwable
+    public SessionServerApplication(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer) throws Throwable
     {
         super(name,coreEnvironment,operatorServer);
         long lockTimeoutMs=this.getConfiguration().getLongValue("SessionService.session.lockTimeout", 10*1000);
@@ -26,7 +26,7 @@ public abstract class SessionService<SESSION extends Session> extends ServerAppl
         
     }
 
-    public SessionService(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer,NoSessionResponder...sessionRejectResponders) throws Throwable
+    public SessionServerApplication(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer,NoSessionResponder...sessionRejectResponders) throws Throwable
     {
         this(name,coreEnvironment,operatorServer);
         String directoryServiceEndPoint=this.getConfiguration().getValue("SessionService.directoryServiceEndPoint", "http://"+Utils.getLocalHostName()+":"+this.getPublicServer().getPorts()[0]);

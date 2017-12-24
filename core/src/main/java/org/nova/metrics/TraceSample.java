@@ -21,6 +21,7 @@ public class TraceSample
     final private long createdMs;
     final private Trace firstExceptionTrace;
     final private Trace lastExceptionTrace;
+    final private Trace lastTrace;
     
     final private long exceptionCount;
     final private  double exceptionRate;
@@ -44,6 +45,7 @@ public class TraceSample
         this.firstExceptionTrace=meter.firstExceptionTrace;
         this.lastExceptionTrace=meter.lastExceptionTrace;
         this.exceptionCount=meter.exceptionCount;
+        this.lastTrace=meter.lastTrace;
         this.rate=rate;
         this.exceptionRate=exceptionRate;
     }
@@ -199,5 +201,9 @@ public class TraceSample
     public double getExceptionRate()
     {
         return exceptionRate;
+    }
+    public Trace getLastTrace()
+    {
+        return this.lastTrace;
     }
 }

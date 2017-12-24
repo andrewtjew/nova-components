@@ -4,14 +4,18 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import org.nova.html.elements.Element;
-import org.nova.html.elements.Inner;
+import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.elements.InnerElement;
 import org.nova.html.tags.a;
 import org.nova.html.tags.td;
 import org.nova.html.tags.tr;
 
-public class Row extends tr implements Inner<Row>
+public class Row extends GlobalEventTagElement<Row>
 {
+    public Row()
+    {
+        super("tr");
+    }
     public Row add(String...items)
     {
         for (String item:items)

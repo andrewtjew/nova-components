@@ -20,6 +20,7 @@ public class TraceMeter
     int count;
     Trace firstExceptionTrace;
     Trace lastExceptionTrace;
+    Trace lastTrace;
     int exceptionCount;
 
     public TraceMeter()
@@ -69,6 +70,7 @@ public class TraceMeter
                 this.minWaitNs=durationNs;
                 this.minWaitInstantMs=System.currentTimeMillis();
             }
+            this.lastTrace=trace;
             this.totalDurationNs+=durationNs;
             this.totalDuration2Ns+=durationNs*durationNs;
             this.totalWaitNs+=waitNs;

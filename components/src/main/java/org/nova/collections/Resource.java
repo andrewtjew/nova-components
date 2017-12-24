@@ -6,7 +6,7 @@ import org.nova.tracing.Trace;
 public abstract class Resource implements AutoCloseable
 {
 	final private Pool<?> pool;
-	private Trace trace;
+	private Trace parent;
 	private long recentlyUsedCount;
 	
 	
@@ -16,26 +16,18 @@ public abstract class Resource implements AutoCloseable
 		this.recentlyUsedCount=0;
 	}
 	
-	void activate(Trace trace) throws Throwable
+	void activate(Trace parent) throws Throwable
 	{
 		synchronized(this)
 		{
-			this.trace=trace;
-			try
-			{
-				activate();
-			}
-			catch (Throwable t)
-			{
-				trace.close(t);
-				throw t;
-			}
+			this.parent=parent;
+			activate();
 		}
 	}
 
 	abstract protected void activate() throws Throwable;
 
-	abstract protected void park() throws Throwable;
+	abstract protected void park() throws Exception;
 	
 	boolean canAddLast(long recentActivateMaximumCount)
 	{
@@ -55,20 +47,17 @@ public abstract class Resource implements AutoCloseable
 	{
 		synchronized(this)
 		{
-			if (this.trace!=null)
+			if (this.parent!=null)
 			{
-				try
-				{
-					park();
-	                pool.release(this);
-					this.trace.close();
-				}
-				catch (Throwable t)
-				{
-					this.trace.close(t);
-				}
-				this.trace=null;
+                park();
+                pool.release(this);
+				this.parent=null;
 			}
 		}
+	}
+	
+	public Trace getParent()
+	{
+	    return this.parent;
 	}
 }

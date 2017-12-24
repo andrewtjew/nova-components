@@ -2,21 +2,29 @@ package org.nova.lexing;
 
 public class Lexeme
 {
+    private final String literal;
     private final String value;
     private final Token token;
-    private final Snippet snippet;
     private final String modifier;
+    private final int position;
+    private final Source source;
 
-    public Lexeme(Token token,String value,Snippet snippet)
+    public Lexeme(Source source,String literal,Token token,String value,int position)
     {
-        this(token,value,null,snippet);
+        this(source,literal,token,value,null,position);
     }
-    public Lexeme(Token token,String value,String modifier,Snippet snippet)
+    public Lexeme(Source source,String literal,Token token,String value,String modifier,int position)
     {
+        this.source=source;
         this.token=token;
+        this.literal=literal;
         this.value=value;
         this.modifier=modifier;
-        this.snippet=snippet;
+        this.position=position;
+    } 
+    public String getLiteral()
+    {
+        return this.literal;
     }
     public String getValue()
     {
@@ -26,60 +34,16 @@ public class Lexeme
     {
         return token;
     }
-    public Snippet getSnippet()
-    {
-        return this.snippet;
-    }
-    public boolean isOperator(String text)
-    {
-        if (this.token!=Token.OPERATOR)
-        {
-            return false;
-        }
-        return this.value.equals(text);
-    }
-    public boolean isPunctuator(String text)
-    {
-        if (this.token!=Token.PUNCTUATOR)
-        {
-            return false;
-        }
-        return this.value.equals(text);
-    }
-    public boolean isString(String text)
-    {
-        if (this.token!=Token.STRING)
-        {
-            return false;
-        }
-        return this.value.equals(text);
-    }
-    public boolean isCaseInsenstiveWord(String text)
-    {
-        if (this.token!=Token.TEXT)
-        {
-            return false;
-        }
-        return this.value.equalsIgnoreCase(text);
-    }
-    public boolean isText(String text)
-    {
-        if (this.token!=Token.TEXT)
-        {
-            return false;
-        }
-        return this.value.equals(text);
-    }
-    public boolean isError()
-    {
-        return this.token==Token.ERROR;
-    }
-    public boolean isToken(Token token)
-    {
-        return (this.token==token);
-    }
     public String getModifier()
     {
         return this.modifier;
+    }
+    public int getPosition()
+    {
+        return position;
+    }
+    public Source getSource()
+    {
+        return source;
     }
 }

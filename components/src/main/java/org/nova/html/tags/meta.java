@@ -24,6 +24,11 @@ public class meta extends GlobalEventTagElement<meta>
     {
         return attr("http-equiv",http_equiv);
     }
+    public meta http_equiv_content(http_equiv http_equiv,String content)
+    {
+        attr("http-equiv",http_equiv);
+        return attr("content",content);
+    }
     public meta name(name name)
     {
         return attr("name",name);

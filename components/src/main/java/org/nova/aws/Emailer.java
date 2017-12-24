@@ -10,6 +10,7 @@ import javax.mail.internet.MimeMessage;
 
 import org.nova.logging.Item;
 import org.nova.logging.Logger;
+import org.nova.tracing.Trace;
 
 public class Emailer
 {
@@ -20,7 +21,7 @@ public class Emailer
     final int port;
     final Session session; 
     final Logger logger;
-    public Emailer(String from,String username,String password,String host,int port,Logger logger)
+    public Emailer(String from,String username,String password,String host,int port,int timeout,Logger logger)
     {
         this.username=username;
         this.password=password;
@@ -32,6 +33,8 @@ public class Emailer
         Properties props=System.getProperties();
         props.put("mail.transport.protocol", "smtps");
         props.put("mail.smtp.port", port); 
+        props.put("mail.smtp.connectiontimeout", timeout);
+        props.put("mail.smtp.timeout", timeout);
         
         // Set properties indicating that we want to use STARTTLS to encrypt the connection.
         // The SMTP session will begin on an unencrypted connection, and then the client
@@ -43,49 +46,42 @@ public class Emailer
         // Create a Session object to represent a mail session with the specified properties. 
         this.session = Session.getDefaultInstance(props);
     }
-    public void send(String to,String subject,String content,String mediaType) throws Throwable
+    public void send(Trace parent,String to,String subject,String content,String mediaType) throws Throwable
     {
-        send(this.from,to,subject,content,mediaType);
+        send(parent,this.from,to,subject,content,mediaType);
     }    
-    public void send(String from,String to,String subject,String content,String mediaType) throws Throwable
+    public void send(Trace parent,String from,String to,String subject,String content,String mediaType) throws Throwable
     {
         // Create a message with the specified information. 
 
-        MimeMessage msg = new MimeMessage(this.session);
-        msg.setFrom(new InternetAddress(from));
-        msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
-        msg.setSubject(subject);
-        msg.setContent(content,mediaType);
-            
-        // Create a transport.        
-        Transport transport = this.session.getTransport();
-        // Send the message.
-        try
-        {
-//            System.out.println("Attempting to send an email through the Amazon SES SMTP interface...");
-            
-            // Connect to Amazon SES using the SMTP username and password you specified above.
-            transport.connect(this.host, this.username, this.password);
-            
-            // Send the email.
-            transport.sendMessage(msg, msg.getAllRecipients());
-//            System.out.println("Email sent!");
-            this.logger.log("Emailer",new Item("from",from),new Item("to",to),new Item("subject",subject),new Item("mediaType",mediaType),new Item("content",content));
-        }
-        /*
-        catch (Exception ex) 
-        {
-            System.out.println("The email was not sent.");
-            System.out.println("Error message: " + ex.getMessage());
-        }
-        */
-        finally
-        {
-            // Close and terminate the connection.
-
-            transport.close();
-        }
         
+        try (Trace trace=new Trace(parent,"Emailer.send"))
+        {
+            trace.setDetails("from:"+from+",to:"+to+",subject:"+subject);
+            MimeMessage msg = new MimeMessage(this.session);
+            msg.setFrom(new InternetAddress(from));
+            msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
+            msg.setSubject(subject);
+            msg.setContent(content,mediaType);
+                
+            // Create a transport.        
+            Transport transport = this.session.getTransport();
+            this.logger.log("Emailer",new Item("from",from),new Item("to",to),new Item("subject",subject),new Item("mediaType",mediaType),new Item("content",content));
+            try
+            {
+                transport.connect(this.host, this.username, this.password);
+                transport.sendMessage(msg, msg.getAllRecipients());
+            }
+            catch (Throwable t) 
+            {
+                this.logger.log(t);
+                trace.close(t);
+            }
+            finally
+            {
+                transport.close();
+            }
+        }        
     }
     
 }

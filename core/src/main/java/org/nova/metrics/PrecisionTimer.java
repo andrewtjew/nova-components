@@ -13,7 +13,7 @@ public class PrecisionTimer
 	{
 		this.startNs=System.nanoTime();
 	}
-	public long getCurrentElapsed()
+	public long getCurrentElapsedNs()
 	{
 		return System.nanoTime()-this.startNs;
 	}

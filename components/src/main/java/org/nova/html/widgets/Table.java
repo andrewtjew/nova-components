@@ -35,9 +35,9 @@ public class Table extends table
         return tbody;
     }
     
-    public Table setHeadRow(tr tr)
+    public Table setHeadRow(Row row)
     {
-        this.thead.setInner(tr);
+        this.thead.setInner(row);
         return this;
     }
     public Table setHeadRowItems(Object...objects)
@@ -45,9 +45,9 @@ public class Table extends table
         this.thead.addInner(new Row().add(objects));
         return this;
     }
-    public Table setFootRow(tr tr)
+    public Table setFootRow(Row row)
     {
-        this.tfoot.setInner(tr);
+        this.tfoot.setInner(row);
         return this;
     }
     public Table setFootRowItems(Object...objects)
@@ -55,9 +55,9 @@ public class Table extends table
         this.tfoot.addInner(new Row().add(objects));
         return this;
     }
-    public Table addBodyRow(tr tr)
+    public Table addBodyRow(Row row)
     {
-        this.tbody.addInner(tr);
+        this.tbody.addInner(row);
         return this;
     }
     public Table addBodyRowItems(Object...objects)

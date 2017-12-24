@@ -1,5 +1,7 @@
 package org.nova.http.server;
 
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 public class Queries
@@ -16,6 +18,11 @@ public class Queries
     public String getValue(String name)
     {
         return this.request.getParameter(name);
+    }
+    public String[] getNames()
+    {
+        Set<String> set=this.request.getParameterMap().keySet();
+        return set.toArray(new String[set.size()]);
     }
     
 }

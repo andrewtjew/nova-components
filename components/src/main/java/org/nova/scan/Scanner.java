@@ -1,8 +1,8 @@
-package org.nova.lexing;
+package org.nova.scan;
 
 import javax.swing.text.html.HTMLDocument.HTMLReader.CharacterAction;
 
-import org.nova.lexing.Lexeme;
+import org.nova.scan.Lexeme;
 import org.nova.test.Testing;
 
 public class Scanner

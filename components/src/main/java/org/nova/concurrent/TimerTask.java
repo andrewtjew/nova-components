@@ -2,6 +2,7 @@ package org.nova.concurrent;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Timer;
 
 import org.nova.concurrent.TimerScheduler.Key;
@@ -144,76 +145,107 @@ public class TimerTask
 
         case YEAR:
         {
-           LocalDateTime now=LocalDateTime.now();
+           ZonedDateTime now=ZonedDateTime.now(ZoneOffset.UTC);
            long currentTimeMillis=System.currentTimeMillis();
            int days=now.getDayOfYear()+1;
-           LocalDateTime next=now.minusDays(days).minusHours(now.getHour()).minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusYears(1);
-           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
-           this.due=currentTimeMillis+millis+this.offset;
+           ZonedDateTime next=now.minusDays(days).minusHours(now.getHour()).minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano());
+           
+           this.due=next.toInstant().toEpochMilli()+this.offset;
+           if (this.due<currentTimeMillis)
+           {
+               next=next.plusYears(1);
+               this.due=next.toInstant().toEpochMilli()+this.offset;
+           }
         }
            break;
 
         case MONTH:
         {
-           LocalDateTime now=LocalDateTime.now();
+            ZonedDateTime now=ZonedDateTime.now(ZoneOffset.UTC);
            long currentTimeMillis=System.currentTimeMillis();
            int days=now.getDayOfMonth()-1;
-           LocalDateTime next=now.minusDays(days).minusHours(now.getHour()).minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusMonths(1);
-           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
-           this.due=currentTimeMillis+millis+this.offset;
+           ZonedDateTime next=now.minusDays(days).minusHours(now.getHour()).minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano());
+           
+           this.due=next.toInstant().toEpochMilli()+this.offset;
+           if (this.due<currentTimeMillis)
+           {
+               next=next.plusMonths(1);
+               this.due=next.toInstant().toEpochMilli()+this.offset;
+           }
         }
            break;
 
         case WEEK:
         {
-           LocalDateTime now=LocalDateTime.now();
+           ZonedDateTime now=ZonedDateTime.now(ZoneOffset.UTC);
            long currentTimeMillis=System.currentTimeMillis();
            int day=now.getDayOfWeek().getValue();
-           LocalDateTime next=now.minusHours(now.getHour()).minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusDays(7-day);
-           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
-           this.due=currentTimeMillis+millis+this.offset;
+           ZonedDateTime next=now.minusHours(now.getHour()).minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).minusDays(day);
+    
+           this.due=next.toInstant().toEpochMilli()+this.offset;
+           if (this.due<currentTimeMillis)
+           {
+               next=next.plusDays(7);
+               this.due=next.toInstant().toEpochMilli()+this.offset;
+           }
         }
            break;
 
         case DAY:
         {
-           LocalDateTime now=LocalDateTime.now();
+           ZonedDateTime now=ZonedDateTime.now(ZoneOffset.UTC);
            long currentTimeMillis=System.currentTimeMillis();
-           LocalDateTime next=now.minusHours(now.getHour()).minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusDays(1);
-           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
-           this.due=currentTimeMillis+millis+this.offset;
+           ZonedDateTime next=now.minusHours(now.getHour()).minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano());
+           this.due=next.toInstant().toEpochMilli()+this.offset;
+           if (this.due<currentTimeMillis)
+           {
+               next=next.plusDays(1);
+               this.due=next.toInstant().toEpochMilli()+this.offset;
+           }
         }
            break;
            
         case HOUR:
         {
-           LocalDateTime now=LocalDateTime.now();
+           ZonedDateTime now=ZonedDateTime.now(ZoneOffset.UTC);
            long currentTimeMillis=System.currentTimeMillis();
-           LocalDateTime next=now.minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusHours(1);
-           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
-           this.due=currentTimeMillis+millis+this.offset;
+           ZonedDateTime next=now.minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano());
+           this.due=next.toInstant().toEpochMilli()+this.offset;
+           if (this.due<currentTimeMillis)
+           {
+               next=next.plusHours(1);
+               this.due=next.toInstant().toEpochMilli()+this.offset;
+           }
         }
            break;
            
         case HALF_HOUR:
         {
-           LocalDateTime now=LocalDateTime.now();
+           ZonedDateTime now=ZonedDateTime.now(ZoneOffset.UTC);
            long currentTimeMillis=System.currentTimeMillis();
-           int add=(now.getMinute()/30)*30+30;
-           LocalDateTime next=now.minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusMinutes(add);
-           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
-           this.due=currentTimeMillis+millis+this.offset;
+           int add=(now.getMinute()/30)*30;
+           ZonedDateTime next=now.minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusMinutes(add);
+           this.due=next.toInstant().toEpochMilli()+this.offset;
+           if (this.due<currentTimeMillis)
+           {
+               next=next.plusMinutes(30);
+               this.due=next.toInstant().toEpochMilli()+this.offset;
+           }
         }
            break;
 
         case QUARTER_HOUR:
         {
-           LocalDateTime now=LocalDateTime.now();
+           ZonedDateTime now=ZonedDateTime.now(ZoneOffset.UTC);
            long currentTimeMillis=System.currentTimeMillis();
-           int add=(now.getMinute()/15)*15+15;
-           LocalDateTime next=now.minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusMinutes(add);
-           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
-           this.due=currentTimeMillis+millis+this.offset;
+           int add=(now.getMinute()/15)*15;
+           ZonedDateTime next=now.minusMinutes(now.getMinute()).minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusMinutes(add);
+           this.due=next.toInstant().toEpochMilli()+this.offset;
+           if (this.due<currentTimeMillis)
+           {
+               next=next.plusMinutes(15);
+               this.due=next.toInstant().toEpochMilli()+this.offset;
+           }
         }
            break;
            
@@ -221,9 +253,13 @@ public class TimerTask
         {
            LocalDateTime now=LocalDateTime.now();
            long currentTimeMillis=System.currentTimeMillis();
-           LocalDateTime next=now.minusSeconds(now.getSecond()).minusNanos(now.getNano()).plusMinutes(1);
-           long millis=next.toInstant(ZoneOffset.UTC).toEpochMilli()-now.toInstant(ZoneOffset.UTC).toEpochMilli();
-           this.due=currentTimeMillis+millis+this.offset;
+           LocalDateTime next=now.minusSeconds(now.getSecond()).minusNanos(now.getNano());
+           this.due=next.toInstant(ZoneOffset.UTC).toEpochMilli()+this.offset;
+           if (this.due<currentTimeMillis)
+           {
+               next=next.plusMinutes(1);
+               this.due=next.toInstant(ZoneOffset.UTC).toEpochMilli()+this.offset;
+           }
         }
            break;
            
