@@ -708,6 +708,7 @@ class RequestHandlerMap
 	    boolean logRequestContent=true;
         boolean logResponseHeaders=true;
         boolean logResponseContent=true;
+        boolean logRequestParameters=true;
         
         PathAndQueryBuilder path=new PathAndQueryBuilder();
         if (root!=null)
@@ -736,6 +737,7 @@ class RequestHandlerMap
 	        {
     	        logLastRequestsInMemory=handlerAnnotations.log.lastRequestsInMemory();
     	        logRequestHeaders=handlerAnnotations.log.requestHeaders();
+    	        logRequestParameters=handlerAnnotations.log.requestParameters();
     	        logRequestContent=handlerAnnotations.log.requestContent();
     	        logResponseHeaders=handlerAnnotations.log.responseHeaders();
     	        logResponseContent=handlerAnnotations.log.responseContent();
@@ -755,7 +757,7 @@ class RequestHandlerMap
 	    }
         RequestHandler requestHandler = new RequestHandler(object, method, httpMethod, fullPath, handlerFilters.toArray(new Filter[handlerFilters.size()]),
                 parameterInfos.toArray(new ParameterInfo[parameterInfos.size()]), contentDecoderMap, contentEncoderMap, contentReaderMap, contentWriterMap,
-                log,logRequestHeaders,logRequestContent,logResponseHeaders,logResponseContent,logLastRequestsInMemory,
+                log,logRequestHeaders,logRequestParameters,logRequestContent,logResponseHeaders,logResponseContent,logLastRequestsInMemory,
                 true);
         add(httpMethod, fullPath, requestHandler);
 	}

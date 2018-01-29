@@ -15,27 +15,68 @@ public class WsUtils
 			String header=names.nextElement();
 			sb.append(header).append(":");
 			Enumeration<String> values=request.getHeaders(header);
+			boolean needSeperator=false;
 			while (values.hasMoreElements())
 			{
+			    if (needSeperator)
+			    {
+			        sb.append(";");
+			    }
+			    else
+			    {
+			        needSeperator=true;
+			    }
 				String value=values.nextElement();
 				sb.append(value);
-				sb.append(";");
 			}
 			sb.append("\r\n");
 		}
 		return sb.toString();
 	}
+    public static String getRequestParameters(HttpServletRequest request)
+    {
+        StringBuilder sb=new StringBuilder();
+        Enumeration<String> names=request.getParameterNames();
+        while (names.hasMoreElements())
+        {
+            String name=names.nextElement();
+            sb.append(name).append(":");
+            boolean needSeperator=false;
+            for (String value:request.getParameterValues(name))
+            {
+                if (needSeperator)
+                {
+                    sb.append(";");
+                }
+                else
+                {
+                    needSeperator=true;
+                }
+                sb.append(value);
+            }
+            sb.append("\r\n");
+        }
+        return sb.toString();
+    }
 
 	public static String getResponseHeaders(HttpServletResponse response)
 	{
 		StringBuilder sb=new StringBuilder();
 		for (String header:response.getHeaderNames())
 		{
+            boolean needSeperator=false;
 			sb.append(header).append(":");
 			for (String value:response.getHeaders(header))
 			{
+                if (needSeperator)
+                {
+                    sb.append(";");
+                }
+                else
+                {
+                    needSeperator=true;
+                }
 				sb.append(value);
-				sb.append(";");
 			}
 			sb.append("\r\n");
 		}

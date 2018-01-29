@@ -1752,6 +1752,10 @@ public class ObjectMapper
 
     static public <OBJECT> OBJECT read(String text,Class<OBJECT> type) throws Throwable
     {
+        if ((text==null)||(text.length()==0))
+        {
+            return null;
+        }
         return read(text,type,true);
     }
     

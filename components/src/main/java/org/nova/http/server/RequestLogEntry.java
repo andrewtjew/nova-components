@@ -20,6 +20,7 @@ public class RequestLogEntry
 	final private String queryString;
     final String requestHeaders;
     final String responseHeaders;
+    final String requestParameters;
 	final int statusCode;
 	final String remoteEndPoint;
 	final String request;
@@ -51,6 +52,7 @@ public class RequestLogEntry
 		this.remoteEndPoint=request.getRemoteHost()+":"+request.getRemotePort();
         this.requestHeaders=WsUtils.getRequestHeaders(request);
         this.responseHeaders=WsUtils.getResponseHeaders(response);
+        this.requestParameters=WsUtils.getRequestParameters(request);
 	}
 
 	public Trace getTrace()
@@ -95,6 +97,10 @@ public class RequestLogEntry
     public String getRequestHeaders()
     {
         return requestHeaders;
+    }
+    public String getRequestParameters()
+    {
+        return requestParameters;
     }
 
     public String getResponseHeaders()

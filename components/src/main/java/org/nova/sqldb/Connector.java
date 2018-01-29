@@ -6,6 +6,8 @@ import java.util.List;
 import org.nova.collections.Pool;
 import org.nova.logging.Logger;
 import org.nova.metrics.CountMeter;
+import org.nova.metrics.LevelMeter;
+import org.nova.metrics.LongSizeMeter;
 import org.nova.metrics.RateMeter;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
@@ -269,6 +271,27 @@ public abstract class Connector
     public RateMeter getCallRate()
     {
         return callRate;
+    }
+    
+    public LevelMeter getAccessorsInUseMeter()
+    {
+        return this.pool.getInUseMeter();
+    }
+    public LevelMeter getWaitingForAcessorsMeter()
+    {
+        return this.pool.getWaitingMeter();
+    }
+    public CountMeter getAccessorsAvailableMeter()
+    {
+        return this.pool.getAvailableMeter();
+    }
+    public LongSizeMeter getAcessorsWaitNsMeter()
+    {
+        return this.pool.getWaitNsMeter();
+    }
+    public CountMeter getUsedMeter()
+    {
+        return this.pool.getUsedMeter();
     }
 
 }

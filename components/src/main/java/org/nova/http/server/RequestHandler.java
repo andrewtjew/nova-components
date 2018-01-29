@@ -28,6 +28,7 @@ public class RequestHandler
 	final private boolean public_;
     final private boolean log;
     final private boolean logRequestHeaders;
+    final private boolean logRequestParameters;
     final private boolean logRequestContent;
     final private boolean logResponseHeaders;
     final private boolean logResponseContent;
@@ -40,7 +41,7 @@ public class RequestHandler
 	final private LongRateMeter requestCompressedContentSizeMeter;
 	final private LongRateMeter responseCompressedContentSizeMeter;
 	
-	RequestHandler(Object object,Method method,String httpMethod,String path,Filter[] filters,ParameterInfo[] parameterInfos,	Map<String,ContentDecoder> contentDecoders,Map<String,ContentEncoder> contentEncoders,Map<String,ContentReader<?>> contentReaders,Map<String,ContentWriter<?>> contentWriters,boolean log,boolean logRequestHeaders,boolean logRequestContent,boolean logResponseHeaders,boolean logResponseContent,boolean logLastRequestsInMemory,boolean public_)
+	RequestHandler(Object object,Method method,String httpMethod,String path,Filter[] filters,ParameterInfo[] parameterInfos,	Map<String,ContentDecoder> contentDecoders,Map<String,ContentEncoder> contentEncoders,Map<String,ContentReader<?>> contentReaders,Map<String,ContentWriter<?>> contentWriters,boolean log,boolean logRequestHeaders,boolean logRequestParameters,boolean logRequestContent,boolean logResponseHeaders,boolean logResponseContent,boolean logLastRequestsInMemory,boolean public_)
 	{
 		this.object=object;
 		this.method=method;
@@ -62,6 +63,7 @@ public class RequestHandler
 		
 		this.log=log;
 		this.logRequestHeaders=logRequestHeaders;
+		this.logRequestParameters=logRequestParameters;
 		this.logRequestContent=logRequestContent;
         this.logResponseHeaders=logResponseHeaders;
         this.logResponseContent=logResponseContent;
@@ -193,6 +195,10 @@ public class RequestHandler
     public boolean isLogRequestContent()
     {
         return logRequestContent;
+    }
+    public boolean isLogRequestParameters()
+    {
+        return logRequestParameters;
     }
 
     public boolean isLogResponseHeaders()

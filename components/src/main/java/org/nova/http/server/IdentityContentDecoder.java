@@ -11,10 +11,12 @@ public class IdentityContentDecoder extends ContentDecoder
 {
 	static class Context extends DecoderContext
 	{
-		SizeInputStream inputStream;
-		Context(InputStream inputStream)
+		final SizeInputStream inputStream;
+		final private int contentLength; 
+		Context(InputStream inputStream,Integer contentLength)
 		{
 			this.inputStream=new SizeInputStream(inputStream);
+			this.contentLength=contentLength;
 		}
 		@Override
 		public InputStream getInputStream() throws Throwable
@@ -36,6 +38,11 @@ public class IdentityContentDecoder extends ContentDecoder
 		{
 			return this.inputStream.getContentSize();
 		}
+        @Override
+        public int getContentLength() throws Throwable
+        {
+            return this.contentLength;
+        }
 	}
 	@Override
 	public String getCoding()
@@ -46,7 +53,7 @@ public class IdentityContentDecoder extends ContentDecoder
 	@Override
 	public DecoderContext open(HttpServletRequest request,HttpServletResponse response) throws Throwable
 	{
-		return new Context(request.getInputStream());
+		return new Context(request.getInputStream(),request.getContentLength());
 	}
 
 }

@@ -108,10 +108,12 @@ public class JSONClient
 	{
 	    return new DisruptorTraceContext(parent, this.traceManager, this.logger, this.disruptor, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery,this.endPoint);
 	}
+	/*
     public <TYPE> JSONResponse<TYPE> get(Trace parent,String traceCategoryOverride,String pathAndQuery,Class<TYPE> responseContentType) throws Throwable
     {
-        return get(parent,traceCategoryOverride,pathAndQuery,responseContentType);
-    }	
+        return get(parent,traceCategoryOverride,pathAndQuery,responseContentType,null);
+    }
+    */	
     private <TYPE> JSONResponse<TYPE> processResponse(HttpResponse response,DisruptorTraceContext context,Class<TYPE> responseContentType) throws Throwable
     {
        String json=processResponse(response, context);
@@ -489,6 +491,7 @@ public class JSONClient
     
 	private String processResponse(HttpResponse response,DisruptorTraceContext context) throws Throwable
 	{
+        context.addLogItem(new Item("statusCode",response.getStatusLine().getStatusCode()));
         for (org.apache.http.Header header:response.getAllHeaders())
         {
             context.addLogItem(new Item("responseHeader:"+header.getName(),header.getValue()));
@@ -501,85 +504,6 @@ public class JSONClient
         return responseContent;
 	}
 	
-	/*
-    public TextResponse get(Trace parent,String traceCategoryOverride,String pathAndQuery) throws Exception
-    {
-        try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
-        {
-            HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
-            get.setHeader("Accept",this.contentType);
-            if (this.headers!=null)
-            {
-                for (Header header:this.headers)
-                {
-                    get.setHeader(header.getName(),header.getValue());
-                }
-            }
-            HttpResponse response=this.client.execute(get);
-            try
-            {
-                int statusCode=response.getStatusLine().getStatusCode();
-                if (statusCode>=300)
-                {
-                    return new TextResponse(statusCode, null,null);
-                }
-                org.apache.http.Header[] responseHeaders=response.getAllHeaders();
-                Header[] textResponseHeaders=new Header[responseHeaders.length];
-                for (int i=0;i<responseHeaders.length;i++)
-                {
-                    textResponseHeaders[i]=new Header(responseHeaders[i].getName(),responseHeaders[i].getValue());
-                }
-                return new TextResponse(statusCode,Utils.readString(response.getEntity().getContent()),textResponseHeaders);
-            }
-            finally
-            {
-                response.getEntity().getContent().close();
-            }
-        }       
-    }
-
-	public TextResponse post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content) throws Exception
-	{
-		try (Trace trace=new Trace(this.traceManager, parent, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery))
-		{
-			HttpPost post=new HttpPost(this.endPoint+pathAndQuery);
-			if (content!=null)
-			{
-				StringEntity entity=new StringEntity(ObjectMapper.write(content));
-				post.setEntity(entity);
-			}
-			if (this.headers!=null)
-			{
-				for (Header header:this.headers)
-				{
-					post.setHeader(header.getName(),header.getValue());
-				}
-			}
-			post.setHeader("Accept",this.contentType);
-			post.setHeader("Content-Type",this.contentType);
-			HttpResponse response=this.client.execute(post);
-			try
-			{
-				int statusCode=response.getStatusLine().getStatusCode();
-				if (statusCode>=300)
-				{
-					return new TextResponse(statusCode, null,null);
-				}
-                org.apache.http.Header[] responseHeaders=response.getAllHeaders();
-                Header[] textResponseHeaders=new Header[responseHeaders.length];
-                for (int i=0;i<responseHeaders.length;i++)
-                {
-                    textResponseHeaders[i]=new Header(responseHeaders[i].getName(),responseHeaders[i].getValue());
-                }
-                return new TextResponse(statusCode,Utils.readString(response.getEntity().getContent()),textResponseHeaders);
-			}
-			finally
-			{
-				response.getEntity().getContent().close();
-			}
-		}		
-	}
-	*/
 	public String getEndPoint()
 	{
 	    return this.endPoint;
@@ -627,7 +551,9 @@ public class JSONClient
                 try
                 {
                     IOUtils.copy(response.getEntity().getContent(), outputStream);
-                    return response.getStatusLine().getStatusCode();
+                    int statusCode=response.getStatusLine().getStatusCode();
+                    context.addLogItem(new Item("statusCode",statusCode));
+                    return statusCode;
                 }
                 finally
                 {

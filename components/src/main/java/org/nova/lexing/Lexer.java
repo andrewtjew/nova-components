@@ -8,59 +8,68 @@ import java.util.List;
 
 public class Lexer
 {
-    static class Operator
+    class OperatorTree
     {
-        final char[] letters;
-        final String value;
-        Operator(String value)
+        private HashMap<Character,OperatorTree> leaves;
+        
+        public OperatorTree()
         {
-            this.value=value;
-            if (value.length()>1)
-            {
-                this.letters=value.substring(1).toCharArray();
-            }
-            else
-            {
-                this.letters=null;
-            }
+            this.leaves=null;
         }
-        boolean match(char[] additionals,int additionalsLength)
+
+        public OperatorTree getLeave(char c)
         {
-            if (this.letters==null)
+            if (this.leaves==null)
             {
-                return true;
+                return null;
             }
-            for (int i=0;i<additionalsLength;i++)
-            {
-                if (this.letters[i]!=additionals[i])
-                {
-                    return false;
-                }
-                        
-            }
-            return true;
+            return this.leaves.get(c);
         }
-        boolean isSingle()
+
+        public boolean isEnd()
         {
-            return this.letters==null;
+            return this.leaves==null;
+        }
+        
+        public void add(String s)
+        {
+            build(s.toCharArray(),0);
+        }
+        
+        
+        private void build(char[] array,int index)
+        {
+            char c=array[index];
+            if (this.leaves==null)
+            {
+                this.leaves=new HashMap<>();
+            }
+            OperatorTree childNode=this.leaves.get(c);
+            if (childNode==null)
+            {
+                childNode=new OperatorTree();
+                this.leaves.put(c, childNode);
+            }
+            if (index<array.length-1)
+            {
+                childNode.build(array, index+1);;
+            }
         }
     }
     
     final private HashSet<String> separators;
-    final private HashMap<Character,ArrayList<Operator>> operarators;
     final private HashSet<String> keywords;
     final private Source source;
     
     final private String text;
     final private int length;
-    final private char[] operatorCharacters;
     private int position;
     private int mark;
     
     private ArrayList<Lexeme> lexemes;
-    private ArrayList<Fragment> comments;
-    private ArrayList<Fragment> extras;
-    
+    private ArrayList<Extra> comments;
+    private ArrayList<Extra> extras;
+    private final OperatorTree operatorTree;
     
     public Lexer(Source source,String[] separators,String[] operators,String[] keywords)
     {
@@ -72,32 +81,11 @@ public class Lexer
         {
             this.separators.add(separator);
         }
-        this.operarators=new HashMap<>();
-        int longest=0;
+        this.operatorTree=new OperatorTree();
         for (String operator:operators)
         {
-            char start=operator.charAt(0);
-            ArrayList<Operator> list=this.operarators.get(start);
-            if (list==null)
-            {
-                list=new ArrayList<>();
-                this.operarators.put(start, list);
-            }
-            list.add(new Operator(operator));
-            if (operator.length()>longest)
-            {
-                longest=operator.length();
-            }
-        }
-        if (longest>1)
-        {
-            this.operatorCharacters=new char[longest-1];
-        }
-        else
-        {
-            this.operatorCharacters=null;
-        }
-        
+            this.operatorTree.add(operator);
+        }        
         this.keywords=new HashSet<>();
         for (String keyword:keywords)
         {
@@ -142,7 +130,28 @@ public class Lexer
     {
         this.position-=amount;
     }
-    
+
+    private String matchOperator(char c)
+    {
+        OperatorTree node=this.operatorTree.getLeave(c);
+        if (node==null)
+        {
+            return null;
+        }
+        StringBuilder sb=new StringBuilder(c);
+        while (node.isEnd()==false)
+        {
+            c=nextCharacter();
+            node=node.getLeave(c);
+            if (node==null)
+            {
+                back(1);
+                break;
+            }
+            sb.append(c);
+        }
+        return sb.toString();
+    }
     
     public void process()
     {
@@ -167,42 +176,13 @@ public class Lexer
                 this.lexemes.add(produceLexeme(Token.SEPARATOR,Character.toString(c),0));
                 continue;
             }
-            List<Operator> operators=this.operarators.get(c);
-            if (operators!=null)
+            String operator=matchOperator(c);
+            if (operator!=null)
             {
-                this.operatorCharacters[0]=c;
-                Operator best=null;
-                for (Operator operator:operators)
-                {
-                    if (operator.isSingle())
-                    {
-                        best=operator;
-                    }
-                }
-                for (int i=1;i<this.operatorCharacters.length;i++)
-                {
-                    c=nextCharacter();
-                    if (c==0)
-                    {
-                        break;
-                    }
-                    this.operatorCharacters[i]=c;
-                    boolean anyMatches=false;
-                    for (Operator operator:operators)
-                    {
-                        if (operator.match(this.operatorCharacters, i+1))
-                        {
-                            best=operator;
-                            anyMatches=true;
-                        }
-                    }
-                    if (anyMatches==false)
-                    {
-                        break;
-                    }
-                }
-                this.lexemes.add(produceLexeme(Token.OPERATOR,new String(this.operatorCharacters,0,length),0));
+                this.lexemes.add(produceLexeme(Token.OPERATOR,operator,0));
+                continue;
             }
+            
         }
     }
 
@@ -210,17 +190,7 @@ public class Lexer
     {
         return new Lexeme(this.source,this.text.substring(this.mark, this.position-back),token,value,this.mark);
     }
-    
-    private Fragment produceFragment(int forward,int back)
-    {
-        return new Fragment(this.source,this.text.substring(this.mark+forward, this.position-back),this.mark);
-        
-    }
-    private Fragment produceFragment(int back)
-    {
-        return new Fragment(this.source,this.text.substring(this.mark, this.position-back),this.mark);
-        
-    }
+  
     
     private void produceSlashSlashComment() 
     {
@@ -231,7 +201,7 @@ public class Lexer
                 break;
             }
         }
-        this.comments.add(produceFragment(0));
+        this.comments.add(new Extra(this.source,ExtraNote.SINGLE_LINE_COMMENT,this.mark,this.position));
     }
     public void produceNestableSlashStarComment() 
     {
@@ -261,7 +231,7 @@ public class Lexer
                 {
                     if (level == 0)
                     {
-                        this.comments.add(produceFragment(-1));
+                        this.comments.add(new Extra(this.source,ExtraNote.MULTI_LINE_COMMENT,this.mark,this.position));
                         return;
                     }
                     level--;
@@ -276,7 +246,7 @@ public class Lexer
                 }
             }
         }
-        this.extras.add(produceFragment(0));
+        this.comments.add(new Extra(this.source,ExtraNote.UNTERMINATED_COMMENT,this.mark,this.text.length()));
     }
     
 }

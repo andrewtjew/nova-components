@@ -23,7 +23,10 @@ public class SizeInputStream extends InputStream
     @Override
     public int read(byte b[], int off, int len) throws IOException {
 		int read=this.inputStream.read(b,off,len);
-		this.contentSize+=read;
+		if (read>0)
+		{
+		    this.contentSize+=read;
+		}
 		return read;
     }
     @Override

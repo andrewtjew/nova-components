@@ -15,10 +15,10 @@ public class MultiException extends Exception
         {
             return null;
         }
-        NodeException[] nodeExceptions=new NodeException[throwables.length];
+        LinkException[] nodeExceptions=new LinkException[throwables.length];
         for (int i=0;i<throwables.length;i++)
         {
-            nodeExceptions[i]=new NodeException(i, throwables[i]);
+            nodeExceptions[i]=new LinkException(i, throwables[i]);
         }
         
         for (int i=0;i<nodeExceptions.length-1;i++)

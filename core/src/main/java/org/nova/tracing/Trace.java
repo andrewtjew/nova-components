@@ -148,16 +148,14 @@ public class Trace implements AutoCloseable
 				{
 					this.closeStackTrace=this.thread.getStackTrace();
 				}
+				long nowNs=System.nanoTime();
 				this.traceManager.close(this);
 				if (this.waiting)
 				{
-					this.wait+=System.nanoTime()-this.waitStart;
+					this.wait+=nowNs-this.waitStart;
 					this.waiting=false;
 				}
-				else
-				{
-					this.duration=System.nanoTime()-this.start;
-				}
+				this.duration=nowNs-this.start;
                 this.traceNode.update(this);
 				this.traceManager=null;
 			}

@@ -26,8 +26,14 @@ public class ServerApplicationRunner //
 {
     public static interface ServerApplicationInstantiator
     {
-        ServerApplication newServerApplication(CoreEnvironment coreEnvironment,HttpServer operatorServer) throws Throwable;
+        ServerApplication instantiate(CoreEnvironment coreEnvironment,HttpServer operatorServer) throws Throwable;
     }
+
+    public static void main(String[] args,ServerApplicationInstantiator instantiator)
+    {
+        new ServerApplicationRunner().run(args,instantiator);
+    }
+
     
     private Throwable startupException;
     
@@ -101,7 +107,7 @@ public class ServerApplicationRunner //
         try
         {
             showNotice(coreEnvironment.getLogger(),"New ServerApplication...");
-            serverApplication=instantiator.newServerApplication(coreEnvironment,operatorServer);
+            serverApplication=instantiator.instantiate(coreEnvironment,operatorServer);
         }
         catch (Throwable t)
         {

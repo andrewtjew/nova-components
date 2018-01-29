@@ -6,9 +6,10 @@ public enum Token
     SEPARATOR,
     TERMINATOR,
     KEYWORD,
-    IDENTIFIER,
+    WORD,
     STRING, 
     CHARACTER,
-    NUMBER,
+    INTEGER,
+    FLOAT,
     EXTRA,
 }

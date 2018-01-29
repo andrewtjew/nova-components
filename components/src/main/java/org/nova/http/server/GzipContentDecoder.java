@@ -17,12 +17,14 @@ public class GzipContentDecoder extends ContentDecoder
 		final private SizeInputStream uncompressedInputStream;
 		final private SizeInputStream compressedInputStream;
 		final private GZIPInputStream gzipInputStream;
+		final private int contentLength;
 		
-		Context(InputStream inputStream) throws IOException
+		Context(InputStream inputStream,int contentLength) throws IOException
 		{
 			this.compressedInputStream=new SizeInputStream(inputStream);
 			this.gzipInputStream=new GZIPInputStream(this.compressedInputStream);
 			this.uncompressedInputStream=new SizeInputStream(gzipInputStream);
+			this.contentLength=contentLength;
 		}
 		
 		@Override
@@ -48,6 +50,12 @@ public class GzipContentDecoder extends ContentDecoder
 		{
 			return this.compressedInputStream.getContentSize();
 		}
+
+        @Override
+        public int getContentLength() throws Throwable
+        {
+            return this.contentLength;
+        }
 	}
 	
 	@Override
@@ -59,7 +67,7 @@ public class GzipContentDecoder extends ContentDecoder
 	@Override
 	public DecoderContext open(HttpServletRequest request,HttpServletResponse response) throws IOException
 	{
-		return new Context(request.getInputStream());
+		return new Context(request.getInputStream(),request.getContentLength());
 	}
 
 }

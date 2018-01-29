@@ -168,6 +168,10 @@ public class Utils
     }
     public static String combine(String[] items,String seperator)
     {
+        if (items==null)
+        {
+            return "";
+        }
         StringBuilder sb=new StringBuilder();
         for (String item:items)
         {
@@ -710,9 +714,12 @@ public class Utils
 	public static int occurs(String string,String pattern)
 	{
 		int occurs=0;
-		for (int index=string.indexOf(pattern);index>=0;index=string.indexOf(pattern,index+pattern.length()))
+		if (string!=null)
 		{
-			occurs++;
+    		for (int index=string.indexOf(pattern);index>=0;index=string.indexOf(pattern,index+pattern.length()))
+    		{
+    			occurs++;
+    		}
 		}
 		return occurs;
 	}

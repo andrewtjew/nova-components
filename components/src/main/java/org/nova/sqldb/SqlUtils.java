@@ -3,6 +3,7 @@ package org.nova.sqldb;
 import java.sql.Timestamp;
 
 import org.nova.core.NameObject;
+import org.nova.html.enums.name;
 import org.nova.tracing.Trace;
 
 public class SqlUtils
@@ -137,11 +138,7 @@ public class SqlUtils
     {
         try (Accessor accessor=connector.openAccessor(parent))
         {
-            try (Transaction transaction=new Transaction(accessor, parent))
-            {
-                save(parent,categoryOverride,accessor,table,keyObject,activeStatusObject,inactiveStatusValue,nameObjects);
-                transaction.commit();
-            }
+            save(parent,categoryOverride,accessor,table,keyObject,activeStatusObject,inactiveStatusValue,nameObjects);
         }
     }
 
@@ -166,11 +163,15 @@ public class SqlUtils
         }
         sb.append(')');
 
-        accessor.executeUpdate(parent,categoryOverride,"UPDATE "+table+" SET "+activeStatusObject.getName()+"=? WHERE "+keyObject.getName()+"=?",
-                inactiveStatusValue,keyObject.getValue());
-        if (accessor.executeUpdate(parent, categoryOverride, sb.toString(),parameters)!=1)
+        try (Transaction transaction=new Transaction(accessor, parent))
         {
-            throw new Exception("Unable to save");
+            accessor.executeUpdate(parent,categoryOverride,"UPDATE "+table+" SET "+activeStatusObject.getName()+"=? WHERE "+keyObject.getName()+"=?",
+                    inactiveStatusValue,keyObject.getValue());
+            if (accessor.executeUpdate(parent, categoryOverride, sb.toString(),parameters)!=1)
+            {
+                throw new Exception("Unable to save");
+            }
+            transaction.commit();
         }
     }
 
@@ -178,12 +179,7 @@ public class SqlUtils
     {
         try (Accessor accessor=connector.openAccessor(parent))
         {
-            try (Transaction transaction=new Transaction(accessor, parent))
-            {
-                long key=saveAndGetLongKey(parent,categoryOverride,accessor,table,keyObject,activeStatusObject,inactiveStatusValue,nameObjects);
-                accessor.commit();
-                return key;
-            }
+            return saveAndGetLongKey(parent,categoryOverride,accessor,table,keyObject,activeStatusObject,inactiveStatusValue,nameObjects);
         }
     }
 
@@ -275,6 +271,172 @@ public class SqlUtils
         }
     }
     
+    static public void updateInsert(Trace parent,String categoryOverride,Connector connector,String table,NameObject[] keyObjects,NameObject[] nameObjects) throws Throwable
+    {
+        try (Accessor accessor=connector.openAccessor(parent))
+        {
+            updateInsert(parent,categoryOverride,accessor,table,keyObjects,nameObjects);
+        }
+    }
+    static public void updateInsert(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject[] keyObjects,NameObject[] nameObjects) throws Throwable
+    {
+        if (keyObjects.length==0)
+        {
+            throw new Exception();
+        }
+        StringBuilder update=new StringBuilder();
+        update.append("UPDATE "+table+"SET ");
+        Object[] updateParameters=new Object[nameObjects.length+keyObjects.length];
+        for (int i=0;i<nameObjects.length;i++)
+        {
+            NameObject nameObject=nameObjects[i];
+            updateParameters[i]=nameObject.getName();
+            if (i>0)
+            {
+                update.append(',');
+            }
+            update.append(nameObject.getName());
+            update.append("=?");
+        }
+        update.append(" WHERE ");
+        for (int i=0;i<keyObjects.length;i++)
+        {
+            if (i>0)
+            {
+                update.append(" AND ");
+            }
+            NameObject keyObject=keyObjects[i];
+            update.append(keyObject.getName()+"=?");
+            updateParameters[nameObjects.length+i]=keyObject.getValue();
+        }
+        
+        try (Transaction transaction=accessor.beginTransaction("updateInsert"))
+        {
+            if (accessor.executeUpdate(parent, categoryOverride!=null?"update@"+categoryOverride:null, updateParameters, update.toString())==0)
+            {
+                StringBuilder insert=new StringBuilder();
+                insert.append("INSERT INTO ").append(table).append(" (");
+                Object[] insertParameters=new Object[keyObjects.length+nameObjects.length];
+                for (int i=0;i<keyObjects.length;i++)
+                {
+                    NameObject keyObject=keyObjects[i];
+                    if (i>0)
+                    {
+                        insert.append(',');
+                    }
+                    insert.append(keyObject.getName());
+                    insertParameters[i]=keyObject.getValue();
+                }                
+                for (int i=0;i<nameObjects.length;i++)
+                {
+                    insert.append(',').append(nameObjects[i].getName());
+                    insertParameters[i+keyObjects.length]=nameObjects[i].getValue();
+                }
+                insert.append(") VALUES (");
+                for (int i=0;i<keyObjects.length+nameObjects.length;i++)
+                {
+                    if (i==0)
+                    {
+                        insert.append("?");
+                    }
+                    else
+                    {
+                        insert.append(",?");
+                    }
+                }
+                insert.append(')');
+
+                accessor.executeUpdate(parent, categoryOverride!=null?"insert@"+categoryOverride:null, insertParameters, insert.toString());
+            }
+            transaction.commit();
+        }
+    }
+    
+    static public void insertUpdate(Trace parent,String categoryOverride,Connector connector,String table,NameObject[] keyObjects,NameObject[] nameObjects) throws Throwable
+    {
+        try (Accessor accessor=connector.openAccessor(parent))
+        {
+            insertUpdate(parent,categoryOverride,accessor,table,keyObjects,nameObjects);
+        }
+    }
+    static public void insertUpdate(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject[] keyObjects,NameObject[] nameObjects) throws Throwable
+    {
+        if (keyObjects.length==0)
+        {
+            throw new Exception();
+        }
+        StringBuilder insert=new StringBuilder();
+        insert.append("INSERT INTO ").append(table).append(" (");
+        Object[] insertParameters=new Object[keyObjects.length+nameObjects.length];
+        for (int i=0;i<keyObjects.length;i++)
+        {
+            NameObject keyObject=keyObjects[i];
+            if (i>0)
+            {
+                insert.append(',');
+            }
+            insert.append(keyObject.getName());
+            insertParameters[i]=keyObject.getValue();
+        }                
+        for (int i=0;i<nameObjects.length;i++)
+        {
+            insert.append(',').append(nameObjects[i].getName());
+            insertParameters[i+keyObjects.length]=nameObjects[i].getValue();
+        }
+        insert.append(") VALUES (");
+        for (int i=0;i<keyObjects.length+nameObjects.length;i++)
+        {
+            if (i==0)
+            {
+                insert.append("?");
+            }
+            else
+            {
+                insert.append(",?");
+            }
+        }
+        insert.append(')');
+
+        try (Transaction transaction=accessor.beginTransaction("insertUpdate"))
+        {
+            try
+            {
+                accessor.executeUpdate(parent, categoryOverride!=null?"insert@"+categoryOverride:null, insertParameters, insert.toString());
+            }
+            catch (Throwable t)
+            {
+                StringBuilder update=new StringBuilder();
+                update.append("UPDATE "+table+" SET ");
+                Object[] updateParameters=new Object[nameObjects.length+keyObjects.length];
+                for (int i=0;i<nameObjects.length;i++)
+                {
+                    NameObject nameObject=nameObjects[i];
+                    if (i>0)
+                    {
+                        update.append(',');
+                    }
+                    update.append(nameObject.getName());
+                    update.append("=?");
+                    updateParameters[i]=nameObject.getValue();
+                }
+                update.append(" WHERE ");
+                for (int i=0;i<keyObjects.length;i++)
+                {
+                    if (i>0)
+                    {
+                        update.append(" AND ");
+                    }
+                    NameObject keyObject=keyObjects[i];
+                    update.append(keyObject.getName());
+                    update.append("=?");
+                    updateParameters[nameObjects.length+i]=keyObject.getValue();
+                }
+                accessor.executeUpdate(parent, categoryOverride!=null?"update@"+categoryOverride:null, updateParameters, update.toString());
+            }
+            transaction.commit();
+        }
+    }
+
     public static RowSet getFirstRowSet(Trace parent,Connector connector,String call,Param...params) throws Throwable
     {
         try (Accessor accessor=connector.openAccessor(parent))
@@ -284,4 +446,13 @@ public class SqlUtils
         }
     }
     
+    public static int getSelectCount(Trace parent,Accessor accessor,String table,String where,Object...params) throws Throwable
+    {
+        RowSet rowSet=accessor.executeQuery(parent, null, "SELECT count(*) as Size FROM "+table+" WHERE "+where,params);
+        if (rowSet.size()==0)
+        {
+            return 0;
+        }
+        return rowSet.getRow(0).getINTEGER(0);
+    }
 }

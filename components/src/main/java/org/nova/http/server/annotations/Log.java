@@ -12,6 +12,7 @@ public @interface Log
     boolean value() default true;
     boolean lastRequestsInMemory() default true;
     boolean requestHeaders() default true;
+    boolean requestParameters() default true;
     boolean requestContent() default true;
     boolean responseHeaders() default true;
     boolean responseContent() default true;

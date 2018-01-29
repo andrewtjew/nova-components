@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletException;
@@ -19,6 +20,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.nova.annotations.Description;
 import org.nova.collections.RingBuffer;
+import org.nova.core.Utils;
 import org.nova.http.Header;
 import org.nova.logging.Item;
 import org.nova.logging.LogEntry;
@@ -305,18 +307,12 @@ public class HttpServer
 		try
 		{
 		    
-		    //??? how does the following need to work???
-			DecoderContext decoderContext = null;
-			if ("application/x-www-form-urlencoded".equals(servletRequest.getParameter("Content-Type")))
-			{
-				decoderContext = getContentDecoder(servletRequest.getHeader("Content-Encoding"), handler).open(servletRequest, servletResponse);
-			}
-			else
-			{
+            DecoderContext decoderContext = null;
+            if ("application/x-www-form-urlencoded".equals(servletRequest.getParameter("Content-Type"))==false)
+            {
                 decoderContext = getContentDecoder(servletRequest.getHeader("Content-Encoding"), handler).open(servletRequest, servletResponse);
-			}
-			
-//			Object attribute=servletRequest.getAttribute("javax.servlet.request.X509Certificate");
+            }
+            //for "application/x-www-form-urlencoded" we cannot read the content, otherwise the request parameters will not be created.
 			
 			try 
 			{
@@ -431,33 +427,30 @@ public class HttpServer
                 items.add(new Item("remoteEndPoint",entry.remoteEndPoint));
                 items.add(new Item("request",entry.request));
                 items.add(new Item("statusCode",entry.statusCode));
+                items.add(new Item("queryString",entry.getQueryString()));
             }
             if ((handler.isLogRequestHeaders()&&entry.requestHeaders!=null))
             {
-                if ("application/x-www-form-urlencoded".equals(servletRequest.getParameter("Content-Type")))
-                {
-                    items.add(new Item("queryString",servletRequest.getQueryString()));
-                }
                 if (entry.requestHeaders!=null)
                 {
                     items.add(new Item("requestHeaders",entry.requestHeaders));
                 }
             }
-            if ((handler.isLogRequestContent()&&entry.requestContentText!=null))
-            {
+            if (handler.isLogRequestContent())
+            {                
                 if (entry.requestContentText!=null)
                 {
                     items.add(new Item("requestContent",entry.requestContentText));
                 }
             }
-            if ((handler.isLogResponseHeaders()&&entry.responseHeaders!=null))
+            if (handler.isLogResponseHeaders())
             {
                 if (entry.responseHeaders!=null)
                 {
                     items.add(new Item("responseHeaders",entry.responseHeaders));
                 }
             }
-            if ((handler.isLogResponseContent()&&entry.responseContentText!=null))
+            if (handler.isLogResponseContent())
             {
                 if (entry.responseContentText!=null)
                 {

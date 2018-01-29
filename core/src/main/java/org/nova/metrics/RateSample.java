@@ -16,7 +16,7 @@ public class RateSample
         this.createdMs=System.currentTimeMillis();
     }
 
-    public long getAllTimeCount()
+    public long getTotalCount()
     {
         return this.allTimeCount;
     }

@@ -2,6 +2,8 @@ package org.nova.utils;
 
 import java.net.NetworkInterface;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class NetUtils
 {
     public static String getLocalHostName() throws Exception
@@ -22,6 +24,16 @@ public class NetUtils
             sb.append(String.format("%02X", mac[i]));
         }
         return sb.toString();
+    }
+
+    public static String getClientClosestRemoteHost(HttpServletRequest request) throws Exception
+    {
+        String host=request.getHeader("x-forwarded-for");
+        if (host!=null)
+        {
+            return host;
+        }
+        return request.getRemoteHost();
     }
 
 }

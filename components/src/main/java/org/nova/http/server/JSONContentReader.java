@@ -22,8 +22,9 @@ public class JSONContentReader extends ContentReader<Object>
 		return "application/json";
 	}
 
+	int er=0;
 	@Override
-	public Object read(Context context, InputStream inputStream,Class<?> contentType) throws Throwable
+	public Object read(Context context, int contentLength,InputStream inputStream,Class<?> contentType) throws Throwable
 	{
 		String contentText=Utils.readString(inputStream, StandardCharsets.UTF_8);
 		context.setRequestContentText(contentText);

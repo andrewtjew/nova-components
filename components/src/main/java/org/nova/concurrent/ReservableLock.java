@@ -32,6 +32,23 @@ public class ReservableLock
         }        
     }
     
+    public boolean waitForUnlock(long timeout)
+    {
+        synchronized(this)
+        {
+            return Synchronization.waitForNoThrow(this, ()->{return this.object==null;},timeout);
+        }        
+    }
+
+    public void waitForUnlock()
+    {
+        synchronized(this)
+        {
+            Synchronization.waitForNoThrow(this, ()->{return this.object==null;});
+        }        
+    }
+
+    
     void releaseReservation()
     {
         synchronized(this)

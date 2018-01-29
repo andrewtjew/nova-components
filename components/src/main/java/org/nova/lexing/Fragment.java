@@ -1,5 +1,6 @@
 package org.nova.lexing;
 
+/*
 public class Fragment
 {
     private final String value;
@@ -25,3 +26,4 @@ public class Fragment
         return source;
     }
 }
+*/

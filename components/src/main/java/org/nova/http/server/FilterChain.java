@@ -39,27 +39,67 @@ public class FilterChain
 		{
 			return value;
 		}
-		else if ((type==int.class)||(type==Integer.class))
+		if (type==int.class)
 		{
 			return Integer.parseInt(value);
 		}
-		if ((type==long.class)||(type==Long.class))
+        if (type==Integer.class)
+        {
+            if (value.length()==0)
+            {
+                return null;
+            }
+            return Integer.parseInt(value);
+        }
+		if (type==long.class)
 		{
 			return Long.parseLong(value);
 		}
-		if ((type==short.class)||(type==Short.class))
+        if (type==Long.class)
+        {
+            if (value.length()==0)
+            {
+                return null;
+            }
+            return Long.parseLong(value);
+        }
+		if (type==short.class)
 		{
 			return Short.parseShort(value);
 		}
-		if ((type==float.class)||(type==Float.class))
+        if (type==Short.class)
+        {
+            if (value.length()==0)
+            {
+                return null;
+            }
+            return Short.parseShort(value);
+        }
+		if (type==float.class)
 		{
 			return Float.parseFloat(value);
 		}
-		if ((type==double.class)||(type==Double.class))
+        if (type==Float.class)
+        {
+            if (value.length()==0)
+            {
+                return null;
+            }
+            return Float.parseFloat(value);
+        }
+		if (type==double.class)
 		{
 			return Double.parseDouble(value);
 		}
-		if ((type==boolean.class)||(type==Boolean.class))
+        if (type==Double.class)
+        {
+            if (value.length()==0)
+            {
+                return null;
+            }
+            return Double.parseDouble(value);
+        }
+		if (type==boolean.class)
 		{
             if ("on".equals(value))
             {
@@ -67,12 +107,32 @@ public class FilterChain
             }
 		    return !("false".equals(value));
 		}
+        if (type==Boolean.class)
+        {
+            if (value.length()==0)
+            {
+                return null;
+            }
+            if ("on".equals(value))
+            {
+                return true;
+            }
+            return !("false".equals(value));
+        }
         if (type.isEnum())
         {
+            if (value.length()==0)
+            {
+                return null;
+            }
             return Enum.valueOf((Class<Enum>)type, value);
         }
         if (type==BigDecimal.class)
         {
+            if (value.length()==0)
+            {
+                return null;
+            }
             return new BigDecimal(value);
         }
         throw new Exception("Cannot parse parameter "+parameterInfo.getName());
@@ -105,7 +165,7 @@ public class FilterChain
 					reader=context.getContentReader();
 					if (reader!=null)
 					{
-						content=reader.read(context,this.decoderContext.getInputStream(),parameterInfo.getType());
+                        content=reader.read(context,this.decoderContext.getContentLength(),this.decoderContext.getInputStream(),parameterInfo.getType());
 					}
 					else
 					{

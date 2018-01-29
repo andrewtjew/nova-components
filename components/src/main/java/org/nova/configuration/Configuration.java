@@ -89,7 +89,7 @@ public class Configuration
 		ConfigurationItem item=getConfigurationItem(name);
 		if (item==null)
 		{
-			throw new Exception();
+			throw new Exception("No item for name="+name);
 		}
 		return item.getValue();
 	}

@@ -8,6 +8,7 @@ import org.nebula.sqlserver.DatabaseUpdatePermissions;
 import org.nebula.sqlserver.DatabaseUpdater;
 import org.nova.annotations.Description;
 import org.nova.configuration.Configuration;
+import org.nova.core.Utils;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.tags.em;
@@ -31,6 +32,10 @@ import org.nova.http.server.annotations.POST;
 import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.QueryParam;
 import org.nova.metrics.CountMeter;
+import org.nova.metrics.LevelMeter;
+import org.nova.metrics.LevelSample;
+import org.nova.metrics.LongSizeMeter;
+import org.nova.metrics.LongSizeSample;
 import org.nova.metrics.RateMeter;
 import org.nova.metrics.RateSample;
 import org.nova.sqldb.Connector;
@@ -50,7 +55,8 @@ public class ConnectorController
     {
         this.connectors=new HashMap<>();
         this.application=application;
-        this.application.getMenuBar().add("/operator/connector/viewAll", "Connectors","View All");
+        this.application.getMenuBar().add("/operator/connectors/view", "Connectors","View All");
+        this.application.getMenuBar().add("/operator/connector/pools/view", "Connectors","View Pools");
         this.application.getOperatorServer().registerHandlers(this);
     }
 
@@ -67,18 +73,6 @@ public class ConnectorController
         track(connector.getName(),connector);
     }
     
-    private void write(NameValueList list,String name,CountMeter meter)
-    {
-        list.add(name, meter.getCount());
-    }
-
-    private void write(Row row,RateMeter meter,double minimalResetDurationS)
-    {
-        RateSample sample=meter.sample(minimalResetDurationS);
-        row.add(String.format("%.3f",sample.getWeightedRate()));
-        row.add(sample.getCount());
-    }
-
     public Connector initializeConnector(Trace parent,String configurationNameFragment) throws Throwable
     {
         Configuration configuration=this.application.getConfiguration();
@@ -96,12 +90,12 @@ public class ConnectorController
 
 
     @GET
-    @Path("/operator/connector/viewAll")
+    @Path("/operator/connectors/view")
     public Element viewAll(@QueryParam("minimalResetDurationS") @DefaultValue("10.0") double minimalResetDurationS) throws Throwable
     {
-        OperatorPage page=this.application.buildOperatorPage("View All Connectors");
+        OperatorPage page=this.application.buildOperatorPage("View Connector Stats");
         DataTable table=page.content().returnAddInner(new DataTable(page.head()));
-        table.lengthMenu(-1,20,40,60);
+        table.lengthMenu(-1,40,60,100);
         Row row=new Row();
         row.add("Name");
         row.add(new TitleText("Row updated rate (per second)","Updated"));
@@ -140,5 +134,111 @@ public class ConnectorController
 
         return page;
     }
+    
+    private void write(NameValueList list,String name,CountMeter meter)
+    {
+        list.add(name, meter.getCount());
+    }
 
+    private void write(Row row,RateMeter meter,double minimalResetDurationS)
+    {
+        RateSample sample=meter.sample(minimalResetDurationS);
+        row.add(String.format("%.3f",sample.getWeightedRate()));
+        row.add(sample.getCount());
+    }
+
+    private void write(Row row,LevelMeter meter)
+    {
+        LevelSample sample=meter.sample();
+        row.add(sample.getLevel());
+        row.add(sample.getMaxLevel());
+        long min=sample.getMaxLevelInstantMs();
+        if (min>0)
+        {
+            row.add(Utils.millisToLocalDateTime(sample.getMaxLevelInstantMs()));
+        }
+        else
+        {
+            row.add("");
+        }
+    }
+
+    private void write(Row row,LongSizeMeter meter,long used)
+    {
+        LongSizeSample sample=meter.sample();
+        long waits=sample.getCount();
+        row.add(waits);
+        if (used>0)
+        {
+            double percentage=(waits*100.0)/used;
+            row.add(String.format("%.3f",percentage));
+        }
+        else
+        {
+            row.add("");
+        }
+        if (waits>0)
+        {
+            row.add(String.format("%.3f",sample.getAverage()/1.0e6));
+            row.add(String.format("%.3f",sample.getStandardDeviation()/1.0e6));
+            row.add(String.format("%.3f",sample.getMaximum()/1.0e6));
+            row.add(Utils.millisToLocalDateTime(sample.getMaximumInstantMs()));
+        }
+        else
+        {
+            row.add("");
+            row.add("");
+            row.add("");
+            row.add("");
+        }
+    }
+
+    @GET
+    @Path("/operator/connector/pools/view")
+    public Element viewUsage() throws Throwable
+    {
+        OperatorPage page=this.application.buildOperatorPage("View Connector Pools");
+        DataTable table=page.content().returnAddInner(new DataTable(page.head()));
+        table.lengthMenu(-1,40,60,100);
+        Row row=new Row();
+        row.add("Name");
+        row.add(new TitleText("Accessors available in pool","Available"));
+        row.add(new TitleText("Accessors in use","In Use"));
+        row.add(new TitleText("Max accessors in use","Max"));
+        row.add(new TitleText("Instant when max accessors are in use","Max Instant"));
+        row.add(new TitleText("Threads waiting for accessors","Waiting"));
+        row.add(new TitleText("Maximum threads waiting for accessors","Max"));
+        row.add(new TitleText("Instant when maximum threads are waiting for accessors","Max Waiting Instant"));
+        row.add(new TitleText("Number of times connector is used","Used"));
+        row.add(new TitleText("Number of times when waiting for accessor occurs","Waits"));
+        row.add(new TitleText("Percentage times waits occurred","%"));
+        row.add(new TitleText("Average duration for accessor (ms)","Duration"));
+        row.add(new TitleText("Standard deviation wait for accessor (ms)","StdDev"));
+        row.add(new TitleText("Maximum wait for accessor (ms)","Max"));
+        row.add(new TitleText("Instant when maximum wait occurs","Max Duration Instant"));
+        table.setHeadRow(row);
+
+        synchronized(this)
+        {
+            for (Entry<String, Connector> entry:this.connectors.entrySet())
+            {
+                Connector connector=entry.getValue();
+                row=new Row();
+                row.add(entry.getKey());
+
+                CountMeter availableMeter=connector.getAccessorsAvailableMeter();
+                row.add(availableMeter.getCount());
+                
+                write(row,connector.getAccessorsInUseMeter());
+                write(row,connector.getWaitingForAcessorsMeter());
+                long used=connector.getUsedMeter().getCount();
+                row.add(used);
+                write(row,connector.getAcessorsWaitNsMeter(),used);
+                
+                table.addBodyRow(row);
+            }
+        }
+
+        return page;
+    }
 }

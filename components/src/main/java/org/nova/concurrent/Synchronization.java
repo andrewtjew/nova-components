@@ -147,6 +147,19 @@ public class Synchronization
 	    }
     }
 
+	public static boolean waitFor(Trace trace,Object synchronizationObject,Predicate predicate,long timeout) throws Throwable
+    {
+        trace.beginWait();
+        try
+        {
+            return waitFor(synchronizationObject,predicate,timeout);
+        }
+        finally
+        {
+            trace.endWait();
+        }
+    }
+
 	public static void sleep(Object synchronizationObject,long timeout)
     {
 	    if (timeout<0)

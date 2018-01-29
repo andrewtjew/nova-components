@@ -239,6 +239,7 @@ public class ServerApplicationPages
         this.serverApplication = serverApplication;
 
         MenuBar menuBar=serverApplication.getMenuBar();
+        menuBar.add("/","Environment","Home");
         menuBar.add("/operator/application/configuration","Environment","Configuration");
         menuBar.add("/operator/environment/statusBoard","Environment","Status Board");
         menuBar.addSeparator("Environment");       
@@ -2063,7 +2064,7 @@ public class ServerApplicationPages
         Level2Panel panel=page.content().returnAddInner(new Level2Panel(page.head(),"Trace Stats"));
         NameValueList list=panel.content().returnAddInner(new NameValueList());
         list.add("Rate", format_3(sample.getRate())+"");
-        list.add("Total", sample.getAllTimeCount());
+        list.add("Total", sample.getTotalCount());
         list.add("CurrentTracesOverflowCount", this.serverApplication.getTraceManager().getCurrentTracesOverflowCount());
         return page;
     }
@@ -2468,6 +2469,7 @@ public class ServerApplicationPages
         writeTrace(head,panel.content(),entry.getTrace(),false);
         
         writeHeaders(head,"Request Headers",panel.content(),entry.getRequestHeaders());
+        writeHeaders(head,"Request Parameters",panel.content(),entry.getRequestParameters());
         writeContent(head,"Request Content",panel.content(),entry.getRequestContentText(),false);
 
         writeHeaders(head,"Response Headers",panel.content(),entry.getResponseHeaders());
@@ -3950,6 +3952,20 @@ public class ServerApplicationPages
         .add("Started",Utils.millisToLocalDateTimeString(this.serverApplication.getStartTime()))
         .add("Current",Utils.millisToLocalDateTimeString(now))
         .add("Uptime",Utils.millisToNiceDurationString(now - this.serverApplication.getStartTime()));
+     
+        try
+        {
+            String info=Utils.readTextFile("./build-info.txt");
+            page.content().addInner("build-info:");
+            page.content().addInner(new textarea().style("width:100%;").readonly().rows(8).addInner(info));
+        }
+        catch (Throwable t)
+        {
+            page.content().addInner("No build-info available.");
+        }
+        
+        
+        
         return page;
     }
 
