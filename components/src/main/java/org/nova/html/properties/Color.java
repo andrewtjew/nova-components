@@ -24,7 +24,6 @@ public class Color
         return new Color("hsl("+hue+","+saturation+"%,"+lightness+"%)");
     }
     
-    
     @Override
     public String toString()
     {

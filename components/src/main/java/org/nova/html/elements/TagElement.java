@@ -28,6 +28,7 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
         }
         return (ELEMENT) this;
     }
+
     @SuppressWarnings("unchecked")
     public ELEMENT attr(String name)
     {

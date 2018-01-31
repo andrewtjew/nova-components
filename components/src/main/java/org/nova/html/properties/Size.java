@@ -27,4 +27,15 @@ public class Size
     {
         return unit;
     }
+    
+    /*
+    static public Size rem(double size)
+    {
+    	return new Size(size,org.nova.html.properties.unit.rem);
+    }
+    static public Size px(double size)
+    {
+        return new Size(size,org.nova.html.properties.unit.px);
+    }
+    */
 }
