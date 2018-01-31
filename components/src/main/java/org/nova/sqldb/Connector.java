@@ -7,7 +7,7 @@ import org.nova.collections.Pool;
 import org.nova.logging.Logger;
 import org.nova.metrics.CountMeter;
 import org.nova.metrics.LevelMeter;
-import org.nova.metrics.LongSizeMeter;
+import org.nova.metrics.LongValueMeter;
 import org.nova.metrics.RateMeter;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
@@ -273,25 +273,34 @@ public abstract class Connector
         return callRate;
     }
     
-    public LevelMeter getAccessorsInUseMeter()
+    public int getAccessorsInUse()
     {
-        return this.pool.getInUseMeter();
+        return this.pool.getInUse();
     }
     public LevelMeter getWaitingForAcessorsMeter()
     {
         return this.pool.getWaitingMeter();
     }
-    public CountMeter getAccessorsAvailableMeter()
+    public int getAccessorsAvailable()
     {
-        return this.pool.getAvailableMeter();
+        return this.pool.getAvailable();
     }
-    public LongSizeMeter getAcessorsWaitNsMeter()
+    public LongValueMeter getAcessorsWaitNsMeter()
     {
         return this.pool.getWaitNsMeter();
     }
-    public CountMeter getUsedMeter()
+    public RateMeter getUseMeter()
     {
-        return this.pool.getUsedMeter();
+        return this.pool.getUseMeter();
+    }
+    public Accessor[] getSnapshotOfAccessorsInUse()
+    {
+        List<Accessor> list=this.pool.getSnapshotOfInUseResources();
+        return list.toArray(new Accessor[list.size()]);
+    }
+    public void setCaptureActivateStackTrace(boolean captureActivateStackTrace)
+    {
+        this.pool.setCaptureActivateStackTrace(captureActivateStackTrace);
     }
 
 }

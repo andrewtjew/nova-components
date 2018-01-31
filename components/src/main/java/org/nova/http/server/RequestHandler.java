@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.nova.metrics.LongRateMeter;
-import org.nova.metrics.LongRateSample;
+import org.nova.metrics.LongValueMeter;
+import org.nova.metrics.LongValueSample;
 import org.nova.metrics.RateMeter;
 
 import java.util.SortedMap;
@@ -35,11 +35,11 @@ public class RequestHandler
     final private boolean logLastRequestsInMemory;
 	
 	
-	final private HashMap<Integer,LongRateMeter> meters;
-	final private LongRateMeter requestUncompressedContentSizeMeter;
-	final private LongRateMeter responseUncompressedContentSizeMeter;
-	final private LongRateMeter requestCompressedContentSizeMeter;
-	final private LongRateMeter responseCompressedContentSizeMeter;
+	final private HashMap<Integer,LongValueMeter> meters;
+	final private LongValueMeter requestUncompressedContentSizeMeter;
+	final private LongValueMeter responseUncompressedContentSizeMeter;
+	final private LongValueMeter requestCompressedContentSizeMeter;
+	final private LongValueMeter responseCompressedContentSizeMeter;
 	
 	RequestHandler(Object object,Method method,String httpMethod,String path,Filter[] filters,ParameterInfo[] parameterInfos,	Map<String,ContentDecoder> contentDecoders,Map<String,ContentEncoder> contentEncoders,Map<String,ContentReader<?>> contentReaders,Map<String,ContentWriter<?>> contentWriters,boolean log,boolean logRequestHeaders,boolean logRequestParameters,boolean logRequestContent,boolean logResponseHeaders,boolean logResponseContent,boolean logLastRequestsInMemory,boolean public_)
 	{
@@ -56,10 +56,10 @@ public class RequestHandler
 		this.key=httpMethod+" "+path;
 		this.public_=public_;
 		this.meters=new HashMap<>();
-		this.requestUncompressedContentSizeMeter=new LongRateMeter();
-		this.responseUncompressedContentSizeMeter=new LongRateMeter();
-		this.requestCompressedContentSizeMeter=new LongRateMeter();
-		this.responseCompressedContentSizeMeter=new LongRateMeter();
+		this.requestUncompressedContentSizeMeter=new LongValueMeter();
+		this.responseUncompressedContentSizeMeter=new LongValueMeter();
+		this.requestCompressedContentSizeMeter=new LongValueMeter();
+		this.responseCompressedContentSizeMeter=new LongValueMeter();
 		
 		this.log=log;
 		this.logRequestHeaders=logRequestHeaders;
@@ -135,10 +135,10 @@ public class RequestHandler
 	{
 		synchronized (this)
 		{
-			LongRateMeter meter=this.meters.get(statusCode);
+			LongValueMeter meter=this.meters.get(statusCode);
 			if (meter==null)
 			{
-				meter=new LongRateMeter();
+				meter=new LongValueMeter();
 				this.meters.put(statusCode, meter);
 			}
 			meter.update(duration);
@@ -149,12 +149,12 @@ public class RequestHandler
 		this.responseCompressedContentSizeMeter.update(responseCompressedContentSize);
 	}
 
-	public Map<Integer,LongRateSample> sampleStatusMeters()
+	public Map<Integer,LongValueSample> sampleStatusMeters()
 	{
 		synchronized (this)
 		{
-			TreeMap<Integer,LongRateSample> results =new TreeMap<>();
-			for (Entry<Integer, LongRateMeter> entry:this.meters.entrySet())
+			TreeMap<Integer,LongValueSample> results =new TreeMap<>();
+			for (Entry<Integer, LongValueMeter> entry:this.meters.entrySet())
 			{
 			    results.put(entry.getKey(), entry.getValue().sample());
 			}
@@ -162,22 +162,22 @@ public class RequestHandler
 		}		
 	}
 
-	public LongRateMeter getRequestUncompressedContentSizeMeter()
+	public LongValueMeter getRequestUncompressedContentSizeMeter()
 	{
 		return requestUncompressedContentSizeMeter;
 	}
 
-	public LongRateMeter getResponseUncompressedContentSizeMeter()
+	public LongValueMeter getResponseUncompressedContentSizeMeter()
 	{
 		return responseUncompressedContentSizeMeter;
 	}
 
-	public LongRateMeter getRequestCompressedContentSizeMeter()
+	public LongValueMeter getRequestCompressedContentSizeMeter()
 	{
 		return requestCompressedContentSizeMeter;
 	}
 
-	public LongRateMeter getResponseCompressedContentSizeMeter()
+	public LongValueMeter getResponseCompressedContentSizeMeter()
 	{
 		return responseCompressedContentSizeMeter;
 	}

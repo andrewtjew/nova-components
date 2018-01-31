@@ -53,7 +53,7 @@ public class DatabaseUpdater
     {
         
         SqlServerConnector connector=new SqlServerConnector(coreEnvironment.getTraceManager(), coreEnvironment.getLogger(), configuration.user, coreEnvironment.getVault(), configuration.passwordKey, configuration.connectorConfiguration);
-        migrate(parent,connector,configuration.scriptFile,configuration.charSet);
+        migrate(parent,connector,configuration.scriptFile,Charset.forName(configuration.charSet));
         return connector;
     }
     

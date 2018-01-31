@@ -5,20 +5,20 @@ public class RateSample
     RateSample lastSample;
     final private long durationNs;
     final private long count;
-    final private long allTimeCount;
+    final private long totalCount;
     final private long createdMs;
     
     public RateSample(RateSample lastSample, long durationNs, long count,long allTimeCount)
     {
         this.durationNs=durationNs;
         this.count=count;
-        this.allTimeCount=allTimeCount;
+        this.totalCount=allTimeCount;
         this.createdMs=System.currentTimeMillis();
     }
 
     public long getTotalCount()
     {
-        return this.allTimeCount;
+        return this.totalCount;
     }
     public RateSample getLastSample()
     {

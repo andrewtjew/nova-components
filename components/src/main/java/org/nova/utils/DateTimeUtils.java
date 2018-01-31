@@ -25,5 +25,15 @@ public class DateTimeUtils
         return ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), UTCZoneId).format(DateTimeFormatter.ISO_DATE_TIME);
     }
 
+    public static long getNextDailyOffset(ZoneId zoneId,long dayOffsetS)
+    {
+        ZonedDateTime zonedNow=ZonedDateTime.now(zoneId);
+        ZonedDateTime due=ZonedDateTime.of(zonedNow.getYear(), zonedNow.getMonthValue(),zonedNow.getDayOfMonth(),0,0,0,0,zoneId).plusSeconds(dayOffsetS);
+        if (due.isBefore(zonedNow))
+        {
+            due=due.plusDays(1);
+        }
+        return due.toEpochSecond()*1000-System.currentTimeMillis();
+    }
     
 }

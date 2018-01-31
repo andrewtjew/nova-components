@@ -1,8 +1,6 @@
 package org.nova.tracing;
 
 import org.nova.metrics.TraceSample;
-import org.nova.metrics.LongRateMeter;
-import org.nova.metrics.LongRateSample;
 
 public class CategorySample
 {

@@ -1,12 +1,18 @@
 package org.nova.collections;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.nova.concurrent.Synchronization;
+import org.nova.core.Utils;
 import org.nova.metrics.CountMeter;
 import org.nova.metrics.LevelMeter;
-import org.nova.metrics.LongSizeMeter;
+import org.nova.metrics.LongValueMeter;
+import org.nova.metrics.RateMeter;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
 
@@ -15,21 +21,37 @@ public class Pool<RESOURCE extends Resource>
 	final private LinkedList<RESOURCE> container;
 	final TraceManager traceManager;
 	final private LevelMeter waitingMeter;
-	final private LevelMeter inUseMeter;
-    final private CountMeter availableMeter;
-    final private CountMeter usedMeter;
-    final private LongSizeMeter waitNsMeter;
+    final private RateMeter usedMeter;
+    final private LongValueMeter waitNsMeter;
 	final private long maximumRecentlyUsedCount;
+	private AtomicLong identifier;
+	private boolean captureActivateStackTrace;
+	final HashMap<Long,RESOURCE> InUseResources=new HashMap<>();
+	
 	public Pool(TraceManager traceManager,long maximumRecentActivateCount)
 	{
 		this.waitingMeter=new LevelMeter();
-		this.inUseMeter=new LevelMeter();
-		this.availableMeter=new CountMeter();
-		this.waitNsMeter=new LongSizeMeter();
-		this.usedMeter=new CountMeter();
+		this.waitNsMeter=new LongValueMeter();
+		this.usedMeter=new RateMeter();
 		this.traceManager=traceManager;
 		this.container=new LinkedList<>();
 		this.maximumRecentlyUsedCount=maximumRecentActivateCount;
+		this.identifier=new AtomicLong();
+	}
+	
+	public void setCaptureActivateStackTrace(boolean captureActivateStackTrace)
+	{
+	    synchronized(this)
+	    {
+	        this.captureActivateStackTrace=captureActivateStackTrace;
+	    }
+	}
+	public boolean captureActiveStackTrace()
+	{
+        synchronized(this)
+        {
+            return this.captureActivateStackTrace;
+        }
 	}
 	
 	public LevelMeter getWaitingMeter()
@@ -37,22 +59,33 @@ public class Pool<RESOURCE extends Resource>
         return waitingMeter;
     }
 
-    public LevelMeter getInUseMeter()
+    public int getInUse()
     {
-        return inUseMeter;
+        synchronized(this)
+        {
+            return this.InUseResources.size();
+        }
     }
 
-    public CountMeter getAvailableMeter()
+    long getNextIdentifier()
     {
-        return availableMeter;
+        return this.identifier.getAndIncrement();
     }
     
-    public CountMeter getUsedMeter()
+    public int getAvailable()
+    {
+        synchronized (this)
+        {
+            return this.container.size(); 
+        }
+    }
+    
+    public RateMeter getUseMeter()
     {
         return this.usedMeter;
     }
 
-    public LongSizeMeter getWaitNsMeter()
+    public LongValueMeter getWaitNsMeter()
     {
         return this.waitNsMeter;
     }
@@ -85,8 +118,8 @@ public class Pool<RESOURCE extends Resource>
                         }
                     }				    
                     RESOURCE resource=container.pop();
-                    this.inUseMeter.increment();
                     resource.activate(parent);
+                    this.InUseResources.put(resource.getIdentifier(), resource);
                     return resource;
 				}
 				catch (Throwable t)
@@ -102,35 +135,11 @@ public class Pool<RESOURCE extends Resource>
 	{
 	    return waitForAvailable(parent, traceCategory,Long.MAX_VALUE);
 	}
-	/*
-	@SuppressWarnings("resource")
-	public RESOURCE allocate(Trace parent,String traceCategory) throws Throwable
-	{
-		Trace trace=new Trace(this.traceManager,parent, traceCategory,true);
-		synchronized (this)
-		{
-			try
-			{
-				Condition.waitForNoThrowPredicate(this,()->{return stack.size()>0;});
-				RESOURCE resource=stack.pop();
-				resource.activate(trace);
-				trace.endWait();
-				return resource;
-			}
-			catch (Throwable t)
-			{
-				trace.close(t);
-				throw t;
-			}
-		}
-	}
-	*/
 
 	public void add(RESOURCE resource)
 	{
 		synchronized (this)
 		{
-			this.availableMeter.increment();
 			container.add(resource);
 		}
 	}
@@ -153,9 +162,16 @@ public class Pool<RESOURCE extends Resource>
 			{
 				this.notify();
 			}
+			this.InUseResources.remove(resource.getIdentifier());
 		}
-        this.inUseMeter.decrement();
 	}
 	
+	public List<RESOURCE> getSnapshotOfInUseResources()
+	{
+	    synchronized(this)
+	    {
+	        return new ArrayList<>(this.InUseResources.values());
+	    }
+	}
 	
 }

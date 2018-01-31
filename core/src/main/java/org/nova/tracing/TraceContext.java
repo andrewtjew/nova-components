@@ -1,7 +1,6 @@
 package org.nova.tracing;
 
 import org.nova.metrics.TraceMeter;
-import org.nova.metrics.LongRateMeter;
 
 public class TraceContext
 {

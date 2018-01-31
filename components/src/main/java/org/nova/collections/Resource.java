@@ -6,14 +6,17 @@ import org.nova.tracing.Trace;
 public abstract class Resource implements AutoCloseable
 {
 	final private Pool<?> pool;
+    final private long identifier;
 	private Trace parent;
 	private long recentlyUsedCount;
-	
+    private Thread activateThread;
+    private StackTraceElement[] activateStackTrace;
 	
 	public Resource(Pool<?> pool)
 	{
 		this.pool=pool;
 		this.recentlyUsedCount=0;
+		this.identifier=pool.getNextIdentifier();
 	}
 	
 	void activate(Trace parent) throws Throwable
@@ -21,6 +24,11 @@ public abstract class Resource implements AutoCloseable
 		synchronized(this)
 		{
 			this.parent=parent;
+			this.activateThread=Thread.currentThread();
+	        if (pool.captureActiveStackTrace())
+	        {
+	            this.activateStackTrace=this.activateThread.getStackTrace();
+	        }
 			activate();
 		}
 	}
@@ -28,6 +36,11 @@ public abstract class Resource implements AutoCloseable
 	abstract protected void activate() throws Throwable;
 
 	abstract protected void park() throws Exception;
+	
+	public long getIdentifier()
+	{
+	    return this.identifier;
+	}
 	
 	boolean canAddLast(long recentActivateMaximumCount)
 	{
@@ -52,12 +65,31 @@ public abstract class Resource implements AutoCloseable
                 park();
                 pool.release(this);
 				this.parent=null;
+				this.activateThread=null;
+				this.activateStackTrace=null;
 			}
 		}
 	}
 	
 	public Trace getParent()
 	{
-	    return this.parent;
+        synchronized(this)
+        {
+            return this.parent;
+        }
+	}
+	public Thread getActivateThread()
+	{
+	    synchronized(this)
+	    {
+	        return this.activateThread;
+	    }
+	}
+	public StackTraceElement[] getActivateStackTrace()
+	{
+        synchronized(this)
+        {
+            return this.activateStackTrace;
+        }
 	}
 }

@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 import org.nova.concurrent.Synchronization;
 import org.nova.core.Utils;
-import org.nova.metrics.LongRateMeter;
+import org.nova.metrics.LongValueMeter;
 
 public class TcpClient
 {
@@ -20,8 +20,8 @@ public class TcpClient
 	private Thread thread;
 	private long id=0;
 
-	final private LongRateMeter bytesSentMeter;
-	final private LongRateMeter bytesReceivedMeter;
+	final private LongValueMeter bytesSentMeter;
+	final private LongValueMeter bytesReceivedMeter;
 	
 	public TcpClient(String host,int port,int sendBufferSize,int receiveBufferSize) throws Exception
 	{
@@ -31,8 +31,8 @@ public class TcpClient
 		this.socket.setSendBufferSize(sendBufferSize);
 		this.inputStream=this.socket.getInputStream();
 		this.outputStream=this.socket.getOutputStream();
-		this.bytesSentMeter=new LongRateMeter();
-		this.bytesReceivedMeter=new LongRateMeter();
+		this.bytesSentMeter=new LongValueMeter();
+		this.bytesReceivedMeter=new LongValueMeter();
 		this.thread=new Thread(()->{main();});
 		this.thread.start();
 	}

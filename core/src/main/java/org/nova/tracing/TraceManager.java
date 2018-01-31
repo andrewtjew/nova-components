@@ -14,8 +14,6 @@ import org.nova.metrics.TraceMeter;
 import org.nova.metrics.TraceSample;
 import org.nova.metrics.RateMeter;
 import org.nova.metrics.RateSample;
-import org.nova.metrics.LongRateMeter;
-import org.nova.metrics.LongRateSample;
 import org.nova.operations.OperatorVariable;
 
 // Don't track Trace in Thread Local Store. The problem is figuring out after closing a Trace which trace to make current

@@ -5,9 +5,8 @@ public class RateMeter
     private RateSample lastSample;
     
     private long markNs;
-    private long count;
-    private long allTimeCount;
-    private double minimalResetDurationS;
+    private long markCount;
+    private long totalCount;
 	
 	public RateMeter()
 	{
@@ -18,8 +17,8 @@ public class RateMeter
 	{
 		synchronized (this)
 		{
-			this.count+=count;
-			this.allTimeCount+=count;
+			this.markCount+=count;
+			this.totalCount+=count;
 		}
 	}
 	
@@ -27,47 +26,24 @@ public class RateMeter
 	{
 		synchronized (this)
 		{
-			this.count++;
-			this.allTimeCount++;
+			this.markCount++;
+			this.totalCount++;
 		}
 	}
 	
-	public long getAllTimeCount()
+	public long getTotalCount()
 	{
 		synchronized (this)
 		{
-			return this.allTimeCount;
+			return this.totalCount;
 		}
 	}
-	
-    public RateSample sampleAndReset()
-    {
-        long nowNs=System.nanoTime();
-        synchronized (this)
-        {
-            long durationNs=nowNs-this.markNs;
-            if (durationNs<=0)
-            {
-                return this.lastSample;
-            }
-            if (this.lastSample!=null)
-            {
-                this.lastSample.lastSample=null;
-            }
-            RateSample sample=new RateSample(this.lastSample,durationNs, this.count, this.allTimeCount);
-            this.lastSample=sample;
-            
-            this.markNs=nowNs;
-            this.count=0;
-            return sample;
-        }
-    }
     
     public RateSample sample()
     {
         synchronized(this)
         {
-            return sample(this.minimalResetDurationS);
+            return sample(1);
         }
     }
     
@@ -76,7 +52,6 @@ public class RateMeter
         long nowNs=System.nanoTime();
         synchronized (this)
         {
-            this.minimalResetDurationS=minimalResetDurationS;
             long durationNs=nowNs-this.markNs;
             if (durationNs<=0)
             {
@@ -86,12 +61,12 @@ public class RateMeter
             {
                 this.lastSample.lastSample=null;
             }
-            RateSample result=new RateSample(this.lastSample, durationNs, this.count,this.allTimeCount);
+            RateSample result=new RateSample(this.lastSample, durationNs, this.markCount,this.totalCount);
             if (durationNs>(long)(minimalResetDurationS*1.0e9))
             {
                 this.lastSample=result;
                 this.markNs=nowNs;
-                this.count=0;
+                this.markCount=0;
             }
             return result;
         }

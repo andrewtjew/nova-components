@@ -809,7 +809,7 @@ public class ObjectMapper
             }
             else if (c=='{')
             {
-                if (isNonEmptyElements())
+                if (isNext('}')==false)
                 {
                     for (;;)
                     {
@@ -827,7 +827,7 @@ public class ObjectMapper
             }
             else if (c=='[')
             {
-                if (isNonEmptyArray())
+                if (isNext(']')==false)
                 {
                     for (;;)
                     {
@@ -882,20 +882,21 @@ public class ObjectMapper
             }
             throw new Exception(", or ] expected: "+getError());
         }
+        public boolean isNext(char end) throws Exception
+        {
+            char c=nextNonWhiteSpaceCharacter();
+            if (c==end)
+            {
+                return true;
+            }
+            this.position--;
+            return false;
+            
+        }
         
         public boolean isNonEmptyElements() throws Exception
         {
             char c=nextNonWhiteSpaceCharacter();
-            if (c!='{')
-            {
-                if (c=='n')
-                {
-                    expectRestOfNull();
-                    return false;
-                }
-                throw new Exception("{ expected: "+getError());
-            }
-            c=nextNonWhiteSpaceCharacter();
             if (c=='}')
             {
                 return false;
@@ -906,16 +907,6 @@ public class ObjectMapper
         public boolean isNonEmptyArray() throws Exception
         {
             char c=nextNonWhiteSpaceCharacter();
-            if (c!='[')
-            {
-                if (c=='n')
-                {
-                    expectRestOfNull();
-                    return false;
-                }
-                throw new Exception("[ expected: "+getError());
-            }
-            c=nextNonWhiteSpaceCharacter();
             if (c==']')
             {
                 return false;
@@ -1427,11 +1418,21 @@ public class ObjectMapper
         @Override
         Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
+            char c=parser.nextNonWhiteSpaceCharacter();
+            if (c=='n')
+            {
+                parser.expectRestOfNull();
+                return null;
+            }
+            if (c!='[')
+            {
+                throw new Exception("array or null expected: "+parser.getError());
+            }
+            Class<?> componentType=type.getComponentType();
+            Reader reader=getReader(componentType);
             ArrayList<Object> list=new ArrayList<>();
             if (parser.isNonEmptyArray())
             {
-                Class<?> componentType=type.getComponentType();
-                Reader reader=getReader(componentType);
                 for (;;)
                 {
                     list.add(reader.read(parser, componentType,ignoreUnknownFields));
@@ -1440,14 +1441,13 @@ public class ObjectMapper
                         break;
                     }
                 }
-                Object array = Array.newInstance(componentType, list.size());
-                for (int i = 0; i < list.size(); i++)
-                {
-                    Array.set(array, i, list.get(i));
-                }
-                return array;
             }
-            return null;
+            Object array = Array.newInstance(componentType, list.size());
+            for (int i = 0; i < list.size(); i++)
+            {
+                Array.set(array, i, list.get(i));
+            }
+            return array;
         }
     }
     static class ObjectReader extends Reader
@@ -1455,6 +1455,16 @@ public class ObjectMapper
         @Override
         Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
+            char c=parser.nextNonWhiteSpaceCharacter();
+            if (c=='n')
+            {
+                parser.expectRestOfNull();
+                return null;
+            }
+            if (c!='{')
+            {
+                throw new Exception("elements or null expected: "+parser.getError());
+            }
             ClassReader reader=getFieldReaders(type);
             Object object=reader.newInstance();
             if (parser.isNonEmptyElements())
@@ -1762,7 +1772,7 @@ public class ObjectMapper
     static public <OBJECT> OBJECT read(String text,Class<OBJECT> type,boolean ignoreUnknownFields) throws Throwable
     {
         Parser parser=new Parser(text);
-        return (OBJECT)read(new Parser(text),type,ignoreUnknownFields);
+        return (OBJECT)read(parser,type,ignoreUnknownFields);
     }
 
     static Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable

@@ -1,17 +1,24 @@
+/*
 package org.nova.metrics;
 
 import org.nova.tracing.Trace;
 
 public class LongSizeMeter
 {
+    private LongSizeSample lastSample;
     long createdMs;
-    long totalSize;
-    double totalSize2;
+
+    long markTotalSize;
+    double marTotalSize2;
+    long markCount;
+    int totalCount;
+    private long markNs;
+    private double minimalResetDurationS;
+
     long maxSize;
     long maxSizeInstantMs;
     long minSize;
     long minSizeInstantMs;
-    int count;
 
     public LongSizeMeter()
     {
@@ -33,10 +40,20 @@ public class LongSizeMeter
                 this.minSize=size;
                 this.minSizeInstantMs=System.currentTimeMillis();
             }
-            this.totalSize+=size;
-            this.totalSize2+=size*size;
-            this.count++;
+            this.markNs=System.nanoTime();
+            this.markTotalSize+=size;
+            this.marTotalSize2+=size*size;
+            this.totalCount++;
+            this.markCount++;
         }
+    }
+    public void resetExtremas()
+    {
+        synchronized(this)
+        {
+            this.maxSize=Long.MIN_VALUE;
+            this.minSize=Long.MAX_VALUE;
+        }        
     }
     public LongSizeSample sample()
     {
@@ -47,9 +64,11 @@ public class LongSizeMeter
             {
                 span=1;
             }
-            double rate=1000.0*this.count/span;
+            double rate=1000.0*this.totalCount/span;
             return new LongSizeSample(this,rate);
         }
     }
 
+
 }
+*/

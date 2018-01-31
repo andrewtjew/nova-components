@@ -1,12 +1,14 @@
+/*
 package org.nova.metrics;
 
 import org.nova.tracing.Trace;
 
 public class LongSizeSample
 {
-    final private  double rate;
-    final private long totalSize;
-    final private double totalSize2;
+    LongSizeSample lastSample;
+    
+    final private long markTotalSize;
+    final private double markTotalSize2;
     final private long maximumSize;
     final private long maximumSizeInstantMs;
     final private long minimumSize;
@@ -17,23 +19,18 @@ public class LongSizeSample
     LongSizeSample(LongSizeMeter meter,double rate)
     {
         this.createdMs=meter.createdMs;
-        this.totalSize = meter.totalSize;
-        this.totalSize2=meter.totalSize2;
+        this.markTotalSize = meter.markTotalSize;
+        this.markTotalSize2=meter.marTotalSize2;
         this.maximumSize = meter.maxSize;
         this.maximumSizeInstantMs = meter.maxSizeInstantMs;
         this.minimumSize = meter.minSize;
         this.mininumSizeInstantMs = meter.minSizeInstantMs;
-        this.count = meter.count;
-        this.rate=rate;
+        this.count = meter.totalCount;
     }
 
     public long getCreatedMs()
     {
         return this.createdMs;
-    }
-    public double getRate()
-    {
-       return this.rate; 
     }
     public long getMaxSize()
     {
@@ -61,7 +58,7 @@ public class LongSizeSample
     }
     public double getTotalSize()
     {
-        return this.totalSize;
+        return this.markTotalSize;
     }
 
     public long getCount()
@@ -70,8 +67,8 @@ public class LongSizeSample
     }
     public double getStandardDeviation()
     {
-        double b=((double)this.totalSize/this.count)*this.totalSize;
-        double d = this.totalSize2 - b;
+        double b=((double)this.markTotalSize/this.count)*this.markTotalSize;
+        double d = this.markTotalSize2 - b;
         if (d <= 0.0)
         {
             return 0;
@@ -80,6 +77,7 @@ public class LongSizeSample
     }
     public double getAverage()
     {
-        return (double)this.totalSize/this.count;
+        return (double)this.markTotalSize/this.count;
     }
 }
+*/

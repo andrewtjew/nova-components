@@ -11,5 +11,6 @@ public class ConnectorAndMigrationConfiguration
     public String passwordKey;
     public String user;
     public String scriptFile;
-    public Charset charSet=StandardCharsets.UTF_16LE;
+    public String charSet=StandardCharsets.UTF_16LE.name();
+    public boolean captureActivateStackTrace;
 }

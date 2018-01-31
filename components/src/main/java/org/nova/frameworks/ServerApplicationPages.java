@@ -134,9 +134,9 @@ import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
 import org.nova.logging.SourceQueueLogger;
 import org.nova.logging.StatusEntry;
-import org.nova.metrics.LongRateSample;
+import org.nova.metrics.LongValueSample;
 import org.nova.metrics.CategoryMeters;
-import org.nova.metrics.LongRateMeter;
+import org.nova.metrics.LongValueMeter;
 import org.nova.metrics.LongRateMeterBox;
 import org.nova.metrics.CountMeter;
 import org.nova.metrics.CountMeterBox;
@@ -630,8 +630,8 @@ public class ServerApplicationPages
                     .add("Count","Total","Description"));
             for (LongRateMeterBox box : countAverageRateBoxes)
             {
-                LongRateMeter meter = box.getMeter();
-                LongRateSample result = meter.sample();
+                LongValueMeter meter = box.getMeter();
+                LongValueSample result = meter.sample();
                 table.addBodyRowItems(box.getName(),String.format("%.4f", result != null ? result.getAverage() : "-")
                         ,String.format("%.4f", result != null ? result.getStandardDeviation() : "-")
                         ,String.format("%.4f", result != null ? result.getRate() : "-")
@@ -711,8 +711,8 @@ public class ServerApplicationPages
                     .add("Count","Total","Description"));
             for (LongRateMeterBox box : countAverageRateBoxes)
             {
-                LongRateMeter meter = box.getMeter();
-                LongRateSample result  = meter.sample();
+                LongValueMeter meter = box.getMeter();
+                LongValueSample result  = meter.sample();
                 table.addBodyRowItems(box.getName(),String.format("%.4f", result  != null ? result .getAverage() : "-")
                         ,String.format("%.4f", result  != null ? result .getStandardDeviation() : "-")
                         ,String.format("%.4f", result  != null ? result .getRate() : "-")
@@ -2222,11 +2222,11 @@ public class ServerApplicationPages
         double totalAll = 0;
         long totalCount = 0;
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
-        HashMap<String,Map<Integer, LongRateSample>> statusResults=new HashMap<>();
+        HashMap<String,Map<Integer, LongValueSample>> statusResults=new HashMap<>();
         for (RequestHandler requestHandler : requestHandlers)
         {
-            Map<Integer, LongRateSample> results = requestHandler.sampleStatusMeters();
-            for (LongRateSample result : results.values())
+            Map<Integer, LongValueSample> results = requestHandler.sampleStatusMeters();
+            for (LongValueSample result : results.values())
             {
                 totalAll += result.getTotal();
                 totalCount += result.getCount();
@@ -2235,11 +2235,11 @@ public class ServerApplicationPages
         }
         for (RequestHandler requestHandler : requestHandlers)
         {
-            Map<Integer, LongRateSample> results = statusResults.get(requestHandler.getKey());
+            Map<Integer, LongValueSample> results = statusResults.get(requestHandler.getKey());
             long total = 0;
             long count = 0;
             double rate = 0;
-            for (LongRateSample result : results.values())
+            for (LongValueSample result : results.values())
             {
                 total += result.getTotal();
                 count += result.getCount();
@@ -2257,8 +2257,8 @@ public class ServerApplicationPages
             .add(DOUBLE_FORMAT.format(totalPercentage))
             .add(count > 0 ? DOUBLE_FORMAT.format(total / (1.0e6 * count)) : 0)
             .add(DOUBLE_FORMAT.format(rate))
-            .add(count > 0 ? requestHandler.getRequestUncompressedContentSizeMeter().getAllTimeTotal() / count : 0)
-            .add(count > 0 ? requestHandler.getResponseUncompressedContentSizeMeter().getAllTimeTotal() / count : 0);
+            .add(requestHandler.getRequestUncompressedContentSizeMeter().sample().getWeightedAverage(0))
+            .add(requestHandler.getResponseUncompressedContentSizeMeter().sample().getWeightedAverage());
             row.addDetailButton(new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).addQuery("server", server).toString());
             table.addBodyRow(row);
             
@@ -2549,8 +2549,8 @@ public class ServerApplicationPages
             statusCodes.put(300, 0L);
             statusCodes.put(400, 0L);
             statusCodes.put(500, 0L);
-            Map<Integer, LongRateSample> results = requestHandler.sampleStatusMeters();
-            for (Entry<Integer, LongRateSample> entry : results.entrySet())
+            Map<Integer, LongValueSample> results = requestHandler.sampleStatusMeters();
+            for (Entry<Integer, LongValueSample> entry : results.entrySet())
             {
                 int status = entry.getKey() / 100 * 100;
                 Long count = statusCodes.get(status);
@@ -3067,7 +3067,7 @@ public class ServerApplicationPages
         HttpServer httpServer=getHttpServer(server);
         RequestHandler requestHandler = httpServer.getRequestHandler(key);
 
-        Map<Integer, LongRateSample> meters = requestHandler.sampleStatusMeters();
+        Map<Integer, LongValueSample> meters = requestHandler.sampleStatusMeters();
         if (meters.size()>0)
         {
             Panel durationPanel=page.content().returnAddInner(new Level1Panel(page.head(),"Durations"));
@@ -3081,14 +3081,14 @@ public class ServerApplicationPages
                         .addWithTitle("StdDev", "Standard Deviation")
                         .addWithTitle("Total","Total duration in milliseconds")
                         );
-            for (Entry<Integer, LongRateSample> entry : meters.entrySet())
+            for (Entry<Integer, LongValueSample> entry : meters.entrySet())
             {
-                LongRateSample result = entry.getValue();
+                LongValueSample result = entry.getValue();
                 if (result.getCount()!=0)
                 {
                     table.addBodyRow(new Row().add(
                             entry.getKey()
-                            ,result.getAllTimeCount()
+                            ,result.getTotalCount()
                             ,result.getCount()
                             ,format_3(result.getRate())
                             ,format_3(result.getAverage() / 1.0e6)
@@ -3100,7 +3100,7 @@ public class ServerApplicationPages
                 {
                     table.addBodyRow(new Row().add(
                             entry.getKey()
-                            ,result.getAllTimeCount()
+                            ,result.getTotalCount()
                             ,result.getCount()
                             ,""
                             ,""
@@ -3125,11 +3125,11 @@ public class ServerApplicationPages
                     .addWithTitle("StDev", "Standard Deviation")
                     .add("Total Bytes","KB","MB","GB","TB"));
             
-            LongRateMeter requestMeter = requestHandler.getRequestUncompressedContentSizeMeter();
-            LongRateSample result = requestMeter.sample();
+            LongValueMeter requestMeter = requestHandler.getRequestUncompressedContentSizeMeter();
+            LongValueSample result = requestMeter.sample();
             if (result.getCount()>0)
             {
-                long total = requestUncompressed = requestMeter.getAllTimeTotal();
+                long total = requestUncompressed = requestMeter.getTotal();
                 table.addBodyRow(new Row().add(
                         "Request uncompressed content"
                         ,DOUBLE_FORMAT.format(result.getAverage())
@@ -3142,7 +3142,7 @@ public class ServerApplicationPages
             }
             else
             {
-                long total = requestUncompressed = requestMeter.getAllTimeTotal();
+                long total = requestUncompressed = requestMeter.getTotal();
                 table.addBodyRow(new Row().add(
                         "Request uncompressed content"
                         ,""
@@ -3154,11 +3154,11 @@ public class ServerApplicationPages
                         ,total / 1024 / 1024 / 1024 / 1024));
             }
     
-            LongRateMeter compressedRequestMeter = requestHandler.getRequestCompressedContentSizeMeter();
+            LongValueMeter compressedRequestMeter = requestHandler.getRequestCompressedContentSizeMeter();
             result = compressedRequestMeter.sample();
             if (result.getCount()>0)
             {
-                long total = requestCompressed = compressedRequestMeter.getAllTimeTotal();
+                long total = requestCompressed = compressedRequestMeter.getTotal();
                 table.addBodyRow(new Row().add(
                         "Request content"
                         ,format_3(result.getAverage())
@@ -3171,7 +3171,7 @@ public class ServerApplicationPages
             }
             else
             {
-                long total = requestCompressed = compressedRequestMeter.getAllTimeTotal();
+                long total = requestCompressed = compressedRequestMeter.getTotal();
                 table.addBodyRow(new Row().add(
                         "Request content"
                         ,""
@@ -3183,11 +3183,11 @@ public class ServerApplicationPages
                         ,total / 1024 / 1024 / 1024 / 1024));
             }
     
-            LongRateMeter responseMeter = requestHandler.getResponseUncompressedContentSizeMeter();
+            LongValueMeter responseMeter = requestHandler.getResponseUncompressedContentSizeMeter();
             result = responseMeter.sample();
             if (result.getCount()>0)
             {
-                long total = responseUncompressed = responseMeter.getAllTimeTotal();
+                long total = responseUncompressed = responseMeter.getTotal();
                 table.addBodyRow(new Row().add(
                         "Response uncompressed content"
                         ,format_3(result.getAverage())
@@ -3200,7 +3200,7 @@ public class ServerApplicationPages
             }
             else
             {
-                long total = responseUncompressed = responseMeter.getAllTimeTotal();
+                long total = responseUncompressed = responseMeter.getTotal();
                 table.addBodyRow(new Row().add(
                         "Response uncompressed content"
                         ,""
@@ -3212,11 +3212,11 @@ public class ServerApplicationPages
                         ,total / 1024 / 1024 / 1024 / 1024));
             }
     
-            LongRateMeter compressedResponseMeter = requestHandler.getResponseCompressedContentSizeMeter();
+            LongValueMeter compressedResponseMeter = requestHandler.getResponseCompressedContentSizeMeter();
             result = compressedResponseMeter.sample();
             if (result.getCount()>0)
             {
-                long total = responseCompressed = compressedResponseMeter.getAllTimeTotal();
+                long total = responseCompressed = compressedResponseMeter.getTotal();
                 table.addBodyRow(new Row().add(
                         "Response content"
                         ,format_3(result.getAverage())
@@ -3229,7 +3229,7 @@ public class ServerApplicationPages
             }
             else
             {
-                long total = responseCompressed = compressedResponseMeter.getAllTimeTotal();
+                long total = responseCompressed = compressedResponseMeter.getTotal();
                 table.addBodyRow(new Row().add(
                         "Response content"
                         ,""

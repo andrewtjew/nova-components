@@ -12,6 +12,9 @@ import org.nova.core.Utils;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.tags.em;
+import org.nova.html.tags.hr;
+import org.nova.html.tags.p;
+import org.nova.html.tags.textarea;
 import org.nova.html.widgets.DataTable;
 import org.nova.html.widgets.NameValueList;
 import org.nova.html.widgets.Row;
@@ -34,10 +37,11 @@ import org.nova.http.server.annotations.QueryParam;
 import org.nova.metrics.CountMeter;
 import org.nova.metrics.LevelMeter;
 import org.nova.metrics.LevelSample;
-import org.nova.metrics.LongSizeMeter;
-import org.nova.metrics.LongSizeSample;
+import org.nova.metrics.LongValueMeter;
+import org.nova.metrics.LongValueSample;
 import org.nova.metrics.RateMeter;
 import org.nova.metrics.RateSample;
+import org.nova.sqldb.Accessor;
 import org.nova.sqldb.Connector;
 import org.nova.tracing.Trace;
 
@@ -57,6 +61,7 @@ public class ConnectorController
         this.application=application;
         this.application.getMenuBar().add("/operator/connectors/view", "Connectors","View All");
         this.application.getMenuBar().add("/operator/connector/pools/view", "Connectors","View Pools");
+        this.application.getMenuBar().add("/operator/connector/stackTraces/view", "Connectors","View Active StackTraces");
         this.application.getOperatorServer().registerHandlers(this);
     }
 
@@ -65,6 +70,10 @@ public class ConnectorController
     {
         synchronized(this)
         {
+            if (this.connectors.containsKey(name))
+            {
+                throw new Exception("Provide unique names. Clashing name="+name);
+            }
             this.connectors.put(name, connector);
         }
     }
@@ -84,7 +93,8 @@ public class ConnectorController
             return null;
         }
         Connector connector=migrator.connectAndMigrate(parent, this.application.getCoreEnvironment(), connectorAndMigrationconfiguration);
-        track(connector);
+        connector.setCaptureActivateStackTrace(connectorAndMigrationconfiguration.captureActivateStackTrace);
+        track(configurationNameFragment,connector);
         return connector;
     }    
 
@@ -163,39 +173,36 @@ public class ConnectorController
         }
     }
 
-    private void write(Row row,LongSizeMeter meter,long used)
+    private void write(Row row,LongValueMeter meter,long used)
     {
-        LongSizeSample sample=meter.sample();
-        long waits=sample.getCount();
-        row.add(waits);
+        LongValueSample sample=meter.sample();
+        row.add(sample.getTotalCount());
         if (used>0)
         {
-            double percentage=(waits*100.0)/used;
+            double percentage=(sample.getTotalCount()*100.0)/used;
             row.add(String.format("%.3f",percentage));
         }
         else
         {
             row.add("");
         }
-        if (waits>0)
+        row.add(String.format("%.3f",sample.getWeightedAverage(0)/1.0e6));
+        row.add(String.format("%.3f",sample.getWeightedStandardDeviation(0)/1.0e6));
+        if (sample.getMax()>Long.MIN_VALUE)
         {
-            row.add(String.format("%.3f",sample.getAverage()/1.0e6));
-            row.add(String.format("%.3f",sample.getStandardDeviation()/1.0e6));
-            row.add(String.format("%.3f",sample.getMaximum()/1.0e6));
-            row.add(Utils.millisToLocalDateTime(sample.getMaximumInstantMs()));
+            row.add(String.format("%.3f",sample.getMax()/1.0e6));
         }
         else
         {
             row.add("");
-            row.add("");
-            row.add("");
-            row.add("");
         }
+            
+        row.add(Utils.millisToLocalDateTime(sample.getMaxInstantMs()));
     }
 
     @GET
     @Path("/operator/connector/pools/view")
-    public Element viewUsage() throws Throwable
+    public Element viewUsage(@DefaultValue("1.0") @QueryParam("minimalResetDurationS") double minimalResetDurationS) throws Throwable
     {
         OperatorPage page=this.application.buildOperatorPage("View Connector Pools");
         DataTable table=page.content().returnAddInner(new DataTable(page.head()));
@@ -204,15 +211,14 @@ public class ConnectorController
         row.add("Name");
         row.add(new TitleText("Accessors available in pool","Available"));
         row.add(new TitleText("Accessors in use","In Use"));
-        row.add(new TitleText("Max accessors in use","Max"));
-        row.add(new TitleText("Instant when max accessors are in use","Max Instant"));
         row.add(new TitleText("Threads waiting for accessors","Waiting"));
         row.add(new TitleText("Maximum threads waiting for accessors","Max"));
         row.add(new TitleText("Instant when maximum threads are waiting for accessors","Max Waiting Instant"));
         row.add(new TitleText("Number of times connector is used","Used"));
+        row.add(new TitleText("Connector use rate (per second)","Rate"));
         row.add(new TitleText("Number of times when waiting for accessor occurs","Waits"));
         row.add(new TitleText("Percentage times waits occurred","%"));
-        row.add(new TitleText("Average duration for accessor (ms)","Duration"));
+        row.add(new TitleText("Average wait for accessor (ms)","Ave Wait"));
         row.add(new TitleText("Standard deviation wait for accessor (ms)","StdDev"));
         row.add(new TitleText("Maximum wait for accessor (ms)","Max"));
         row.add(new TitleText("Instant when maximum wait occurs","Max Duration Instant"));
@@ -226,16 +232,50 @@ public class ConnectorController
                 row=new Row();
                 row.add(entry.getKey());
 
-                CountMeter availableMeter=connector.getAccessorsAvailableMeter();
-                row.add(availableMeter.getCount());
+                row.add(connector.getAccessorsAvailable());
                 
-                write(row,connector.getAccessorsInUseMeter());
+                row.add(connector.getAccessorsInUse());
                 write(row,connector.getWaitingForAcessorsMeter());
-                long used=connector.getUsedMeter().getCount();
+                long used=connector.getUseMeter().getTotalCount();
                 row.add(used);
+                RateSample useSample=connector.getUseMeter().sample(minimalResetDurationS);
+                row.add(String.format("%.3f", useSample.getWeightedRate()));
+                
                 write(row,connector.getAcessorsWaitNsMeter(),used);
                 
                 table.addBodyRow(row);
+            }
+        }
+
+        return page;
+    }
+    @GET
+    @Path("/operator/connector/stackTraces/view")
+    public Element viewStackTraces() throws Throwable
+    {
+        OperatorPage page=this.application.buildOperatorPage("View Connector Active Stack Traces");
+        
+        synchronized(this)
+        {
+            for (Entry<String, Connector> entry:this.connectors.entrySet())
+            {
+                Connector connector=entry.getValue();
+                for (Accessor accessor:connector.getSnapshotOfAccessorsInUse())
+                {
+                    String stackTrace=Utils.toString(accessor.getActivateThread().getStackTrace());
+                    page.content().addInner("Trace:"+accessor.getParent().getCategory());
+                    page.content().addInner(", Thread:"+accessor.getActivateThread().getName());
+                    page.content().addInner(new p());
+                    page.content().addInner("Current Stack Trace:");
+                    page.content().returnAddInner(new textarea()).rows(15).addInner(stackTrace).style("width:100%;");
+                    StackTraceElement[] stackTraceElements=accessor.getActivateStackTrace();
+                    if (stackTraceElements!=null)
+                    {
+                        page.content().addInner("Activate Stack Trace:");
+                        page.content().returnAddInner(new textarea()).rows(15).addInner(Utils.toString(stackTraceElements)).style("width:100%;");
+                    }
+                    page.content().addInner(new hr());
+                }
             }
         }
 

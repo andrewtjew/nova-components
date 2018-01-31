@@ -103,6 +103,7 @@ public class MeterManager
 				field.setAccessible(true);
 				countMeters.put(key, new CountMeterBox(category, key, description, (CountMeter) field.get(object)));
 			}
+			/*
 			else if (Utils.isDerivedFrom(field.getType(), LongRateMeter.class))
 			{
 				if (countAverageRateMeters.containsKey(key))
@@ -112,6 +113,7 @@ public class MeterManager
 				field.setAccessible(true);
 				countAverageRateMeters.put(key, new LongRateMeterBox(category, key, description,(LongRateMeter) field.get(object)));
 			}
+			*/
 		}
 	}
 
