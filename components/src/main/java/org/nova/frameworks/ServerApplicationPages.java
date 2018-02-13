@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -135,24 +136,26 @@ import org.nova.logging.Logger;
 import org.nova.logging.SourceQueueLogger;
 import org.nova.logging.StatusEntry;
 import org.nova.metrics.LongValueSample;
-import org.nova.metrics.CategoryMeters;
+import org.nova.metrics.MeterAttribute;
+import org.nova.metrics.MeterAttributeValue;
+import org.nova.metrics.MeterStore;
 import org.nova.metrics.LongValueMeter;
-import org.nova.metrics.LongRateMeterBox;
 import org.nova.metrics.CountMeter;
-import org.nova.metrics.CountMeterBox;
+import org.nova.metrics.CountSample;
 import org.nova.metrics.TraceSample;
 import org.nova.metrics.LevelMeter;
-import org.nova.metrics.LevelMeterBox;
 import org.nova.metrics.LevelSample;
-import org.nova.metrics.MeterSnapshot;
 import org.nova.metrics.PrecisionTimer;
 import org.nova.metrics.RateMeter;
-import org.nova.metrics.RateMeterBox;
 import org.nova.metrics.RateSample;
+import org.nova.metrics.RecentSourceEventMeter;
+import org.nova.metrics.RecentSourceEventSample;
+import org.nova.metrics.SourceEvent;
 import org.nova.metrics.TopDoubleValues;
 import org.nova.metrics.TopLongValues;
 import org.nova.metrics.TraceMeter;
 import org.nova.operations.OperatorVariable;
+import org.nova.pathStore.AttributeValue;
 import org.nova.security.Vault;
 import org.nova.test.Testing;
 import org.nova.testing.TestTraceClient;
@@ -160,6 +163,7 @@ import org.nova.tracing.CategorySample;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
 import org.nova.tracing.TraceNode;
+import org.nova.utils.DateTimeUtils;
 
 import com.google.common.base.Strings;
 
@@ -239,17 +243,15 @@ public class ServerApplicationPages
         this.serverApplication = serverApplication;
 
         MenuBar menuBar=serverApplication.getMenuBar();
-        menuBar.add("/","Environment","Home");
+        menuBar.add("/","Environment","Status");
         menuBar.add("/operator/application/configuration","Environment","Configuration");
-        menuBar.add("/operator/environment/statusBoard","Environment","Status Board");
+        menuBar.add("/operator/jvm","Environment","JVM");
         menuBar.addSeparator("Environment");       
         menuBar.add("/operator/application/futures","Environment","Futures");
         menuBar.add("/operator/application/timers","Environment","Timer Tasks");
         menuBar.addSeparator("Environment");       
-        menuBar.add("/operator/application/meters/categories","Environment","Category Meters");
-        menuBar.add("/operator/application/meters/all","Environment","All Meters");
-        menuBar.addSeparator("Environment");       
-        menuBar.add("/operator/jvm","Environment","JVM");
+        menuBar.add("/operator/environment/sourceEventBoard","Environment","Source Event Board");
+        menuBar.add("/operator/application/meters","Environment","Meters");
         menuBar.addSeparator("Environment");       
         menuBar.add("/operator/exception","Environment","Startup Exception");
 
@@ -311,6 +313,14 @@ public class ServerApplicationPages
         serverApplication.getOperatorVariableManager().register(this);
     }
 
+    @GET
+    @Path("/operator/noStartupExceptions")
+    public Element noStartupExceptions() throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Startup Exceptions");
+        page.content().addInner("No exceptions");
+        return page;
+    }
     
     @GET
     @Path("/operator/application/configuration")
@@ -333,6 +343,192 @@ public class ServerApplicationPages
         return page;
     }
     
+    
+    static class Meters
+    {
+        final TreeMap<String,MeterAttributeValue> countMeterAttributeValues;
+        final TreeMap<String,MeterAttributeValue> levelMeterAttributeValues;
+        final TreeMap<String,MeterAttributeValue> rateMeterAttributeValues;
+        final TreeMap<String,MeterAttributeValue> longValueMeterAttributeValues;
+        final TreeMap<String,MeterAttributeValue> recentSourceEventMeterAttributeValues;
+        
+        Meters(List<MeterAttributeValue> list)
+        {
+            this.countMeterAttributeValues=new TreeMap<>();
+            this.levelMeterAttributeValues=new TreeMap<>();
+            this.rateMeterAttributeValues=new TreeMap<>();
+            this.longValueMeterAttributeValues=new TreeMap<>();
+            this.recentSourceEventMeterAttributeValues=new TreeMap<>();
+            
+            for (MeterAttributeValue item:list)
+            {
+                if (item.getCountMeter()!=null)
+                {
+                    countMeterAttributeValues.put(item.getPath(), item);
+                }
+                else if (item.getLevelMeter()!=null)
+                {
+                    levelMeterAttributeValues.put(item.getPath(), item);
+                }
+                else if (item.getRateMeter()!=null)
+                {
+                    rateMeterAttributeValues.put(item.getPath(), item);
+                }
+                else if (item.getLongValueMeter()!=null)
+                {
+                    longValueMeterAttributeValues.put(item.getPath(), item);
+                }
+                else if (item.getRecentStateEventMeter()!=null)
+                {
+                    recentSourceEventMeterAttributeValues.put(item.getPath(), item);
+                }
+            }
+        }
+    
+    }
+    
+    @GET
+    @Path("/operator/application/meters")
+    public Element meters(@DefaultValue("/") @QueryParam("path") String path) throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Meters from path:"+path);
+        
+        MeterStore store=this.serverApplication.getMeterStore();
+        List<MeterAttributeValue> list=store.getAllMeterAttributeValues(path);
+
+        Meters meters=new Meters(list);
+        writeMeters(meters,page.head(),page.content());
+        
+        return page;
+    }
+
+    private div buildPath(MeterAttributeValue av) throws Exception
+    {
+        MeterAttribute attribute=av.getAttribute();
+        div div=new div();
+        if (attribute.getDescription()!=null)
+        {
+            div.title(attribute.getDescription());
+        }
+        StringBuilder sb=new StringBuilder();
+        for (String pathElement:av.getPathElements())
+        {
+            div.addInner("/");
+            sb.append("/"+pathElement);
+            a a=div.returnAddInner(new a());
+            a.href(new PathAndQueryBuilder("/operator/application/meters").addQuery("path",sb.toString()).toString());
+            a.addInner(pathElement);
+        }
+        return div;
+    }
+    
+    
+    public void writeMeters(Meters meters,Head head,InnerElement<?> element) throws Throwable
+    {
+        if (meters.countMeterAttributeValues.size()>0)
+        {
+            Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Count Meters"));
+            DataTable table=accordion.content().returnAddInner(new OperatorTable(head));
+            table.setHeadRow(new Row().add("Path","Count"));
+            for (MeterAttributeValue av:meters.countMeterAttributeValues.values())
+            {
+                Row row=new Row();
+                row.add(buildPath(av));
+                CountSample sample=av.getCountMeter().sample();
+                row.add(sample.getCount());
+                table.addBodyRow(row);
+            }
+        }
+        if (meters.levelMeterAttributeValues.size()>0)
+        {
+            Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Level Meters"));
+            DataTable table=accordion.content().returnAddInner(new OperatorTable(head));
+            table.setHeadRow(new Row().add("Path","Level","Base","Min","Min Instant","Max","Max Instant"));
+            for (MeterAttributeValue av:meters.levelMeterAttributeValues.values())
+            {
+                Row row=new Row();
+                row.add(buildPath(av));
+                LevelSample sample=av.getLevelMeter().sample();
+                row.add(sample.getLevel());
+                row.add(sample.getBaseLevel());
+                row.add(sample.getMinLevel());
+                row.add(sample.getMinLevel()<sample.getBaseLevel()?Utils.millisToLocalDateTimeString(sample.getMinLevelInstantMs()):"");
+                row.add(sample.getMaxLevel());
+                row.add(sample.getMaxLevel()>sample.getBaseLevel()?Utils.millisToLocalDateTimeString(sample.getMaxLevelInstantMs()):"");
+                table.addBodyRow(row);
+            }
+        }
+        if (meters.rateMeterAttributeValues.size()>0)
+        {
+            Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Rate Meters"));
+            DataTable table=accordion.content().returnAddInner(new OperatorTable(head));
+            table.setHeadRow(new Row().add("Path","Rate","Total","Samples"));
+            for (MeterAttributeValue av:meters.rateMeterAttributeValues.values())
+            {
+                Row row=new Row();
+                row.add(buildPath(av));
+                RateSample sample=av.getRateMeter().sample();
+                row.add(sample.getRate());
+                row.add(sample.getTotalCount());
+                row.add(sample.getSamples());
+                table.addBodyRow(row);
+            }
+        }
+        if (meters.longValueMeterAttributeValues.size()>0)
+        {
+            Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Long Value Meters"));
+            DataTable table=accordion.content().returnAddInner(new OperatorTable(head));
+            table.setHeadRow(new Row().add("Path","Value","Average","Deviation","Rate","Min","Max","Samples"));
+            for (MeterAttributeValue av:meters.longValueMeterAttributeValues.values())
+            {
+                Row row=new Row();
+                row.add(buildPath(av));
+                LongValueSample sample=av.getLongValueMeter().sample();
+                row.add(sample.getSamples()>0?sample.getValue():"");
+                row.add(sample.getSamples()>=1?sample.getAverage():"");
+                row.add(sample.getSamples()>=2?sample.getStandardDeviation():"");
+                row.add(sample.getSamples()>=1?sample.getRate():"");
+                row.add(sample.getSamples()>0?sample.getMin():"");
+                row.add(sample.getSamples()>0?sample.getMax():"");
+                row.add(sample.getSamples());
+                table.addBodyRow(row);
+            }
+        }
+        if (meters.recentSourceEventMeterAttributeValues.size()>0)
+        {
+            Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Count Meters"));
+            DataTable table=accordion.content().returnAddInner(new OperatorTable(head));
+            table.setHeadRow(new Row().add("Path","Most recent","Most recent instant","State 1","Instant 1","State 2","Instant 2","Count"));
+            for (MeterAttributeValue av:meters.recentSourceEventMeterAttributeValues.values())
+            {
+                Row row=new Row();
+                row.add(buildPath(av));
+                RecentSourceEventSample sample=av.getRecentStateEventMeter().sample();
+                List<SourceEvent> events=sample.getEvents();
+                int show=events.size();
+                if (show>3)
+                {
+                    show=3;
+                }
+                for (int i=0;i<show;i++)
+                {
+                    SourceEvent event=events.get(i);
+                    Object state=event.getState();
+                    
+                    row.add(state!=null?state.toString():"");
+                    row.add(Utils.millisToLocalDateTime(event.getInstantMs()));
+                }
+                for (int i=show;i<3;i++)
+                {
+                    row.add("","");
+                }
+                row.add(sample.getCount());
+                
+                table.addBodyRow(row);
+            }
+        }
+    }
+
     @GET
     @Path("/operator/application/futures")
     public Element futures() throws Throwable
@@ -352,24 +548,29 @@ public class ServerApplicationPages
     }
 
     @GET
-    @Path("/operator/environment/statusBoard")
+    @Path("/operator/environment/sourceEventBoard")
     public Element statusBoard() throws Throwable
     {
-        OperatorPage page=this.serverApplication.buildOperatorPage("Status Board");
+        OperatorPage page=this.serverApplication.buildOperatorPage("Source Event Board");
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         table.lengthMenu(-1,20,40,60);
 
-        table.setHeadRowItems("Name","Value","Created","Count","Source");
-        for (StatusEntry item : this.serverApplication.getStatusBoard().getStatusEntries())
+        
+        table.setHeadRowItems("Name","State","Type","Instant","Source","Count");
+        for (Entry<String, RecentSourceEventMeter> entry:this.serverApplication.getSourceEventBoard().getSnapshot().entrySet())
         {
-            org.nova.html.widgets.Row row=new Row();
-            row.add(item.getName());
-            row.add(new TitleText(item.getValue(),120));
-            row.add(Utils.millisToLocalDateTime(item.getCreatedMs()));
-            row.add(item.getCount());
-            row.add(item.getSource());
+            Row row=new Row();
+            RecentSourceEventSample sample=entry.getValue().sample();
+            SourceEvent event=sample.getEvents().get(0);
+            Object state=event.getState();
+            String type=state!=null?state.getClass().getSimpleName():"";
+
+            row.add(entry.getKey());
+            row.add(new TitleText(state!=null?state.toString():"",120));
+            row.add(type,DateTimeUtils.toSystemDateTimeString(event.getInstantMs()),event.getSource(),sample.getCount());
             table.addBodyRow(row);
         }
+        
         return page;
     }
     
@@ -439,7 +640,7 @@ public class ServerApplicationPages
                 }
                 row.add(div);
                 RateSample sample=sourceQueueLogger.getRateMeter().sample(minimalResetDurationS);
-                row.add(sample.getCount());
+                row.add(sample.getSamples());
                 row.add(sample.getRate());
                 row.add(sourceQueueLogger.getLogFailures().getCount());
                 Throwable exception=sourceQueueLogger.getLogFailureThrowable();
@@ -562,181 +763,7 @@ public class ServerApplicationPages
         }
         return page;
     }
-    @GET
-    @Path("/operator/application/meters/all")
-    public Element meterCategories(@DefaultValue("10") @QueryParam("interval") double interval) throws Throwable
-    {
-        MeterSnapshot snapshot=this.serverApplication.getMeterManager().getSnapshot();
-        OperatorPage page=this.serverApplication.buildOperatorPage("Meters");
 
-        form_post form=page.content().returnAddInner(new form_post());
-        form.addInner("Sampling interval (seconds): ");
-        SelectOptions options=form.returnAddInner(new SelectOptions());
-        options.add(1,interval==1);
-        options.add(2,interval==2);
-        options.add(5,interval==5);
-        options.add(10,interval==10);
-        options.onchange("window.location='./all?interval='+(this.value);");
-        
-        page.content().addInner(new p());
-        LevelMeterBox[] levelBoxes = snapshot.getLevelMeterBoxes();
-        if (levelBoxes.length>0)
-        {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"Level Meters"));
-            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
-            table.setHeadRow(new Row().add("Category","Name","Level", "Highest","Highest TimeStamp","Description"));
-        
-            for (LevelMeterBox box : levelBoxes)
-            {
-                LevelSample sample = box.getMeter().sample();
-                
-                table.addBodyRowItems(box.getCategory(),box.getName(),sample.getLevel(),sample.getMaxLevel()
-                        ,Utils.millisToLocalDateTimeString(sample.getMaxLevelInstantMs()),box.getDescription());
-            }
-        } 
-        RateMeterBox[] rateBoxes = snapshot.getRateMeterBoxes();
-        if (rateBoxes.length>0)
-        {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"Rate Meters"));
-            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
-            table.setHeadRow(new Row().add("Name","Rate","Count","Description"));
-            for (RateMeterBox box : rateBoxes)
-            {
-                RateSample sample= box.getMeter().sample(interval);
-                table.addBodyRowItems(box.getName(),String.format("%.4f", sample.getRate())
-                ,sample.getCount(),box.getDescription());
-            }
-        }
-        CountMeterBox[] countBoxes = snapshot.getCountMeterBoxes();
-        if (countBoxes.length>0)
-        {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"Count Meters"));
-            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
-            table.setHeadRow(new Row().add("Name","Count","Description"));
-            for (CountMeterBox box : countBoxes)
-            {
-                CountMeter meter = box.getMeter();
-                table.addBodyRowItems(box.getName(),meter.getCount(),box.getDescription());
-            }
-        }
-        LongRateMeterBox[] countAverageRateBoxes = snapshot.getValueRateMeterBoxes();
-        if (countAverageRateBoxes.length>0)
-        {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"CountAverageRate Meters"));
-            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
-            table.setHeadRow(new Row().add("Name","Average")
-                    .addWithTitle("StdDev", "Standard Deviation")
-                    .addWithTitle("Rate", "per second")
-                    .add("Count","Total","Description"));
-            for (LongRateMeterBox box : countAverageRateBoxes)
-            {
-                LongValueMeter meter = box.getMeter();
-                LongValueSample result = meter.sample();
-                table.addBodyRowItems(box.getName(),String.format("%.4f", result != null ? result.getAverage() : "-")
-                        ,String.format("%.4f", result != null ? result.getStandardDeviation() : "-")
-                        ,String.format("%.4f", result != null ? result.getRate() : "-")
-                        ,result.getCount(),result.getTotal(),box.getDescription());
-            }
-        }
-        return page;
-    }
-
-    @GET
-    @Path("/operator/application/meters/category")
-    public Element meterCategory(@QueryParam("category") String category, @QueryParam("interval") @DefaultValue("10") double interval) throws Throwable
-    {
-
-        OperatorPage page=this.serverApplication.buildOperatorPage("Meter Category: "+category);
-        form_post form=page.content().returnAddInner(new form_post());
-        form.addInner("Sampling interval (seconds): ");
-        SelectOptions options=form.returnAddInner(new SelectOptions());
-        options.add(1,interval==1);
-        options.add(2,interval==2);
-        options.add(5,interval==5);
-        options.add(10,interval==10);
-        options.onchange("window.location='./all?interval='+(this.value);");
-        page.content().addInner(new p());
-        CategoryMeters categories = this.serverApplication.getMeterManager().getSnapshot().getMeterBoxes(category);
-        LevelMeterBox[] levelBoxes = categories.getLevelMeterBoxes();
-        if (levelBoxes.length>0)
-        {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"Level Meters"));
-            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
-            table.setHeadRow(new Row().add("Category","Name","Level", "Highest","Highest TimeStamp","Description"));
-        
-            for (LevelMeterBox box : levelBoxes)
-            {
-                LevelSample sample= box.getMeter().sample();
-                
-                table.addBodyRowItems(box.getCategory(),box.getName(),sample.getLevel(),sample.getMaxLevel()
-                        ,Utils.millisToLocalDateTimeString(sample.getMaxLevelInstantMs()),box.getDescription());
-            }
-        }        
-        RateMeterBox[] rateBoxes = categories.getRateMeterBoxes();
-        if (rateBoxes.length>0)
-        {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"Rate Meters"));
-            accordion.button().addInner("Rate Meters");
-            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
-            table.setHeadRow(new Row().add("Name","Rate","Count","Description"));
-            for (RateMeterBox box : rateBoxes)
-            {
-                RateSample sample = box.getMeter().sample(interval);
-                
-                table.addBodyRowItems(box.getName(),String.format("%.4f", sample.getRate())
-                ,sample.getCount(),(box.getDescription()));
-            }
-        }
-
-        CountMeterBox[] countBoxes = categories.getCountMeterBoxes();
-        if (countBoxes.length>0)
-        {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null,true,"Count Meters"));
-            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
-            table.setHeadRow(new Row().add("Name","Count","Description"));
-            for (CountMeterBox box : countBoxes)
-            {
-                CountMeter meter = box.getMeter();
-                table.addBodyRowItems(box.getName(),meter.getCount(),box.getDescription());
-            }
-        }
-        LongRateMeterBox[] countAverageRateBoxes = categories.getCountAverageMeterBoxes();
-        if (countAverageRateBoxes.length>0)
-        {
-            Accordion accordion=page.content().returnAddInner(new Accordion(page.head(), null, true,"CountAverageRate Meters"));
-            DataTable table=accordion.content().returnAddInner(new OperatorTable(page.head()));
-            table.setHeadRow(new Row().add("Name","Average")
-                    .addWithTitle("StdDev", "Standard Deviation")
-                    .addWithTitle("Rate", "per second")
-                    .add("Count","Total","Description"));
-            for (LongRateMeterBox box : countAverageRateBoxes)
-            {
-                LongValueMeter meter = box.getMeter();
-                LongValueSample result  = meter.sample();
-                table.addBodyRowItems(box.getName(),String.format("%.4f", result  != null ? result .getAverage() : "-")
-                        ,String.format("%.4f", result  != null ? result .getStandardDeviation() : "-")
-                        ,String.format("%.4f", result  != null ? result .getRate() : "-")
-                        ,result.getCount(),result.getTotal(),box.getDescription());
-            }
-        }
-        return page;
-    }
-
-    @GET
-    @Path("/operator/application/meters/categories")
-    public Element meterCategories() throws Throwable
-    {
-        OperatorPage page=this.serverApplication.buildOperatorPage("Meter Categories");
-        Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Categories"));
-        String[] categories = this.serverApplication.getMeterManager().getSnapshot().getCategories();
-        VerticalMenu menu=panel.content().returnAddInner(new VerticalMenu(page.head(), "menu"));
-        for (String category:categories)
-        {
-            menu.addMenuItem(category, new PathAndQueryBuilder("/operator/application/meters/category").addQuery("category", category).toString());
-        }
-        return page;
-    }
-    
 
     void write(Table table, Trace trace, Object family) throws Exception
     {
@@ -2201,7 +2228,7 @@ public class ServerApplicationPages
         RateSample sample=requestRateMeter.sample();
         WideTable infoTable=page.content().returnAddInner(new WideTable(page.head()));
         infoTable.setHeadRowItems("Request Rate","Total Requests");
-        infoTable.addBodyRowItems(DOUBLE_FORMAT.format(sample.getRate()),sample.getCount());
+        infoTable.addBodyRowItems(DOUBLE_FORMAT.format(sample.getRate()),sample.getSamples());
         
         page.content().addInner(new p());
         Panel requestHandlerPanel=page.content().returnAddInner(new Level1Panel(page.head(),"RequestHandlers"));
@@ -2229,7 +2256,7 @@ public class ServerApplicationPages
             for (LongValueSample result : results.values())
             {
                 totalAll += result.getTotal();
-                totalCount += result.getCount();
+                totalCount += result.getSamples();
             }
             statusResults.put(requestHandler.getKey(),results);
         }
@@ -2242,7 +2269,7 @@ public class ServerApplicationPages
             for (LongValueSample result : results.values())
             {
                 total += result.getTotal();
-                count += result.getCount();
+                count += result.getSamples();
                 rate += result.getRate();
             }
             double countPercentage = totalCount > 0 ? (100.0 * count) / totalCount : 0;
@@ -2556,11 +2583,11 @@ public class ServerApplicationPages
                 Long count = statusCodes.get(status);
                 if (count == null)
                 {
-                    count = entry.getValue().getCount();
+                    count = entry.getValue().getSamples();
                 }
                 else
                 {
-                    count += entry.getValue().getCount();
+                    count += entry.getValue().getSamples();
                 }
                 statusCodes.put(status, count);
             }
@@ -3084,12 +3111,12 @@ public class ServerApplicationPages
             for (Entry<Integer, LongValueSample> entry : meters.entrySet())
             {
                 LongValueSample result = entry.getValue();
-                if (result.getCount()!=0)
+                if (result.getSamples()!=0)
                 {
                     table.addBodyRow(new Row().add(
                             entry.getKey()
                             ,result.getTotalCount()
-                            ,result.getCount()
+                            ,result.getSamples()
                             ,format_3(result.getRate())
                             ,format_3(result.getAverage() / 1.0e6)
                             ,format_3(result.getStandardDeviation() / 1.0e6)
@@ -3101,7 +3128,7 @@ public class ServerApplicationPages
                     table.addBodyRow(new Row().add(
                             entry.getKey()
                             ,result.getTotalCount()
-                            ,result.getCount()
+                            ,result.getSamples()
                             ,""
                             ,""
                             ,""
@@ -3127,7 +3154,7 @@ public class ServerApplicationPages
             
             LongValueMeter requestMeter = requestHandler.getRequestUncompressedContentSizeMeter();
             LongValueSample result = requestMeter.sample();
-            if (result.getCount()>0)
+            if (result.getSamples()>0)
             {
                 long total = requestUncompressed = requestMeter.getTotal();
                 table.addBodyRow(new Row().add(
@@ -3156,7 +3183,7 @@ public class ServerApplicationPages
     
             LongValueMeter compressedRequestMeter = requestHandler.getRequestCompressedContentSizeMeter();
             result = compressedRequestMeter.sample();
-            if (result.getCount()>0)
+            if (result.getSamples()>0)
             {
                 long total = requestCompressed = compressedRequestMeter.getTotal();
                 table.addBodyRow(new Row().add(
@@ -3185,7 +3212,7 @@ public class ServerApplicationPages
     
             LongValueMeter responseMeter = requestHandler.getResponseUncompressedContentSizeMeter();
             result = responseMeter.sample();
-            if (result.getCount()>0)
+            if (result.getSamples()>0)
             {
                 long total = responseUncompressed = responseMeter.getTotal();
                 table.addBodyRow(new Row().add(
@@ -3214,7 +3241,7 @@ public class ServerApplicationPages
     
             LongValueMeter compressedResponseMeter = requestHandler.getResponseCompressedContentSizeMeter();
             result = compressedResponseMeter.sample();
-            if (result.getCount()>0)
+            if (result.getSamples()>0)
             {
                 long total = responseCompressed = compressedResponseMeter.getTotal();
                 table.addBodyRow(new Row().add(
@@ -4021,7 +4048,7 @@ public class ServerApplicationPages
                         table.setHeadRowItems("","Bytes","KB","MB","GB");
                         RateSample sample=sink.getWriteRateMeter().sample(this.rateSamplingDuration);
                         writeSize(table, "Write Rate (per second)", sample.getRate());
-                        writeSize(table, "Written", sample.getCount());
+                        writeSize(table, "Written", sample.getSamples());
                     }
                 }
             }
@@ -4074,7 +4101,7 @@ public class ServerApplicationPages
     {
         HttpServletResponse response = context.getHttpServletResponse();
         byte[] bytes = this.serverApplication.getFileCache().get(trace, file);
-        context.setHandled(true);
+        context.setCaptured(true);
         if (bytes == null)
         {
             if (Testing.ENABLED)
@@ -4099,7 +4126,7 @@ public class ServerApplicationPages
     public void cache(@PathParam(PathParam.AT_LEAST_ONE_SEGMENT) String file, Context context, Trace trace) throws Throwable
     {
         HttpServletResponse response = context.getHttpServletResponse();
-        context.setHandled(true);
+        context.setCaptured(true);
 
         byte[] bytes;
         try

@@ -89,7 +89,7 @@ public class SessionOperatorPages<SESSION extends Session>
             Row row=new Row();
             RateSample sample=session.getAccessRateMeter().sample();
             row.add(session.getToken(),session.getUser(),Utils.millisToLocalDateTimeString(session.getCreated()),Utils.millisToLocalDateTimeString(session.getLastAccess()),Utils.millisToDurationString(duration),Utils.millisToDurationString(idle)
-                    ,sample.getCount(),String.format("%.2f",sample.getRate()
+                    ,sample.getSamples(),String.format("%.2f",sample.getRate()
                             ));
             /*
             row.addRemoveAndDetailButtons("window.location='"+new PathAndQueryBuilder("/operator/sessions/remove").addQuery("token", session.getToken()).toString()+"';"

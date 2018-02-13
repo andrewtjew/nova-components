@@ -30,8 +30,8 @@ import org.nova.logging.Level;
 import org.nova.logging.LogDirectoryManager;
 import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
-import org.nova.logging.StatusBoard;
-import org.nova.metrics.MeterManager;
+import org.nova.metrics.MeterStore;
+import org.nova.metrics.SourceEventEventBoard;
 import org.nova.operations.OperatorVariable;
 import org.nova.operations.OperatorVariableManager;
 import org.nova.security.SecureFileVault;
@@ -58,7 +58,7 @@ public abstract class CoreEnvironmentApplication
     {
         return this.coreEnvironment.getLogDirectoryManager();
     }
-    public MeterManager getMeterManager()
+    public MeterStore getMeterStore()
     {
         return this.coreEnvironment.getMeterManager();
     }
@@ -98,9 +98,9 @@ public abstract class CoreEnvironmentApplication
     {
         return this.coreEnvironment;
     }
-    public StatusBoard getStatusBoard()
+    public SourceEventEventBoard getSourceEventBoard()
     {
-        return this.coreEnvironment.getStatusBoard();
+        return this.coreEnvironment.getSourceEventBoard();
     }
     public String getName()
     {

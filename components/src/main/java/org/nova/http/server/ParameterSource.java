@@ -10,6 +10,6 @@ public enum ParameterSource
 	STATE,
 	CONTEXT,
 	TRACE,
-	CHECK,
+	NAME,
 	QUERIES,
 }

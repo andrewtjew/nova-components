@@ -28,5 +28,13 @@ public class input_radio extends InputElement<input_radio>
     {
         return attr("value",text);
     }
+    public input_radio value(Object value)
+    {
+        if (value==null)
+        {
+            return this;
+        }
+        return attr("value",value.toString());
+    }
     
 }

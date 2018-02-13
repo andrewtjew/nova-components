@@ -185,37 +185,77 @@ class RequestHandlerMap
 
 	@SuppressWarnings(
 	{ "unchecked", "rawtypes" })
-	private Object getDefaultValue(Method method, DefaultValue default_, Class<?> type) throws Exception
+	private Object getDefaultValue(Method method, DefaultValue defaultValue, Class<?> type) throws Exception
 	{
-		if (default_ == null)
+		if (defaultValue == null)
 		{
 			return null;
 		}
 		try
 		{
-			if ((type == int.class) || (type == Integer.class))
+            if (type == int.class)
+            {
+                return Integer.parseInt(defaultValue.value());
+            }
+            else if (type == Integer.class)
+            {
+                if (defaultValue.value().length()==0)
+                {
+                    return null;
+                }
+                return Integer.parseInt(defaultValue.value());
+            }
+            else if (type == long.class)
+            {
+                return Long.parseLong(defaultValue.value());
+            }
+            else if (type == Long.class)
+            {
+                if (defaultValue.value().length()==0)
+                {
+                    return null;
+                }
+                return Long.parseLong(defaultValue.value());
+            }
+            else if (type == short.class)
+            {
+                return Short.parseShort(defaultValue.value());
+            }
+            else if (type == Short.class)
+            {
+                if (defaultValue.value().length()==0)
+                {
+                    return null;
+                }
+                return Short.parseShort(defaultValue.value());
+            }
+            else if (type == float.class)
+            {
+                return Float.parseFloat(defaultValue.value());
+            }
+            else if (type == Float.class)
+            {
+                if (defaultValue.value().length()==0)
+                {
+                    return null;
+                }
+                return Float.parseFloat(defaultValue.value());
+            }
+            else if (type == double.class)
+            {
+                return Double.parseDouble(defaultValue.value());
+            }
+            else if (type == Double.class)
+            {
+                if (defaultValue.value().length()==0)
+                {
+                    return null;
+                }
+                return Double.parseDouble(defaultValue.value());
+            }
+			else if (type == boolean.class)
 			{
-				return Integer.parseInt(default_.value());
-			}
-			else if ((type == long.class) || (type == Long.class))
-			{
-				return Long.parseLong(default_.value());
-			}
-			else if ((type == short.class) || (type == short.class))
-			{
-				return Short.parseShort(default_.value());
-			}
-			else if ((type == float.class) || (type == Float.class))
-			{
-				return Float.parseFloat(default_.value());
-			}
-			else if ((type == double.class) || (type == Double.class))
-			{
-				return Double.parseDouble(default_.value());
-			}
-			else if ((type == boolean.class) || (type == Boolean.class))
-			{
-				String value = default_.value().toLowerCase();
+				String value = defaultValue.value().toLowerCase();
 				if (value.equals("true"))
 				{
 					return true;
@@ -225,23 +265,43 @@ class RequestHandlerMap
 					return false;
 				}
 			}
+            else if (type == Boolean.class)
+            {
+                if (defaultValue.value().length()==0)
+                {
+                    return null;
+                }
+                String value = defaultValue.value().toLowerCase();
+                if (value.equals("true"))
+                {
+                    return true;
+                }
+                if (value.equals("false"))
+                {
+                    return false;
+                }
+            }
 			else if (type == String.class)
 			{
-				return default_.value();
+				return defaultValue.value();
 			}
             else if (type == BigDecimal.class)
             {
-                return new BigDecimal(0);
+                if (defaultValue.value().length()==0)
+                {
+                    return null;
+                }
+                return new BigDecimal(Long.parseLong(defaultValue.value()));
             }
 			else if (type.isEnum())
 			{
-				return Enum.valueOf((Class<Enum>) type, default_.value());
+				return Enum.valueOf((Class<Enum>) type, defaultValue.value());
 			}
 		}
 		catch (Throwable t)
 		{
 		}
-		throw new Exception("Unable to parse @Default value. Value=" + default_.value() + ". Site=" + method.getName());
+		throw new Exception("Unable to parse @DefaultValue value. Value=" + defaultValue.value() + ". Site=" + method.getName());
 	}
 
 	static class DistanceContentWriter
@@ -415,7 +475,7 @@ class RequestHandlerMap
 			PathParam pathParam = null;
 			QueryParam queryParam = null;
 			StateParam stateParam = null;
-			ParamName checkParam=null;
+			ParamName paramName=null;
 			
 			for (Annotation annotation : parameterAnnotations)
 			{
@@ -454,7 +514,7 @@ class RequestHandlerMap
                 }
                 else if (type==ParamName.class)
                 {
-                    checkParam=(ParamName)annotation;
+                    paramName=(ParamName)annotation;
                 }
 			}
 
@@ -484,9 +544,9 @@ class RequestHandlerMap
 			{
 				params.add(stateParam);
 			}
-            if (checkParam != null)
+            if (paramName != null)
             {
-                params.add(checkParam);
+                params.add(paramName);
             }
 			if (params.size() > 1)
 			{
@@ -579,19 +639,27 @@ class RequestHandlerMap
 				parameterInfos.add(new ParameterInfo(ParameterSource.HEADER, headerParam, headerParam.value(), parameterIndex, parameterType,
 						getDefaultValue(method, defaultValue, parameterType)));
 			}
-			else if (checkParam!=null)
+			else if (paramName!=null)
 			{
-                if (defaultValue != null)
+                if (paramName.startsWith())
                 {
-                    throw new Exception("@DefaultValue annotation not allowed with @CheckParam annotation. Site=" + object.getClass().getCanonicalName() + "."
-                            + method.getName());
+                    parameterInfos.add(new ParameterInfo(ParameterSource.NAME, paramName, paramName.value(), parameterIndex, parameterType,
+                            getDefaultValue(method, defaultValue, parameterType)));
                 }
-			    if (parameterType!=boolean.class)
-			    {
-                    throw new Exception("Only the boolean type is allowed for CheckParam parameter. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
-			    }
-                parameterInfos.add(new ParameterInfo(ParameterSource.CHECK, checkParam, checkParam.value(), parameterIndex, parameterType,
-                        null));
+                else
+                {
+                    if (defaultValue != null)
+                    {
+                        throw new Exception("@DefaultValue annotation not allowed for ParamName with startsWith=false. Site=" + object.getClass().getCanonicalName() + "."
+                                + method.getName());
+                    }
+    			    if (parameterType!=boolean.class)
+    			    {
+                        throw new Exception("Only the boolean type is allowed for ParamName when the startsWith field is false. Site=" + object.getClass().getCanonicalName() + "." + method.getName());
+    			    }
+                    parameterInfos.add(new ParameterInfo(ParameterSource.NAME, paramName, paramName.value(), parameterIndex, parameterType,
+                            null));
+                }
 			}
 		}
 

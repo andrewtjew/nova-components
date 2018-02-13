@@ -1,14 +1,11 @@
-package org.nova.http.server.annotations;
-
+package org.nova.annotations;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ParamName
+@Target({ElementType.METHOD,ElementType.TYPE,ElementType.FIELD,ElementType.PARAMETER})
+public @interface Metrics
 {
-	String value();
-	boolean startsWith() default false;
 }

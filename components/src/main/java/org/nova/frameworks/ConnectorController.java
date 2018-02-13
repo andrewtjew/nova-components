@@ -76,6 +76,7 @@ public class ConnectorController
             }
             this.connectors.put(name, connector);
         }
+        this.application.getMeterStore().addMeters("/connectors/"+name,connector);
     }
     public void track(Connector connector) throws Throwable
     {
@@ -154,18 +155,32 @@ public class ConnectorController
     {
         RateSample sample=meter.sample(minimalResetDurationS);
         row.add(String.format("%.3f",sample.getWeightedRate()));
-        row.add(sample.getCount());
+        row.add(sample.getSamples());
     }
 
-    private void write(Row row,LevelMeter meter)
+    private void writeMax(Row row,LevelMeter meter)
     {
         LevelSample sample=meter.sample();
         row.add(sample.getLevel());
         row.add(sample.getMaxLevel());
-        long min=sample.getMaxLevelInstantMs();
-        if (min>0)
+        if (sample.getMaxLevel()>sample.getBaseLevel())
         {
             row.add(Utils.millisToLocalDateTime(sample.getMaxLevelInstantMs()));
+        }
+        else
+        {
+            row.add("");
+        }
+    }
+    private void writeMin(Row row,LevelMeter meter)
+    {
+        LevelSample sample=meter.sample();
+        row.add(sample.getLevel());
+        row.add(sample.getBaseLevel());
+        row.add(sample.getMinLevel());
+        if (sample.getMinLevel()<sample.getBaseLevel())
+        {
+            row.add(Utils.millisToLocalDateTime(sample.getMinLevelInstantMs()));
         }
         else
         {
@@ -210,7 +225,9 @@ public class ConnectorController
         Row row=new Row();
         row.add("Name");
         row.add(new TitleText("Accessors available in pool","Available"));
-        row.add(new TitleText("Accessors in use","In Use"));
+        row.add(new TitleText("Accessor pool size","Size"));
+        row.add(new TitleText("Minimum accessors available","Min"));
+        row.add(new TitleText("Instant when minimum acccessors occurred","Min available Instant"));
         row.add(new TitleText("Threads waiting for accessors","Waiting"));
         row.add(new TitleText("Maximum threads waiting for accessors","Max"));
         row.add(new TitleText("Instant when maximum threads are waiting for accessors","Max Waiting Instant"));
@@ -232,10 +249,8 @@ public class ConnectorController
                 row=new Row();
                 row.add(entry.getKey());
 
-                row.add(connector.getAccessorsAvailable());
-                
-                row.add(connector.getAccessorsInUse());
-                write(row,connector.getWaitingForAcessorsMeter());
+                writeMin(row,connector.getAccessorsAvailableMeter());
+                writeMax(row,connector.getWaitingForAcessorsMeter());
                 long used=connector.getUseMeter().getTotalCount();
                 row.add(used);
                 RateSample useSample=connector.getUseMeter().sample(minimalResetDurationS);

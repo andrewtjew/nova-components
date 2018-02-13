@@ -3,23 +3,38 @@ package org.nova.metrics;
 public class LevelMeter
 {
 	private long level;
-	private long maxLevel;
-	private long maxLevelInstantMs;
+    private long maxLevel;
+    private long maxLevelInstantMs;
+    private long minLevel;
+    private long minLevelInstantMs;
+	final private long baseLevel;
 	
-	public LevelMeter()
-	{
-	}
+    public LevelMeter()
+    {
+        this(0);
+    }
+
+    public LevelMeter(long baseLevel)
+    {
+        this.baseLevel=baseLevel;
+        this.level=this.minLevel=this.maxLevel=this.baseLevel;
+    }
 	
 	public void add(long value)
 	{
 		synchronized (this)
 		{
 			this.level+=value;
-			if (this.level>=this.maxLevel)
-			{
-				this.maxLevel=level;
-				this.maxLevelInstantMs=System.currentTimeMillis();
-			}
+            if (this.level>=this.maxLevel)
+            {
+                this.maxLevel=level;
+                this.maxLevelInstantMs=System.currentTimeMillis();
+            }
+            if (this.level<=this.minLevel)
+            {
+                this.minLevel=level;
+                this.minLevelInstantMs=System.currentTimeMillis();
+            }
 		}
 	}
 	
@@ -28,11 +43,16 @@ public class LevelMeter
 		synchronized (this)
 		{
 			this.level=value;
-			if (this.level>=this.maxLevel)
-			{
-				this.maxLevel=level;
-				this.maxLevelInstantMs=System.currentTimeMillis();
-			}
+	        if (this.level>=this.maxLevel)
+	        {
+	            this.maxLevel=level;
+	            this.maxLevelInstantMs=System.currentTimeMillis();
+	        }
+	        if (this.level<=this.minLevel)
+	        {
+	            this.minLevel=level;
+	            this.minLevelInstantMs=System.currentTimeMillis();
+	        }
 		}
 	}
 	
@@ -54,6 +74,11 @@ public class LevelMeter
 		synchronized (this)
 		{
 			this.level--;
+	        if (this.level<=this.minLevel)
+	        {
+	            this.minLevel=level;
+	            this.minLevelInstantMs=System.currentTimeMillis();
+	        }
 		}
 	}
 
@@ -61,12 +86,7 @@ public class LevelMeter
 	{
 		synchronized (this)
 		{
-			this.maxLevel=0;
-			this.maxLevelInstantMs=System.currentTimeMillis();
-			if (this.level>=this.maxLevel)
-			{
-				this.maxLevel=level;
-			}
+			this.level=this.minLevel=this.maxLevel=this.baseLevel;
 		}
 	}
 	
@@ -74,7 +94,7 @@ public class LevelMeter
 	{
 	    synchronized (this)
 	    {
-	        return new LevelSample(this.level,this.maxLevel,this.maxLevelInstantMs);
+	        return new LevelSample(this.level,this.baseLevel,this.maxLevel,this.maxLevelInstantMs,this.minLevel,this.minLevelInstantMs);
 	    }
 	}
 

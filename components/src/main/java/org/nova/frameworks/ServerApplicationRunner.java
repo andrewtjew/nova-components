@@ -1,5 +1,6 @@
 package org.nova.frameworks;
 
+import org.eclipse.jetty.http.HttpStatus;
 import org.nova.configuration.Configuration;
 import org.nova.configuration.ConfigurationReader;
 import org.nova.core.Utils;
@@ -142,7 +143,9 @@ public class ServerApplicationRunner //
         }
         else
         {
-            context.getHttpServletResponse().getWriter().write("No exception");
+            
+            context.getHttpServletResponse().setHeader("Location","/operator/noStartupExceptions");
+            context.getHttpServletResponse().setStatus(HttpStatus.TEMPORARY_REDIRECT_307);
         }
     }
 }

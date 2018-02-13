@@ -41,8 +41,8 @@ import org.nova.logging.LogDirectoryManager;
 import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
 import org.nova.logging.SourceQueueLogger;
-import org.nova.logging.StatusBoard;
-import org.nova.metrics.MeterManager;
+import org.nova.metrics.MeterStore;
+import org.nova.metrics.SourceEventEventBoard;
 import org.nova.operations.OperatorVariable;
 import org.nova.operations.OperatorVariableManager;
 import org.nova.operator.OperatorPages;
@@ -72,6 +72,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
 	private Template template;
 	@OperatorVariable
 	boolean test;
+	final private String localHostName;
 	
 	public ServerApplication(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer) throws Throwable 
 	{
@@ -85,7 +86,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
 		//Discover base directory. This is important to know for troubleshooting errors with file paths, so we output this info and we put this in the configuration. 
         File baseDirectory=new File(".");
         this.baseDirectory=baseDirectory.getCanonicalPath();
-        CoreEnvironment.STATUS_BOARD.set("Application.baseDirectory",this.baseDirectory);
+        CoreEnvironment.SOURCE_EVENT_BOARD.set("Application.baseDirectory",this.baseDirectory);
         System.out.println("base directory: "+this.baseDirectory);
 
         this.test=configuration.getBooleanValue("System.test",false);
@@ -95,6 +96,8 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
         configuration.remove("System.vault.secureVaultFile");
         configuration.remove("System.vault.passwordFile");
         configuration.remove("System.vault.salt");
+
+        this.localHostName=configuration.getValue("ServerApplication.localHostNameOverride",Utils.getLocalHostName());
         
         this.operatorVariableManager=new OperatorVariableManager();
 		this.typeMappings=TypeMappings.DefaultTypeMappings();
@@ -363,7 +366,11 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
             
         }
     }
-    
+
+    public String getLocalHostName()
+    {
+        return this.localHostName;
+    }
     
     public boolean isTest()
     {

@@ -174,11 +174,10 @@ public class HttpServer
 		catch (Throwable t)
 		{
 		    this.logger.log(t);
-		//	t.printStackTrace();
 		}
 		finally
 		{
-			request.setHandled(true);
+            request.setHandled(true);
 		}
 	}
 
@@ -285,7 +284,6 @@ public class HttpServer
 				{
 					this.lastRequestHandlerNotFoundLogEntries.add(new RequestHandlerNotFoundLogEntry(trace,servletRequest));
 				}
-				return;
 			}
 			if (requestHandlerWithParameters.requestHandler.isPublic()==true)
 			{
@@ -321,8 +319,8 @@ public class HttpServer
 				context.setContentWriter(findContentWriter(servletRequest.getHeader("Accept"), handler));
 
 				Response<?> response = chain.next(trace, context);
-				if (context.isHandled()==false)
-				{
+                if (context.isCaptured()==false)
+                {
 					if (response != null)
 					{
 						if (response.headers != null)

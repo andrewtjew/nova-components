@@ -13,10 +13,6 @@ public class ConsoleWriter extends OutputStreamWriter
         super(formatter);
         this.outputSegments=outputSegments;
     }
-    public ConsoleWriter() throws Throwable
-    {
-        this(new JSONFormatter(),false);
-    }
 
     @Override
     public OutputStream openOutputStream(long marker) throws Throwable

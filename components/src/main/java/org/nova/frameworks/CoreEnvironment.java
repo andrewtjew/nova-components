@@ -20,8 +20,8 @@ import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
 import org.nova.logging.SimpleFileWriter;
 import org.nova.logging.SourceQueueLogger;
-import org.nova.logging.StatusBoard;
-import org.nova.metrics.MeterManager;
+import org.nova.metrics.MeterStore;
+import org.nova.metrics.SourceEventEventBoard;
 import org.nova.security.SecureFileVault;
 import org.nova.security.UnsecureFileVault;
 import org.nova.security.UnsecureVault;
@@ -34,14 +34,14 @@ public class CoreEnvironment
 	final private FutureScheduler futureScheduler;
 	final private TraceManager traceManager;
 	final private Configuration configuration;
-	final private MeterManager meterManager;
+	final private MeterStore meterStore;
 	final private Logger logger;
 	final HashMap<String,Logger> loggers;
 	final SourceQueue<LogEntry> logSourceQueue;
 	final private LogDirectoryManager logDirectoryManager;
 	final private int logCategoryBufferSize;
-	final static public StatusBoard STATUS_BOARD=new StatusBoard();
     final private Vault vault;
+    final public static SourceEventEventBoard SOURCE_EVENT_BOARD=new SourceEventEventBoard();
 	
 	public CoreEnvironment(Configuration configuration) throws Throwable
 	{
@@ -52,8 +52,10 @@ public class CoreEnvironment
 		long maxDirectorySize=configuration.getLongValue("Environment.Logger.logDirectory.maxDirectorySize",10_000_000_000L);
 		int maxMakeSpaceRetries=configuration.getIntegerValue("Environment.Logger.logDirectory.maxMakeSpaceRetries",10);
 		this.logCategoryBufferSize=configuration.getIntegerValue("Environment.Logger.logCategoryBufferSize",10);
-		this.logDirectoryManager=new LogDirectoryManager(directory, maxMakeSpaceRetries, maxFiles, maxDirectorySize, reserve);
 
+        this.meterStore=new MeterStore();
+
+		this.logDirectoryManager=new LogDirectoryManager(directory, maxMakeSpaceRetries, maxFiles, maxDirectorySize, reserve);
 		String loggerType=configuration.getValue("Environment.Logger.class","JSONBufferedLZ4Queue");
 		switch (loggerType)
 		{
@@ -73,7 +75,6 @@ public class CoreEnvironment
 		this.loggers=new HashMap<>();
 		Logger traceLogger=this.getLogger("tracing");
 	
-        this.meterManager=new MeterManager();
 		this.traceManager=new TraceManager(traceLogger);
 		this.futureScheduler=new FutureScheduler(traceManager,configuration.getIntegerValue("Environment.FutureScheduler.threads",1000));
 		this.timerScheduler=new TimerScheduler(traceManager, this.getLogger());
@@ -149,13 +150,14 @@ public class CoreEnvironment
         stream.println("**************************************");
     }
     
-	public MeterManager getMeterManager()
+	public MeterStore getMeterManager()
 	{
-		return meterManager;
+		return meterStore;
 	}
-	public StatusBoard getStatusBoard()
+	
+	public SourceEventEventBoard getSourceEventBoard()
 	{
-	    return this.STATUS_BOARD;
+	    return this.SOURCE_EVENT_BOARD;
 	}
 	
 

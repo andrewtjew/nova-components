@@ -21,7 +21,6 @@ public abstract class SessionServerApplication<SESSION extends Session> extends 
         long timeoutMs=this.getConfiguration().getLongValue("SessionService.session.timeout", 30*60*1000);
         int generations=this.getConfiguration().getIntegerValue("SessionService.session.timeoutGenerations", 10);
         this.sessionManager=new SessionManager<SESSION>(this.getTraceManager(),this.getLogger("SessionService"),this.getTimerScheduler(), lockTimeoutMs,timeoutMs, generations);
-        this.getMeterManager().register("SessionManager", this.sessionManager);
         this.tokenGenerator=new TokenGenerator();
         
     }

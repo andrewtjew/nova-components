@@ -65,6 +65,7 @@ public class MySqlConnector extends Connector
 		this.host=configuration.host;
 		int poolSize=configuration.poolSize;
 		long connectionKeepAlive=configuration.connectionKeepAlive;
+		Accessor[] accessors=new Accessor[poolSize];
 		for (int i=0;i<poolSize;i++)
 		{
 			Accessor accessor=new Accessor(this.pool, this, connectionKeepAlive);
@@ -80,8 +81,9 @@ public class MySqlConnector extends Connector
 					connect=false;
 				}
 			}
-			this.pool.add(accessor);
+			accessors[i]=accessor;
 		}
+		this.pool.initialize(accessors);
 	}
 
 	@Override

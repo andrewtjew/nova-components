@@ -10,17 +10,18 @@ public class LongValueMeter
     private long maxInstantMs;
 
     private long markNs;
-    private long markCount;
+    private long samples;
     private long totalCount;
     private long total;
 	private long markTotal;
 	private double markTotal2;
+	private long value;
 
 	public LongValueMeter()
 	{
 	    this.min=Long.MAX_VALUE;
 	    this.max=Long.MIN_VALUE;
-	    this.lastSample=new LongValueSample(null, 0,0,0,0,0,0,0,0,this.totalCount);
+	    this.lastSample=new LongValueSample(null, 0,0,0,0,0,0,0,0,0,0);
 	    this.markNs=System.nanoTime();
 	}
 	
@@ -28,7 +29,8 @@ public class LongValueMeter
 	{
 		synchronized(this)
 		{
-			this.markCount++;
+		    this.value=value;
+			this.samples++;
 			this.totalCount++;
 			this.markTotal+=value;
 			this.markTotal2+=value*value;
@@ -71,6 +73,14 @@ public class LongValueMeter
 	    }
 	}
 
+	public long getValue()
+	{
+        synchronized(this)
+        {
+            return this.value;
+        }
+	}
+	
 	public void resetExtremas()
 	{
         synchronized (this)
@@ -94,12 +104,12 @@ public class LongValueMeter
             {
                 this.lastSample.lastSample=null;
             }
-            LongValueSample result=new LongValueSample(this.lastSample, this.min, this.minInstantMs, this.max, this.maxInstantMs, durationNs, this.markCount, this.markTotal, this.markTotal2,this.totalCount);
-            if (this.markCount>minimalResetCount)
+            LongValueSample result=new LongValueSample(this.lastSample, this.value, this.min, this.minInstantMs, this.max, this.maxInstantMs, durationNs, this.samples, this.markTotal, this.markTotal2,this.totalCount);
+            if (this.samples>minimalResetCount)
             {
                 this.lastSample=result;
                 this.markNs=nowNs;
-                this.markCount=0;
+                this.samples=0;
                 this.markTotal=0;
                 this.markTotal2=0;
             }

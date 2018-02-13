@@ -304,11 +304,17 @@ public class Utils
 	}
 
     static public DateTimeFormatter LOCALDATETIME_FILENAME_FORMATTER=DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss_SSS"); 
+    static public DateTimeFormatter SHORT_LOCALDATETIME_FILENAME_FORMATTER=DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss"); 
 
     public static String millisToLocalDateTimeFileName(long millis)
-	{
-		return millisToLocalDateTime(millis).format(LOCALDATETIME_FILENAME_FORMATTER);
-	}
+    {
+        return millisToLocalDateTime(millis).format(LOCALDATETIME_FILENAME_FORMATTER);
+    }
+    
+    public static String millisToShortLocalDateTimeFileName(long millis)
+    {
+        return millisToLocalDateTime(millis).format(SHORT_LOCALDATETIME_FILENAME_FORMATTER);
+    }
     
     
 
@@ -673,7 +679,7 @@ public class Utils
 
 	public static String readString(InputStream stream,Charset charset) throws IOException
 	{
-		return readString(stream,4096,charset);
+		return readString(stream,65536,charset);
 	}
 
 	public static String readString(InputStream stream) throws IOException
@@ -762,5 +768,45 @@ public class Utils
         ZonedDateTime zoned=ZonedDateTime.ofInstant(localDateTime, ZoneOffset.ofTotalSeconds(timeZoneOffsetSeconds), ZoneId.of("UTC"));
         return zoned.toInstant().toEpochMilli();
     }	
+    
+    static public String replaceUsingEnvironmentVariables(String text)
+    {
+        int index=0;
+        int end=0;
+        int start=0;
+        StringBuilder sb=new StringBuilder();
+        while (index<text.length())
+        {
+            start=text.indexOf('%',index);
+            if (start<0)
+            {
+                end=text.length();
+                sb.append(text.substring(index,end));
+                break;
+            }
+            end=text.indexOf('%',start+1);
+            if (end<0)
+            {
+                end=text.length();
+                sb.append(text.substring(index,end));
+                break;
+            }
+            sb.append(text.substring(index,start));
+            String name=text.substring(start+1,end);
+            String value=System.getenv(name);
+            if (value!=null)
+            {
+                sb.append(value);
+            }
+            else
+            {
+                sb.append(text.substring(start,end+1));
+            }
+            index=end+1;
+        }
+        return sb.toString();
+    }
 }
+
+
 

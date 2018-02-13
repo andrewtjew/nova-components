@@ -98,4 +98,12 @@ public class FutureScheduler
 			return this.futures.values().toArray(new Future[this.futures.size()]);
 		}
 	}
+	
+	public void stop()
+	{
+        synchronized(this)
+        {
+            this.executorService.shutdownNow();
+        }
+	}
 }

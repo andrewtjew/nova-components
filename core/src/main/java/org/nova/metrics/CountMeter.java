@@ -53,4 +53,8 @@ public class CountMeter
 		}
 	}
 	
+	public CountSample sample()
+	{
+	    return new CountSample(getCount());
+	}
 }

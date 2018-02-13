@@ -2,12 +2,14 @@ package org.nova.http.server;
 
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.util.Enumeration;
 import java.util.HashMap;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.jetty.http.HttpStatus;
+import org.nova.http.server.annotations.ParamName;
 import org.nova.tracing.Trace;
 
 public class FilterChain
@@ -32,7 +34,6 @@ public class FilterChain
 			{
 				return parameterInfo.getDefaultValue();
 			}
-			throw new Exception("Parameter "+parameterInfo.getName()+" is null.");
 		}
 		Class<?> type=parameterInfo.getType();
 		if (type==String.class)
@@ -45,6 +46,10 @@ public class FilterChain
 		}
         if (type==Integer.class)
         {
+            if (value==null)
+            {
+                return null;
+            }
             if (value.length()==0)
             {
                 return null;
@@ -53,10 +58,18 @@ public class FilterChain
         }
 		if (type==long.class)
 		{
+            if (value==null)
+            {
+                return null;
+            }
 			return Long.parseLong(value);
 		}
         if (type==Long.class)
         {
+            if (value==null)
+            {
+                return null;
+            }
             if (value.length()==0)
             {
                 return null;
@@ -69,6 +82,10 @@ public class FilterChain
 		}
         if (type==Short.class)
         {
+            if (value==null)
+            {
+                return null;
+            }
             if (value.length()==0)
             {
                 return null;
@@ -81,6 +98,10 @@ public class FilterChain
 		}
         if (type==Float.class)
         {
+            if (value==null)
+            {
+                return null;
+            }
             if (value.length()==0)
             {
                 return null;
@@ -93,6 +114,10 @@ public class FilterChain
 		}
         if (type==Double.class)
         {
+            if (value==null)
+            {
+                return null;
+            }
             if (value.length()==0)
             {
                 return null;
@@ -109,6 +134,10 @@ public class FilterChain
 		}
         if (type==Boolean.class)
         {
+            if (value==null)
+            {
+                return null;
+            }
             if (value.length()==0)
             {
                 return null;
@@ -121,6 +150,10 @@ public class FilterChain
         }
         if (type.isEnum())
         {
+            if (value==null)
+            {
+                return null;
+            }
             if (value.length()==0)
             {
                 return null;
@@ -129,6 +162,10 @@ public class FilterChain
         }
         if (type==BigDecimal.class)
         {
+            if (value==null)
+            {
+                return null;
+            }
             if (value.length()==0)
             {
                 return null;
@@ -254,9 +291,29 @@ public class FilterChain
             case QUERIES:
                 parameters[i]=new Queries(request);
                 break;
-            case CHECK:
-                parameters[i]=request.getParameter(parameterInfo.getName())!=null;
+            case NAME:
+            {
+                ParamName paramName=(ParamName)parameterInfo.getAnnotation();
+                if (paramName.startsWith())
+                {
+                    Enumeration<String> enumeration=request.getParameterNames();
+                    while (enumeration.hasMoreElements())
+                    {
+                        String parameterName=enumeration.nextElement();
+                        if (parameterName.startsWith(paramName.value()))
+                        {
+                            String value=parameterName.substring(paramName.value().length());
+                            parameters[i]=buildParameter(parameterInfo,value);
+                        }
+                    }
+                    
+                }
+                else
+                {
+                    parameters[i]=request.getParameter(parameterInfo.getName())!=null;
+                }
                 break;
+            }
 			default:
 				break;
 			}
@@ -266,7 +323,7 @@ public class FilterChain
 		try
 		{
 			Object result=requestHandler.getMethod().invoke(requestHandler.getObject(), parameters);
-			if (context.isHandled()==false)
+			if (context.isCaptured()==false)
 			{
 				if (result==null)
 				{

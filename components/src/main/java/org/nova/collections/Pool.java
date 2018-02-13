@@ -18,11 +18,14 @@ import org.nova.tracing.TraceManager;
 
 public class Pool<RESOURCE extends Resource>
 {
+    final private LevelMeter waitingMeter;
+    final private RateMeter useMeter;
+    final private LongValueMeter waitNsMeter;
+    private LevelMeter availableMeter;
+    
+
 	final private LinkedList<RESOURCE> container;
 	final TraceManager traceManager;
-	final private LevelMeter waitingMeter;
-    final private RateMeter usedMeter;
-    final private LongValueMeter waitNsMeter;
 	final private long maximumRecentlyUsedCount;
 	private AtomicLong identifier;
 	private boolean captureActivateStackTrace;
@@ -32,7 +35,8 @@ public class Pool<RESOURCE extends Resource>
 	{
 		this.waitingMeter=new LevelMeter();
 		this.waitNsMeter=new LongValueMeter();
-		this.usedMeter=new RateMeter();
+		this.useMeter=new RateMeter();
+		this.availableMeter=new LevelMeter();
 		this.traceManager=traceManager;
 		this.container=new LinkedList<>();
 		this.maximumRecentlyUsedCount=maximumRecentActivateCount;
@@ -59,30 +63,19 @@ public class Pool<RESOURCE extends Resource>
         return waitingMeter;
     }
 
-    public int getInUse()
-    {
-        synchronized(this)
-        {
-            return this.InUseResources.size();
-        }
-    }
-
     long getNextIdentifier()
     {
         return this.identifier.getAndIncrement();
     }
     
-    public int getAvailable()
+    public LevelMeter getAvailableMeter()
     {
-        synchronized (this)
-        {
-            return this.container.size(); 
-        }
+        return this.availableMeter;
     }
     
     public RateMeter getUseMeter()
     {
-        return this.usedMeter;
+        return this.useMeter;
     }
 
     public LongValueMeter getWaitNsMeter()
@@ -120,6 +113,7 @@ public class Pool<RESOURCE extends Resource>
                     RESOURCE resource=container.pop();
                     resource.activate(parent);
                     this.InUseResources.put(resource.getIdentifier(), resource);
+                    this.availableMeter.decrement();
                     return resource;
 				}
 				catch (Throwable t)
@@ -136,6 +130,7 @@ public class Pool<RESOURCE extends Resource>
 	    return waitForAvailable(parent, traceCategory,Long.MAX_VALUE);
 	}
 
+	/*
 	public void add(RESOURCE resource)
 	{
 		synchronized (this)
@@ -143,11 +138,25 @@ public class Pool<RESOURCE extends Resource>
 			container.add(resource);
 		}
 	}
+	*/
+	
+	public void initialize(RESOURCE[] resources)
+	{
+        synchronized (this)
+        {
+            for (RESOURCE resource:resources)
+            {
+                container.add(resource);
+            }
+            this.availableMeter=new LevelMeter(resources.length);
+        }
+	    
+	}
 	
 	@SuppressWarnings("unchecked")
     void release(Resource resource)
 	{
-        this.usedMeter.increment();
+        this.useMeter.increment();
 		synchronized (this)
 		{
 		    if (resource.canAddLast(this.maximumRecentlyUsedCount))
@@ -163,6 +172,7 @@ public class Pool<RESOURCE extends Resource>
 				this.notify();
 			}
 			this.InUseResources.remove(resource.getIdentifier());
+            this.availableMeter.increment();
 		}
 	}
 	

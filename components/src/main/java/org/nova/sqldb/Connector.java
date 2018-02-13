@@ -3,6 +3,8 @@ package org.nova.sqldb;
 import java.sql.Connection;
 import java.util.List;
 
+import org.nova.annotations.Description;
+import org.nova.annotations.Metrics;
 import org.nova.collections.Pool;
 import org.nova.logging.Logger;
 import org.nova.metrics.CountMeter;
@@ -17,11 +19,16 @@ import com.nova.disrupt.Disruptor;
 public abstract class Connector
 {
 	final protected TraceManager traceManager;
-    final protected Pool<Accessor> pool;
+    @Metrics
+	final protected Pool<Accessor> pool;
     final protected Disruptor disruptor;
     final Logger logger;
+
+    @Description("Number of close connection exceptions. Possible causes are database problems.")
 	final CountMeter closeConnectionExceptions; 
-	final CountMeter createConnectionExceptions; 
+
+    @Description("Number of create connection exceptions. Possible causes are database problems.")
+    final CountMeter createConnectionExceptions; 
 	final CountMeter initialConnectionExceptions; 
 	final CountMeter openConnectionSuccesses; 
     final RateMeter rowsQueriedRate;
@@ -273,17 +280,13 @@ public abstract class Connector
         return callRate;
     }
     
-    public int getAccessorsInUse()
-    {
-        return this.pool.getInUse();
-    }
     public LevelMeter getWaitingForAcessorsMeter()
     {
         return this.pool.getWaitingMeter();
     }
-    public int getAccessorsAvailable()
+    public LevelMeter getAccessorsAvailableMeter()
     {
-        return this.pool.getAvailable();
+        return this.pool.getAvailableMeter();
     }
     public LongValueMeter getAcessorsWaitNsMeter()
     {

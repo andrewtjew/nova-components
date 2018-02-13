@@ -9,7 +9,7 @@ import org.nova.json.ObjectMapper;
 import org.nova.logging.Item;
 import org.nova.logging.Level;
 import org.nova.logging.Logger;
-import org.nova.logging.StatusBoard;
+import org.nova.metrics.SourceEventEventBoard;
 import org.nova.scan.Lexeme;
 import org.nova.scan.LexerException;
 import org.nova.scan.Snippet;
@@ -34,12 +34,12 @@ public class DatabaseUpdater
     final private DatabaseUpdateActions executed;
     final private DatabaseUpdatePermissions permissions;
     final private Logger logger;
-    final private StatusBoard statusBoard;
+    final private SourceEventEventBoard statusBoard;
 
     public DatabaseUpdater(CoreEnvironment coreEnvironment,DatabaseUpdatePermissions permissions)
     {
         this.logger=coreEnvironment.getLogger();
-        this.statusBoard=coreEnvironment.getStatusBoard();
+        this.statusBoard=coreEnvironment.getSourceEventBoard();
         if (permissions==null)
         {
             permissions=new DatabaseUpdatePermissions();

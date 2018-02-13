@@ -3,6 +3,8 @@ package org.nova.http.server;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.server.Request;
+
 public class Context
 {
 	private RequestHandler requestHandler;
@@ -11,10 +13,11 @@ public class Context
 	private ContentReader<?> contentReader;
 	private ContentWriter<?> contentWriter;
 	private Object state;
-	private boolean handled=false;
+	private boolean captured=false;
 	
 	private String responseContentText;
 	private String requestContentText;
+	
 	Context(RequestHandler requestHandler,HttpServletRequest servletRequest,HttpServletResponse servletResponse)
 	{
 		this.requestHandler=requestHandler;
@@ -85,13 +88,16 @@ public class Context
 	{
 		this.requestContentText=requestContentText;
 	}
-	public boolean isHandled()
+	public boolean isCaptured()
 	{
-		return handled;
+		return captured;
 	}
-	public void setHandled(boolean handled)
+    public void setCaptured(boolean captured)
+    {
+        this.captured = captured;
+    }
+	public void capture()
 	{
-		this.handled = handled;
+		this.captured = true;
 	}
-	
 }

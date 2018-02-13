@@ -4,14 +4,14 @@ public class RateSample
 {
     RateSample lastSample;
     final private long durationNs;
-    final private long count;
+    final private long samples;
     final private long totalCount;
     final private long createdMs;
     
-    public RateSample(RateSample lastSample, long durationNs, long count,long allTimeCount)
+    public RateSample(RateSample lastSample, long durationNs, long samples,long allTimeCount)
     {
         this.durationNs=durationNs;
-        this.count=count;
+        this.samples=samples;
         this.totalCount=allTimeCount;
         this.createdMs=System.currentTimeMillis();
     }
@@ -32,7 +32,7 @@ public class RateSample
         {
             return 0;
         }
-        return (1.0e9*count)/this.durationNs;
+        return (1.0e9*samples)/this.durationNs;
     }
     private double blend(double value,double last)
     {
@@ -49,19 +49,19 @@ public class RateSample
         return blend(this.getRate(),this.lastSample.getRate());
     }
 
-    public long getCount()
+    public long getSamples()
     {
-        return this.count;
+        return this.samples;
     }
     public long getCreatedMs()
     {
         return this.createdMs;
     }
-    public long getDurationNs()
+    public long getSampleDurationNs()
     {
         return this.durationNs;
     }
-    public double getDurationS()
+    public double getSampleDurationS()
     {
         return this.durationNs/1.0e9;
     }

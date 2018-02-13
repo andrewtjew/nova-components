@@ -5,7 +5,7 @@ public class RateMeter
     private RateSample lastSample;
     
     private long markNs;
-    private long markCount;
+    private long samples;
     private long totalCount;
 	
 	public RateMeter()
@@ -17,7 +17,7 @@ public class RateMeter
 	{
 		synchronized (this)
 		{
-			this.markCount+=count;
+			this.samples+=count;
 			this.totalCount+=count;
 		}
 	}
@@ -26,7 +26,7 @@ public class RateMeter
 	{
 		synchronized (this)
 		{
-			this.markCount++;
+			this.samples++;
 			this.totalCount++;
 		}
 	}
@@ -61,12 +61,12 @@ public class RateMeter
             {
                 this.lastSample.lastSample=null;
             }
-            RateSample result=new RateSample(this.lastSample, durationNs, this.markCount,this.totalCount);
+            RateSample result=new RateSample(this.lastSample, durationNs, this.samples,this.totalCount);
             if (durationNs>(long)(minimalResetDurationS*1.0e9))
             {
                 this.lastSample=result;
                 this.markNs=nowNs;
-                this.markCount=0;
+                this.samples=0;
             }
             return result;
         }
