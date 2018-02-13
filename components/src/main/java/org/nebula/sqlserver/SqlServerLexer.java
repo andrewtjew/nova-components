@@ -1,7 +1,7 @@
 package org.nebula.sqlserver;
 
 import org.nova.scan.Lexeme;
-import org.nova.scan.LexerException;
+import org.nova.scan.ScanException;
 import org.nova.scan.Scanner;
 import org.nova.scan.Snippet;
 import org.nova.scan.Source;
@@ -27,7 +27,7 @@ public class SqlServerLexer extends Scanner
                 if (c==0)
                 {
                     Snippet snippet=this.source.endAndGetSnippet(0);
-                    throw new LexerException("Invalid name", new Lexeme(Token.ERROR, snippet.getTarget(),snippet));
+                    throw new ScanException("Invalid name", new Lexeme(Token.ERROR, snippet.getTarget(),snippet));
                 }
             }
             Snippet snippet=this.source.endAndGetSnippet(1);
@@ -79,7 +79,7 @@ public class SqlServerLexer extends Scanner
                 }
                 else
                 {
-                    throw new LexerException("Invalid comment", new Lexeme(Token.ERROR,null,this.end(0)));
+                    throw new ScanException("Invalid comment", new Lexeme(Token.ERROR,null,this.end(0)));
                 }
             }
         }        

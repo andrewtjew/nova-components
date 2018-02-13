@@ -3,13 +3,15 @@ package org.nova.lexing;
 public enum Token
 {
     OPERATOR,
-    SEPARATOR,
-    TERMINATOR,
+    PUNCTUATOR,
     KEYWORD,
-    WORD,
+    TEXT,
+    IDENTIFIER,
     STRING, 
     CHARACTER,
     INTEGER,
+    DATETIME,
     FLOAT,
     EXTRA,
+    COMMENT,
 }

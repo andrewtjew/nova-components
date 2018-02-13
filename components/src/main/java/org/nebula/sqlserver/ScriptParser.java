@@ -3,7 +3,7 @@ package org.nebula.sqlserver;
 import java.util.ArrayList;
 
 import org.nova.scan.Lexeme;
-import org.nova.scan.LexerException;
+import org.nova.scan.ScanException;
 import org.nova.scan.TextSource;
 
 public class ScriptParser
@@ -51,7 +51,7 @@ public class ScriptParser
             Lexeme lexeme=lexer.expectWord();
             if (lexeme.isError())
             {
-                throw new LexerException("Block verb expected", lexeme);
+                throw new ScanException("Block verb expected", lexeme);
             }
             if (lexeme.isCaseInsenstiveWord("USE"))
             {
@@ -84,7 +84,7 @@ public class ScriptParser
         Lexeme lexeme=lexer.expectWord();
         if (lexeme.isError())
         {
-            throw new LexerException("Object name expected", lexeme);
+            throw new ScanException("Object name expected", lexeme);
         }
         if (lexeme.isCaseInsenstiveWord("TABLE"))
         {
@@ -159,13 +159,13 @@ public class ScriptParser
                 Lexeme lexeme=lexer.produceJavaIdentifier();
                 if (lexeme.isError())
                 {
-                    throw new LexerException("type attribute expected", lexeme);
+                    throw new ScanException("type attribute expected", lexeme);
                 }
                 if (lexeme.isCaseInsenstiveWord("CONSTRAINT"))
                 {
                     break;
                 }                
-                throw new LexerException("???", lexeme);
+                throw new ScanException("???", lexeme);
             }
             lexer.revert();
             Lexeme name=lexer.expectWordWithBracketsRemoved();
@@ -184,7 +184,7 @@ public class ScriptParser
                 Lexeme lexeme=lexer.expectPunctuator(')');
                 if (lexeme.isError())
                 {
-                    throw new LexerException("type size expected", lexeme);
+                    throw new ScanException("type size expected", lexeme);
                 }
                 c=lexer.skipWhiteSpaceAndBegin();
             }
@@ -193,42 +193,42 @@ public class ScriptParser
                 Lexeme lexeme=lexer.produceJavaIdentifier();
                 if (lexeme.isError())
                 {
-                    throw new LexerException("type attribute expected", lexeme);
+                    throw new ScanException("type attribute expected", lexeme);
                 }
                 if (lexeme.isCaseInsenstiveWord("IDENTITY"))
                 {
                     lexeme=lexer.expectPunctuator('(');
                     if (lexeme.isError())
                     {
-                        throw new LexerException("( expected", lexeme);
+                        throw new ScanException("( expected", lexeme);
                     }
                     lexer.skipWhiteSpaceAndBegin();
                     identityStart=lexer.produceNumber(false);
                     if (identityStart.isError())
                     {
-                        throw new LexerException("number expected", lexeme);
+                        throw new ScanException("number expected", lexeme);
                     }
                     lexeme=lexer.expectPunctuator(',');
                     if (identityStart.isError())
                     {
-                        throw new LexerException(", expected", lexeme);
+                        throw new ScanException(", expected", lexeme);
                     }
                     lexer.skipWhiteSpaceAndBegin();
                     identityIncrement=lexer.produceNumber(false);
                     if (identityIncrement.isError())
                     {
-                        throw new LexerException("number expected", lexeme);
+                        throw new ScanException("number expected", lexeme);
                     }
                     lexeme=lexer.expectPunctuator(')');
                     if (lexeme.isError())
                     {
-                        throw new LexerException(") expected", lexeme);
+                        throw new ScanException(") expected", lexeme);
                     }
                     lexer.skipWhiteSpaceAndBegin();
                     lexeme=lexer.produceJavaIdentifier();
                     if (lexeme.isError())
                     {
-                        throw new LexerException("type attribute expected", lexeme);
+                        throw new ScanException("type attribute expected", lexeme);
                     }
                 }
                 if (lexeme.isCaseInsenstiveWord("NOT"))
@@ -239,7 +239,7 @@ public class ScriptParser
                 }
                 if (lexeme.isCaseInsenstiveWord("NULL")==false)
                 {
-                    throw new LexerException("NULL expected", lexeme);
+                    throw new ScanException("NULL expected", lexeme);
                 }
                 c=lexer.skipWhiteSpaceAndBegin();
             }
