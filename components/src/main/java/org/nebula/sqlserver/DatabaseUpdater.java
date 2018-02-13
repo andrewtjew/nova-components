@@ -11,7 +11,7 @@ import org.nova.logging.Level;
 import org.nova.logging.Logger;
 import org.nova.metrics.SourceEventEventBoard;
 import org.nova.scan.Lexeme;
-import org.nova.scan.LexerException;
+import org.nova.scan.ScanException;
 import org.nova.scan.Snippet;
 import org.nova.scan.TextSource;
 import org.nova.scan.Token;

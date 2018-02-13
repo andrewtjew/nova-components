@@ -7,8 +7,8 @@ public class Source
     
     public Source(String text,String fileName)
     {
-	this.text=text;
-	this.fileName=fileName;
+    	this.text=text;
+    	this.fileName=fileName;
     }
 
     public String getText()

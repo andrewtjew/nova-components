@@ -96,6 +96,7 @@ public class Scanner
                     if (Character.isDigit(c) || ((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F')))
                     {
                         unicode.append(c);
+                        continue;
                     }
                     return new Lexeme(Token.ERROR, "Invalid unicode escape character in string.", this.source.endAndGetSnippet(0));
                 }

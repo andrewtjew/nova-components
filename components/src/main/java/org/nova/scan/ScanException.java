@@ -1,9 +1,9 @@
 package org.nova.scan;
 
-public class LexerException extends Exception
+public class ScanException extends Exception
 {
 	final private Lexeme lexeme;
-	public LexerException(String message,Lexeme lexeme)
+	public ScanException(String message,Lexeme lexeme)
 	{
 		super(message);
 		this.lexeme=lexeme;
@@ -11,7 +11,5 @@ public class LexerException extends Exception
 	public Lexeme getLexeme()
 	{
 		return lexeme;
-	}
-	
-	
+	}	
 }
