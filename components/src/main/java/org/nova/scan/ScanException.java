@@ -11,7 +11,5 @@ public class ScanException extends Exception
 	public Lexeme getLexeme()
 	{
 		return lexeme;
-	}
-	
-	
+	}	
 }
