@@ -7,7 +7,7 @@ import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
 
-public class Text extends InnerElement<Text>
+public class Text extends Element
 {
     final private String text;
     public Text(String text)

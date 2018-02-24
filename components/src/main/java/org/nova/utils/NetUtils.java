@@ -35,5 +35,20 @@ public class NetUtils
         }
         return request.getRemoteHost();
     }
+    
+    public static String extractHostName(String endPoint)
+    {
+        int index=endPoint.indexOf("//");
+        if (index>0)
+        {
+            endPoint=endPoint.substring(index+2);
+        }
+        index=endPoint.indexOf(':');
+        if (index>0)
+        {
+            endPoint=endPoint.substring(0, index);
+        }
+        return endPoint;
+    }
 
 }

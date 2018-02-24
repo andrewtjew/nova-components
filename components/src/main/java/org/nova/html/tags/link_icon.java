@@ -1,3 +1,4 @@
+/*
 package org.nova.html.tags;
 
 import org.nova.html.elements.LinkElement;
@@ -16,3 +17,4 @@ public class link_icon extends LinkElement<link_icon>
     }
     
 }
+*/

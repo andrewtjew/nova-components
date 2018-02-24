@@ -13,12 +13,12 @@ import org.nova.html.tags.meta;
 import org.nova.html.tags.p;
 import org.nova.html.tags.script;
 import org.nova.html.tags.style;
+import org.nova.html.templates.InsertKey;
+import org.nova.html.templates.Template;
 import org.nova.html.widgets.Content;
 import org.nova.html.widgets.DocType;
 import org.nova.html.widgets.Head;
 import org.nova.html.widgets.MenuBar;
-import org.nova.html.widgets.templates.InsertKey;
-import org.nova.html.widgets.templates.Template;
 
 public class OperatorPage extends Element
 {

@@ -118,7 +118,7 @@ public class DatabaseUpdater
             {
                 map.put(column.getName(), column);
             }
-            for (Row row:rowSet.getRows())
+            for (Row row:rowSet.rows())
             {
                 String name=row.getVARCHAR("name");
                 String type=row.getVARCHAR("type");

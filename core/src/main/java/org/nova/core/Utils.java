@@ -28,6 +28,79 @@ import java.util.stream.Stream;
 
 public class Utils
 {
+    static public <OBJECT> OBJECT replaceIfNull(OBJECT value,OBJECT nullReplacementValue)
+    {
+        if (value==null)
+        {
+            return nullReplacementValue;
+        }
+        return value;
+    }
+    static public boolean replaceIfNull(Boolean value,boolean nullReplacementValue)
+    {
+        if (value==null)
+        {
+            return nullReplacementValue;
+        }
+        return value;
+    }
+    static public byte replaceIfNull(Byte value,byte nullReplacementValue)
+    {
+        if (value==null)
+        {
+            return nullReplacementValue;
+        }
+        return value;
+    }
+    static public char replaceIfNull(Character value,char nullReplacementValue)
+    {
+        if (value==null)
+        {
+            return nullReplacementValue;
+        }
+        return value;
+    }
+    static public short replaceIfNull(Short value,short nullReplacementValue)
+    {
+        if (value==null)
+        {
+            return nullReplacementValue;
+        }
+        return value;
+    }
+    static public int replaceIfNull(Integer value,int nullReplacementValue)
+    {
+        if (value==null)
+        {
+            return nullReplacementValue;
+        }
+        return value;
+    }
+    static public long replaceIfNull(Long value,long nullReplacementValue)
+    {
+        if (value==null)
+        {
+            return nullReplacementValue;
+        }
+        return value;
+    }
+    static public float replaceIfNull(Float value,float nullReplacementValue)
+    {
+        if (value==null)
+        {
+            return nullReplacementValue;
+        }
+        return value;
+    }
+    static public double replaceIfNull(Double value,double nullReplacementValue)
+    {
+        if (value==null)
+        {
+            return nullReplacementValue;
+        }
+        return value;
+    }
+    
     static public List<Integer> intArrayToList(int[] values)
     {
         ArrayList<Integer> list=new ArrayList<>();
@@ -46,7 +119,7 @@ public class Utils
         }
         return list;
     }
-    static public long[] longArrayFromList(List<Long> list)
+    static public long[] longListToArray(List<Long> list)
     {
         long[] array=new long[list.size()];
         for (int i=0;i<array.length;i++)
@@ -55,9 +128,18 @@ public class Utils
         }
         return array;
     }
-    static public int[] intArrayFromList(List<Integer> list)
+    static public int[] intListToArray(List<Integer> list)
     {
         int[] array=new int[list.size()];
+        for (int i=0;i<array.length;i++)
+        {
+            array[i]=list.get(i);
+        }
+        return array;
+    }
+    static public double[] doubleListToArray(List<Double> list)
+    {
+        double[] array=new double[list.size()];
         for (int i=0;i<array.length;i++)
         {
             array[i]=list.get(i);

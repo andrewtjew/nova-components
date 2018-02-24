@@ -116,5 +116,10 @@ public class MeterStore
         return this.store.getIncludingBelow(path);
     }
     
+    public void remove(String path) throws Exception
+    {
+        this.store.remove(path);
+    }
+
 
 }

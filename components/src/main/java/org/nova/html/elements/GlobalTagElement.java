@@ -32,7 +32,7 @@ public class GlobalTagElement<ELEMENT extends TagElement<ELEMENT>> extends TagEl
         return attr("contextmenu",value);
     }
     
-    public ELEMENT data_(String attribute,String value)
+    public ELEMENT data(String attribute,String value)
     {
         return attr("data-"+attribute,value);
     }

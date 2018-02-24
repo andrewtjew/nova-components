@@ -1,5 +1,6 @@
 package org.nova.concurrent;
 
+import org.nova.logging.Logger;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceCallable;
 import org.nova.tracing.TraceManager;
@@ -13,7 +14,7 @@ public class Future<RESULT>
     private int completed;
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-	Future(TraceManager traceManager,Trace parent,String traceCategory,long number,TraceCallable<?>[] executables)
+	Future(TraceManager traceManager,Trace parent,String traceCategory,long number,TraceCallable<?>[] executables,Logger logger)
 	{
 		this.number=number;
 		this.waiting=executables.length;
@@ -23,7 +24,7 @@ public class Future<RESULT>
 		this.trace=new Trace(traceManager,parent,"scheduler@"+traceCategory,true);
 		for (int i=0;i<executables.length;i++)
 		{
-			this.tasks[i]=new FutureTask(traceManager,this.trace,"runner@"+traceCategory,executables[i],i);
+			this.tasks[i]=new FutureTask(traceManager,this.trace,"runner@"+traceCategory,executables[i],i,logger);
 		}
 	}
 	

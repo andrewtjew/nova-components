@@ -5,18 +5,38 @@ import org.nova.tracing.TraceManager;
 
 public class ReservableLock
 {
+    private long delayInstantMs;
     private Object object;
     private boolean reserved;
+    private final long lockDelayMs;
     private final TraceManager traceManager;
-    public ReservableLock(TraceManager traceManager)
+    
+    public ReservableLock(TraceManager traceManager,long lockDelayMs)
     {
         this.object=null;
         this.traceManager=traceManager;
+        this.lockDelayMs=lockDelayMs;
+        this.delayInstantMs=0;
     }
-    public LockReservation openReservation(Trace parent)
+    
+    public boolean isOpen()
     {
-        return openReservation(parent,null);
-    }    
+        synchronized (this)
+        {
+            if (this.reserved||this.object!=null)
+            {
+                return false;
+            }
+            if (this.lockDelayMs>0)
+            {
+                if (System.currentTimeMillis()-this.delayInstantMs<=this.lockDelayMs)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }        
+    }
     public LockReservation openReservation(Trace parent,String categoryOverride)
     {
         if (categoryOverride==null)
@@ -26,7 +46,15 @@ public class ReservableLock
         Trace trace=new Trace(this.traceManager,parent,categoryOverride);
         synchronized (this)
         {
-            LockReservation context=new LockReservation(this, this.reserved==false&&this.object==null, trace);
+            boolean open=this.reserved==false&&this.object==null;
+            if (open&&(this.lockDelayMs>0))
+            {
+                if (System.currentTimeMillis()-this.delayInstantMs<=this.lockDelayMs)
+                {
+                    open=false;
+                }
+            }
+            LockReservation context=new LockReservation(this, open, trace);
             this.reserved=true;
             return context;
         }        
@@ -98,7 +126,19 @@ public class ReservableLock
             @SuppressWarnings("unchecked")
             OBJECT object=(this.object.getClass()==type)?(OBJECT)this.object:null;
             this.object=null;
+            if (this.lockDelayMs>0)
+            {
+                this.delayInstantMs=System.currentTimeMillis();
+            }
             return object;
+        }
+    }
+    
+    public void delayLock()
+    {
+        synchronized(this)
+        {
+            this.delayInstantMs=System.currentTimeMillis();
         }
     }
     

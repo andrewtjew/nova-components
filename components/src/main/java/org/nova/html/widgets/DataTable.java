@@ -175,7 +175,7 @@ public class DataTable extends Table
         }
     }
 
-    public DataTable lengthMenu(int...lengths)
+    public void lengthMenu(int...lengths)
     {
         String[] labels=new String[lengths.length];
         for (int i=0;i<labels.length;i++)
@@ -189,10 +189,10 @@ public class DataTable extends Table
                 labels[i]="All";
             }
         }
-        return lengthMenu(lengths,labels);
+        lengthMenu(lengths,labels);
     }
 
-    public DataTable order(DataTableColumnOrder...orders)
+    public void order(DataTableColumnOrder...orders)
     {
         Object[][] objects=new Object[orders.length][];
         for (int i=0;i<orders.length;i++)
@@ -202,7 +202,6 @@ public class DataTable extends Table
             objects[i]=new Object[]{order.column,order};
         }
         this.objects.add("order", objects);
-        return this;
     }
 
     static class Orderable
@@ -211,7 +210,7 @@ public class DataTable extends Table
         int targets;
     }
     
-    public DataTable disableOrderables(int...columns)
+    public void disableOrderables(int...columns)
     {
         Orderable[] orderables=new Orderable[columns.length];
         for (int i=0;i<columns.length;i++)
@@ -221,40 +220,34 @@ public class DataTable extends Table
             orderables[i]=orderable;
         }
         this.objects.add("columnDefs", orderables);
-        return this;
     }
     
     
-    public DataTable lengthMenu(int[] lengths,String[] labels)
+    public void lengthMenu(int[] lengths,String[] labels)
     {
         this.objects.add("lengthMenu", new Object[]{lengths,labels});
-        return this;
     }
-    public DataTable paginate(boolean on)
+    public void paginate(boolean on)
     {
         this.objects.add("bPaginate",on);
-        return this;
     }
-    public DataTable filter(boolean on)
+    public void filter(boolean on)
     {
         this.objects.add("bFilter",on);
-        return this;
-    }
-    public DataTable info(boolean on)
-    {
-        this.objects.add("bInfo",on);
-        return this;
-    }
-    public DataTable sort(boolean on)
-    {
-        this.objects.add("bSort",on);
-        return this;
     }
 
-    public DataTable addObject(String name,Object object)
+    public void info(boolean on)
+    {
+        this.objects.add("bInfo",on);
+    }
+    public void sort(boolean on)
+    {
+        this.objects.add("bSort",on);
+    }
+
+    public void addObject(String name,Object object)
     {
         this.objects.add(name, object);
-        return this;
     }
     
 }

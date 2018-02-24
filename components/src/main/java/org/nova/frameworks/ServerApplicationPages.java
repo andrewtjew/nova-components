@@ -32,7 +32,6 @@ import org.nova.configuration.Configuration;
 import org.nova.configuration.ConfigurationItem;
 import org.nova.core.Utils;
 import org.nova.flow.Tapper;
-import org.nova.html.operator.Menu;
 import org.nova.html.properties.Color;
 import org.nova.html.properties.Size;
 import org.nova.html.properties.Style;
@@ -64,10 +63,8 @@ import org.nova.html.tags.style;
 import org.nova.html.tags.td;
 import org.nova.html.tags.textarea;
 import org.nova.html.tags.tr;
-import org.nova.html.widgets.AjaxButton;
-import org.nova.html.widgets.AjaxQueryResult;
-import org.nova.html.widgets.AjaxQueryResultWriter;
 import org.nova.html.widgets.BasicPage;
+import org.nova.html.widgets.Content;
 import org.nova.html.widgets.DataTable;
 import org.nova.html.widgets.Head;
 import org.nova.html.widgets.HtmlUtils;
@@ -75,11 +72,11 @@ import org.nova.html.widgets.MenuBar;
 import org.nova.html.widgets.NameValueList;
 import org.nova.html.widgets.Panel;
 import org.nova.html.widgets.Row;
-import org.nova.html.widgets.SelectOptions;
 import org.nova.html.widgets.Table;
 import org.nova.html.widgets.Text;
-import org.nova.html.widgets.TitleText;
-import org.nova.html.widgets.TwoColumnTable;
+import org.nova.html.widgets.TreeNode;
+import org.nova.html.widgets.OnLoadFunctionCalls;
+import org.nova.html.widgets.jsTree;
 import org.nova.html.widgets.InputFeedBackForm.NameInputValueList;
 import org.nova.html.widgets.w3c.Accordion;
 import org.nova.html.widgets.w3c.VerticalMenu;
@@ -110,11 +107,18 @@ import org.nova.http.server.RequestHandlerNotFoundLogEntry;
 import org.nova.http.server.RequestLogEntry;
 import org.nova.http.server.Response;
 import org.nova.http.server.HtmlContentWriter;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.FormElement;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.elements.InnerElement;
 import org.nova.html.enums.http_equiv;
+import org.nova.html.operator.AjaxButton;
+import org.nova.html.operator.AjaxQueryResult;
+import org.nova.html.operator.AjaxQueryResultWriter;
+import org.nova.html.operator.SelectOptions;
+import org.nova.html.operator.TitleText;
+import org.nova.html.operator.TwoColumnTable;
 import org.nova.http.server.annotations.ParamName;
 import org.nova.http.server.annotations.ContentDecoders;
 import org.nova.http.server.annotations.ContentEncoders;
@@ -275,8 +279,7 @@ public class ServerApplicationPages
         menuBar.add(false,"/operator/tracing/sampleWatchTraceBuffer","Tracing","Sample Watch Trace Buffer");
         menuBar.add(false,"/operator/tracing/watchListLastTraces","Tracing","Last Watch Traces");
         menuBar.addSeparator("Tracing");
-        menuBar.add("/operator/tracing/traceGraph","Tracing","Trace Graph");
-        menuBar.add("/operator/tracing/traceRoots","Tracing","Trace Roots");
+        menuBar.add("/operator/tracing/traceTree","Tracing","Trace Tree");
         menuBar.addSeparator("Tracing");
         menuBar.add("/operator/tracing/stats","Tracing","TraceManager","Stats");
         menuBar.add("/operator/tracing/settings","Tracing","TraceManager","Settings");
@@ -566,8 +569,8 @@ public class ServerApplicationPages
             String type=state!=null?state.getClass().getSimpleName():"";
 
             row.add(entry.getKey());
-            row.add(new TitleText(state!=null?state.toString():"",120));
-            row.add(type,DateTimeUtils.toSystemDateTimeString(event.getInstantMs()),event.getSource(),sample.getCount());
+            row.add(new TitleText(state!=null?state.toString():"",80));
+            row.add(type,DateTimeUtils.toSystemDateTimeString(event.getInstantMs()),event.getStackTrace()[event.getStackTraceStartIndex()].toString(),sample.getCount());
             table.addBodyRow(row);
         }
         
@@ -1120,7 +1123,7 @@ public class ServerApplicationPages
         row.addInner(new td());
         table.setHeadRow(row);
 
-        Map<String, TraceNode> roots = this.serverApplication.getTraceManager().getTraceGraphRootsSnapshot();
+        Map<String, TraceNode> roots = this.serverApplication.getTraceManager().getTraceTreeRootsSnapshot();
         HashMap<String, TraceSample> categorySamples = buildCategorySamples(roots);
         
         SlowTraceSampleDetector detector=new SlowTraceSampleDetector(categorySamples.size());
@@ -1193,7 +1196,7 @@ public class ServerApplicationPages
 
         OperatorPage page=this.serverApplication.buildOperatorPage("Trace Watch List");
         TraceManager traceManager=this.serverApplication.getTraceManager();
-        Map<String,TraceNode> roots=traceManager.getTraceGraphRootsSnapshot();
+        Map<String,TraceNode> roots=traceManager.getTraceTreeRootsSnapshot();
         HashMap<String,Boolean> categories=new HashMap<>();
         for (Entry<String, TraceNode> entry:roots.entrySet())
         {
@@ -1225,72 +1228,91 @@ public class ServerApplicationPages
     }
     
 
-    @GET
-    @Path("/operator/tracing/traceGraph")
-    public Element traceGraph() throws Throwable
+    static class NameValueRow extends Element
     {
-        OperatorPage page=this.serverApplication.buildOperatorPage("Trace Graph");
-        Map<String, TraceNode> map = this.serverApplication.getTraceManager().getTraceGraphRootsSnapshot();
-        Table table=page.content().returnAddInner(new Table());
-        table.style("border-collapse:collapse;");
-        for (Entry<String, TraceNode> entry : map.entrySet())
+        final private span span;
+        final private span value;
+        final private span unit;
+        static String STYLE="color:#448;";
+        public NameValueRow(String name,Element value,String unit)
         {
-            tr tr=new tr();
-            table.tbody().addInner(tr);
-            writeTraceGraphNode(page.head(),tr,entry,0);
+            this.span=new span().style(STYLE).addInner(name);
+            this.value=new span().style(STYLE).addInner(value);
+            this.unit=new span().style(STYLE).addInner(unit);
         }
-        return page;
+        public NameValueRow(String name,Object value,String unit)
+        {
+            this.span=new span().style(STYLE).addInner(name);
+            this.value=new span().style(STYLE).addInner(value);
+            this.unit=new span().style(STYLE).addInner(unit);
+        }
+
+        @Override
+        public void compose(Composer composer) throws Throwable
+        {
+            composer.render(this.span);
+            composer.render(this.value);
+            composer.render(this.unit);
+            
+        }
     }
-
-    @GET
-    @Path("/operator/tracing/traceRoots")
-    public Element traceRoots() throws Throwable
+    
+    private TreeNode writeTraceNode(Entry<String, TraceNode> entry,boolean opened,String focusCategory)
     {
-        OperatorPage page=this.serverApplication.buildOperatorPage("Trace Roots");
-        Map<String, TraceNode> map = this.serverApplication.getTraceManager().getTraceGraphRootsSnapshot();
-        DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
-        table.setHeadRow(new Row().add("Category","Count")
-                .addWithTitle("Average", "Milliseconds")
-                .addWithTitle("Duration", "Milliseconds")
-                .addWithTitle("Wait", "Milliseconds")
-                .add("")
-                );
+        TraceNode traceNode=entry.getValue();
+        TraceSample sample=traceNode.sampleTrace();
+        Content content=new Content();
+        content.addInner(entry.getKey());
+        content.addInner(new NameValueRow(", Count: ",sample.getCount(),null));
+        if (sample.getCount()>0)
+        {
+            content.addInner((new NameValueRow(", Average: ",formatNsToMs(sample.getTotalDurationNs() / sample.getCount())," ms")));  //Milliseconds
+        }
+        content.addInner(new NameValueRow(", Duration: ",formatNsToMs(sample.getTotalDurationNs())," ms"));
+        content.addInner(new NameValueRow(", Wait: ",formatNsToMs(sample.getTotalWaitNs())," ms"));
 
-        for (Entry<String, TraceNode> entry : map.entrySet())
+        TreeNode treeNode=new TreeNode(content);
+        if (Utils.equals(entry.getKey(),focusCategory))
         {
-            TraceNode node = entry.getValue();
-            TraceSample sample=node.sampleTrace();
-            Row row=new Row()
-                    .add(entry.getKey()
-                    ,sample.getCount()
-                    ,formatNsToMs(sample.getTotalDurationNs() / sample.getCount())
-                    ,formatNsToMs(sample.getTotalDurationNs())
-                    ,formatNsToMs(sample.getTotalWaitNs()));
-            row.addDetailButton(new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString());
-            table.addBodyRow(row);
+            treeNode.selected(true);
+            treeNode.opened(true);
         }
-        return page;
-    }
+        else
+        {
+            treeNode.opened(opened);
+        }
 
-    boolean isChild(String category, Entry<String, TraceNode> entry)
-    {
-        if (entry.getKey().equals(category))
+        Map<String,TraceNode> snapshot=traceNode.getChildTraceNodesSnapshot();
+        if (snapshot!=null)
         {
-            return true;
-        }
-        TraceNode node = entry.getValue();
-        if (node.getChildTraceNodesSnapshot() == null)
-        {
-            return false;
-        }
-        for (Entry<String, TraceNode> child : node.getChildTraceNodesSnapshot().entrySet())
-        {
-            if (isChild(category, child) == true)
+            for (Entry<String, TraceNode> child: snapshot.entrySet())
             {
-                return true;
+                treeNode.add(writeTraceNode(child,false,focusCategory));
             }
         }
-        return false;
+        
+        return treeNode;
+    }
+    
+    
+    private Element writeTraceNodeTree(Head head,String focusCategory)
+    {
+        Map<String, TraceNode> map = this.serverApplication.getTraceManager().getTraceTreeRootsSnapshot();
+        jsTree tree=new jsTree(head);
+        for (Entry<String, TraceNode> entry : map.entrySet())
+        {
+            tree.add(writeTraceNode(entry,true,focusCategory));
+        }
+        return tree;
+    }
+    
+    @GET
+    @Path("/operator/tracing/traceTree")
+    public Element traceTree() throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Trace Tree");
+        page.content().addInner(writeTraceNodeTree(page.head(),null));
+        return page;
     }
 
     private TitleText formatNsToMs(long ns,long instantMs)
@@ -1360,28 +1382,8 @@ public class ServerApplicationPages
     @Path("/operator/tracing/trace")
     public Element trace(@QueryParam("category") String category) throws Throwable
     {
-        OperatorPage page=this.serverApplication.buildOperatorPage("Trace Category Details");
-        Map<String, TraceNode> map = this.serverApplication.getTraceManager().getTraceGraphRootsSnapshot();
-        for (Entry<String, TraceNode> entry : map.entrySet())
-        {
-          if (isChild(category, entry))
-          {
-              Panel panel=page.content().returnAddInner(new Panel(page.head(),entry.getKey()));
-              Level2Panel treePanel=panel.content().returnAddInner(new Level2Panel(page.head(),"Path to root and sub tree"));
-              Table table=treePanel.content().returnAddInner(new Table());
-              table.style("border-collapse:collapse;");
-              tr tr=new tr();
-              table.tbody().addInner(tr);
-              writeTraceGraphNodeToCategory(page.head(),tr, category, entry, 0);
-              TraceSample sample=entry.getValue().sampleTrace();
-              Trace lastExceptiontrace=sample.getLastExceptionTrace();
-              if (lastExceptiontrace!=null)
-              {
-                  Level2Panel exceptionPanel=panel.content().returnAddInner(new Level2Panel(page.head(),"Last Exception Trace"));
-                      writeTrace(page.head(),exceptionPanel.content(),lastExceptiontrace,true);
-                  }
-              }
-          }
+        OperatorPage page=this.serverApplication.buildOperatorPage("Trace Branch");
+          page.content().addInner(writeTraceNodeTree(page.head(), category));
           return page;
       }
 
@@ -1389,80 +1391,7 @@ public class ServerApplicationPages
       {
           return "border-style:solid;border-color:#888;border-width:1px 0 1px 0;";
       }
-      private void writeTraceGraphNodeToCategory(Head head,tr tr, String category,Entry<String, TraceNode> entry, int level) throws Exception
-      {
-          if (entry.getKey().equals(category))
-          {
-              writeTraceGraphNode(head,tr, entry, level + 1);
-              return;
-          }
-          TraceNode node = entry.getValue();
-          td td=tr.returnAddInner(new td());
-          td.style(this.getTraceBoxStyle());
-          
-          Panel panel=td.returnAddInner(new Level2Panel(head,null));
-          panel.heading().addInner(new a().href(new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString()).addInner(new TitleText(entry.getKey(),80)));
 
-          writeNode(panel,node);
-          
-          if (node.getChildTraceNodesSnapshot() != null)
-          {
-              td=tr.returnAddInner(new td());
-              td.style(this.getTraceBoxStyle());
-              Table table=td.returnAddInner(new Table());
-              table.style("border-collapse:collapse;");
-              for (Entry<String, TraceNode> child : node.getChildTraceNodesSnapshot().entrySet())
-              {
-                  if (isChild(category, child))
-                  {
-                      tr=new tr();
-                      table.tbody().addInner(tr);
-                      writeTraceGraphNodeToCategory(head,tr, category, child, level + 1);
-                  }
-              }
-          }
-      }
-
-      private void writeNode(Panel panel,TraceNode node)
-      {
-          NameValueList list=panel.content().returnAddInner(new NameValueList());
-          TraceSample sample=node.sampleTrace();
-          list.add("Count", sample.getCount());
-          if (sample.getCount()>0)
-          {
-              list.add("Average (ms)", formatNsToMs(sample.getTotalDurationNs() / sample.getCount()));  //Milliseconds
-          }
-          list.add("Duration (ms)", formatNsToMs(sample.getTotalDurationNs()));
-          list.add("Wait (ms)", formatNsToMs(sample.getTotalWaitNs()));
-      }
-      
-      private void writeTraceGraphNode(Head head,tr tr, Entry<String, TraceNode> entry, int level) throws Exception
-      {
-          TraceNode node = entry.getValue();
-          td td=tr.returnAddInner(new td());
-          td.style(this.getTraceBoxStyle());
-          Panel panel=td.returnAddInner(new Level2Panel(head,null));
-          panel.heading().addInner(new a().href(new PathAndQueryBuilder("./trace").addQuery("category", entry.getKey()).toString()).addInner(new TitleText(entry.getKey(),40)));
-
-          writeNode(panel,node);
-
-          if (node.getChildTraceNodesSnapshot() != null)
-          {
-              td=tr.returnAddInner(new td());
-              td.style(this.getTraceBoxStyle());
-
-              Table table=td.returnAddInner(new Table());
-              table.style("border-collapse:collapse;");
-              for (Entry<String, TraceNode> child : node.getChildTraceNodesSnapshot().entrySet())
-              {
-                  tr=new tr();
-                  table.tbody().addInner(tr);
-                  writeTraceGraphNode(head, tr, child, level + 1);
-              }
-          }
-      }
-      
-      
     
     final static TitleText TRACE_NUMBER_COLUMN=new TitleText("Trace number","#");
     final static TitleText TRACE_CATEGORY_COLUMN=new TitleText("Trace category","Category");
@@ -1481,7 +1410,7 @@ public class ServerApplicationPages
 
     final static TitleText TS_COUNT=new TitleText("Sample count","Count");
     final static TitleText TS_RATE=new TitleText("Per second","Rate");
-    final static TitleText TRACE_ROOT_COLUMN=new TitleText("Root of the trace graph","Root");
+    final static TitleText TRACE_ROOT_COLUMN=new TitleText("Root of the trace tree","Root");
     final static TitleText TRACE_NODE_COLUMN=new TitleText("The number of times the trace category occurs as nodes in the trace graph","&#9738;");
     final static TitleText EXCEPTION_COUNT_COLUMN=new TitleText("Number of exceptions","&#9888;");
 
@@ -1659,7 +1588,7 @@ public class ServerApplicationPages
         row.addInner(new td());
         table.setHeadRow(row);
 
-        Map<String, TraceNode> roots = this.serverApplication.getTraceManager().getTraceGraphRootsSnapshot();
+        Map<String, TraceNode> roots = this.serverApplication.getTraceManager().getTraceTreeRootsSnapshot();
         HashMap<String, TraceSample> categorySamples = buildCategorySamples(roots);
         
         SlowTraceSampleDetector detector=new SlowTraceSampleDetector(categorySamples.size());
@@ -1742,7 +1671,7 @@ public class ServerApplicationPages
             OperatorPage page=this.serverApplication.buildOperatorPage("Reset Selected");
             page.content().addInner("Trace Categories Reset:");
             page.content().addInner(new hr());
-            resetTraceNodes(page.content(),this.serverApplication.getTraceManager().getTraceGraphRootsSnapshot(),queries);
+            resetTraceNodes(page.content(),this.serverApplication.getTraceManager().getTraceTreeRootsSnapshot(),queries);
             return page;
         }
         return traceAllCategories();
@@ -2004,7 +1933,7 @@ public class ServerApplicationPages
     public Element sampleAllCategory(@QueryParam("category") String category) throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Trace Category: "+category);
-        Map<String, TraceNode> roots = this.serverApplication.getTraceManager().getTraceGraphRootsSnapshot();
+        Map<String, TraceNode> roots = this.serverApplication.getTraceManager().getTraceTreeRootsSnapshot();
         HashMap<String, TraceSample> samples = buildCategorySamples(roots);
         TraceSample sample=samples.get(category);
         if (sample==null)
@@ -3965,7 +3894,7 @@ public class ServerApplicationPages
         HttpClientEndPoint httpClientEndPoint=getExecuteClient(httpServer,context);
         String content=httpClientEndPoint.endPoint+pathAndQuery.toString();
         BasicPage page=new BasicPage();
-        page.head().addInner(new meta().http_equiv(http_equiv.refresh).content("0;URL='"+content+"'"));
+        page.head().add(new meta().http_equiv(http_equiv.refresh).content("0;URL='"+content+"'"));
         return page;
     }
 

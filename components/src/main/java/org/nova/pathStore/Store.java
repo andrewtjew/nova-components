@@ -22,7 +22,7 @@ public class Store<A,V,AV extends AttributeValue<A,V>>
         {
             if (node.attributeValue!=null)
             {
-                throw new Exception("/"+Utils.combine(pathElements, "/")+" is already added. Choose a different path");
+     //BUG!!!!           throw new Exception("/"+Utils.combine(pathElements, "/")+" is already added. Choose a different path");
             }
             node.attributeValue=attributeValue;
         }

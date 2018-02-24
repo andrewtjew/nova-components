@@ -53,7 +53,7 @@ public class RowSet
 	{
 		return this.rows[index];
 	}
-	public Row[] getRows()
+	public Row[] rows()
 	{
 	    return this.rows;
 	}
@@ -87,7 +87,7 @@ public class RowSet
         {
             return null;
         }
-        Row row=getRows()[0];
+        Row row=rows()[0];
         TYPE item = (TYPE)constructorFieldMap.newInstance();
         for (int columnIndex = 0; columnIndex < columns; columnIndex++)
         {
@@ -114,7 +114,7 @@ public class RowSet
             fields[columnIndex]=field;
         }       
 
-        for (Row row:getRows())
+        for (Row row:rows())
         {
             TYPE item = (TYPE)constructorFieldMap.newInstance();
             list.add(item);
@@ -154,7 +154,7 @@ public class RowSet
             fields[columnIndex]=field;
         }       
 
-        for (Row row:getRows())
+        for (Row row:rows())
         {
             TYPE item = (TYPE)constructorFieldMap.newInstance();
             list.add(item);

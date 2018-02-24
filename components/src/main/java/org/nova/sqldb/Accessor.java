@@ -286,7 +286,7 @@ public class Accessor extends Resource
             fields[columnIndex]=field;
         }       
 
-        for (Row row:rowSet.getRows())
+        for (Row row:rowSet.rows())
         {
             TYPE item = (TYPE)constructorFieldMap.newInstance();
             list.add(item);
@@ -651,7 +651,7 @@ public class Accessor extends Resource
                     {
                         outValues.put(index, statement.getObject(index+offset));
                     }
-                    int[] updateCountArray=Utils.intArrayFromList(updateCounts);
+                    int[] updateCountArray=Utils.intListToArray(updateCounts);
                     RowSet[] rowSetArray=rowSetList.toArray(new RowSet[rowSetList.size()]);
                     context.logRowsUpdated(updateCountArray);
                     context.logRowsQueried(rowSetArray);

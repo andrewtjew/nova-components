@@ -35,35 +35,29 @@ public class Table extends table
         return tbody;
     }
     
-    public Table setHeadRow(Row row)
+    public void setHeadRow(Row row)
     {
         this.thead.setInner(row);
-        return this;
     }
-    public Table setHeadRowItems(Object...objects)
+    public void setHeadRowItems(Object...objects)
     {
         this.thead.addInner(new Row().add(objects));
-        return this;
     }
-    public Table setFootRow(Row row)
+    public void setFootRow(Row row)
     {
         this.tfoot.setInner(row);
-        return this;
     }
-    public Table setFootRowItems(Object...objects)
+    public void setFootRowItems(Object...objects)
     {
         this.tfoot.addInner(new Row().add(objects));
-        return this;
     }
-    public Table addBodyRow(Row row)
+    public void addBodyRow(Row row)
     {
         this.tbody.addInner(row);
-        return this;
     }
-    public Table addBodyRowItems(Object...objects)
+    public void addBodyRowItems(Object...objects)
     {
         this.tbody.addInner(new Row().add(objects));
-        return this;
     }
     
 }

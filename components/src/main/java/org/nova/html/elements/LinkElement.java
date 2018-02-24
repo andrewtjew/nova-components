@@ -33,5 +33,9 @@ public class LinkElement <ELEMENT extends LinkElement<ELEMENT>> extends GlobalEv
     {
         return attr("type",media_type);
     }
+    public ELEMENT integrity(String code)
+    {
+        return attr("integrity",code);
+    }
     
 }

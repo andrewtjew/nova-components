@@ -19,46 +19,65 @@ import org.nova.tracing.Trace;
 public class SessionFilter extends Filter
 {
     final private SessionManager<?> sessionManager;
-    final private String directoryServiceEndPoint;
     final private String headerTokenKey;
     final private String queryTokenKey;
     final private String cookieTokenKey;
-    final private DefaultNoSessionResponder defaultResponder;
-    final private HashMap<String,NoSessionResponder> noSessionResponders;
+    final private HashMap<String,AbnormalSessionRequestHandling> abnormalSessionHandlers;
     private Session debugSession;
     
-    public SessionFilter(SessionManager<?> sessionManager,String directoryServiceEndPoint,String headerTokenKey,String queryTokenKey,String cookieTokenKey,NoSessionResponder...noRejectResponders)
+    public SessionFilter(SessionManager<?> sessionManager,String headerTokenKey,String queryTokenKey,String cookieTokenKey,AbnormalSessionRequestHandling...abnormalSessionHandlers)
     {
         this.sessionManager=sessionManager;
-        this.directoryServiceEndPoint=directoryServiceEndPoint;
         this.headerTokenKey=headerTokenKey;
         this.queryTokenKey=queryTokenKey;
         this.cookieTokenKey=cookieTokenKey;
-        this.defaultResponder=new DefaultNoSessionResponder();
-        this.noSessionResponders=new HashMap<>();
-        for (NoSessionResponder responder:noRejectResponders)
+        this.abnormalSessionHandlers=new HashMap<>();
+        this.abnormalSessionHandlers.put("*/*", new DefaultAbnormalSessionRequestHandler());
+        for (AbnormalSessionRequestHandling responder:abnormalSessionHandlers)
         {
-            this.noSessionResponders.put(responder.getAssociatedMediaType(), responder);
+            for (String mediaType:responder.getMediaTypes())
+            {
+                this.abnormalSessionHandlers.put(mediaType, responder);
+                
+            }
         }
     }
+
+    public SessionFilter(SessionManager<?> sessionManager,String tokenKey,AbnormalSessionRequestHandling...abnormalSessionHandlers)
+    {
+        this(sessionManager,tokenKey,tokenKey,tokenKey,abnormalSessionHandlers);
+    }
+
     public void setDebugSession(Session session)
     {
         this.debugSession=session;
     }
     
-    private NoSessionResponder getBestSessionRejectResponder(Context context)
+    private AbnormalSessionRequestHandling getAbnormalSessionRequestHandler(Context context)
     {
-        ContentWriter<?> contentWriter=context.getContentWriter();
-        if (contentWriter==null)
+        String contentType=context.getHttpServletRequest().getContentType();
+        if (contentType==null)
         {
-            return this.defaultResponder;
+            contentType="*/*";
         }
-        NoSessionResponder responder=this.noSessionResponders.get(contentWriter.getMediaType());
-        if (responder==null)
+
+        AbnormalSessionRequestHandling responder=this.abnormalSessionHandlers.get(contentType);
+        if (responder!=null)
         {
-            return this.defaultResponder;
+            return responder;
         }
-        return responder;
+        int index=contentType.indexOf('/');
+        if (index>0)
+        {
+            contentType=contentType.substring(0, index)+"*";
+            responder=this.abnormalSessionHandlers.get(contentType);
+            if (responder!=null)
+            {
+                return responder;
+            }
+        }
+        return this.abnormalSessionHandlers.get("*/*");
+        
     }
     
     @Override
@@ -93,7 +112,7 @@ public class SessionFilter extends Filter
         {
             if (this.debugSession==null)
             {
-                session=getBestSessionRejectResponder(context).respondToNoSession(parent,this, context);
+                session=getAbnormalSessionRequestHandler(context).handleNoSessionRequest(parent,this, context);
                 if (session==null)
                 {
                     return null;
@@ -107,15 +126,15 @@ public class SessionFilter extends Filter
         Lock<String> lock=sessionManager.waitForLock(parent,session.getToken());
         if (lock==null)
         {
-            getBestSessionRejectResponder(context).respondToNoLock(parent,this, session, context);
+            getAbnormalSessionRequestHandler(context).handleNoLockRequest(parent,this, session, context);
             return null;
         }
         session.update(lock);
         try
         {
-            if (session.isAccessDeniedForCurrentRequest(parent,context))
+            if (session.isAccessDenied(parent,context))
             {
-                getBestSessionRejectResponder(context).respondToAccessDenied(parent,this, session, context);
+                getAbnormalSessionRequestHandler(context).handleAccessDeniedRequest(parent,this, session, context);
                 return null;
             }
             context.setState(session);
@@ -141,9 +160,5 @@ public class SessionFilter extends Filter
     public String getCookieTokenKey()
     {
         return cookieTokenKey;
-    }
-    public String getDirectoryServiceEndPoint()
-    {
-        return this.directoryServiceEndPoint;
     }
 }

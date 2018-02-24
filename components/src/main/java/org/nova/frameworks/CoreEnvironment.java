@@ -74,12 +74,12 @@ public class CoreEnvironment
 		this.logSourceQueue.start();
 		this.loggers=new HashMap<>();
 		Logger traceLogger=this.getLogger("tracing");
+        this.logger=getLogger("application");
 	
 		this.traceManager=new TraceManager(traceLogger);
-		this.futureScheduler=new FutureScheduler(traceManager,configuration.getIntegerValue("Environment.FutureScheduler.threads",1000));
+		this.futureScheduler=new FutureScheduler(traceManager,configuration.getIntegerValue("Environment.FutureScheduler.threads",1000),this.logger);
 		this.timerScheduler=new TimerScheduler(traceManager, this.getLogger());
 		this.timerScheduler.start();
-		this.logger=getLogger("application");
 
 		//Setting up the vault
         String secureVaultFile=configuration.getValue("Environment.Vault.secureVaultFile",null);

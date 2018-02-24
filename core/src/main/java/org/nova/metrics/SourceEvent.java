@@ -4,11 +4,13 @@ public class SourceEvent
 {
     final Object state;
     final long instantMs;
-    final String source;
-    SourceEvent(Object state,String source)
+    final StackTraceElement[] stackTrace;
+    final int stackTraceStartIndex;
+    SourceEvent(Object state,StackTraceElement[] stackTrace,int stackTraceStartIndex)
     {
         this.state=state;
-        this.source=source;
+        this.stackTrace=stackTrace;
+        this.stackTraceStartIndex=stackTraceStartIndex;
         this.instantMs=System.currentTimeMillis();
     }
 
@@ -21,9 +23,14 @@ public class SourceEvent
     {
         return instantMs;
     }
-    public String getSource()
+    public StackTraceElement[] getStackTrace()
     {
-        return this.source;
+        return this.stackTrace;
     }
+    public int getStackTraceStartIndex()
+    {
+        return this.stackTraceStartIndex;
+    }
+    
     
 }

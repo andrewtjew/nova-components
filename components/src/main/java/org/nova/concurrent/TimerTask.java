@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 import java.util.Timer;
 
 import org.nova.concurrent.TimerScheduler.Key;
+import org.nova.logging.Logger;
 import org.nova.tracing.Trace;
 
 public class TimerTask
@@ -31,6 +32,7 @@ public class TimerTask
 	final private long offset;
 	final private long number;
 	final private long created;
+	
 	final TimeBase schedulingMode;
 	private long due;
 	private long totalDuration;
@@ -42,6 +44,7 @@ public class TimerTask
 	private TaskStatus executeStatus;
 	private long misses;
 	private boolean cancel;
+	
 	
 	TimerTask(long number,String category,TimerScheduler timerScheduler,TimeBase schedulingMode,long offset,long period,TimerRunnable executable)
 	{
@@ -86,6 +89,11 @@ public class TimerTask
 				this.lastThrowable=t;
 				this.throwables++;
 				trace.close(t);
+				Logger logger=this.timerScheduler.getLogger();
+				if (logger!=null)
+				{
+				    logger.log(trace);
+				}
 			}
 			this.totalDuration+=trace.getDurationNs();
 			synchronized(this)

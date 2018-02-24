@@ -213,7 +213,7 @@ public class TraceManager
 		return traceRoots;
 		
 	}
-    public Map<String,TraceNode> getTraceGraphRootsSnapshot()
+    public Map<String,TraceNode> getTraceTreeRootsSnapshot()
     {
         HashMap<String,TraceNode> traceRoots=new HashMap<>();
         synchronized (this.managerLock)

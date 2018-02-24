@@ -8,11 +8,11 @@ public class canvas extends GlobalEventTagElement<canvas>
     {
         super("canvas");
     }
-    public canvas height(String pixels)
+    public canvas height(int pixels)
     {
         return attr("height",pixels);
     }
-    public canvas width(String pixels)
+    public canvas width(int pixels)
     {
         return attr("width",pixels);
     }

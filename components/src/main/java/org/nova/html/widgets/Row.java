@@ -9,6 +9,8 @@ import org.nova.html.elements.InnerElement;
 import org.nova.html.tags.a;
 import org.nova.html.tags.td;
 import org.nova.html.tags.tr;
+import org.nova.html.xtags.remove_button;
+import org.nova.html.xtags.more_button;
 
 public class Row extends GlobalEventTagElement<Row>
 {
@@ -71,11 +73,11 @@ public class Row extends GlobalEventTagElement<Row>
         data.style("width:5em;");
         if (detailLocation!=null)
         {
-            data.addInner(new RowDetailButton(detailLocation));
+            data.addInner(new more_button(detailLocation));
         }
         if (removeScript!=null)
         {
-            data.addInner(new RowRemoveButton().onclick(removeScript));
+            data.addInner(new remove_button().onclick(removeScript));
         }
         return this;
         
@@ -83,41 +85,15 @@ public class Row extends GlobalEventTagElement<Row>
     public Row addRemoveButton(String removeScript)
     {
         td data=returnAddInner(new td());
-        data.addInner(new RowRemoveButton().onclick(removeScript));
+        data.addInner(new remove_button().onclick(removeScript));
         return this;
         
     }
     public Row addDetailButton(String detailLocation)
     {
         td data=returnAddInner(new td());
-        data.addInner(new RowDetailButton(detailLocation));
+        data.addInner(new more_button(detailLocation));
         return this;
     }
-    public Row addInner(Element element)
-    {
-        super.addInner(element);
-        return this;
-    }
-    public Row setInner(Element element)
-    {
-        super.setInner(element);
-        return this;
-    }
-    public Row addInners(Element...elements)
-    {
-        super.addInners(elements);
-        return this;
-    }
-    public Row addInner(Object object)
-    {
-        super.addInner(object);
-        return this;
-    }
-    /*
-    public Row onClickLocation(String URL)
-    {
-        onclick("window.location='"+URL+"'");
-        return this;
-    }
-    */
+    
 }

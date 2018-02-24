@@ -25,14 +25,14 @@ public abstract class SessionServerApplication<SESSION extends Session> extends 
         
     }
 
-    public SessionServerApplication(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer,NoSessionResponder...sessionRejectResponders) throws Throwable
+    public SessionServerApplication(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer,AbnormalSessionRequestHandling...sessionRejectResponders) throws Throwable
     {
         this(name,coreEnvironment,operatorServer);
         String directoryServiceEndPoint=this.getConfiguration().getValue("SessionService.directoryServiceEndPoint", "http://"+Utils.getLocalHostName()+":"+this.getPublicServer().getPorts()[0]);
         String headerTokenKey=this.getConfiguration().getValue("SessionService.tokenKey.header", "X-Token");
         String queryTokenKey=this.getConfiguration().getValue("SessionService.tokenKey.query", "token");
         String cookieTokenKey=this.getConfiguration().getValue("SessionService.tokenKey.cookie", headerTokenKey);
-        this.sessionFilter=new SessionFilter(this.sessionManager,directoryServiceEndPoint,headerTokenKey,queryTokenKey,cookieTokenKey,sessionRejectResponders);
+        this.sessionFilter=new SessionFilter(this.sessionManager,headerTokenKey,queryTokenKey,cookieTokenKey,sessionRejectResponders);
 
         this.getMenuBar().add("/operator/sessions","Sessions","View All");
         this.getPublicServer().addFilters(this.sessionFilter);

@@ -26,7 +26,7 @@ public class HtmlUtils
     public static Element redirect(String url)
     {
         BasicPage page=new BasicPage();
-        page.head().addInner(new meta().http_equiv(http_equiv.refresh).content("0;URL='"+url+"'"));
+        page.head().add(new meta().http_equiv(http_equiv.refresh).content("0;URL='"+url+"'"));
         return page;
     }
     public static String confirmPOST(String title,String text,PathAndQueryBuilder post,Object content,PathAndQueryBuilder success) throws Throwable

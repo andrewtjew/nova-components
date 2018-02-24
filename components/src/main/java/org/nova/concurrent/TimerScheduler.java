@@ -213,4 +213,8 @@ public class TimerScheduler
 			return this.map.values().toArray(new TimerTask[this.map.size()]);
 		}
 	}
+	Logger getLogger()
+	{
+	    return this.logger;
+	}
 }

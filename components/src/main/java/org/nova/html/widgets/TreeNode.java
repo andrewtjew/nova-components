@@ -1,0 +1,98 @@
+package org.nova.html.widgets;
+
+import org.nova.html.elements.Composer;
+import org.nova.html.elements.Element;
+import org.nova.html.tags.li;
+import org.nova.html.tags.ul;
+import org.nova.json.ObjectMapper;
+
+public class TreeNode extends Element
+{
+    private final ul ul;
+    
+    static class Attributes
+    {
+        public boolean opened;
+        public boolean selected;
+        public boolean disabled;
+        public String icon;
+    }
+    private final Attributes attributes;
+    private final String id;
+    private final Element element;
+    
+    public TreeNode(Element element,String id)
+    {
+        this.id=id;
+        this.attributes=new Attributes();
+        this.ul=new ul();
+        this.element=element;
+    }
+    
+    public TreeNode(Element element)
+    {
+        this(element,null);
+    }
+    
+    public TreeNode(Object object)
+    {
+        this(new Text(object),null);
+    }
+    
+    public TreeNode opened(boolean value)
+    {
+        this.attributes.opened=value;
+        return this;
+    }
+
+    public TreeNode selected(boolean value)
+    {
+        this.attributes.selected=value;
+        return this;
+    }
+    
+    public TreeNode icon(String value)
+    {
+        this.attributes.icon=value;
+        return this;
+    }
+    
+    public TreeNode disabled(boolean value)
+    {
+        this.attributes.disabled=value;
+        return this;
+    }
+    
+    public TreeNode add(TreeNode node)
+    {
+        this.ul.addInner(node);
+        return this;
+    }
+    public TreeNode add(Object object)
+    {
+        TreeNode node=new TreeNode(object);
+        node.icon("false");
+        this.ul.addInner(node);
+        return this;
+    }
+    public TreeNode add(Element element)
+    {
+        TreeNode node=new TreeNode(element);
+        node.icon("false");
+        this.ul.addInner(node);
+        return this;
+    }
+    
+    
+    @Override
+    public void compose(Composer composer) throws Throwable
+    {
+        li li=new li();
+        String jsonText=ObjectMapper.write(this.attributes);
+        li.attr("data-jstree",jsonText,'\'');
+        li.addInner(element);
+        li.addInner(this.ul);
+        composer.render(li);
+    }
+
+}

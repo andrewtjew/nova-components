@@ -215,6 +215,11 @@ public class Style
         sb.append("text-align:"+value+";");
         return this;
     }
+    public Style list_style(list_style value)
+    {
+        sb.append("list-style:"+value+";");
+        return this;
+    }
     public Style z_index(int value)
     {
         sb.append("z-index:"+value+";");

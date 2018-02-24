@@ -75,6 +75,6 @@ public abstract class Session
     
     abstract public void onClose(Trace trace) throws Throwable;
     abstract public NameObject[] getDisplayItems();
-    abstract public boolean isAccessDeniedForCurrentRequest(Trace trace,Context context) throws Throwable;
+    abstract public boolean isAccessDenied(Trace trace,Context context) throws Throwable;
     
 }

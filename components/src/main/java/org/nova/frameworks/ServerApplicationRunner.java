@@ -5,7 +5,7 @@ import org.nova.configuration.Configuration;
 import org.nova.configuration.ConfigurationReader;
 import org.nova.core.Utils;
 import org.nova.html.elements.HtmlElementWriter;
-import org.nova.html.widgets.AjaxQueryResultWriter;
+import org.nova.html.operator.AjaxQueryResultWriter;
 import org.nova.http.server.Context;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;

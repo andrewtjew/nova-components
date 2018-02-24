@@ -1,5 +1,6 @@
 package org.nova.concurrent;
 
+import org.nova.logging.Logger;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceCallable;
 import org.nova.tracing.TraceManager;
@@ -10,19 +11,21 @@ public class FutureTask<RESULT>
 	private RESULT result;
 	private Throwable throwable;
 	final private Trace scheduleTrace;
-	final private TraceManager traceManager;
 	final private String traceCategory;
 	final private TraceCallable<RESULT> callable;
 	final private int index;
+	final private Logger logger;
+	final private TraceManager traceManager;
 	
-	public FutureTask(TraceManager traceManager,Trace scheduleTrace,String traceCategory,TraceCallable<RESULT> callable,int index)
+	public FutureTask(TraceManager traceManager,Trace scheduleTrace,String traceCategory,TraceCallable<RESULT> callable,int index,Logger logger)
 	{
+	    this.traceManager=traceManager;
 		this.traceCategory=traceCategory;
 		this.scheduleTrace=scheduleTrace;
-		this.traceManager=traceManager;
 		this.callable=(TraceCallable<RESULT>)callable;
 		this.status=TaskStatus.READY;
         this.index=index;
+        this.logger=logger;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -49,6 +52,10 @@ public class FutureTask<RESULT>
 			{
 				throwable=t;
 				trace.close(t);
+				if (this.logger!=null)
+				{
+				    this.logger.log(trace);
+				}
 			}
 		}
 		synchronized (this)

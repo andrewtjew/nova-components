@@ -560,6 +560,7 @@ public abstract class Lexer
         return addLexeme(new Lexeme(this.source,Token.TEXT,value,this.mark,this.position));
     }
 
+    //operators must be non letter based (&&, >=, etc) or letter based (and, or, not, etc)
     protected boolean matchOperator(char first)
     {
         OperatorTree child;
@@ -571,8 +572,17 @@ public abstract class Lexer
             {
                 if (node.isTerminator())
                 {
-                    back(1);
-                    return addLexeme(new Lexeme(this.source,Token.OPERATOR,this.text.substring(this.mark, this.position),this.mark,this.position));
+                    if (Character.isLetter(first)==false)
+                    {
+                        back(1);
+                        return addLexeme(new Lexeme(this.source,Token.OPERATOR,this.text.substring(this.mark, this.position),this.mark,this.position));
+                    }
+                    if (Character.isLetter(c)==false)
+                    {
+                        back(1);
+                        return addLexeme(new Lexeme(this.source,Token.OPERATOR,this.text.substring(this.mark, this.position),this.mark,this.position));
+                    }
+                    
                 }
             }
         }

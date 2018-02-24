@@ -22,9 +22,14 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
     @SuppressWarnings("unchecked")
     public ELEMENT attr(String name,Object value)
     {
+        return attr(name,value,'"');
+    }
+    @SuppressWarnings("unchecked")
+    public ELEMENT attr(String name,Object value,char bracketChar)
+    {
         if (value!=null)
         {
-            sb.append(' ').append(name).append("=\"").append(value).append('"');
+            sb.append(' ').append(name).append("=").append(bracketChar).append(value).append(bracketChar);
         }
         return (ELEMENT) this;
     }

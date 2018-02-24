@@ -18,8 +18,9 @@ import org.nova.html.tags.style;
 import org.nova.html.tags.script;
 import org.nova.html.tags.noscript;
 
-public class Head extends head
+public class Head extends Element
 {
+    final private head head;
     private HashSet<String> styleSet;
     private HashSet<String> baseSet;
     private HashSet<String> linkSet;
@@ -28,8 +29,15 @@ public class Head extends head
 
     public Head()
     {
+        this.head=new head();
     }
 
+    public Head title(String title)
+    {
+        this.head.title(title);
+        return this;
+    }
+    
     public Head add(String key, style style)
     {
         if (this.styleSet == null)
@@ -38,7 +46,7 @@ public class Head extends head
         }
         if (this.styleSet.add(key))
         {
-            addInner(style);
+            this.head.addInner(style);
         }
         return this;
     }
@@ -51,7 +59,7 @@ public class Head extends head
         }
         if (this.baseSet.add(key))
         {
-            addInner(base);
+            this.head.addInner(base);
         }
         return this;
     }
@@ -64,7 +72,7 @@ public class Head extends head
         }
         if (this.linkSet.add(key))
         {
-            addInner(link);
+            this.head.addInner(link);
         }
         return this;
     }
@@ -77,7 +85,7 @@ public class Head extends head
         }
         if (this.metaSet.add(key))
         {
-            addInner(meta);
+            this.head.addInner(meta);
         }
         return this;
     }
@@ -90,17 +98,32 @@ public class Head extends head
         }
         if (this.scriptSet.add(key))
         {
-            addInner(script);
+            this.head.addInner(script);
         }
         return this;
     }
 
-    public Head addCssLink(String URL)
+    public Head includeCss(String URL)
     {
         return add(URL,new link().rel(link_rel.stylesheet).type("text/css").href(URL));
     }
-    public Head addScript(String URL)
+    public Head includeScript(String URL)
     {
         return add(URL,new script().src(URL));
     }
+    
+    public Head add(Element element)
+    {
+        this.head.addInner(element);
+        return this;
+    }
+
+    @Override
+    public void compose(Composer composer) throws Throwable
+    {
+        composer.render(this.head);
+        
+    }
+    
+    
 }

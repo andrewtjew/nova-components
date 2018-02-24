@@ -15,6 +15,14 @@ public class script extends GlobalEventTagElement<script>
         super("script");
     }
     
+    public script integrity(String code)
+    {
+        return attr("integrity",code);
+    }
+    public script crossorigin(crossorigin crossorigin)
+    {
+        return attr("crossorigin",crossorigin.toString());
+    }
     public script async()
     {
         return attr("async");

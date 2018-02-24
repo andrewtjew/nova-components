@@ -30,7 +30,7 @@ public class JSONFormatter extends Formatter
 	    }
         sb.append("{");
         write(false,sb,"number",entry.getNumber());
-		writeString(true,sb,"created",Utils.millisToLocalDateTimeString(entry.getCreated()));
+		writeString(true,sb,"created",Utils.millisToUTCDateTimeString(entry.getCreated()));
         writeString(true,sb,"level",entry.getLogLevel().toString());
         writeString(true,sb,"category",entry.getCategory());
         writeString(true,sb,"message",entry.getMessage());
@@ -41,7 +41,7 @@ public class JSONFormatter extends Formatter
             boolean commaNeeded=false;
             for (Item item:items)
             {
-                if (item.getValue()!=null)
+                if (item!=null)
                 {
                     writeItem(commaNeeded,sb,item);
                     commaNeeded=true;
@@ -59,7 +59,7 @@ public class JSONFormatter extends Formatter
         {
             sb.append(",\"trace\":{");
             write(false,sb,"number",trace.getNumber());
-            writeString(true,sb,"created",Utils.millisToLocalDateTimeString(trace.getCreatedMs()));
+            writeString(true,sb,"created",Utils.millisToUTCDateTimeString(trace.getCreatedMs()));
             writeString(true,sb,"category",trace.getCategory());
             write(true,sb,"duration",trace.getDurationS());
             Trace parent=trace.getParent();
@@ -118,7 +118,7 @@ public class JSONFormatter extends Formatter
             sb.append('"');
 	        sb.append(key);
             sb.append("\":\"");
-            ObjectMapper.writeString(sb, value.toString());
+            ObjectMapper.writeString(sb, value);
             sb.append('"');
 	    }
 	}
@@ -131,9 +131,17 @@ public class JSONFormatter extends Formatter
         }
         sb.append("{\"");
         sb.append(item.getName());
-        sb.append("\":\"");
-        sb.append(item.getValue());
-        sb.append("\"}");
+        Object value=item.getValue();
+        if (value==null)
+        {
+            sb.append("\":null}");
+        }
+        else
+        {
+            sb.append("\":");
+            ObjectMapper.writeString(sb, value.toString());
+            sb.append("}");
+        }
     }
 	
 	private void write(boolean comma,StringBuilder sb,String key,double value)
@@ -170,9 +178,6 @@ public class JSONFormatter extends Formatter
         sb.append("\":");
         sb.append(value);
     }
-
-    static private byte[] BEGIN="[\r\n".getBytes(StandardCharsets.UTF_8);
-    static private byte[] END="\r\n]".getBytes(StandardCharsets.UTF_8);
 
     @Override
 	public String formatBegin() throws IOException

@@ -10,20 +10,11 @@ public class RecentSourceEventMeter
     {
         this.events=new RingBuffer<>(new SourceEvent[eventBuferSize]);
     }
-    private static String getSource(StackTraceElement[] elements,int index)
-    {
-        if (index>=elements.length)
-        {
-            return null;
-        }
-        StackTraceElement element=elements[index];
-        return element.getFileName()+"."+element.getLineNumber();
-    }
-    public void update(Object state,int sourceIndex)
+    public void update(Object state,int stackTraceStartIndex)
     {
         synchronized(this)
         {
-            this.events.add(new SourceEvent(state,getSource(Thread.currentThread().getStackTrace(),sourceIndex+3)));
+            this.events.add(new SourceEvent(state,Thread.currentThread().getStackTrace(),stackTraceStartIndex+3));
             this.count++;
         }
     }

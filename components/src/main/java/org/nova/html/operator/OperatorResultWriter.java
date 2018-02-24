@@ -7,8 +7,8 @@ import java.nio.charset.StandardCharsets;
 import org.nova.core.Utils;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.StringComposer;
+import org.nova.html.templates.Template;
 import org.nova.html.widgets.Text;
-import org.nova.html.widgets.templates.Template;
 import org.nova.http.server.ContentWriter;
 import org.nova.http.server.Context;
 
