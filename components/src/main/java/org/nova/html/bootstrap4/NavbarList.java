@@ -45,7 +45,7 @@ public class NavbarList extends Element
         a.addInner(label).href(href);
         ClassBuilder cb=new ClassBuilder("nav-link");
         cb.add(state);
-        cb.addTo(a);
+        cb.applyTo(a);
         return this;
     }
     

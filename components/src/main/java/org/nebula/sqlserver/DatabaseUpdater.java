@@ -184,7 +184,14 @@ public class DatabaseUpdater
                 if (sb.length()>0)
                 {
                     String alter="ALTER TABLE "+ownerName+" "+sb.toString();
-                    accessor.executeUpdate(parent, null,alter);
+                    try
+                    {
+                        accessor.executeUpdate(parent, null,alter);
+                    }
+                    catch (Throwable t)
+                    {
+                        throw new Exception("ALTER TABLE:"+alter,t);
+                    }
                     this.logger.log(Level.NOTICE,"alter table",new Item("table",ownerName),new Item("alter",alter));
                 }
             }

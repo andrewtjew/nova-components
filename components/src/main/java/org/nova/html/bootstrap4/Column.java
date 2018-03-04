@@ -73,7 +73,7 @@ public class Column extends Element
         class_.add(this.textColor);
 
         div div=new div();
-	    class_.addTo(div);
+	    class_.applyTo(div);
 	    div.addInner(this.content);
 	    composer.render(div);
     }

@@ -130,7 +130,7 @@ public class FilterChain
             {
                 return true;
             }
-		    return !("false".equals(value));
+		    return "true".equals(value);
 		}
         if (type==Boolean.class)
         {

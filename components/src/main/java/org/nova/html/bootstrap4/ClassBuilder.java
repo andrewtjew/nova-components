@@ -69,7 +69,7 @@ public class ClassBuilder
         return this;
     }
     
-    public void addTo(GlobalTagElement<?> element)
+    public void applyTo(GlobalTagElement<?> element)
     {
         element.class_(this.sb.toString());
     }

@@ -7,14 +7,14 @@ import org.nova.tracing.Trace;
 public class NodeLogger extends Logger
 {
     final private Node[] receivers;
-    final private ThrowablesLog firstAndLastThrowablesLog; 
+    final private ThrowablesLog throwablesLog; 
     private long number;
     
     public NodeLogger(String category,Node...receivers)
     {
         super(category);
         this.receivers=receivers;
-        this.firstAndLastThrowablesLog=new ThrowablesLog(); 
+        this.throwablesLog=new ThrowablesLog(); 
                 
     }
 
@@ -33,16 +33,16 @@ public class NodeLogger extends Logger
                 }
                 catch (Throwable t)
                 {
-                    this.firstAndLastThrowablesLog.log(t);
+                    this.throwablesLog.log(t);
                 }
             }
         }
     }
-    public ThrowablesLog getFirstAndLastThrowablesLog()
+    public ThrowablesLog getThrowablesLog()
     {
         synchronized(this)
         {
-            return this.firstAndLastThrowablesLog;
+            return this.throwablesLog;
         }
     }
 

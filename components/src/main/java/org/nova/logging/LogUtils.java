@@ -5,7 +5,7 @@ import org.nova.flow.SourceQueueConfiguration;
 import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
 
-public class Loggers
+public class LogUtils
 {
 	public static SourceQueueLogger createConsoleLogger(String category,Formatter formatter,SourceQueueConfiguration configuration,boolean outputSegments) throws Throwable
 	{
@@ -42,5 +42,23 @@ public class Loggers
         return createSimpleFileLogger(logDirectoryManager,null);
     }
 
+    public static String toString(Formatter formatter,LogEntry[] logEntries,boolean document) throws Throwable
+    {
+        StringBuilder sb=new StringBuilder();
+        if (document)
+        {
+            sb.append(formatter.beginDocument());
+        }
+        for (LogEntry logEntry:logEntries)
+        {
+            sb.append(formatter.format(logEntry));
+        }
+        if (document)
+        {
+            sb.append(formatter.endDocument());
+        }
+        return sb.toString();
+        
+    }
 	
 }

@@ -52,7 +52,7 @@ public class Row extends Element
         sb.addIf(this.noGutters,"no-gutters");
         
 	    div div=new div();
-	    sb.addTo(div);
+	    sb.applyTo(div);
 	    div.addInner(this.content);
 	    composer.render(div);
     }

@@ -1,11 +1,11 @@
 package org.nova.logging;
 
-public class InstantThrowable
+public class ThrowableEvent
 {
     final Throwable throwable;
     final long instantMs;
     
-    InstantThrowable(Throwable throwable)
+    ThrowableEvent(Throwable throwable)
     {
         this.throwable=throwable;
         this.instantMs=System.currentTimeMillis();

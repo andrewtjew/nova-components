@@ -15,13 +15,13 @@ public class XmlFormatter extends Formatter
 {
 
 	@Override
-	public String formatBegin() throws IOException
+	public String beginDocument() throws IOException
 	{
 		return "<Logs>\r\n";
 	}
 
 	@Override
-	public String formatEnd() throws IOException
+	public String endDocument() throws IOException
 	{
         return "</Logs>\r\n";
 	}

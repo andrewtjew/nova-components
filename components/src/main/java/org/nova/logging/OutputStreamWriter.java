@@ -45,7 +45,7 @@ public abstract class OutputStreamWriter extends Node
         try
         {
             this.outputStream=openOutputStream(groupIdentifier);
-            write(this.formatter.formatBegin());
+            write(this.formatter.beginDocument());
         }
         catch (Throwable t)
         {
@@ -64,7 +64,7 @@ public abstract class OutputStreamWriter extends Node
         {
             try
             {
-                write(this.formatter.formatEnd());
+                write(this.formatter.endDocument());
                 closeOutputStream(this.outputStream);
                 this.outputStream = null;
                 return;

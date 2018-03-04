@@ -41,24 +41,37 @@ public class JSONClient
 	final private String patchType;  
 	final private Disruptor disruptor;
     final private TimerTask timerTask;
+    final private long reconnectWaitMs;
+    final private long idleConnectionTimeoutMs;
+    private long lastRequestInstantMs;
 	
-	public JSONClient(TraceManager traceManager,Logger logger,TimerScheduler scheduler,long idleConnectionTimeoutMs,Disruptor disruptor,String endPoint,HttpClient client,String contentType,String patchType,Header...headers) throws Throwable
+	public JSONClient(TraceManager traceManager,Logger logger,TimerScheduler scheduler,long idleConnectionTimeoutMs,long reconnectWaitMs,Disruptor disruptor,String endPoint,HttpClient client,String contentType,String patchType,Header...headers) throws Throwable
 	{
+	    this.idleConnectionTimeoutMs=idleConnectionTimeoutMs;
+	    this.lastRequestInstantMs=System.currentTimeMillis();
 		this.traceManager=traceManager;
 		this.disruptor=disruptor;
 		this.logger=logger;
 		this.endPoint=endPoint;
 		this.client=client;
 		this.headers=new ArrayList<>();
+        this.reconnectWaitMs=reconnectWaitMs;
 		for (Header header:headers)
 		{
 		    setHeader(header);
 		}
 		this.contentType=contentType;
 		this.patchType=patchType;
-		if (scheduler!=null)
+		if (idleConnectionTimeoutMs>0)
 		{
-		    this.timerTask=scheduler.schedule("JSONClient.closeIdleConnections",TimeBase.FREE,idleConnectionTimeoutMs,idleConnectionTimeoutMs,(trace,task)->{closeIdleConnections(trace);});
+    		if (scheduler!=null)
+    		{
+    		    this.timerTask=scheduler.schedule("JSONClient.closeIdleConnections",TimeBase.FREE,idleConnectionTimeoutMs,idleConnectionTimeoutMs,(trace,task)->{closeIdleConnections(trace);});
+    		}
+    		else
+    		{
+    		    throw new Exception();
+    		}
 		}
 		else
 		{
@@ -68,17 +81,18 @@ public class JSONClient
 	
 	public void closeIdleConnections(Trace parent)
 	{
+	    this.client.getConnectionManager().closeIdleConnections(this.idleConnectionTimeoutMs-1, TimeUnit.MILLISECONDS);
         HttpClientUtils.closeQuietly(this.client);
 	}
 	
 	
-    public JSONClient(TraceManager traceManager,Logger logger,TimerScheduler scheduler,long idleConnectionTimeoutMs,String endPoint,HttpClient client) throws Throwable
+    public JSONClient(TraceManager traceManager,Logger logger,TimerScheduler scheduler,long idleConnectionTimeoutMs,long reconnectWaitMs,String endPoint,HttpClient client) throws Throwable
     {
-        this(traceManager,logger,scheduler,idleConnectionTimeoutMs,null,endPoint,client,"application/json","application/merge-patch+json");
+        this(traceManager,logger,scheduler,idleConnectionTimeoutMs,reconnectWaitMs,null,endPoint,client,"application/json","application/merge-patch+json");
     }
     public JSONClient(TraceManager traceManager,Logger logger,String endPoint,HttpClient client) throws Throwable
     {
-        this(traceManager,logger,null,0,endPoint,client);
+        this(traceManager,logger,null,0,0,endPoint,client);
     }
     public JSONClient(TraceManager traceManager,Logger logger,String endPoint) throws Throwable
     {
@@ -104,8 +118,20 @@ public class JSONClient
             context.addLogItem(new Item("requestHeader:"+header.getName(),header.getValue()));
         }
 	}
-	private DisruptorTraceContext createDisruptorConext(Trace parent,String traceCategoryOverride,String pathAndQuery)
+	private DisruptorTraceContext createContext(Trace parent,String traceCategoryOverride,String pathAndQuery)
 	{
+        if (this.reconnectWaitMs>0)
+        {
+            synchronized(this)
+            {
+                long now=System.currentTimeMillis();
+                if (now-this.lastRequestInstantMs>=this.reconnectWaitMs)
+                {
+                    this.client.getConnectionManager().closeIdleConnections(this.reconnectWaitMs-1, TimeUnit.MILLISECONDS);
+                }
+                this.lastRequestInstantMs=now;
+            }
+        }
 	    return new DisruptorTraceContext(parent, this.traceManager, this.logger, this.disruptor, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery,this.endPoint);
 	}
 	/*
@@ -124,10 +150,10 @@ public class JSONClient
        }
        return new JSONResponse<TYPE>(statusCode,ObjectMapper.read(json, responseContentType));
     }
-
+    
     public <TYPE> JSONResponse<TYPE> get(Trace parent,String traceCategoryOverride,String pathAndQuery,Class<TYPE> responseContentType,Header...headers) throws Throwable
     {
-        try (DisruptorTraceContext context=createDisruptorConext(parent, traceCategoryOverride, pathAndQuery))
+        try (DisruptorTraceContext context=createContext(parent, traceCategoryOverride, pathAndQuery))
         {
             try 
             {
@@ -222,7 +248,7 @@ public class JSONClient
     }
 	public int delete(Trace parent,String traceCategoryOverride,String pathAndQuery,Header...headers) throws Throwable
 	{
-        try (DisruptorTraceContext context=createDisruptorConext(parent, traceCategoryOverride, pathAndQuery))
+        try (DisruptorTraceContext context=createContext(parent, traceCategoryOverride, pathAndQuery))
         {
             try 
             {
@@ -268,7 +294,7 @@ public class JSONClient
     }
 	public int put(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Header...headers) throws Throwable
 	{
-        try (DisruptorTraceContext context=createDisruptorConext(parent, traceCategoryOverride, pathAndQuery))
+        try (DisruptorTraceContext context=createContext(parent, traceCategoryOverride, pathAndQuery))
         {
             try 
     		{
@@ -325,7 +351,7 @@ public class JSONClient
 	
 	public int patch(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Header...headers) throws Throwable
 	{
-        try (DisruptorTraceContext context=createDisruptorConext(parent, traceCategoryOverride, pathAndQuery))
+        try (DisruptorTraceContext context=createContext(parent, traceCategoryOverride, pathAndQuery))
         {
             try 
             {
@@ -377,7 +403,7 @@ public class JSONClient
 	}
 	public <TYPE> JSONResponse<TYPE> post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Class<TYPE> responseContentType,Header...headers) throws Throwable
 	{
-        try (DisruptorTraceContext context=createDisruptorConext(parent, traceCategoryOverride, pathAndQuery))
+        try (DisruptorTraceContext context=createContext(parent, traceCategoryOverride, pathAndQuery))
         {
     		try 
     		{
@@ -441,7 +467,7 @@ public class JSONClient
     }
     public int post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Header...headers) throws Throwable
     {
-        try (DisruptorTraceContext context=createDisruptorConext(parent, traceCategoryOverride, pathAndQuery))
+        try (DisruptorTraceContext context=createContext(parent, traceCategoryOverride, pathAndQuery))
         {
             try 
             {

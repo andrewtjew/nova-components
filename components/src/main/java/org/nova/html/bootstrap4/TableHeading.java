@@ -94,7 +94,7 @@ public class TableHeading extends Element
         theadClass.add(this.textColor);
         theadClass.add(this.backgroundColor);
         
-        theadClass.addTo(this.thead);
+        theadClass.applyTo(this.thead);
         composer.render(this.thead);
         
     }

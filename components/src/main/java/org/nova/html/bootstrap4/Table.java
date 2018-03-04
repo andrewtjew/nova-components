@@ -86,7 +86,7 @@ public class Table extends Element
         tableClass.addIf(this.dark,"table-dark");
         tableClass.addIf(this.bordered,"table-bordered");
         tableClass.addIf(this.responsiveness!=null,"table",this.responsiveness);
-        tableClass.addTo(this.table);
+        tableClass.applyTo(this.table);
         
         div div=new div();
         
@@ -95,7 +95,7 @@ public class Table extends Element
             ClassBuilder divClass=new ClassBuilder("class");
             divClass.addFragments("responsive");
             divClass.addFragments(this.tableResponsiveness.toString());
-            divClass.addTo(div);
+            divClass.applyTo(div);
         }
         div.addInner(this.table);
         composer.render(div);

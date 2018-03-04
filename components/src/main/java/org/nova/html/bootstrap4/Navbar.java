@@ -73,7 +73,7 @@ public class Navbar extends Element
         navClass.addIf(this.responsiveness!=null,"navbar-expand",this.responsiveness);
         navClass.add(this.backgroundColor);
         navClass.add(this.color);
-        navClass.addTo(this.nav);
+        navClass.applyTo(this.nav);
 
         div top=new div().addInner(this.nav);
         composer.render(top);

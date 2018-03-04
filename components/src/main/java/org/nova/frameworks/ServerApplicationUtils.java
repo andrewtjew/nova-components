@@ -1,6 +1,7 @@
 package org.nova.frameworks;
 
 import org.apache.http.client.HttpClient;
+import org.nova.concurrent.TimerScheduler;
 import org.nova.http.client.HttpClientConfiguration;
 import org.nova.http.client.HttpClientFactory;
 import org.nova.http.client.JSONClient;
@@ -16,6 +17,8 @@ public class ServerApplicationUtils
         public String endPoint;
         public String clusterName;
         public HttpClientConfiguration httpClientConfiguration;
+        public long reconnectWaitMs=0;
+        public long idleConnectionTimeoutMs=0;
     }
     
     
@@ -39,6 +42,6 @@ public class ServerApplicationUtils
         }
 
         
-        return new JSONClient(application.getTraceManager(),application.getLogger(),configuration.endPoint,client);
+        return new JSONClient(application.getTraceManager(),application.getLogger(),application.getTimerScheduler(),configuration.idleConnectionTimeoutMs,configuration.reconnectWaitMs,configuration.endPoint,client);
     }
 }

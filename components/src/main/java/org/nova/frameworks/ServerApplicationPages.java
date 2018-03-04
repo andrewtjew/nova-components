@@ -269,7 +269,9 @@ public class ServerApplicationPages
         menuBar.add("/operator/tracing/sampleAndResetLast","Tracing","Sample and Reset Last Traces");
         menuBar.add("/operator/tracing/sampleLastTraceBuffer","Tracing","Sample Last Trace Buffer");
         menuBar.add("/operator/tracing/lastTraces","Tracing","Last Traces");
-        menuBar.add("/operator/tracing/lastExceptions","Tracing","Last Traces with Exceptions");
+        menuBar.add("/operator/tracing/lastExceptions","Tracing","Last Exception Traces");
+        menuBar.add("/operator/tracing/lastSecondaryExceptions","Tracing","Last Secondary Exception Traces");
+        menuBar.add("/operator/tracing/secondaryCategories","Tracing","Set Secondary Categories");
         menuBar.addSeparator("Tracing");
         menuBar.add("/operator/tracing/sampleAll","Tracing","Sample All Trace Categories");
         menuBar.addSeparator("Tracing");
@@ -1063,6 +1065,64 @@ public class ServerApplicationPages
         }
     }
     
+    @GET
+    @Path("/operator/tracing/secondaryCategories")
+    public Element secondaryCategories() throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Set Secondary Categories");
+        TraceManager traceManager=this.serverApplication.getTraceManager();
+        String legendText="Select categories as secondary";
+                
+        HashSet<String> watches=new HashSet<>();
+        for (String category:traceManager.getSecondaryCategories())
+        {
+            watches.add(category);
+        }
+
+        form_post form=page.content().returnAddInner(new form_post()).action("/operator/tracing/secondaryCategories/set");
+        fieldset fieldset=form.returnAddInner(new fieldset());
+        fieldset.addInner(new legend().addInner(legendText));
+        DataTable table=fieldset.returnAddInner(new OperatorTable(page.head()));
+        Row row=new Row();
+        row.add("");
+        addTraceSampleColumns(row);
+        row.addInner(new td());
+        table.setHeadRow(row);
+
+        Map<String, TraceNode> roots = this.serverApplication.getTraceManager().getTraceTreeRootsSnapshot();
+        HashMap<String, TraceSample> categorySamples = buildCategorySamples(roots);
+        
+        SlowTraceSampleDetector detector=new SlowTraceSampleDetector(categorySamples.size());
+        for (TraceSample sample:categorySamples.values())
+        {
+            detector.update(sample);
+        }
+
+        for (Entry<String, TraceSample> entry:categorySamples.entrySet())
+        {
+            TraceSample sample=entry.getValue();
+            row=new Row();
+            row.add(new input_checkbox().checked(watches.contains(entry.getKey())).name("~"+entry.getKey()));
+            row.add(new TitleText(entry.getKey(),80));
+            writeTraceSample(detector,row,sample);
+            String location=new PathAndQueryBuilder("/operator/tracing/sampleAll/category").addQuery("category", entry.getKey()).toString();
+            row.addDetailButton(location);
+            table.addBodyRow(row);
+        }
+        
+        fieldset.returnAddInner(new hr());
+        fieldset.returnAddInner(new p()).addInner(new input_checkbox().name("change")).addInner("&nbsp;").addInner(new input_submit().value("Set")).addInner("&nbsp;&nbsp;&nbsp;").addInner(new input_reset());
+
+        if (traceManager.isEnableLastTraceWatching())
+        {
+            form_post disableForm=page.content().returnAddInner(new form_post()).action("/operator/tracing/watchList/disable");
+            fieldset disableFieldset=disableForm.returnAddInner(new fieldset());
+            disableFieldset.addInner(new legend().addInner("Disable trace Watching"));
+            disableFieldset.returnAddInner(new p()).addInner(new input_checkbox().name("change")).addInner("&nbsp;").addInner(new input_submit().value("Disable"));
+        }        
+        return page;
+    }
+
     
     @GET
     @Path("/operator/tracing/watchList")
@@ -1080,33 +1140,6 @@ public class ServerApplicationPages
             legendText="Select categories for watching - Trace watching is currently disabled.";
         }
                 
-        
-        /*
-        Map<String,TraceNode> roots=traceManager.getTraceGraphRootsSnapshot();
-        HashMap<String,Boolean> categories=new HashMap<>();
-        for (Entry<String, TraceNode> entry:roots.entrySet())
-        {
-            buildCategories(categories,entry);
-        }
-        for (String category:traceManager.getWatchList())
-        {
-            categories.put(category, true);
-        }
-        form_post form=page.content().returnAddInner(new form_post()).action("/operator/tracing/watchList/set");
-        fieldset fieldset=form.returnAddInner(new fieldset());
-        fieldset.addInner(new legend().addInner(legendText));
-        DataTable table=fieldset.returnAddInner(new DataTable(page.head()));
-        table.setHeadRowItems("","Category");
-        table.lengthMenu(-1,20,40,60);
-        for (Entry<String, Boolean> entry:categories.entrySet())
-        {
-            Row row=new Row();
-            row.addInner(new td().style("width:2em;").addInner(new input_checkbox().checked(entry.getValue()).name("~"+entry.getKey())));
-            row.add(new TitleText(entry.getKey(),100));
-            table.addBodyRow(row);
-        }
-        */
-
         HashSet<String> watches=new HashSet<>();
         for (String category:traceManager.getWatchList())
         {
@@ -2091,6 +2124,15 @@ public class ServerApplicationPages
     }
 
     @GET
+    @Path("/operator/tracing/lastSecondaryExceptions")
+    public Element lastSecondaryExeptions() throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Last Secondary Exception Traces");
+        writeTraces(page, this.serverApplication.getTraceManager().getLastSecondaryExceptionTraces(),"/operator/traces/clear/lastSecondaryExceptions");
+        return page;
+    }
+
+    @GET
     @Path("/operator/tracing/currentTraces")
     public Element activeTraces() throws Throwable
     {
@@ -2142,6 +2184,20 @@ public class ServerApplicationPages
         this.serverApplication.getTraceManager().clearLastExceptionTraces();
         BasicPage page=new BasicPage();
         page.body().returnAddInner(new script()).addInner("window.location='/operator/tracing/lastExceptions';");
+        return page;
+    }
+    
+    @GET
+    @Path("/operator/traces/clear/lastSecondaryExceptions")
+    public Element clearLastSecondaryExceptions(@ParamName("check") boolean check) throws Throwable
+    {
+        if (check==false)
+        {
+            return lastTraces();
+        }
+        this.serverApplication.getTraceManager().clearLastSecondaryExceptionTraces();
+        BasicPage page=new BasicPage();
+        page.body().returnAddInner(new script()).addInner("window.location='/operator/tracing/lastSecondaryExceptions';");
         return page;
     }
     

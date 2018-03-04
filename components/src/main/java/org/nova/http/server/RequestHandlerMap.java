@@ -822,6 +822,7 @@ class RequestHandlerMap
 	    if (fullPath.endsWith("/#"))
 	    {
 	        fullPath=fullPath.substring(0, fullPath.length()-1)+method.getName();
+	 //       System.out.println("METHOD:"+fullPath);
 	    }
         RequestHandler requestHandler = new RequestHandler(object, method, httpMethod, fullPath, handlerFilters.toArray(new Filter[handlerFilters.size()]),
                 parameterInfos.toArray(new ParameterInfo[parameterInfos.size()]), contentDecoderMap, contentEncoderMap, contentReaderMap, contentWriterMap,

@@ -6,7 +6,8 @@ public class TraceManagerConfiguration
     public int lastTraceBufferSize=2000;
     public int watchListLastTraceBufferSize=2000;
 	public boolean enableLastTraceWatching=false;
-	public int lastExceptionBufferSize=2000;
+    public int lastExceptionBufferSize=2000;
+    public int lastSecondaryExceptionBufferSize=1000;
 	public boolean logTraces=true;
 	public boolean logExceptionTraces=true;
     public boolean captureCreateStackTrace=false;

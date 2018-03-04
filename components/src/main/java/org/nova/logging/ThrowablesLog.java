@@ -2,8 +2,8 @@ package org.nova.logging;
 
 public class ThrowablesLog
 {
-    private InstantThrowable first;
-    private InstantThrowable last; 
+    private ThrowableEvent first;
+    private ThrowableEvent last; 
     
     public ThrowablesLog()
     {
@@ -13,7 +13,7 @@ public class ThrowablesLog
     {
         synchronized(this)
         {
-            last=new InstantThrowable(throwable);
+            last=new ThrowableEvent(throwable);
             if (first==null)
             {
                 first=last;
@@ -21,7 +21,7 @@ public class ThrowablesLog
         }
     }
 
-    public InstantThrowable getFirst()
+    public ThrowableEvent getFirst()
     {
         synchronized(this)
         {
@@ -29,7 +29,7 @@ public class ThrowablesLog
         }
     }
 
-    public InstantThrowable getLast()
+    public ThrowableEvent getLast()
     {
         synchronized(this)
         {

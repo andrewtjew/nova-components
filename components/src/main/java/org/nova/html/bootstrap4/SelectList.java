@@ -79,7 +79,7 @@ public class SelectList extends Element
         {
             cb.add("border",this.borderSize);
         }
-        cb.addTo(this.select);
+        cb.applyTo(this.select);
         
         composer.render(this.div);
     }

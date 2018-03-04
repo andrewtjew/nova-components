@@ -22,7 +22,10 @@ public class TraceManager
 	final private HashMap<Long,Trace> currentTraces;
     final private Object managerLock=new Object();
     final private HashMap<String,TraceNode> traceRoots;
-	final private TraceBuffer lastExceptions;
+    final private TraceBuffer lastExceptions;
+    final private TraceBuffer lastSecondaryExceptions;
+    final private HashSet<String> secondaryCategories;
+    
     final private TraceBuffer lastTraces;
     final private TraceBuffer watchTraces;
 	final private HashSet<String> watchCategories;
@@ -56,6 +59,8 @@ public class TraceManager
 	
 	public TraceManager(Logger logger,TraceManagerConfiguration configuration)
 	{
+        this.secondaryCategories=new HashSet<>();
+        this.lastSecondaryExceptions=new TraceBuffer(configuration.lastSecondaryExceptionBufferSize);
 		this.currentTraces=new HashMap<>();
 		this.lastTraceMeters=new HashMap<>();
 		this.traceRoots=new HashMap<>();
@@ -154,7 +159,14 @@ public class TraceManager
 		
 			if (trace.getThrowable()!=null)
 			{
-				this.lastExceptions.add(trace);
+			    if ((this.secondaryCategories.size()>0)&&this.secondaryCategories.contains(trace.getCategory()))
+			    {
+			        this.lastSecondaryExceptions.add(trace);
+			    }
+			    else
+			    {
+			        this.lastExceptions.add(trace);
+			    }
 			}
     		log=logTraces||logExceptionTraces||((logTracesWithGreaterDuration>=0)&&(trace.getDurationNs()/10000000>=logTracesWithGreaterDuration));
 		}
@@ -247,13 +259,19 @@ public class TraceManager
 	{
         synchronized (this.managerLock)
 	    {
-	        if (this.watchCategories==null)
-	        {
-	            return new String[0];
-	        }
 	        return this.watchCategories.toArray(new String[this.watchCategories.size()]);
 	    }
 	}
+
+	public String[] getSecondaryCategories()
+    {
+        synchronized (this.managerLock)
+        {
+            return this.secondaryCategories.toArray(new String[this.secondaryCategories.size()]);
+        }
+    }
+	
+	
 	public boolean isCaptureCreateStackTrace()
 	{
         synchronized (this.managerLock)
@@ -359,6 +377,14 @@ public class TraceManager
 			return this.lastExceptions.getSnapshotAsArray();
 		}
 	}
+
+	public Trace[] getLastSecondaryExceptionTraces()
+    {
+        synchronized (this.managerLock)
+        {
+            return this.lastSecondaryExceptions.getSnapshotAsArray();
+        }
+    }
 	
 	public Trace[] getLastTraces()
 	{
@@ -381,6 +407,14 @@ public class TraceManager
         synchronized (this.managerLock)
         {
             this.lastExceptions.clear();
+        }
+    }
+    
+    public void clearLastSecondaryExceptionTraces()
+    {
+        synchronized (this.managerLock)
+        {
+            this.lastSecondaryExceptions.clear();
         }
     }
     
@@ -522,6 +556,12 @@ public class TraceManager
         {
             return this.currentTracesOverflowCount;
         }
+    }
+    
+    public void generateTrace(Trace parent,String category)
+    {
+        Trace trace=new Trace(this, parent, category);
+        trace.close();
     }
     
 }

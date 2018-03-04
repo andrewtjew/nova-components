@@ -24,7 +24,7 @@ public class Container extends Element
     {
 	    div div=new div();
 	    ClassBuilder class_=this.fluid?new ClassBuilder("container","fluid"):new ClassBuilder("container");
-	    class_.addTo(div);
+	    class_.applyTo(div);
 	    div.addInner(this.content);
         composer.render(div);
     }

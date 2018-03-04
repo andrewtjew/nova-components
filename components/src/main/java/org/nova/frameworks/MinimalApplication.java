@@ -1,7 +1,7 @@
 package org.nova.frameworks;
 
 import org.nova.logging.Logger;
-import org.nova.logging.Loggers;
+import org.nova.logging.LogUtils;
 import org.nova.logging.SourceQueueLogger;
 import org.nova.metrics.SourceEventEventBoard;
 import org.nova.tracing.TraceManager;
@@ -14,7 +14,7 @@ public class MinimalApplication
 	
 	public MinimalApplication() throws Throwable
 	{
-		this.logger=Loggers.createConsoleLogger();
+		this.logger=LogUtils.createConsoleLogger();
 		this.traceManager=new TraceManager(this.logger);
 		this.statusBoard=new SourceEventEventBoard();
 	}

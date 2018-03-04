@@ -180,14 +180,14 @@ public class JSONFormatter extends Formatter
     }
 
     @Override
-	public String formatBegin() throws IOException
+	public String beginDocument() throws IOException
 	{
         this.commaNeededBetweenEntries=false;
         return "[\r\n";
 	}
 
 	@Override
-	public String formatEnd() throws IOException
+	public String endDocument() throws IOException
 	{
         return "\r\n]";
 	}
