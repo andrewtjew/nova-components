@@ -7,9 +7,6 @@ import java.util.Map.Entry;
 
 import org.nova.metrics.LongValueMeter;
 import org.nova.metrics.LongValueSample;
-import org.nova.metrics.RateMeter;
-
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class RequestHandler

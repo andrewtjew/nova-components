@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.geneva.lexing3.Lexeme;
 import com.geneva.parsing.Namespace;
-import com.geneva.parsing.Node;
 
 public class ClassMember extends Member
 

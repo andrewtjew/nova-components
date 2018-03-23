@@ -4,7 +4,6 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map.Entry;
 
-import org.nova.core.Utils;
 import org.nova.http.server.ContentWriter;
 import org.nova.http.server.Context;
 

@@ -1,13 +1,8 @@
 package org.nova.http.server;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.nova.http.Header;
 import org.nova.tracing.Trace;
 
 public class RequestLogEntry

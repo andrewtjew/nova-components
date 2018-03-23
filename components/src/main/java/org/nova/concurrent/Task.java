@@ -5,7 +5,7 @@ import org.nova.tracing.Trace;
 import org.nova.tracing.TraceCallable;
 import org.nova.tracing.TraceManager;
 
-public class FutureTask<RESULT>
+public class Task<RESULT>
 {
 	private TaskStatus status;
 	private RESULT result;
@@ -17,7 +17,7 @@ public class FutureTask<RESULT>
 	final private Logger logger;
 	final private TraceManager traceManager;
 	
-	public FutureTask(TraceManager traceManager,Trace scheduleTrace,String traceCategory,TraceCallable<RESULT> callable,int index,Logger logger)
+	public Task(TraceManager traceManager,Trace scheduleTrace,String traceCategory,TraceCallable<RESULT> callable,int index,Logger logger)
 	{
 	    this.traceManager=traceManager;
 		this.traceCategory=traceCategory;

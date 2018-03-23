@@ -1,7 +1,5 @@
 package org.nova.html;
 
-import org.nova.frameworks.InteropTarget;
-
 public class Selection
 {
     private HtmlWriter writer;

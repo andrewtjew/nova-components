@@ -1,8 +1,6 @@
 package org.nova.html.widgets;
 
-import org.nova.html.enums.link_rel;
 import org.nova.html.tags.div;
-import org.nova.html.tags.link;
 import org.nova.html.tags.style;
 
 public class ThreeColumnBannerPage extends BasicPage

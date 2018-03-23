@@ -2,7 +2,6 @@ package com.geneva.parsing.statement;
 
 import java.util.List;
 import com.geneva.parsing.NameTypeExpression;
-import com.geneva.parsing.Node;
 
 public class UsingStatement extends MultiStateme
 {

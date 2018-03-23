@@ -3,7 +3,6 @@ package org.nova.logging;
 import org.nova.flow.SourceQueue;
 import org.nova.flow.SourceQueueConfiguration;
 import org.nova.logging.LogEntry;
-import org.nova.logging.Logger;
 
 public class LogUtils
 {

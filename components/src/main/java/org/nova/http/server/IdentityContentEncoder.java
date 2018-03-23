@@ -32,12 +32,12 @@ public class IdentityContentEncoder extends ContentEncoder
 		@Override
 		public long getUncompressedContentSize() throws Throwable
 		{
-			return outputStream.getContentSize();
+			return outputStream.getBytesStreamed();
 		}
 		@Override
 		public long getCompressedContentSize() throws Throwable
 		{
-			return outputStream.getContentSize();
+			return outputStream.getBytesStreamed();
 		}
 		
 	}

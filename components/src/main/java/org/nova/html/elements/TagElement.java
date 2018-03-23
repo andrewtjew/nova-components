@@ -1,13 +1,5 @@
 package org.nova.html.elements;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.nova.html.widgets.Text;
-
 public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElement<ELEMENT>
 {
     final private StringBuilder sb;

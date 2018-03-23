@@ -3,9 +3,6 @@ package org.nova.html.tags;
 
 import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.enums.crossorigin;
-import org.nova.html.enums.area_shape;
-import org.nova.html.enums.sandbox;
-import org.nova.html.enums.target;
 
 public class img extends GlobalEventTagElement<img>
 {

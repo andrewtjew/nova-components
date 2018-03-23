@@ -1,14 +1,5 @@
 package org.nova.json;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -16,15 +7,7 @@ import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-
-import org.nova.core.Utils;
-import org.nova.json.Lexer.Reader;
-import org.nova.json.Lexer.StreamReader;
-import org.nova.json.Lexer.StringReader;
-import org.nova.json.ObjectMapper.FieldWriter;
-import org.nova.json.ObjectMapper.Writer;
 
 public class ObjectMapper2
 {
@@ -718,6 +701,7 @@ public class ObjectMapper2
     }
     static class EnumReader extends Reader
     {
+        @SuppressWarnings("unchecked")
         @Override
         Object read(Parser parser,Class<?> type) throws Throwable
         {

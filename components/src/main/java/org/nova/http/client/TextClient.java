@@ -1,21 +1,15 @@
 package org.nova.http.client;
 
-import java.io.InputStream;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.nova.core.Utils;
 import org.nova.http.Header;
-import org.nova.json.ObjectMapper;
 import org.nova.logging.Logger;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;

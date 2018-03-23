@@ -1,7 +1,6 @@
 package org.nova.html.tags;
 
 import org.nova.html.elements.GlobalEventTagElement;
-import org.nova.html.enums.preload;
 
 public class option extends GlobalEventTagElement<option>
 {

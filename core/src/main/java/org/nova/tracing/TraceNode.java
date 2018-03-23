@@ -2,8 +2,6 @@ package org.nova.tracing;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import org.nova.metrics.TraceMeter;
 import org.nova.metrics.TraceSample;
 

@@ -1,10 +1,7 @@
 package org.nova.html.elements;
 
-import org.nova.html.enums.enctype;
 import org.nova.html.enums.autocomplete;
 import org.nova.html.enums.target;
-
-import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
 
 public class FormElement<ELEMENT extends FormElement<ELEMENT>> extends GlobalEventTagElement<ELEMENT>
 {

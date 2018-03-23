@@ -6,8 +6,6 @@ import java.io.OutputStream;
 import org.nova.logging.Formatter;
 import org.nova.logging.LogDirectoryManager;
 import org.nova.metrics.RateMeter;
-import org.nova.test.Testing;
-
 import net.jpountz.lz4.LZ4BlockOutputStream;
 
 public class BufferedLZ4FileWriter extends OutputStreamWriter

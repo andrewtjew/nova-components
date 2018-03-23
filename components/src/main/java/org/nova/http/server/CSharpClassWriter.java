@@ -1,24 +1,16 @@
 package org.nova.http.server;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-
-import javax.xml.stream.events.Characters;
 
 import org.nova.annotations.Description;
 import org.nova.core.Utils;
 import org.nova.frameworks.InteropTarget;
-import org.nova.json.ObjectExample;
-import org.nova.json.SchemaWriter;
 
 public class CSharpClassWriter
 {

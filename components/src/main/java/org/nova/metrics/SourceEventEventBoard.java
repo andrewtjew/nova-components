@@ -3,10 +3,6 @@ package org.nova.metrics;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.nova.logging.Item;
-import org.nova.logging.StatusEntry;
-import org.nova.metrics.SourceEvent;
-
 public class SourceEventEventBoard
 {
     final private HashMap<String,RecentSourceEventMeter> map;

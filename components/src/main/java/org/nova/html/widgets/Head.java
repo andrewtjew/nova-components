@@ -1,11 +1,7 @@
 package org.nova.html.widgets;
 
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 
-import org.nova.collections.FileCache;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.enums.link_rel;
@@ -13,10 +9,8 @@ import org.nova.html.tags.base;
 import org.nova.html.tags.head;
 import org.nova.html.tags.link;
 import org.nova.html.tags.meta;
-import org.nova.html.tags.title;
 import org.nova.html.tags.style;
 import org.nova.html.tags.script;
-import org.nova.html.tags.noscript;
 
 public class Head extends Element
 {
@@ -125,5 +119,8 @@ public class Head extends Element
         
     }
     
-    
+    public head head()
+    {
+        return this.head();
+    }
 }

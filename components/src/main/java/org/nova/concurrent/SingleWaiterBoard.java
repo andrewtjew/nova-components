@@ -2,7 +2,6 @@ package org.nova.concurrent;
 
 import java.util.HashMap;
 
-import org.nova.metrics.CountMeter;
 import org.nova.metrics.LevelMeter;
 
 public class SingleWaiterBoard

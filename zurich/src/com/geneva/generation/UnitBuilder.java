@@ -1,16 +1,11 @@
 package com.geneva.generation;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import javax.lang.model.type.PrimitiveType;
-
 import com.geneva.debug.Debug;
-import com.geneva.parsing.MutableNameType;
 import com.geneva.parsing.NameType;
 import com.geneva.parsing.Namespace;
 import com.geneva.parsing.Unit;

@@ -1,6 +1,5 @@
 package org.nova.core;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MultiException extends Exception

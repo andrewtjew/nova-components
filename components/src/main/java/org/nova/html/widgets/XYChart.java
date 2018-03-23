@@ -1,13 +1,8 @@
 package org.nova.html.widgets;
 
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import javax.xml.stream.events.Characters;
-
 import org.nova.html.elements.Composer;
-import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
 
 public class XYChart extends InnerElement<XYChart>

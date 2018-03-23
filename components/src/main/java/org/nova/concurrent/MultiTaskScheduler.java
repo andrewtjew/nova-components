@@ -10,38 +10,32 @@ import org.nova.tracing.TraceCallable;
 import org.nova.tracing.TraceManager;
 import org.nova.tracing.TraceRunnable;
 
-public class FutureScheduler
+public class MultiTaskScheduler
 {
 	private final ExecutorService executorService;
 	private final TraceManager traceManager;
 	private long number;
-	private final HashMap<Long,Future<?>> futures;
+	private final HashMap<Long,Progress<?>> futures;
 	private final Logger logger;
 	
-	public FutureScheduler(TraceManager traceManager,ExecutorService executorService,Logger logger)
+	public MultiTaskScheduler(TraceManager traceManager,ExecutorService executorService,Logger logger)
 	{
 		this.traceManager=traceManager;
 		this.executorService=executorService;
 		this.futures=new HashMap<>();
 		this.logger=logger;
 	}
-    public FutureScheduler(TraceManager traceManager,int maximumThreads,Logger logger)
+    public MultiTaskScheduler(TraceManager traceManager,int maximumThreads,Logger logger)
     {
         this(traceManager,Executors.newFixedThreadPool(maximumThreads),logger);
     }
-    /*
-    public FutureScheduler(TraceManager traceManager,int maximumThreads)
-    {
-        this(traceManager,Executors.newFixedThreadPool(maximumThreads),null);
-    }
-    */
 
 	class Runner implements java.lang.Runnable
 	{
-		final Future<?> future;
-		final FutureTask<?> task;
+		final Progress<?> future;
+		final Task<?> task;
 
-		Runner(Future<?> futures,FutureTask<?> task)
+		Runner(Progress<?> futures,Task<?> task)
 		{
 			this.task=task;
 			this.future=futures;
@@ -56,7 +50,7 @@ public class FutureScheduler
 		}
 	}
 	
-	private void complete(Future<?> futures)
+	private void complete(Progress<?> futures)
 	{
 		synchronized(this)
 		{
@@ -67,44 +61,44 @@ public class FutureScheduler
 		}		
 	}
 	
-    public <RESULT> Future<RESULT> schedule(Trace parent,String traceCategory,TraceCallable<RESULT>...callables)
+    public <RESULT> Progress<RESULT> schedule(Trace parent,String traceCategory,TraceCallable<RESULT>...callables)
 	{
-		Future<RESULT> future=null;
+		Progress<RESULT> future=null;
 		synchronized(this)
 		{
 			long number=this.number++;
-			future=new Future<RESULT>(this.traceManager,parent,traceCategory,number,callables,this.logger);
+			future=new Progress<RESULT>(this.traceManager,parent,traceCategory,number,callables,this.logger);
 			this.futures.put(number, future);
 		}
 		for (int i=0;i<callables.length;i++)
 		{
-			this.executorService.submit(new Runner(future, future.getCallableTask(i)));
+			this.executorService.submit(new Runner(future, future.getTask(i)));
 		}
 		return future;
 	}
 
-	public Future<Void> schedule(Trace parent,String traceCategory,TraceRunnable...runnables)
+	public Progress<Void> schedule(Trace parent,String traceCategory,TraceRunnable...runnables)
     {
-        Future<Void> future=null;
+        Progress<Void> future=null;
         synchronized(this)
         {
             long number=this.number++;
-            future=new Future<Void>(this.traceManager,parent,traceCategory,number,runnables,this.logger);
+            future=new Progress<Void>(this.traceManager,parent,traceCategory,number,runnables,this.logger);
             this.futures.put(number, future);
         }
         for (int i=0;i<runnables.length;i++)
         {
-            this.executorService.submit(new Runner(future, future.getCallableTask(i)));
+            this.executorService.submit(new Runner(future, future.getTask(i)));
         }
         return future;
     }
 
 
-	public Future<?>[] getFutureSnapshot()
+	public Progress<?>[] getProgressSnapshot()
 	{
 		synchronized(this)
 		{
-			return this.futures.values().toArray(new Future[this.futures.size()]);
+			return this.futures.values().toArray(new Progress[this.futures.size()]);
 		}
 	}
 	

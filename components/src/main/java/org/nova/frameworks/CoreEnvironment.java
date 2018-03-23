@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.HashMap;
 
-import org.nova.concurrent.FutureScheduler;
+import org.nova.concurrent.MultiTaskScheduler;
 import org.nova.concurrent.TimerScheduler;
 import org.nova.configuration.Configuration;
 import org.nova.core.Utils;
@@ -31,7 +31,7 @@ import org.nova.tracing.TraceManager;
 public class CoreEnvironment
 {
 	final private TimerScheduler timerScheduler;
-	final private FutureScheduler futureScheduler;
+	final private MultiTaskScheduler multiTaskScheduler;
 	final private TraceManager traceManager;
 	final private Configuration configuration;
 	final private MeterStore meterStore;
@@ -77,7 +77,7 @@ public class CoreEnvironment
         this.logger=getLogger("application");
 	
 		this.traceManager=new TraceManager(traceLogger);
-		this.futureScheduler=new FutureScheduler(traceManager,configuration.getIntegerValue("Environment.FutureScheduler.threads",1000),this.logger);
+		this.multiTaskScheduler=new MultiTaskScheduler(traceManager,configuration.getIntegerValue("Environment.FutureScheduler.threads",1000),this.logger);
 		this.timerScheduler=new TimerScheduler(traceManager, this.getLogger());
 		this.timerScheduler.start();
 
@@ -161,9 +161,9 @@ public class CoreEnvironment
 	}
 	
 
-	public FutureScheduler getFutureScheduler()
+	public MultiTaskScheduler getMultiTaskScheduler()
 	{
-		return futureScheduler;
+		return this.multiTaskScheduler;
 	}
 
 	public TraceManager getTraceManager()

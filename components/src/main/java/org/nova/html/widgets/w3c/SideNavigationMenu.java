@@ -1,16 +1,11 @@
 package org.nova.html.widgets.w3c;
 
-import java.io.OutputStream;
-
-import org.nova.html.elements.Element;
 import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.elements.TagElement;
 import org.nova.html.enums.link_rel;
 import org.nova.html.tags.a;
 import org.nova.html.tags.div;
 import org.nova.html.tags.link;
-import org.nova.html.tags.script;
-import org.nova.html.tags.span;
 import org.nova.html.widgets.Head;
 
 public class SideNavigationMenu extends div

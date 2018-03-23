@@ -1,7 +1,6 @@
 package org.nova.sqldb;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;

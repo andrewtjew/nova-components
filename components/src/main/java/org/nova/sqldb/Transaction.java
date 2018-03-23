@@ -1,8 +1,6 @@
 package org.nova.sqldb;
 
 import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.nova.core.MultiException;
 import org.nova.tracing.Trace;
 

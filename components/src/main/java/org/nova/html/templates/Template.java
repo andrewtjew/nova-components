@@ -1,10 +1,5 @@
 package org.nova.html.templates;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Map.Entry;
-
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.templates.ElementMap;

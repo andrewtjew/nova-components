@@ -1,7 +1,5 @@
 package org.nova.tracing;
 
-import org.nova.metrics.TraceMeter;
-
 public class TraceContext
 {
     final long number;

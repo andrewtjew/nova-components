@@ -1,7 +1,5 @@
 package com.geneva.lexing3;
 
-import java.util.HashSet;
-
 import com.geneva.util.Source;
 
 public class GenevaLexer extends Lexer

@@ -1,11 +1,6 @@
 package org.nova.logging;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-
-import org.apache.commons.codec.Charsets;
 import org.nova.core.Utils;
 import org.nova.logging.Item;
 import org.nova.logging.LogEntry;

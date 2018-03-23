@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.nova.lexing.Lexeme;
 import org.nova.lexing.Token;
-import org.nova.parsing.expression.ExpressionNode;
-import org.nova.parsing.expression.ParseError;
 
 public class SectionParser
 {

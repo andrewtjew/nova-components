@@ -1,63 +1,81 @@
 package org.nova.html.widgets;
 
+import org.nova.html.elements.Composer;
+import org.nova.html.elements.Element;
+import org.nova.html.enums.link_rel;
+import org.nova.html.tags.link;
 import org.nova.html.tags.table;
-import org.nova.html.tags.thead;
-import org.nova.html.tags.tr;
 import org.nova.html.tags.tbody;
-import org.nova.html.tags.tfoot;
-import org.nova.html.tags.th;
 
-public class Table extends table
+public class Table extends Element
 {
-    final private thead thead;
-    final private tfoot tfoot;
+    final private table table;
     final private tbody tbody;
+    private TableHeader header;
+    private TableFooter footer;
     
     public Table()
     {
-        this.thead=returnAddInner(new thead()); 
-        this.tfoot=returnAddInner(new tfoot()); 
-        this.tbody=returnAddInner(new tbody()); 
-    }
-
-    public thead thead()
-    {
-        return thead;
-    }
-
-    public tfoot tfoot()
-    {
-        return tfoot;
-    }
-
-    public tbody tbody()
-    {
-        return tbody;
+        this.table=new table();
+        this.tbody=new tbody();
     }
     
-    public void setHeadRow(Row row)
+    public Table(Head head)
     {
-        this.thead.setInner(row);
+        this(head,"Table","/resources/html/widgets/Table");
     }
-    public void setHeadRowItems(Object...objects)
+    
+    public Table(Head head,String class_,String sourcePath)
     {
-        this.thead.addInner(new Row().add(objects));
+        this.table=new table();
+        this.tbody=new tbody();
+
+        this.table.class_(class_);
+        link link=new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+"/style.css");
+        if (head!=null)
+        {
+            head.add(class_,link);
+        }
+        else
+        {
+            this.table().addInner(link);
+        }
     }
-    public void setFootRow(Row row)
+    
+    public table table()
     {
-        this.tfoot.setInner(row);
+        return this.table;
     }
-    public void setFootRowItems(Object...objects)
+    
+    public tbody tbody()
     {
-        this.tfoot.addInner(new Row().add(objects));
+        return this.tbody;
     }
-    public void addBodyRow(Row row)
+    
+    public void setHeader(TableHeader header)
+    {
+        this.header=header;
+    }
+    public void setHeaderItems(Object...objects)
+    {
+        this.header=new TableHeader().add(objects);
+    }
+    public void addRow(TableRow row)
     {
         this.tbody.addInner(row);
     }
-    public void addBodyRowItems(Object...objects)
-    {
-        this.tbody.addInner(new Row().add(objects));
-    }
     
+    public void addRowItems(Object...objects)
+    {
+        this.tbody.addInner(new TableRow().add(objects));
+    }
+
+    @Override
+    public void compose(Composer composer) throws Throwable
+    {
+        this.table.addInner(this.header);
+        this.table.addInner(this.tbody);
+        this.table.addInner(this.footer);
+        composer.render(this.table);
+    }
 }

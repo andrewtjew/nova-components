@@ -1,8 +1,5 @@
 package org.nova.html;
 
-import java.util.ArrayList;
-import org.nova.core.Pair;
-
 public class TableList
 {
     static class Value

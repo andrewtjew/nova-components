@@ -5,26 +5,26 @@ import org.nova.tracing.Trace;
 import org.nova.tracing.TraceCallable;
 import org.nova.tracing.TraceManager;
 
-public class Future<RESULT>
+public class Progress<RESULT>
 {
-	final FutureTask<?>[] tasks;
+	final Task<?>[] tasks;
 	final private long number;
 	final private Trace trace;
     private int waiting;
     private int completed;
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-	Future(TraceManager traceManager,Trace parent,String traceCategory,long number,TraceCallable<?>[] executables,Logger logger)
+	Progress(TraceManager traceManager,Trace parent,String traceCategory,long number,TraceCallable<?>[] executables,Logger logger)
 	{
 		this.number=number;
 		this.waiting=executables.length;
 		
-		this.tasks=new FutureTask<?>[executables.length];
+		this.tasks=new Task<?>[executables.length];
 		
 		this.trace=new Trace(traceManager,parent,"scheduler@"+traceCategory,true);
 		for (int i=0;i<executables.length;i++)
 		{
-			this.tasks[i]=new FutureTask(traceManager,this.trace,"runner@"+traceCategory,executables[i],i,logger);
+			this.tasks[i]=new Task(traceManager,this.trace,"runner@"+traceCategory,executables[i],i,logger);
 		}
 	}
 	
@@ -50,9 +50,9 @@ public class Future<RESULT>
 		}
 	}
 	@SuppressWarnings("unchecked")
-	public FutureTask<RESULT> getCallableTask(int index)
+	public Task<RESULT> getTask(int index)
 	{
-		return (FutureTask<RESULT>)this.tasks[index];
+		return (Task<RESULT>)this.tasks[index];
 	}
 
 	@SuppressWarnings("unchecked")

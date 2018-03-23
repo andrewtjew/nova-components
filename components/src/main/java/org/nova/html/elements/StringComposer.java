@@ -1,7 +1,5 @@
 package org.nova.html.elements;
 
-import java.io.OutputStream;
-
 public class StringComposer extends Composer
 {
     final private StringBuilder sb;

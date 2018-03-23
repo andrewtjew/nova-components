@@ -3,7 +3,6 @@ package com.geneva.parsing.type;
 import java.util.List;
 
 import com.geneva.parsing.MutableNameType;
-import com.geneva.parsing.NameType;
 
 public class FunctionType extends Type
 {

@@ -1,24 +1,13 @@
 package org.nova.frameworks;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import org.eclipse.jetty.server.Server;
 import org.nova.collections.FileCache;
 import org.nova.collections.FileCacheConfiguration;
-import org.nova.concurrent.FutureScheduler;
 import org.nova.concurrent.Synchronization;
-import org.nova.concurrent.TimerScheduler;
 import org.nova.configuration.Configuration;
 import org.nova.core.Utils;
-import org.nova.flow.SourceQueue;
 import org.nova.html.TypeMappings;
-import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.operator.AjaxQueryResultWriter;
 import org.nova.html.templates.Template;
@@ -28,30 +17,15 @@ import org.nova.http.server.JettyServerFactory;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
 import org.nova.http.server.HtmlContentWriter;
-import org.nova.http.server.HtmlContentWriter;
 import org.nova.http.server.HttpServer;
 import org.nova.http.server.HttpServerConfiguration;
 import org.nova.http.server.JSONContentReader;
 import org.nova.http.server.JSONContentWriter;
 import org.nova.http.server.JSONPatchContentReader;
-import org.nova.http.server.TextContentWriter;
-import org.nova.logging.Level;
-import org.nova.logging.LogDirectoryManager;
-import org.nova.logging.LogEntry;
-import org.nova.logging.Logger;
-import org.nova.logging.SourceQueueLogger;
-import org.nova.metrics.MeterStore;
-import org.nova.metrics.SourceEventEventBoard;
 import org.nova.operations.OperatorVariable;
 import org.nova.operations.OperatorVariableManager;
-import org.nova.operator.OperatorPages;
-import org.nova.security.SecureFileVault;
-import org.nova.security.UnsecureFileVault;
-import org.nova.security.UnsecureVault;
 import org.nova.security.Vault;
 import org.nova.tracing.Trace;
-import org.nova.tracing.TraceManager;
-
 import com.nova.disrupt.DisruptorManager;
 
 public abstract class ServerApplication extends CoreEnvironmentApplication
@@ -345,7 +319,6 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
     {
         this.template=OperatorPage.buildTemplate(this.menuBar,this.getName(),this.hostName); 
     }
-    
     
     public OperatorPage buildOperatorPage(String title) throws Throwable
     {

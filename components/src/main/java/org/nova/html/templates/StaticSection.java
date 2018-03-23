@@ -1,8 +1,5 @@
 package org.nova.html.templates;
 
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-
 import org.nova.html.elements.Composer;
 import org.nova.html.templates.ElementMap;
 import org.nova.html.templates.Section;

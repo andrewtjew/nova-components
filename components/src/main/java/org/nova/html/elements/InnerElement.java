@@ -1,10 +1,6 @@
 package org.nova.html.elements;
 
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-
-import javax.management.RuntimeErrorException;
 
 import org.nova.html.widgets.Text;
 

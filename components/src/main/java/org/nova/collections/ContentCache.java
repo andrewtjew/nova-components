@@ -3,7 +3,6 @@ package org.nova.collections;
 import java.util.HashMap;
 
 import org.nova.annotations.Description;
-import org.nova.core.Utils;
 import org.nova.metrics.CountMeter;
 import org.nova.tracing.Trace;
 

@@ -1,15 +1,8 @@
 package org.nova.html.templates;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
-
-import org.nova.collections.FileCache;
 import org.nova.concurrent.Lock;
 import org.nova.concurrent.LockManager;
-import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.StringComposer;
 import org.nova.html.templates.Parser;

@@ -1,22 +1,16 @@
 package org.nova.html.widgets;
 
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
-
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.enums.link_rel;
 import org.nova.html.tags.ul;
 import org.nova.html.tags.a;
-import org.nova.html.tags.div;
 import org.nova.html.tags.hr;
 import org.nova.html.tags.label;
 import org.nova.html.tags.li;
 import org.nova.html.tags.link;
 import org.nova.html.tags.span;
-import org.nova.html.tags.sub;
 
 public class MenuBar extends Element
 {

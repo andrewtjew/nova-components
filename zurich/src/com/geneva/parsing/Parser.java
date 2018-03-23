@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.geneva.debug.Debug;
 import com.geneva.debug.Output;
-import com.geneva.generation.Primitive;
 import com.geneva.lexing3.GenevaLexer;
 import com.geneva.lexing3.Lexeme;
 import com.geneva.lexing3.LexerResult;

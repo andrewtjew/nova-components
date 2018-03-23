@@ -6,7 +6,7 @@ import java.io.InputStream;
 public class SizeInputStream extends InputStream
 {
 	private final InputStream inputStream;
-	private long contentSize;
+	private long bytesStreamed;
 	
 	public SizeInputStream(InputStream inputStream)
 	{
@@ -17,7 +17,7 @@ public class SizeInputStream extends InputStream
 	public int read() throws IOException
 	{
 		int read=this.inputStream.read();
-		this.contentSize++;
+		this.bytesStreamed++;
 		return read;
 	}
     @Override
@@ -25,7 +25,7 @@ public class SizeInputStream extends InputStream
 		int read=this.inputStream.read(b,off,len);
 		if (read>0)
 		{
-		    this.contentSize+=read;
+		    this.bytesStreamed+=read;
 		}
 		return read;
     }
@@ -33,7 +33,7 @@ public class SizeInputStream extends InputStream
     public long skip(long n) throws IOException 
     {
     	long skipped=this.inputStream.skip(n);
-        this.contentSize+=skipped;
+        this.bytesStreamed+=skipped;
         return skipped;
     }
     @Override
@@ -62,9 +62,9 @@ public class SizeInputStream extends InputStream
     {
         return this.inputStream.markSupported();
     }
-    public long getContentSize()
+    public long getBytesStreamed()
     {
-    	return this.contentSize;
+    	return this.bytesStreamed;
     }
 
 }

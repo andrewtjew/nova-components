@@ -3,8 +3,6 @@ package org.nova.concurrent;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Timer;
-
 import org.nova.concurrent.TimerScheduler.Key;
 import org.nova.logging.Logger;
 import org.nova.tracing.Trace;

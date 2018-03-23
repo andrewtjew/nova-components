@@ -1,18 +1,11 @@
 package org.nova.html.widgets;
 
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-
-import org.nova.core.NameObject;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.elements.InnerElement;
 import org.nova.html.enums.link_rel;
 import org.nova.html.tags.link;
 import org.nova.html.tags.ul;
 import org.nova.html.tags.script;
-import org.nova.json.ObjectMapper;
 import org.nova.html.tags.div;
 
 //!!! Requires jquery

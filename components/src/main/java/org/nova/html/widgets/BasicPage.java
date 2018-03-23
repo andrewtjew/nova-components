@@ -1,14 +1,5 @@
 package org.nova.html.widgets;
 import org.nova.html.tags.html;
-import org.nova.html.tags.link;
-import org.nova.html.tags.meta;
-import org.nova.html.tags.head;
-
-import java.io.OutputStream;
-
-import org.nova.html.elements.Element;
-import org.nova.html.enums.link_rel;
-import org.nova.html.enums.name;
 import org.nova.html.tags.body;
 
 public class BasicPage extends Content

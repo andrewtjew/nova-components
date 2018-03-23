@@ -12,7 +12,6 @@ import org.nova.html.properties.font_weight;
 import org.nova.html.properties.text_align;
 import org.nova.html.properties.unit;
 import org.nova.html.tags.div;
-import org.nova.html.tags.span;
 import org.nova.html.widgets.Text;
 
 public class NameInputValueList extends div

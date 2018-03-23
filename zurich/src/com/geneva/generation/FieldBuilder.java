@@ -1,6 +1,5 @@
 package com.geneva.generation;
 
-import com.geneva.parsing.Unit;
 import com.geneva.parsing.member.FieldMember;
 
 public class FieldBuilder

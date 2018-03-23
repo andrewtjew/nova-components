@@ -2,9 +2,6 @@ package org.nova.net;
 
 import java.io.FileInputStream;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.KeyManager;
@@ -14,7 +11,6 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import org.nova.core.Utils;
-import org.nova.frameworks.ServerApplication;
 
 public class SocketUtils
 {

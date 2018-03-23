@@ -1,17 +1,6 @@
 package org.nova.html.widgets;
 
-import java.io.OutputStream;
-import java.util.ArrayList;
-
-import org.nova.html.elements.Element;
-import org.nova.html.elements.GlobalEventTagElement;
-import org.nova.html.elements.InnerElement;
-import org.nova.html.tags.a;
-import org.nova.html.tags.td;
-import org.nova.html.tags.tr;
-import org.nova.html.xtags.remove_button;
-import org.nova.html.xtags.more_button;
-
+/*
 public class Row extends GlobalEventTagElement<Row>
 {
     public Row()
@@ -87,7 +76,6 @@ public class Row extends GlobalEventTagElement<Row>
         td data=returnAddInner(new td());
         data.addInner(new remove_button().onclick(removeScript));
         return this;
-        
     }
     public Row addDetailButton(String detailLocation)
     {
@@ -95,5 +83,5 @@ public class Row extends GlobalEventTagElement<Row>
         data.addInner(new more_button(detailLocation));
         return this;
     }
-    
 }
+*/

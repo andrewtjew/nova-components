@@ -6,7 +6,7 @@ import java.io.OutputStream;
 public class SizeOutputStream extends OutputStream
 {
 	final private OutputStream outputStream;
-	private long contentSize;
+	private long bytesStreamed;
 	public SizeOutputStream(OutputStream outputStream)
 	{
 		this.outputStream=outputStream;
@@ -21,7 +21,7 @@ public class SizeOutputStream extends OutputStream
 	@Override
     public void write(byte b[], int off, int len) throws IOException 
 	{
-		this.contentSize+=len;
+		this.bytesStreamed+=len;
 		this.outputStream.write(b, off, len);
 	}
 	
@@ -36,9 +36,9 @@ public class SizeOutputStream extends OutputStream
 	{
 		this.outputStream.close();
 	}
-	public long getContentSize()
+	public long getBytesStreamed()
 	{
-		return this.contentSize;
+		return this.bytesStreamed;
 	}
 
 }

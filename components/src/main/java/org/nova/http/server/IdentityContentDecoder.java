@@ -31,12 +31,12 @@ public class IdentityContentDecoder extends ContentDecoder
 		@Override
 		public long getUncompressedContentSize() throws Throwable
 		{
-			return this.inputStream.getContentSize();
+			return this.inputStream.getBytesStreamed();
 		}
 		@Override
 		public long getCompressedContentSize() throws Throwable
 		{
-			return this.inputStream.getContentSize();
+			return this.inputStream.getBytesStreamed();
 		}
         @Override
         public int getContentLength() throws Throwable

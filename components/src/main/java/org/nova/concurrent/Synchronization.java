@@ -2,7 +2,6 @@ package org.nova.concurrent;
 
 import org.nova.core.NoThrowPredicate;
 import org.nova.core.Predicate;
-import org.nova.html.tags.pre;
 import org.nova.tracing.Trace;
 
 public class Synchronization

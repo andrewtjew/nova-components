@@ -2,7 +2,6 @@ package org.nova.sqldb;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.SQLType;
 import java.sql.Types;
 
 public class Param

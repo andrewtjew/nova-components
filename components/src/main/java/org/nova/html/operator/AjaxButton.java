@@ -1,14 +1,9 @@
 package org.nova.html.operator;
 
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import org.nova.core.Pair;
-import org.nova.html.Attribute;
 import org.nova.html.elements.Composer;
-import org.nova.html.elements.Element;
-import org.nova.html.elements.InnerElement;
 import org.nova.html.tags.button_button;
 import org.nova.html.tags.script;
 

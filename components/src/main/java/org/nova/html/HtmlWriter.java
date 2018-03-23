@@ -1,12 +1,5 @@
 package org.nova.html;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.jar.Attributes;
-
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 

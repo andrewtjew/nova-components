@@ -1,19 +1,11 @@
 package com.geneva.generation;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import com.geneva.parsing.MutableNameType;
-import com.geneva.parsing.NameType;
 import com.geneva.parsing.Unit;
 import com.geneva.parsing.member.ClassMember;
 import com.geneva.parsing.member.FieldMember;
 import com.geneva.parsing.member.Member;
-import com.geneva.parsing.type.RecordType;
-import com.geneva.parsing.type.SimpleType;
-import com.geneva.parsing.type.Type;
 
 public class ClassBuilder
 {

@@ -5,15 +5,12 @@ import java.util.ArrayList;
 import org.nova.core.NameValue;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.properties.BorderStyleRect;
 import org.nova.html.properties.Color;
 import org.nova.html.properties.Size;
 import org.nova.html.properties.Style;
 import org.nova.html.properties.border_style;
-import org.nova.html.properties.font_weight;
 import org.nova.html.properties.unit;
 import org.nova.html.tags.div;
-import org.nova.html.tags.span;
 
 public class NameValueList extends div
 {

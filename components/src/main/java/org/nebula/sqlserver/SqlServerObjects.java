@@ -1,7 +1,5 @@
 package org.nebula.sqlserver;
 
-import java.util.ArrayList;
-
 public class SqlServerObjects
 {
     final private Function[] functions; 

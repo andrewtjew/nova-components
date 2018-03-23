@@ -3,7 +3,6 @@ package org.nova.html.widgets;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
-import org.nova.html.elements.StringComposer;
 import org.nova.html.tags.div;
 import org.nova.html.templates.Template;
 

@@ -1,6 +1,5 @@
 package org.nova.frameworks;
 
-import org.nova.logging.Logger;
 import org.nova.logging.LogUtils;
 import org.nova.logging.SourceQueueLogger;
 import org.nova.metrics.SourceEventEventBoard;

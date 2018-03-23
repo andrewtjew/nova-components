@@ -2,7 +2,6 @@ package org.nova.logging;
 
 import java.util.ArrayList;
 
-import org.nova.metrics.CountMeter;
 import org.nova.tracing.Trace;
 
 public abstract class Logger

@@ -2,7 +2,6 @@ package com.nova.reflect;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.TreeMap;
 
 public class Fields

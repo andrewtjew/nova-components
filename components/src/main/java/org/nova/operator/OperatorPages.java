@@ -8,10 +8,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.nova.frameworks.OperatorPage;
 import org.nova.frameworks.ServerApplication;
 import org.nova.frameworks.ServerApplicationPages.Level2Panel;
@@ -24,13 +20,15 @@ import org.nova.html.operator.AjaxButton;
 import org.nova.html.operator.AjaxQueryResult;
 import org.nova.html.operator.AjaxQueryResultWriter;
 import org.nova.html.operator.SelectOptions;
+import org.nova.html.operator.TitleText;
 import org.nova.html.tags.div;
 import org.nova.html.tags.input_checkbox;
 import org.nova.html.tags.input_text;
 import org.nova.html.tags.p;
 import org.nova.html.widgets.MenuBar;
-import org.nova.html.widgets.Row;
-import org.nova.http.server.Response;
+import org.nova.html.widgets.TableHeader;
+import org.nova.html.widgets.TableRow;
+import org.nova.html.xtags.th_title;
 import org.nova.http.server.annotations.ContentWriters;
 import org.nova.http.server.annotations.DefaultValue;
 import org.nova.http.server.annotations.GET;
@@ -38,12 +36,9 @@ import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.PathParam;
 import org.nova.http.server.annotations.QueryParam;
 import org.nova.operations.OperatorVariable;
-import org.nova.operations.OperatorVariableManager;
 import org.nova.operations.Status;
 import org.nova.operations.ValidationResult;
 import org.nova.operations.VariableInstance;
-
-import com.google.common.util.concurrent.AtomicDouble;
 
 @ContentWriters(HtmlElementWriter.class)
 public class OperatorPages
@@ -82,13 +77,13 @@ public class OperatorPages
 			page.content().addInner(new p());
 			WideTable table=panel.returnAddInner(new WideTable(page.head()));
 			
-            table.setHeadRowItems("Name","Type","Validator","Default","Value","Modified","Description");
+            table.setHeaderItems("Name","Type","Validator","Default","Value","Modified","Description");
 
 			for (VariableInstance instance:instances)
 			{
                 Field field=instance.getField();
                 OperatorVariable variable=instance.getOperatorVariable();
-                Row row=new Row();
+                TableRow row=new TableRow();
 			    row.add(instance.getName());
 			    row.add(field.getType().getSimpleName());
 			    row.add(variable.validator().getSimpleName());
@@ -96,7 +91,7 @@ public class OperatorPages
 			    row.add(instance.getValue());
 			    row.add(instance.getModified()==0?"":formatDateTime(instance.getModified()));
 			    row.add(variable.description());
-			    table.addBodyRow(row);
+			    table.addRow(row);
 
 			}
 		}
@@ -121,18 +116,18 @@ public class OperatorPages
             page.content().addInner(new p());
             WideTable table=panel.returnAddInner(new WideTable(page.head()));
 
-            Row row=new Row();
-            row.add("Name");
-            row.add("Type");
-            row.add("Default");
-            row.add("Value");
-            row.addWithTitle("Min","Minimum");
-            row.addWithTitle("Max","Maximum");
-            row.addWithTitle("\u2205","Null String");
-            row.add("New Value");
-            row.add("Action");
-            row.add("Result");
-            table.setHeadRow(row);
+            TableHeader header=new TableHeader();
+            header.add("Name");
+            header.add("Type");
+            header.add("Default");
+            header.add("Value");
+            header.add(new th_title("Min","Minimum"));
+            header.add(new th_title("Max","Maximum"));
+            header.add(new th_title("\u2205","Null String"));
+            header.add("New Value");
+            header.add("Action");
+            header.add("Result");
+            table.setHeader(header);
             int textSize=10;
 
             for (VariableInstance instance:instances)
@@ -145,8 +140,8 @@ public class OperatorPages
                 String resultKey=(category+name+"Result").replace('.', '_');
                 String valueKey=(category+name+"Value").replace('.', '_');
 
-                row=new Row();
-                row.addWithTitle(name,variable.description());
+                TableRow row=new TableRow();
+                row.add(new TitleText(variable.description(),name));
                 row.add(type.getSimpleName());
                 row.add(instance.getDefaultValue());
                 row.add(instance.getValue());//,new Attribute("id",valueKey));
@@ -216,7 +211,7 @@ public class OperatorPages
                     row.add(button);
                 }
                 row.add(new div().id(resultKey));
-                table.addBodyRow(row);
+                table.addRow(row);
             }
 		}
 		

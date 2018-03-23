@@ -3,8 +3,6 @@ package org.nova.http.server;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.util.Enumeration;
-import java.util.HashMap;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 

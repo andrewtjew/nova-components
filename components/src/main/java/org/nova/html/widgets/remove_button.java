@@ -1,4 +1,4 @@
-package org.nova.html.xtags;
+package org.nova.html.widgets;
 
 import org.nova.html.tags.button_button;
 

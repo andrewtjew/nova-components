@@ -1,7 +1,5 @@
 package org.nova.html.widgets;
 
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import org.nova.core.NameObject;
@@ -145,23 +143,23 @@ public class DataTable extends Table
     
     public DataTable(Head head,String id)
     {
-        this(head,id,"display","/resources/html/widgets/DataTable","/datatables.css");
+        this(head,id,"display","/resources/html/widgets/DataTable");
     }
     
-    public DataTable(Head head,String id,String class_,String sourcePath,String cssFile)
+    public DataTable(Head head,String id,String class_,String sourcePath)
     {
         if (id==null)
         {
             id=Integer.toString(this.hashCode());
         }
-        id(id);
-        class_(class_);
-        style("width:100%;");
+        this.table().id(id);
+        this.table().class_(class_);
+        this.table().style("width:100%;");
         this.id=id;
         this.objects=new Objects(id);
-        this.addInner(new script().addInner(this.objects));
+        this.table().addInner(new script().addInner(this.objects));
         script script=new script().src(sourcePath+"/datatables.min.js");
-        link link=new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile);
+        link link=new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+"/datatables.min.css");
         if (head!=null)
         {
             head.add(DataTable.class.getCanonicalName(),script);
@@ -169,8 +167,8 @@ public class DataTable extends Table
         }
         else
         {
-            this.addInner(script);
-            this.addInner(link);
+            this.table().addInner(script);
+            this.table().addInner(link);
             
         }
     }

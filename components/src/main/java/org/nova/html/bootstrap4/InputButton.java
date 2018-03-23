@@ -6,8 +6,6 @@ import org.nova.html.bootstrap4.classes.ButtonStyle;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.properties.input_type;
-import org.nova.html.tags.a;
-import org.nova.html.tags.button_button;
 import org.nova.html.tags.input;
 
 public class InputButton extends Element

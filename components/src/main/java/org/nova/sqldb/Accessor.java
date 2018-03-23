@@ -2,7 +2,6 @@ package org.nova.sqldb;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,18 +12,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.nova.collections.Pool;
 import org.nova.collections.Resource;
-import org.nova.core.MultiException;
 import org.nova.core.Utils;
 import org.nova.logging.Item;
 import org.nova.sqldb.FieldMaps.ConstructorFieldMap;
 import org.nova.sqldb.Param.Direction;
 import org.nova.tracing.Trace;
-
-import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 public class Accessor extends Resource
 {

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletException;
@@ -13,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -23,15 +21,12 @@ import org.nova.collections.RingBuffer;
 import org.nova.core.Utils;
 import org.nova.http.Header;
 import org.nova.logging.Item;
-import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
 import org.nova.metrics.RateMeter;
 import org.nova.operations.OperatorVariable;
 import org.nova.test.Testing;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
-import org.omg.CORBA.ServerRequest;
-
 import com.google.common.base.Strings;
 
 public class HttpServer 
@@ -390,11 +385,11 @@ public class HttpServer
 		catch (Throwable e)
 		{
 			trace.close(e);
+            if (this.test)
+            {
+                servletResponse.getOutputStream().print(Utils.toString(e));
+            }
 			servletResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
-			if (this.test)
-			{
-				e.printStackTrace();
-			}
 		}
 		finally
 		{

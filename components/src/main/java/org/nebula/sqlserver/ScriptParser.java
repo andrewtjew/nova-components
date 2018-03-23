@@ -69,12 +69,16 @@ public class ScriptParser
             {
                 continue;
             }
+            if (lexeme.isCaseInsenstiveWord("ENABLE"))
+            {
+                continue;
+            }
             if (lexeme.isCaseInsenstiveWord("CREATE"))
             {
                 parse_CREATE(lexer,block);
                 continue;
             }
-            System.out.println(lexeme.getValue());
+            System.out.println("ScriptParser: Cannot process: "+lexeme.getValue());
         }
     }
     

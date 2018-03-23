@@ -11,27 +11,23 @@ import org.nova.configuration.Configuration;
 import org.nova.core.Utils;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
-import org.nova.html.operator.TitleText;
-import org.nova.html.tags.em;
 import org.nova.html.tags.hr;
 import org.nova.html.tags.p;
 import org.nova.html.tags.textarea;
 import org.nova.html.widgets.DataTable;
 import org.nova.html.widgets.NameValueList;
-import org.nova.html.widgets.Row;
-import org.nova.http.client.PathAndQueryBuilder;
+import org.nova.html.widgets.TableHeader;
+import org.nova.html.widgets.TableRow;
+import org.nova.html.xtags.th_title;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
-import org.nova.http.server.HtmlContentWriter;
 import org.nova.http.server.JSONContentReader;
-import org.nova.http.server.JSONPatchContentReader;
 import org.nova.http.server.annotations.ContentDecoders;
 import org.nova.http.server.annotations.ContentEncoders;
 import org.nova.http.server.annotations.ContentReaders;
 import org.nova.http.server.annotations.ContentWriters;
 import org.nova.http.server.annotations.DefaultValue;
 import org.nova.http.server.annotations.GET;
-import org.nova.http.server.annotations.POST;
 import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.QueryParam;
 import org.nova.metrics.CountMeter;
@@ -83,7 +79,7 @@ public class ConnectorController
         track(connector.getName(),connector);
     }
     
-    public Connector initializeConnector(Trace parent,String configurationNameFragment) throws Throwable
+    public Connector prepareConnector(Trace parent,String configurationNameFragment) throws Throwable
     {
         Configuration configuration=this.application.getConfiguration();
         DatabaseUpdatePermissions permisssions=configuration.getJSONObject("Application.Database.MigrationPermission."+configurationNameFragment,new DatabaseUpdatePermissions(),DatabaseUpdatePermissions.class);
@@ -107,23 +103,23 @@ public class ConnectorController
         OperatorPage page=this.application.buildOperatorPage("View Connector Stats");
         DataTable table=page.content().returnAddInner(new DataTable(page.head()));
         table.lengthMenu(-1,40,60,100);
-        Row row=new Row();
-        row.add("Name");
-        row.add(new TitleText("Row updated rate (per second)","Updated"));
-        row.add(new TitleText("Rows updated","Count"));
-        row.add(new TitleText("Update rate (per second)","Updates"));
-        row.add(new TitleText("Update count","Count"));
+        TableHeader header=new TableHeader();
+        header.add("Name");
+        header.add(new th_title("Updated","Row updated rate (per second)"));
+        header.add(new th_title("Count","Rows updated"));
+        header.add(new th_title("Updates","Update rate (per second)"));
+        header.add(new th_title("Count","Update count"));
 
-        row.add(new TitleText("Rows queried rate (per second)","Queried"));
-        row.add(new TitleText("Rows queried","Count"));
-        row.add(new TitleText("Query rate (per second)","Queries"));
-        row.add(new TitleText("Query count","Count"));
+        header.add(new th_title("Queried","Rows queried rate (per second)"));
+        header.add(new th_title("Count","Rows queried"));
+        header.add(new th_title("Queries","Query rate (per second)"));
+        header.add(new th_title("Count","Query count"));
 
-        row.add(new TitleText("Call rate (per second)","Calls"));
-        row.add(new TitleText("Call count","Count"));
+        header.add(new th_title("Calls","Call rate (per second)"));
+        header.add(new th_title("Count","Call count"));
 
-        row.add(new TitleText("Execute failures","Fails"));
-        table.setHeadRow(row);
+        header.add(new th_title("Fails","Execute failures"));
+        table.setHeader(header);
         
 
         synchronized(this)
@@ -131,7 +127,7 @@ public class ConnectorController
             for (Entry<String, Connector> entry:this.connectors.entrySet())
             {
                 Connector connector=entry.getValue();
-                row=new Row();
+                TableRow row=new TableRow();
                 row.add(entry.getKey());
                 write(row,connector.getRowsUpdatedRate(),minimalResetDurationS);
                 write(row,connector.getUpdateRate(),minimalResetDurationS);
@@ -139,7 +135,7 @@ public class ConnectorController
                 write(row,connector.getQueryRate(),minimalResetDurationS);
                 write(row,connector.getCallRate(),minimalResetDurationS);
                 row.add(connector.getExecuteFailures().getCount());
-                table.addBodyRow(row);
+                table.addRow(row);
             }
         }
 
@@ -151,14 +147,14 @@ public class ConnectorController
         list.add(name, meter.getCount());
     }
 
-    private void write(Row row,RateMeter meter,double minimalResetDurationS)
+    private void write(TableRow row,RateMeter meter,double minimalResetDurationS)
     {
         RateSample sample=meter.sample(minimalResetDurationS);
         row.add(String.format("%.3f",sample.getWeightedRate()));
         row.add(sample.getSamples());
     }
 
-    private void writeMax(Row row,LevelMeter meter)
+    private void writeMax(TableRow row,LevelMeter meter)
     {
         LevelSample sample=meter.sample();
         row.add(sample.getLevel());
@@ -172,7 +168,7 @@ public class ConnectorController
             row.add("");
         }
     }
-    private void writeMin(Row row,LevelMeter meter)
+    private void writeMin(TableRow row,LevelMeter meter)
     {
         LevelSample sample=meter.sample();
         row.add(sample.getLevel());
@@ -188,7 +184,7 @@ public class ConnectorController
         }
     }
 
-    private void write(Row row,LongValueMeter meter,long used)
+    private void write(TableRow row,LongValueMeter meter,long used)
     {
         LongValueSample sample=meter.sample();
         row.add(sample.getTotalCount());
@@ -222,31 +218,31 @@ public class ConnectorController
         OperatorPage page=this.application.buildOperatorPage("View Connector Pools");
         DataTable table=page.content().returnAddInner(new DataTable(page.head()));
         table.lengthMenu(-1,40,60,100);
-        Row row=new Row();
-        row.add("Name");
-        row.add(new TitleText("Accessors available in pool","Available"));
-        row.add(new TitleText("Accessor pool size","Size"));
-        row.add(new TitleText("Minimum accessors available","Min"));
-        row.add(new TitleText("Instant when minimum acccessors occurred","Min available Instant"));
-        row.add(new TitleText("Threads waiting for accessors","Waiting"));
-        row.add(new TitleText("Maximum threads waiting for accessors","Max"));
-        row.add(new TitleText("Instant when maximum threads are waiting for accessors","Max Waiting Instant"));
-        row.add(new TitleText("Number of times connector is used","Used"));
-        row.add(new TitleText("Connector use rate (per second)","Rate"));
-        row.add(new TitleText("Number of times when waiting for accessor occurs","Waits"));
-        row.add(new TitleText("Percentage times waits occurred","%"));
-        row.add(new TitleText("Average wait for accessor (ms)","Ave Wait"));
-        row.add(new TitleText("Standard deviation wait for accessor (ms)","StdDev"));
-        row.add(new TitleText("Maximum wait for accessor (ms)","Max"));
-        row.add(new TitleText("Instant when maximum wait occurs","Max Duration Instant"));
-        table.setHeadRow(row);
+        TableHeader header=new TableHeader();
+        header.add("Name");
+        header.add(new th_title("Available","Accessors available in pool"));
+        header.add(new th_title("Size","Accessor pool size"));
+        header.add(new th_title("Min","Minimum accessors available"));
+        header.add(new th_title("Min available Instant","Instant when minimum acccessors occurred"));
+        header.add(new th_title("Waiting","Threads waiting for accessors"));
+        header.add(new th_title("Max","Maximum threads waiting for accessors"));
+        header.add(new th_title("Max Waiting Instant","Instant when maximum threads are waiting for accessors"));
+        header.add(new th_title("Used","Number of times connector is used"));
+        header.add(new th_title("Rate","Connector use rate (per second)"));
+        header.add(new th_title("Waits","Number of times when waiting for accessor occurs"));
+        header.add(new th_title("%","Percentage times waits occurred"));
+        header.add(new th_title("Ave Wait","Average wait for accessor (ms)"));
+        header.add(new th_title("StdDev","Standard deviation wait for accessor (ms)"));
+        header.add(new th_title("Max","Maximum wait for accessor (ms)"));
+        header.add(new th_title("Max Duration Instant","Instant when maximum wait occurs"));
+        table.setHeader(header);
 
         synchronized(this)
         {
             for (Entry<String, Connector> entry:this.connectors.entrySet())
             {
                 Connector connector=entry.getValue();
-                row=new Row();
+                TableRow row=new TableRow();
                 row.add(entry.getKey());
 
                 writeMin(row,connector.getAccessorsAvailableMeter());
@@ -258,7 +254,7 @@ public class ConnectorController
                 
                 write(row,connector.getAcessorsWaitNsMeter(),used);
                 
-                table.addBodyRow(row);
+                table.addRow(row);
             }
         }
 

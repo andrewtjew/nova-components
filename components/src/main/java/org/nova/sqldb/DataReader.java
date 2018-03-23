@@ -1,13 +1,8 @@
 package org.nova.sqldb;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
-import org.nova.tracing.Trace;
 
 public class DataReader<TYPE> implements AutoCloseable
 {

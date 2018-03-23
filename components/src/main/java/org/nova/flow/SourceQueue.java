@@ -1,8 +1,6 @@
 package org.nova.flow;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-
 import org.nova.concurrent.Synchronization;
 import org.nova.metrics.CountMeter;
 import org.nova.metrics.LevelMeter;

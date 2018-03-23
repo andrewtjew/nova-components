@@ -3,12 +3,7 @@ package org.nova.services;
 import java.util.HashMap;
 
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.eclipse.jetty.http.HttpStatus;
 import org.nova.concurrent.Lock;
-import org.nova.http.server.ContentWriter;
 import org.nova.http.server.Context;
 import org.nova.http.server.Filter;
 import org.nova.http.server.FilterChain;

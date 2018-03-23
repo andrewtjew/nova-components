@@ -1,11 +1,5 @@
 package org.nova.http.server;
 
-import java.security.KeyStore;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.security.cert.X509Certificate;
-
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -17,8 +11,6 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
 import org.nova.core.Utils;
-
-import com.amazonaws.services.lambda.model.EC2AccessDeniedException;
 
 public class JettyServerFactory
 {

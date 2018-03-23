@@ -1,7 +1,6 @@
 package org.nova.html.tags;
 
 import org.nova.html.elements.InputElement;
-import org.nova.html.enums.autocomplete;
 
 public class input_time extends InputElement<input_time>
 {

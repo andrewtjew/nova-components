@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.util.Random;
 
 import org.nova.operations.OperatorVariable;
-import org.nova.operations.Status;
 import org.nova.operations.ValidationResult;
 import org.nova.operations.Validator;
 import org.nova.operations.VariableInstance;

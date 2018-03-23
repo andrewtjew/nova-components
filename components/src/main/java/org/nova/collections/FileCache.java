@@ -15,8 +15,8 @@ public class FileCache extends ContentCache<String,byte[]>
 	public FileCache(FileCacheConfiguration configuration) throws Exception
 	{
 		super(configuration.capacity,configuration.maxAgeMs,configuration.maxSize);
-        this.sharedDirectory=Utils.toNativePath(configuration.sharedDirectory);
-        this.localDirectory=Utils.toNativePath(configuration.localDirectory);
+        this.sharedDirectory=new File(Utils.toNativePath(configuration.sharedDirectory)).getCanonicalPath();
+        this.localDirectory=new File(Utils.toNativePath(configuration.localDirectory)).getCanonicalPath();
 	}
 	
 	public void preload(Trace trace) throws Throwable
@@ -28,10 +28,8 @@ public class FileCache extends ContentCache<String,byte[]>
 		}
 	}
     
-	static byte[] readFile(String fileName) throws Exception
+	static byte[] readFile(File file) throws Exception
     {
-        fileName=Utils.toNativePath(fileName);
-        File file=new File(fileName);
         if (file.exists()==false)
         {
             return null;
@@ -43,7 +41,7 @@ public class FileCache extends ContentCache<String,byte[]>
         long length=file.length();
         if (length>Integer.MAX_VALUE)
         {
-            throw new Exception("File too big. Filename="+fileName);
+            throw new Exception("File too big. Filename="+file.getCanonicalPath());
         }
         try (FileInputStream stream=new FileInputStream(file))
         {
@@ -54,18 +52,28 @@ public class FileCache extends ContentCache<String,byte[]>
     }
     	
 	@Override
-	protected ValueSize<byte[]> load(Trace trace, String key) throws Throwable
+	protected ValueSize<byte[]> load(Trace trace, String filePath) throws Throwable
 	{
-        byte[] bytes=readFile(this.localDirectory+key);
-        if (bytes==null)
+        File file=new File(Utils.toNativePath(this.localDirectory+File.separator+filePath));
+        if (file.getCanonicalPath().startsWith(this.localDirectory))
         {
-            bytes=readFile(this.sharedDirectory+key);
+            byte[] bytes=readFile(file);
+            if (bytes!=null)
+            {
+                return new ValueSize<byte[]>(bytes,bytes.length);
+            }
         }
-        if (bytes==null)
+        file=new File(Utils.toNativePath(this.sharedDirectory+File.separator+filePath));
+        if (file.getCanonicalPath().startsWith(this.sharedDirectory))
         {
-            throw new Exception("File not found: "+key);
+            byte[] bytes=readFile(file);
+            if (bytes==null)
+            {
+                throw new Exception("File not found: "+filePath);
+            }
+            return new ValueSize<byte[]>(bytes,bytes.length);
         }
-		return new ValueSize<byte[]>(bytes,bytes.length);
+        throw new Exception("Invalid file: "+filePath);
 	}
 	
 }

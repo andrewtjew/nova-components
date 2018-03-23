@@ -2,7 +2,6 @@ package org.nova.http.server;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,13 +41,13 @@ public class GzipContentDecoder extends ContentDecoder
 		@Override
 		public long getUncompressedContentSize() throws Throwable
 		{
-			return this.uncompressedInputStream.getContentSize();
+			return this.uncompressedInputStream.getBytesStreamed();
 		}
 
 		@Override
 		public long getCompressedContentSize() throws Throwable
 		{
-			return this.compressedInputStream.getContentSize();
+			return this.compressedInputStream.getBytesStreamed();
 		}
 
         @Override

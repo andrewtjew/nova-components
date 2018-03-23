@@ -7,13 +7,10 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.InputStreamEntity;
-import org.nova.concurrent.FutureScheduler;
+import org.nova.concurrent.MultiTaskScheduler;
 import org.nova.concurrent.Synchronization;
 import org.nova.tracing.Trace;
 
@@ -67,7 +64,7 @@ public class PostContext implements AutoCloseable
     private boolean threadEnded;
     private IOException threadException;
 
-    PostContext(Trace parent, String traceCategory, HttpClient client, FutureScheduler scheduler, HttpPost post, DisruptorTraceContext context) throws IOException
+    PostContext(Trace parent, String traceCategory, HttpClient client, MultiTaskScheduler scheduler, HttpPost post, DisruptorTraceContext context) throws IOException
     {
         this.client = client;
         this.post = post;

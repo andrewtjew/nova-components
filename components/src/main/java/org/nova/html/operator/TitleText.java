@@ -1,16 +1,8 @@
 package org.nova.html.operator;
 
-import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.elements.InnerElement;
-import org.nova.html.elements.TagElement;
-import org.nova.html.tags.em;
 import org.nova.html.tags.span;
-import org.nova.html.tags.var;
 
 public class TitleText extends Element
 {

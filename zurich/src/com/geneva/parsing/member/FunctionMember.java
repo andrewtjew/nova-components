@@ -5,9 +5,7 @@ import java.util.List;
 import com.geneva.lexing3.Lexeme;
 import com.geneva.parsing.Modifiers;
 import com.geneva.parsing.MutableNameType;
-import com.geneva.parsing.NameType;
 import com.geneva.parsing.NameTypeExpression;
-import com.geneva.parsing.Node;
 import com.geneva.parsing.statement.Statement;
 import com.geneva.parsing.type.Type;
 

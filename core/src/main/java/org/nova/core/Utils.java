@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.NetworkInterface;
-import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -20,11 +19,8 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 public class Utils
 {
@@ -110,6 +106,36 @@ public class Utils
         }
         return list;
     }
+    
+    static public String bigEndianByteArrayToHexString(byte[] bytes)
+    {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < bytes.length; i++) 
+        {
+            byte value=bytes[i];
+            int high=(value&0xf0)>>4;
+            if (high<10)
+            {
+                sb.append((char)(high+'0'));
+            }
+            else
+            {
+                sb.append((char)(high-10+'A'));
+            }
+
+            int low=value&0xf;
+            if (low<10)
+            {
+                sb.append((char)(low+'0'));
+            }
+            else
+            {
+                sb.append((char)(low-10+'A'));
+            }
+        }
+        return sb.toString();        
+    }
+    
     static public List<Long> longArrayToList(long[] values)
     {
         ArrayList<Long> list=new ArrayList<>();

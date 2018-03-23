@@ -10,12 +10,6 @@ import org.nova.logging.Item;
 import org.nova.logging.Level;
 import org.nova.logging.Logger;
 import org.nova.metrics.SourceEventEventBoard;
-import org.nova.scan.Lexeme;
-import org.nova.scan.ScanException;
-import org.nova.scan.Snippet;
-import org.nova.scan.TextSource;
-import org.nova.scan.Token;
-import org.nova.security.Vault;
 import org.nova.sqldb.Accessor;
 import org.nova.sqldb.Connector;
 import org.nova.sqldb.Row;
@@ -225,25 +219,32 @@ public class DatabaseUpdater
     private void migrate(Trace parent,Procedure procedure,Accessor accessor) throws Throwable
     {
         String ownerName=procedure.getOwner()!=null?'['+procedure.getOwner()+"].["+procedure.getName()+']':'['+procedure.getName()+']';
-        RowSet rowSet=accessor.executeQuery(parent, null,"SELECT OBJECT_ID(?,'P')",ownerName);
-        if ((rowSet.size()!=0)&&(rowSet.getRow(0).get(0)!=null))
+        try
         {
-            if (this.permissions.replaceProcedure==false)
+            RowSet rowSet=accessor.executeQuery(parent, null,"SELECT OBJECT_ID(?,'P')",ownerName);
+            if ((rowSet.size()!=0)&&(rowSet.getRow(0).get(0)!=null))
             {
-                this.blocked.replaceProcedure++;
+                if (this.permissions.replaceProcedure==false)
+                {
+                    this.blocked.replaceProcedure++;
+                    return;
+                }
+                String drop="DROP PROCEDURE "+ownerName;
+                accessor.executeUpdate(parent, null, drop);
+                accessor.executeUpdate(parent, null, procedure.getText());
+                this.executed.replaceProcedure++;
                 return;
             }
-            String drop="DROP PROCEDURE "+ownerName;
-            accessor.executeUpdate(parent, null, drop);
-            accessor.executeUpdate(parent, null, procedure.getText());
-            this.executed.replaceProcedure++;
-            return;
+            else
+            {
+                accessor.executeUpdate(parent, null, procedure.getText());
+                this.executed.createProcedure++;
+                return;
+            }
         }
-        else
+        catch (Throwable t)
         {
-            accessor.executeUpdate(parent, null, procedure.getText());
-            this.executed.createProcedure++;
-            return;
+            throw new Exception("Migrate failed: "+ownerName,t);
         }
     }
     

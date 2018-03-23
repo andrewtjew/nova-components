@@ -1,11 +1,7 @@
 package com.geneva.debug;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.List;
 
-import com.geneva.lexing3.Lexeme;
-import com.geneva.lexing3.Token;
-import com.geneva.parsing.Element;
 import com.geneva.parsing.Modifiers;
 import com.geneva.parsing.MutableNameType;
 import com.geneva.parsing.MutableNameTypeExpression;

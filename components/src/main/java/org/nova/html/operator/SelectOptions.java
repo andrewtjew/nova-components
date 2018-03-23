@@ -1,9 +1,5 @@
 package org.nova.html.operator;
 
-import java.io.OutputStream;
-
-import org.nova.html.elements.Element;
-import org.nova.html.elements.InnerElement;
 import org.nova.html.tags.option;
 import org.nova.html.tags.select;
 

@@ -1,19 +1,18 @@
 package org.nova.tracing;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.nova.annotations.Description;
 import org.nova.logging.Logger;
 import org.nova.metrics.CountMeter;
 import org.nova.metrics.TraceMeter;
-import org.nova.metrics.TraceSample;
 import org.nova.metrics.RateMeter;
-import org.nova.metrics.RateSample;
 import org.nova.operations.OperatorVariable;
 
 // Don't track Trace in Thread Local Store. The problem is figuring out after closing a Trace which trace to make current
@@ -22,19 +21,21 @@ public class TraceManager
 	final private HashMap<Long,Trace> currentTraces;
     final private Object managerLock=new Object();
     final private HashMap<String,TraceNode> traceRoots;
+    final private HashSet<String> secondaryCategories;
+
     final private TraceBuffer lastExceptions;
     final private TraceBuffer lastSecondaryExceptions;
-    final private HashSet<String> secondaryCategories;
-    
     final private TraceBuffer lastTraces;
     final private TraceBuffer watchTraces;
-	final private HashSet<String> watchCategories;
+    final private HashMap<String,TraceMeter> lastTraceMeters;
+    final private HashMap<String,TraceMeter> lastSecondaryTraceMeters;
+    final private HashMap<String,TraceMeter> watchTraceMeters;
+
+    final private HashSet<String> watchCategories;
     final private RateMeter rateMeter;
     final private CountMeter gapMeter;
 	final private Logger logger;
 	final private int maximumActives;
-    final private HashMap<String,TraceMeter> lastTraceMeters;
-    final private HashMap<String,TraceMeter> watchTraceMeters;
     private long number;
     private long currentTracesOverflowCount;
 
@@ -61,6 +62,7 @@ public class TraceManager
 	{
         this.secondaryCategories=new HashSet<>();
         this.lastSecondaryExceptions=new TraceBuffer(configuration.lastSecondaryExceptionBufferSize);
+        this.lastSecondaryTraceMeters=new HashMap<>();
 		this.currentTraces=new HashMap<>();
 		this.lastTraceMeters=new HashMap<>();
 		this.traceRoots=new HashMap<>();
@@ -135,16 +137,38 @@ public class TraceManager
 	    TraceMeter watchMeter=null;
 	    synchronized(this.managerLock)
 	    {
-	        this.currentTraces.remove(trace.getNumber());
-   			this.lastTraces.add(trace);
-            meter=this.lastTraceMeters.get(trace.getCategory());
-            if (meter==null)
+            boolean isSecondary=(this.secondaryCategories.size()>0)&&this.secondaryCategories.contains(trace.getCategory());
+
+            this.currentTraces.remove(trace.getNumber());
+            this.lastTraces.add(trace);
+            if (isSecondary)
             {
-                meter=new TraceMeter();
-                this.lastTraceMeters.put(trace.getCategory(), meter);
+                meter=this.lastSecondaryTraceMeters.get(trace.getCategory());
+                if (meter==null)
+                {
+                    meter=new TraceMeter();
+                    this.lastSecondaryTraceMeters.put(trace.getCategory(), meter);
+                }
+    			if (trace.getThrowable()!=null)
+    			{
+                    this.lastSecondaryExceptions.add(trace);
+    			}
             }
-    		if (this.enableLastTraceWatching)
-    		{
+            else
+            {
+                meter=this.lastTraceMeters.get(trace.getCategory());
+                if (meter==null)
+                {
+                    meter=new TraceMeter();
+                    this.lastTraceMeters.put(trace.getCategory(), meter);
+                }
+                if (trace.getThrowable()!=null)
+                {
+                    this.lastExceptions.add(trace);
+                }
+            }
+            if (this.enableLastTraceWatching)
+            {
                 if (this.watchCategories.contains(trace.getCategory()))
                 {
                     watchMeter=this.watchTraceMeters.get(trace.getCategory());
@@ -154,21 +178,10 @@ public class TraceManager
                         this.watchTraceMeters.put(trace.getCategory(), watchMeter);
                     }
                     this.watchTraces.add(trace);
-    			}
-    		}
-		
-			if (trace.getThrowable()!=null)
-			{
-			    if ((this.secondaryCategories.size()>0)&&this.secondaryCategories.contains(trace.getCategory()))
-			    {
-			        this.lastSecondaryExceptions.add(trace);
-			    }
-			    else
-			    {
-			        this.lastExceptions.add(trace);
-			    }
-			}
-    		log=logTraces||logExceptionTraces||((logTracesWithGreaterDuration>=0)&&(trace.getDurationNs()/10000000>=logTracesWithGreaterDuration));
+                }
+            }
+        
+    		log=logTraces||logExceptionTraces||(trace.getDurationNs()/10000000>=logTracesWithGreaterDuration);
 		}
         if (log)
         {
@@ -335,17 +348,105 @@ public class TraceManager
 			return enableLastTraceWatching;
 		}
 	}
-	public void enableWatchListLastTraces(String[] categories)
+
+	public void enableAndAddWatchListCategories(String[] categories)
 	{
         synchronized (this.managerLock)
 	    {
-	        for (String category:categories)
+            this.enableLastTraceWatching = true;
+            for (String category:categories)
 	        {
 	            this.watchCategories.add(category);
 	        }
-			this.enableLastTraceWatching = true;
 		}
 	}
+
+	public void setSecondaryCategories(String[] categories)
+    {
+        synchronized (this.managerLock)
+        {
+            for (Entry<String, TraceMeter> entry:this.lastSecondaryTraceMeters.entrySet())
+            {
+                this.lastTraceMeters.put(entry.getKey(), entry.getValue());
+            }
+            this.secondaryCategories.clear();
+            if (categories!=null)
+            {
+                for (String category:categories)
+                {
+                    this.secondaryCategories.add(category);
+                    TraceMeter meter=this.lastTraceMeters.remove(category);
+                    if (meter!=null)
+                    {
+                        this.lastSecondaryTraceMeters.put(category, meter);
+                    }
+                }
+                moveExceptions();
+            }
+        }
+    }
+	
+    public void addSecondaryCategories(String[] categories)
+    {
+        synchronized (this.managerLock)
+        {
+            if (categories!=null)
+            {
+                for (String category:categories)
+                {
+                    this.secondaryCategories.add(category);
+                    TraceMeter meter=this.lastTraceMeters.remove(category);
+                    if (meter!=null)
+                    {
+                        this.lastSecondaryTraceMeters.put(category, meter);
+                    }
+                }
+                moveExceptions();
+            }
+        }
+    }
+    
+    private void moveExceptions()
+    {
+        List<Trace> lastExceptions=this.lastExceptions.getSnapshot();
+        this.lastExceptions.clear();
+
+        for (Trace trace:lastExceptions)
+        {
+            if (this.secondaryCategories.contains(trace.getCategory()))
+            {
+                this.lastSecondaryExceptions.add(trace);
+            }
+            else
+            {
+                this.lastExceptions.add(trace);
+            }
+        }
+        List<Trace> lastSecondaryExceptions=this.lastSecondaryExceptions.getSnapshot();
+        Collections.sort(lastSecondaryExceptions,new Comparator<Trace>()
+        {
+            @Override
+            public int compare(Trace arg0, Trace arg1)
+            {
+                if (arg0.getNumber()<arg1.getNumber())
+                {
+                    return -1;
+                }
+                if (arg0.getNumber()>arg1.getNumber())
+                {
+                    return 1;
+                }
+                return 0;
+            }
+        });
+        this.lastSecondaryExceptions.clear();
+        for (Trace trace:lastSecondaryExceptions)
+        {
+            this.lastSecondaryExceptions.add(trace);
+        }
+    }
+    
+    
     public void disableWatchListLastTraces()
     {
         synchronized (this.managerLock)
@@ -434,6 +535,22 @@ public class TraceManager
         }
     }
 
+    public CategorySample[] sampleLastSecondaryCategories()
+    {
+        synchronized (this.managerLock)
+        {
+            CategorySample[] samples=new CategorySample[this.lastSecondaryTraceMeters.size()];
+            {
+                int index=0;
+                for (Entry<String, TraceMeter> entry:this.lastSecondaryTraceMeters.entrySet())
+                {
+                    samples[index++]=new CategorySample(entry.getKey(), entry.getValue().sample());
+                }
+            }
+            return samples;
+        }
+    }
+
     public CategorySample[] sampleWatchCategories()
     {
         synchronized (this.managerLock)
@@ -461,6 +578,22 @@ public class TraceManager
                     samples[index++]=new CategorySample(entry.getKey(), entry.getValue().sample());
                 }
                 this.lastTraceMeters.clear();
+            }
+            return samples;
+        }
+    }
+    public CategorySample[] sampleAndResetLastSecondaryCategories()
+    {
+        synchronized (this.managerLock)
+        {
+            CategorySample[] samples=new CategorySample[this.lastSecondaryTraceMeters.size()];
+            {
+                int index=0;
+                for (Entry<String, TraceMeter> entry:this.lastSecondaryTraceMeters.entrySet())
+                {
+                    samples[index++]=new CategorySample(entry.getKey(), entry.getValue().sample());
+                }
+                this.lastSecondaryTraceMeters.clear();
             }
             return samples;
         }

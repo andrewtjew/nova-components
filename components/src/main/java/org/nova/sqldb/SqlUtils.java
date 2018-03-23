@@ -3,7 +3,6 @@ package org.nova.sqldb;
 import java.sql.Timestamp;
 
 import org.nova.core.NameObject;
-import org.nova.html.enums.name;
 import org.nova.tracing.Trace;
 
 public class SqlUtils

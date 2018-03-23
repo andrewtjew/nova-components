@@ -2,7 +2,6 @@ package org.nova.html.operator;
 
 import org.nova.html.elements.Element;
 import org.nova.html.tags.div;
-import org.nova.html.tags.head;
 import org.nova.html.tags.style;
 import org.nova.html.widgets.Head;
 

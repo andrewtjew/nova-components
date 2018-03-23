@@ -2,7 +2,6 @@ package org.nova.services;
 
 import org.nova.concurrent.Lock;
 import org.nova.core.NameObject;
-import org.nova.core.NameValue;
 import org.nova.http.server.Context;
 import org.nova.metrics.RateMeter;
 import org.nova.tracing.Trace;

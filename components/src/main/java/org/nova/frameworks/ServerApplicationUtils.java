@@ -1,7 +1,6 @@
 package org.nova.frameworks;
 
 import org.apache.http.client.HttpClient;
-import org.nova.concurrent.TimerScheduler;
 import org.nova.http.client.HttpClientConfiguration;
 import org.nova.http.client.HttpClientFactory;
 import org.nova.http.client.JSONClient;

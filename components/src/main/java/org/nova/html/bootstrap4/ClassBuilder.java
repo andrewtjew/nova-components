@@ -1,9 +1,6 @@
 package org.nova.html.bootstrap4;
 
-import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.elements.GlobalTagElement;
-import org.nova.html.elements.InnerElement;
-import org.nova.html.elements.TagElement;
 
 public class ClassBuilder
 {

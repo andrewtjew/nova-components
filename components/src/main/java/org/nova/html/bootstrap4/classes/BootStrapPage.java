@@ -3,7 +3,6 @@ package org.nova.html.bootstrap4.classes;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.enums.character_set;
-import org.nova.html.enums.crossorigin;
 import org.nova.html.enums.link_rel;
 import org.nova.html.enums.name;
 import org.nova.html.tags.body;
@@ -11,10 +10,7 @@ import org.nova.html.tags.html;
 import org.nova.html.tags.link;
 import org.nova.html.tags.meta;
 import org.nova.html.tags.script;
-import org.nova.html.tags.head;
-import org.nova.html.widgets.BasicPage;
 import org.nova.html.widgets.Content;
-import org.nova.html.widgets.DocType;
 import org.nova.html.widgets.Head;
 
 public class BootStrapPage extends Element

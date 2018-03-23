@@ -1,6 +1,5 @@
 package com.geneva.parsing;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.geneva.parsing.member.Member;

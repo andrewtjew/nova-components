@@ -4,7 +4,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bouncycastle.crypto.RuntimeCryptoException;
 import org.nova.lexing.Lexeme;
 import org.nova.lexing.LexingUtils;
 import org.nova.parsing.section.Section;

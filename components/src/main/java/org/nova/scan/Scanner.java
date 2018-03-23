@@ -1,9 +1,6 @@
 package org.nova.scan;
 
-import javax.swing.text.html.HTMLDocument.HTMLReader.CharacterAction;
-
 import org.nova.scan.Lexeme;
-import org.nova.test.Testing;
 
 public class Scanner
 {

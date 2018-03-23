@@ -1,8 +1,5 @@
 package org.nova.html.templates;
 
-import java.io.OutputStream;
-import java.util.Map;
-
 import org.nova.html.elements.Composer;
 import org.nova.html.templates.ElementMap;
 

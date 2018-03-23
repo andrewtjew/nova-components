@@ -8,19 +8,14 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.HttpClientUtils;
-import org.apache.http.entity.StringEntity;
-import org.nova.concurrent.FutureScheduler;
+import org.nova.concurrent.MultiTaskScheduler;
 import org.nova.concurrent.TimerScheduler;
 import org.nova.concurrent.TimerTask;
 import org.nova.concurrent.TimerTask.TimeBase;
 import org.nova.core.Utils;
-import org.nova.html.tags.table;
 import org.nova.http.Header;
-import org.nova.json.ObjectMapper;
 import org.nova.logging.Item;
 import org.nova.logging.Logger;
 import org.nova.tracing.Trace;
@@ -32,49 +27,58 @@ import com.nova.disrupt.DisruptorTraceContext;
 
 public class Client
 {
-	final private TraceManager traceManager;
-	final private Logger logger;
-	final private HttpClient client;
-	final private String endPoint;
-	final private ArrayList<Header> headers;
-	final private Disruptor disruptor;
+    final private TraceManager traceManager;
+    final private Logger logger;
+    final private HttpClient client;
+    final private String endPoint;
+    final private ArrayList<Header> headers;
+    final private Disruptor disruptor;
     final private TimerTask timerTask;
-	
-	public Client(TraceManager traceManager,Logger logger,TimerScheduler scheduler,long idleConnectionTimeoutMs,Disruptor disruptor,String endPoint,HttpClient client,String patchType,Header...headers) throws Throwable
-	{
-		this.traceManager=traceManager;
-		this.disruptor=disruptor;
-		this.logger=logger;
-		this.endPoint=endPoint;
-		this.client=client;
-		this.headers=new ArrayList<>();
-		for (Header header:headers)
-		{
-		    setHeader(header);
-		}
-		if (scheduler!=null)
-		{
-		    this.timerTask=scheduler.schedule("JSONClient.closeIdleConnections",TimeBase.FREE,idleConnectionTimeoutMs,idleConnectionTimeoutMs,(trace,task)->{closeIdleConnections(trace);});
-		}
-		else
-		{
-		    this.timerTask=null;
-		}
-	}
-	
-	public void closeIdleConnections(Trace parent)
-	{
-        HttpClientUtils.closeQuietly(this.client);
-	}
-	
-	
-    public Client(TraceManager traceManager,Logger logger,TimerScheduler scheduler,long idleConnectionTimeoutMs,String endPoint,HttpClient client) throws Throwable
+    final private long reconnectWaitMs;
+    final private long idleConnectionTimeoutMs;
+    private long lastRequestInstantMs;
+    
+    public Client(TraceManager traceManager,Logger logger,TimerScheduler scheduler,long idleConnectionTimeoutMs,long reconnectWaitMs,Disruptor disruptor,String endPoint,HttpClient client,Header...headers) throws Throwable
     {
-        this(traceManager,logger,scheduler,idleConnectionTimeoutMs,null,endPoint,client,"application/merge-patch+json");
+        this.idleConnectionTimeoutMs=idleConnectionTimeoutMs;
+        this.lastRequestInstantMs=System.currentTimeMillis();
+        this.traceManager=traceManager;
+        this.disruptor=disruptor;
+        this.logger=logger;
+        this.endPoint=endPoint;
+        this.client=client;
+        this.headers=new ArrayList<>();
+        this.reconnectWaitMs=reconnectWaitMs;
+        for (Header header:headers)
+        {
+            setHeader(header);
+        }
+        if (idleConnectionTimeoutMs>0)
+        {
+            if (scheduler!=null)
+            {
+                this.timerTask=scheduler.schedule("JSONClient.closeIdleConnections",TimeBase.FREE,idleConnectionTimeoutMs,idleConnectionTimeoutMs,(trace,task)->{closeIdleConnections(trace);});
+            }
+            else
+            {
+                throw new Exception();
+            }
+        }
+        else
+        {
+            this.timerTask=null;
+        }
     }
+    
+    public void closeIdleConnections(Trace parent)
+    {
+        this.client.getConnectionManager().closeIdleConnections(this.idleConnectionTimeoutMs-1, TimeUnit.MILLISECONDS);
+//        HttpClientUtils.closeQuietly(this.client);
+    }
+	
     public Client(TraceManager traceManager,Logger logger,String endPoint,HttpClient client) throws Throwable
     {
-        this(traceManager,logger,null,0,endPoint,client);
+        this(traceManager,logger,null,0,0,null,endPoint,client);
     }
     public Client(TraceManager traceManager,Logger logger,String endPoint) throws Throwable
     {
@@ -117,10 +121,22 @@ public class Client
             context.addLogItem(new Item("requestHeader:"+header.getName(),header.getValue()));
         }
 	}
-	protected DisruptorTraceContext createDisruptorContext(Trace parent,String traceCategory)
-	{
-	    return new DisruptorTraceContext(parent, this.traceManager, this.logger, this.disruptor, traceCategory,this.endPoint);
-	}
+    private DisruptorTraceContext createContext(Trace parent,String traceCategoryOverride,String pathAndQuery)
+    {
+        if (this.reconnectWaitMs>0)
+        {
+            synchronized(this)
+            {
+                long now=System.currentTimeMillis();
+                if (now-this.lastRequestInstantMs>=this.reconnectWaitMs)
+                {
+                    this.client.getConnectionManager().closeIdleConnections(this.reconnectWaitMs-1, TimeUnit.MILLISECONDS);
+                }
+                this.lastRequestInstantMs=now;
+            }
+        }
+        return new DisruptorTraceContext(parent, this.traceManager, this.logger, this.disruptor, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery,this.endPoint);
+    }
 	
     private String processResponse(HttpResponse response,DisruptorTraceContext context) throws Throwable
     {
@@ -203,11 +219,6 @@ public class Client
         return get(parent,traceCategoryOverride,outputStream,pathAndQuery,acceptContentType,new Header[0]);
     }
 
-    private String getCategory(String traceCategoryOverride,String pathAndQuery)
-    {
-        return traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery;
-    }
-    
     public int get(Trace parent,String traceCategoryOverride,OutputStream outputStream,String pathAndQuery,String acceptContentType,Header...headers) throws Throwable
     {
         try (DisruptorTraceContext context=new DisruptorTraceContext(parent, this.traceManager, this.logger, this.disruptor, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery,this.endPoint))
@@ -264,7 +275,7 @@ public class Client
 
     public int delete(Trace parent,String traceCategoryOverride,String pathAndQuery,Header...headers) throws Throwable
 	{
-        try (DisruptorTraceContext context=createDisruptorContext(parent, getCategory(traceCategoryOverride,pathAndQuery)))
+        try (DisruptorTraceContext context=createContext(parent, traceCategoryOverride,pathAndQuery))
         {
             try 
             {
@@ -305,10 +316,9 @@ public class Client
         }
 	}
     
-    public PostContext openPost(FutureScheduler scheduler,Trace parent,String traceCategoryOverride,String pathAndQuery,String contentType,String acceptContentType,Header...headers) throws Throwable
+    public PostContext openPost(MultiTaskScheduler scheduler,Trace parent,String traceCategoryOverride,String pathAndQuery,String contentType,String acceptContentType,Header...headers) throws Throwable
     {
-        String traceCategory=getCategory(traceCategoryOverride, pathAndQuery);
-        DisruptorTraceContext context=createDisruptorContext(parent, traceCategory);
+        DisruptorTraceContext context=createContext(parent, traceCategoryOverride,pathAndQuery);
         try
         {
             try 
@@ -337,7 +347,7 @@ public class Client
                 }
                 
                 logHeaders(context,post.getAllHeaders());
-                PostContext postContext=new PostContext(parent,traceCategory,this.client,scheduler,post,context);
+                PostContext postContext=new PostContext(parent,traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery,this.client,scheduler,post,context);
                 context=null;
                 return postContext;
             }

@@ -1,8 +1,5 @@
 package com.geneva.net;
 
-import java.io.IOException;
-
-import org.nova.core.Utils;
 import org.nova.tracing.Trace;
 
 public class Context

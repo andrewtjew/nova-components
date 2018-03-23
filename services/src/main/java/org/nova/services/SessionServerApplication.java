@@ -1,12 +1,10 @@
 package org.nova.services;
 
 
-import org.nova.configuration.Configuration;
 import org.nova.core.Utils;
 import org.nova.frameworks.CoreEnvironment;
 import org.nova.frameworks.ServerApplication;
 import org.nova.http.server.HttpServer;
-import org.nova.tracing.Trace;
 
 public abstract class SessionServerApplication<SESSION extends Session> extends ServerApplication
 {

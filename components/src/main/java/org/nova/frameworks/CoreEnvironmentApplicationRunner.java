@@ -2,37 +2,9 @@ package org.nova.frameworks;
 
 import org.nova.configuration.Configuration;
 import org.nova.configuration.ConfigurationReader;
-import org.nova.core.Utils;
-import org.nova.frameworks.ServerApplicationPages.Level1Panel;
-import org.nova.frameworks.ServerApplicationPages.Level2Panel;
-import org.nova.frameworks.ServerApplicationPages.WideTable;
-import org.nova.html.elements.Element;
-import org.nova.html.elements.HtmlElementWriter;
-import org.nova.html.operator.AjaxQueryResultWriter;
-import org.nova.html.tags.p;
-import org.nova.html.tags.style;
-import org.nova.html.widgets.NameValueList;
-import org.nova.html.widgets.Panel;
-import org.nova.html.widgets.Table;
-import org.nova.html.widgets.Text;
-import org.nova.http.server.Context;
-import org.nova.http.server.GzipContentDecoder;
-import org.nova.http.server.GzipContentEncoder;
-import org.nova.http.server.HtmlContentWriter;
-import org.nova.http.server.HttpServer;
-import org.nova.http.server.JSONContentReader;
-import org.nova.http.server.JSONContentWriter;
-import org.nova.http.server.JSONPatchContentReader;
-import org.nova.http.server.JettyServerFactory;
-import org.nova.http.server.annotations.GET;
-import org.nova.http.server.annotations.Path;
-import org.nova.logging.HighPerformanceLogger;
 import org.nova.logging.Level;
-import org.nova.logging.LogDirectoryInfo;
-import org.nova.logging.LogDirectoryManager;
 import org.nova.logging.Logger;
 import org.nova.tracing.Trace;
-import org.nova.tracing.TraceManager;
 
 
 public class CoreEnvironmentApplicationRunner //

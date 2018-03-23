@@ -1,18 +1,14 @@
 package org.nova.sqldb;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
-import org.nova.concurrent.Future;
-import org.nova.concurrent.FutureScheduler;
-import org.nova.core.Callable;
+import org.nova.concurrent.Progress;
+import org.nova.concurrent.MultiTaskScheduler;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceCallable;
 
 public class Cluster
 {
 	final private ClusterNode[] nodes;
-	final private FutureScheduler scheduler;
+	final private MultiTaskScheduler scheduler;
 	
 	private static int hash(String key)
 	{
@@ -24,7 +20,7 @@ public class Cluster
 		return hash;
 	}
 
-	public Cluster(FutureScheduler scheduler,ClusterNode[] nodes)
+	public Cluster(MultiTaskScheduler scheduler,ClusterNode[] nodes)
 	{
 		this.nodes=nodes;
 		this.scheduler=scheduler;
@@ -118,7 +114,7 @@ public class Cluster
 		}
 	}
 
-	private Future<RowSet> createQueryFuture(Trace parent,String traceCategoryOverride,String sql,Object[] parameters)
+	private Progress<RowSet> createQueryFuture(Trace parent,String traceCategoryOverride,String sql,Object[] parameters)
 	{
 		FutureQuery[] queries=new FutureQuery[this.nodes.length];
 		for (int i=0;i<queries.length;i++)
@@ -130,7 +126,7 @@ public class Cluster
 	
 	public ClusterRowSet executeClusterQuery(Trace parent,String traceCategoryOverride,String sql,Object...parameters) throws Throwable
 	{
-		Future<RowSet> future=createQueryFuture(parent, traceCategoryOverride, sql, parameters);
+		Progress<RowSet> future=createQueryFuture(parent, traceCategoryOverride, sql, parameters);
 		RowSet[] rowSets=new RowSet[this.nodes.length];
 		future.waitAll();
 		for (int i=0;i<rowSets.length;i++)
@@ -142,7 +138,7 @@ public class Cluster
 
 	public ClusterRowSet executeClusterQuery(Trace parent,String traceCategoryOverride,long waitMs,String sql,Object...parameters) throws Throwable
 	{
-		Future<RowSet> future=createQueryFuture(parent, traceCategoryOverride, sql, parameters);
+		Progress<RowSet> future=createQueryFuture(parent, traceCategoryOverride, sql, parameters);
 		RowSet[] rowSets=new RowSet[this.nodes.length];
 		future.waitAll(waitMs);
 		for (int i=0;i<rowSets.length;i++)
@@ -172,7 +168,7 @@ public class Cluster
 			}
 		}
 	}
-	private Future<Integer> createUpdateFuture(Trace parent,String traceCategoryOverride,String sql,Object[] parameters)
+	private Progress<Integer> createUpdateFuture(Trace parent,String traceCategoryOverride,String sql,Object[] parameters)
 	{
 		FutureUpdate[] queries=new FutureUpdate[this.nodes.length];
 		for (int i=0;i<queries.length;i++)
@@ -185,7 +181,7 @@ public class Cluster
 
 	public int executeClusterUpdate(Trace parent,String traceCategoryOverride,String sql,Object...parameters) throws Exception
 	{
-		Future<Integer> future=createUpdateFuture(parent, traceCategoryOverride, sql, parameters);
+		Progress<Integer> future=createUpdateFuture(parent, traceCategoryOverride, sql, parameters);
 		future.waitAll();
 		int total=0;
 		for (int i=0;i<future.size();i++)

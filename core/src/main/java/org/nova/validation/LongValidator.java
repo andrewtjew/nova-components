@@ -2,8 +2,6 @@ package org.nova.validation;
 
 import java.util.HashSet;
 
-import org.nova.annotations.Max;
-
 public class LongValidator extends Validator<Long>
 {
     private Long max;

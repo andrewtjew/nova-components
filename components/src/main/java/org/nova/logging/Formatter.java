@@ -1,7 +1,5 @@
 package org.nova.logging;
 
-import java.io.OutputStream;
-
 import org.nova.logging.LogEntry;
 
 public abstract class Formatter

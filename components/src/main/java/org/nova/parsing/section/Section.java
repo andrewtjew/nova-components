@@ -1,9 +1,5 @@
 package org.nova.parsing.section;
 
-import java.util.List;
-
-import org.nova.lexing.Lexeme;
-
 public class Section
 {
     final int start;

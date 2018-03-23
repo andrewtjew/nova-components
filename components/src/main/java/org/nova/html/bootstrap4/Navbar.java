@@ -2,18 +2,14 @@ package org.nova.html.bootstrap4;
 
 import org.nova.html.bootstrap4.classes.BackgroundColor;
 import org.nova.html.bootstrap4.classes.NavbarColor;
-import org.nova.html.bootstrap4.classes.NavbarState;
 import org.nova.html.bootstrap4.classes.Responsiveness;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.enums.target;
 import org.nova.html.tags.nav;
 import org.nova.html.tags.span;
-import org.nova.html.tags.ul;
 import org.nova.html.tags.a;
 import org.nova.html.tags.button_button;
 import org.nova.html.tags.div;
-import org.nova.html.tags.li;
 
 public class Navbar extends Element
 {
@@ -51,7 +47,7 @@ public class Navbar extends Element
         return this;
     }
     
-    public NavbarList openToggler(String targetId)
+    public NavbarList createToggler(String targetId)
     {
         button_button button=this.nav.returnAddInner(new button_button());
         button.class_("navbar-toggler").data("toggle", "collapse").data("target", "#"+targetId);

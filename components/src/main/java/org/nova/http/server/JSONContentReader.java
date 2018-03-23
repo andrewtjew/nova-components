@@ -3,16 +3,12 @@ package org.nova.http.server;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 
 import org.nova.core.Utils;
 import org.nova.json.ObjectExample;
 import org.nova.json.ObjectMapper;
 import org.nova.json.SchemaWriter;
-
-import com.amazonaws.services.simpleemail.model.Content;
 
 public class JSONContentReader extends ContentReader<Object>
 {

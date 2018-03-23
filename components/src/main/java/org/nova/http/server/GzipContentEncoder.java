@@ -38,13 +38,13 @@ public class GzipContentEncoder extends ContentEncoder
 		@Override
 		public long getUncompressedContentSize()
 		{
-			return this.uncompressedOutputStream.getContentSize();
+			return this.uncompressedOutputStream.getBytesStreamed();
 		}
 
 		@Override
 		public long getCompressedContentSize() throws Throwable
 		{
-			return this.compressedOutputStream.getContentSize();
+			return this.compressedOutputStream.getBytesStreamed();
 		}
 	}
 	@Override

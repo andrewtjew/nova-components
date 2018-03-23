@@ -1,7 +1,6 @@
 package org.nova.html.tags;
 
 import org.nova.html.elements.InputElement;
-import org.nova.html.enums.enctype;
 
 public class input_checkbox extends InputElement<input_checkbox>
 {

@@ -2,10 +2,7 @@ package org.nova.sqldb;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.Map;
 
 public class FieldMaps
 {

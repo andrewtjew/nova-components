@@ -1,7 +1,6 @@
 package org.nova.configuration;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.HashMap;
 
 import org.nova.annotations.Alias;

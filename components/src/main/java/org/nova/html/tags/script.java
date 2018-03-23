@@ -3,10 +3,7 @@ package org.nova.html.tags;
 
 import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.enums.crossorigin;
-import org.nova.html.enums.area_shape;
 import org.nova.html.enums.character_set;
-import org.nova.html.enums.sandbox;
-import org.nova.html.enums.target;
 
 public class script extends GlobalEventTagElement<script>
 {

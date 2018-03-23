@@ -17,7 +17,6 @@ import org.nova.http.server.annotations.GET;
 import org.nova.http.server.annotations.PUT;
 import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.QueryParam;
-import org.nova.logging.Logger;
 import org.nova.logging.LogUtils;
 import org.nova.test.PrintMessage;
 import org.nova.test.Testing;

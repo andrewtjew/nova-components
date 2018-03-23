@@ -17,7 +17,6 @@ import org.nova.concurrent.TimerScheduler;
 import org.nova.concurrent.TimerTask;
 import org.nova.concurrent.TimerTask.TimeBase;
 import org.nova.core.Utils;
-import org.nova.html.tags.table;
 import org.nova.http.Header;
 import org.nova.json.ObjectMapper;
 import org.nova.logging.Item;
@@ -29,8 +28,7 @@ import com.amazonaws.util.IOUtils;
 import com.nova.disrupt.Disruptor;
 import com.nova.disrupt.DisruptorTraceContext;
 
-//TODO: logging
-public class JSONClient
+public class JSONClient 
 {
 	final private TraceManager traceManager;
 	final private Logger logger;
@@ -82,7 +80,7 @@ public class JSONClient
 	public void closeIdleConnections(Trace parent)
 	{
 	    this.client.getConnectionManager().closeIdleConnections(this.idleConnectionTimeoutMs-1, TimeUnit.MILLISECONDS);
-        HttpClientUtils.closeQuietly(this.client);
+//        HttpClientUtils.closeQuietly(this.client);
 	}
 	
 	

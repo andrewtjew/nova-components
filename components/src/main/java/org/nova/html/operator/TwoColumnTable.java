@@ -1,10 +1,6 @@
 package org.nova.html.operator;
 
-import java.io.OutputStream;
-
 import org.nova.html.elements.Element;
-import org.nova.html.elements.InnerElement;
-import org.nova.html.tags.table;
 import org.nova.html.tags.td;
 import org.nova.html.tags.tr;
 import org.nova.html.widgets.Table;

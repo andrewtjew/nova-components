@@ -1,7 +1,5 @@
 package org.nova.flow;
 
-import java.util.List;
-
 public class Duplicator extends Node
 {
 	final private Node[] receivers;

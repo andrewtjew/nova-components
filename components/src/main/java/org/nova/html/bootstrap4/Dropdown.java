@@ -1,13 +1,7 @@
 package org.nova.html.bootstrap4;
 
-import org.nova.html.tags.li;
-import org.nova.html.bootstrap4.classes.NavbarState;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.properties.Style;
-import org.nova.html.properties.float_;
-import org.nova.html.properties.list_style;
-import org.nova.html.properties.position;
 import org.nova.html.tags.a;
 import org.nova.html.tags.button_button;
 import org.nova.html.tags.div;

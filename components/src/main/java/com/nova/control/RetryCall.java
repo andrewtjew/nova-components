@@ -1,8 +1,6 @@
 package com.nova.control;
 
 import java.util.ArrayList;
-import java.util.List;
-
 import org.nova.core.MultiException;
 import org.nova.logging.Logger;
 

@@ -70,8 +70,7 @@ public class ResourceController
             response.setContentType(contentType);
         }
         response.setContentLength(bytes.length);
-        response.setHeader("Cache-Control",
-                (this.cacheControlValue == null || this.cacheControlValue.length() == 0) ? "max-age=" + this.cacheMaxAge : this.cacheControlValue + ",max-age=" + this.cacheMaxAge);
+        response.setHeader("Cache-Control",(this.cacheControlValue == null || this.cacheControlValue.length() == 0) ? "max-age=" + this.cacheMaxAge : this.cacheControlValue + ",max-age=" + this.cacheMaxAge);
         response.setStatus(HttpStatus.OK_200);
         response.getOutputStream().write(bytes);
     }

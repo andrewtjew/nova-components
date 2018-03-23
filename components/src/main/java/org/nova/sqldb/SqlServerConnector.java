@@ -1,22 +1,12 @@
 package org.nova.sqldb;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.nova.core.Utils;
-import org.nova.logging.Item;
 import org.nova.logging.Logger;
 import org.nova.security.UnsecureVault;
 import org.nova.security.Vault;
-import org.nova.sqldb.Param.Direction;
-import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
 
-import com.microsoft.sqlserver.jdbc.SQLServerCallableStatement;
 import com.nova.disrupt.Disruptor;
 
 public class SqlServerConnector extends Connector
@@ -102,10 +92,18 @@ public class SqlServerConnector extends Connector
 	@Override
 	protected Connection createConnection() throws Throwable
 	{
-	    String connectionString=buildConnectionString();
-		Connection connection = DriverManager.getConnection(connectionString);
-		this.openConnectionSuccesses.increment();
-		return connection;
+        String connectionString=buildConnectionString();
+	    try
+	    {
+    		Connection connection = DriverManager.getConnection(connectionString);
+    		this.openConnectionSuccesses.increment();
+    		return connection;
+	    }
+	    catch (Throwable t)
+	    {
+//	        throw new Exception("ConnectionString:"+connectionString,t);
+	        throw t;
+	    }
 	}
 
 	@Override

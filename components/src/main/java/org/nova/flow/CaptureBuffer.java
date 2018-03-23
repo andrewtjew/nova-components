@@ -1,7 +1,5 @@
 package org.nova.flow;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.nova.collections.RingBuffer;
 
 public class CaptureBuffer extends Node
