@@ -16,22 +16,29 @@ public class Table extends Element
     
     public Table()
     {
-        this.table=new table();
-        this.tbody=new tbody();
+        this(null,"Table",null);
     }
     
     public Table(Head head)
     {
-        this(head,"Table","/resources/html/widgets/Table");
+        this(head,"Table",DEFAULT_CSS_FILE_PATH);
     }
     
-    public Table(Head head,String class_,String sourcePath)
+    private static String DEFAULT_CSS_FILE_PATH="/resources/html/widgets/Table/style.css";
+    
+    static public link DEFAULT_CSS_LINK()
+    {
+        return new link().rel(link_rel.stylesheet).type("text/css").href(DEFAULT_CSS_FILE_PATH);
+    }
+    
+    
+    public Table(Head head,String class_,String cssFilePath)
     {
         this.table=new table();
         this.tbody=new tbody();
 
         this.table.class_(class_);
-        link link=new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+"/style.css");
+        link link=new link().rel(link_rel.stylesheet).type("text/css").href(cssFilePath);
         if (head!=null)
         {
             head.add(class_,link);
@@ -56,7 +63,7 @@ public class Table extends Element
     {
         this.header=header;
     }
-    public void setHeaderItems(Object...objects)
+    public void setHeaderInline(Object...objects)
     {
         this.header=new TableHeader().add(objects);
     }
@@ -65,7 +72,7 @@ public class Table extends Element
         this.tbody.addInner(row);
     }
     
-    public void addRowItems(Object...objects)
+    public void addRowInline(Object...objects)
     {
         this.tbody.addInner(new TableRow().add(objects));
     }

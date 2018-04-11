@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.TimeZone;
 import org.nova.frameworks.OperatorPage;
 import org.nova.frameworks.ServerApplication;
-import org.nova.frameworks.ServerApplicationPages.Level2Panel;
 import org.nova.frameworks.ServerApplicationPages.WideTable;
 import org.nova.html.Attribute;
 import org.nova.html.HtmlWriter;
@@ -26,6 +25,7 @@ import org.nova.html.tags.input_checkbox;
 import org.nova.html.tags.input_text;
 import org.nova.html.tags.p;
 import org.nova.html.widgets.MenuBar;
+import org.nova.html.widgets.Panel3;
 import org.nova.html.widgets.TableHeader;
 import org.nova.html.widgets.TableRow;
 import org.nova.html.xtags.th_title;
@@ -73,11 +73,11 @@ public class OperatorPages
 			List<VariableInstance> instances=Arrays.asList(this.serverApplication.getOperatorVariableManager().getInstances(category));
 //			Collections.sort(variables);
 
-			Level2Panel panel=page.content().returnAddInner(new Level2Panel(page.head(),category));
+			Panel3 panel=page.content().returnAddInner(new Panel3(page.head(),category));
 			page.content().addInner(new p());
-			WideTable table=panel.returnAddInner(new WideTable(page.head()));
+			WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
 			
-            table.setHeaderItems("Name","Type","Validator","Default","Value","Modified","Description");
+            table.setHeaderInline("Name","Type","Validator","Default","Value","Modified","Description");
 
 			for (VariableInstance instance:instances)
 			{
@@ -112,9 +112,9 @@ public class OperatorPages
 		{
             List<VariableInstance> instances=Arrays.asList(this.serverApplication.getOperatorVariableManager().getInstances(category));
 //			Collections.sort(variables);
-            Level2Panel panel=page.content().returnAddInner(new Level2Panel(page.head(),category));
+            Panel3 panel=page.content().returnAddInner(new Panel3(page.head(),category));
             page.content().addInner(new p());
-            WideTable table=panel.returnAddInner(new WideTable(page.head()));
+            WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
 
             TableHeader header=new TableHeader();
             header.add("Name");

@@ -164,7 +164,7 @@ public class Pool<RESOURCE extends Resource>
 		    {
 		        container.addFirst((RESOURCE)resource);
 		    }
-			if (container.size()==1)
+		    if (this.waitingMeter.getLevel()>0)
 			{
 				this.notify();
 			}

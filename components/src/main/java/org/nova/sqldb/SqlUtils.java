@@ -28,6 +28,8 @@ public class SqlUtils
         }
         throw throwable;
     }
+    
+    
     static public String buildInsert(String table,String...values)
     {
         StringBuilder sb=new StringBuilder();

@@ -12,7 +12,7 @@ public class Accordion extends Content
 {
     final private button_button button;
     final private div content;
-    public Accordion(Head head,String id,boolean opened,String sourcePath,String cssFile,String heading)
+    public Accordion(Head head,String id,boolean opened,String heading,String cssFilePath)
     {
         if (id==null)
         {
@@ -20,8 +20,8 @@ public class Accordion extends Content
         }
         if (head!=null)
         {
-            head.add(Accordion.class.getCanonicalName(),new script().src("/resources/html/js/accordion.js"));
-            head.add(Accordion.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
+       //     head.add(Accordion.class.getCanonicalName(),new script().src("/resources/html/js/accordion.js"));
+            head.add(Accordion.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(cssFilePath));
         }
         if (opened==false)
         {
@@ -43,7 +43,7 @@ public class Accordion extends Content
     }
     public Accordion(Head head,String id,boolean opened,String heading)
     {
-        this(head,id, opened, "/resources/html","/w3c/Accordion/style.css",heading);
+        this(head,id, opened, heading, "/resources/html/w3c/Accordion/style.css");
     }
     public Accordion(Head head,boolean opened,String heading)
     {

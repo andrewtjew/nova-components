@@ -65,6 +65,14 @@ public class ClassBuilder
         }
         return this;
     }
+    public ClassBuilder addFragmentsIf(boolean test,Object...fragments)
+    {
+        if (test)
+        {
+            addFragments(fragments);
+        }
+        return this;
+    }
     
     public void applyTo(GlobalTagElement<?> element)
     {

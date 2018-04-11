@@ -1,5 +1,6 @@
 package org.nova.html.bootstrap4;
 
+import org.nova.html.bootstrap4.classes.Margin;
 import org.nova.html.bootstrap4.classes.NavbarState;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
@@ -7,29 +8,31 @@ import org.nova.html.tags.a;
 import org.nova.html.tags.div;
 import org.nova.html.tags.li;
 import org.nova.html.tags.ul;
+import org.nova.html.widgets.HtmlUtils;
 
 public class NavbarList extends Element
 {
-    final private div div;
     final private ul ul;
-    NavbarList(String id)
-    {
-        this.div=new div().class_("collapse navbar-collapse");
-        if (id!=null)
-        {
-            this.div.id(id);
-        }
-        this.ul=this.div.returnAddInner(new ul().class_("navbar-nav"));
-    }
+    private Margin margin;
+
     public NavbarList()
     {
-        this(null);
+        this.ul=new ul();
+    }
+
+    public NavbarList margin(Margin value)
+    {
+        this.margin=value;
+        return this;
     }
 
     @Override
     public void compose(Composer composer) throws Throwable
     {
-        composer.render(this.div);
+        ClassBuilder cb=new ClassBuilder("navbar-nav");
+        cb.addIf(this.margin!=null,this.margin);
+        cb.applyTo(this.ul);
+        composer.render(this.ul);
     }
 
     public NavbarList add(Element element)
@@ -49,18 +52,13 @@ public class NavbarList extends Element
         return this;
     }
     
-    public NavbarList add(NavbarDropdown dropdown)
+    public NavbarList add(ButtonDropdown dropdown)
     {
-        this.ul.addInner(dropdown);
+        li li=this.ul.returnAddInner(new li().class_("nav-item dropdown"));
+        li.returnAddInner(dropdown);
         return this;
     }
 
 
-    public NavbarList addForm(Element element)
-    {
-        this.div.addInner(element);
-        return this;
-    }
-    
     
 }

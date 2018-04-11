@@ -1,46 +1,75 @@
 package org.nova.html.widgets;
 
+import java.io.File;
+import java.util.ArrayList;
+
+import org.nova.html.attributes.Style;
+import org.nova.html.elements.Composer;
+import org.nova.html.elements.Element;
+import org.nova.html.elements.InnerElement;
 import org.nova.html.enums.link_rel;
 import org.nova.html.tags.div;
 import org.nova.html.tags.link;
 
-public class Panel extends div
+public class Panel extends Element
 {
+    final private div panel;
     final private div content;
-    final private div heading;
-    public Panel(Head head,String id,String sourcePath,String cssFile,String heading)
+    final private div header;
+    final private String title;
+    final private Content leftHeaderElements;
+    final private Content rightHeaderElements;
+    
+    public Panel(Head head,String class_,String cssFilePath,String title)
     {
-        if (id==null)
-        {
-            id=Integer.toString(this.hashCode());
-        }
-        this.heading=returnAddInner(new div().class_("panel-heading").addInner(heading));
-        this.content=returnAddInner(new div().class_("panel-content"));
-        id(id).class_("panel");
+        this.title=title;
+        this.panel=new div().class_(class_);
+        this.header=this.panel.returnAddInner(new div().class_(class_+"-Heading"));
+        this.content=this.panel.returnAddInner(new div().class_(class_+"-Content"));
         if (head!=null)
         {
-            head.add(Panel.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
+            head.add(class_,new link().rel(link_rel.stylesheet).type("text/css").href(cssFilePath));
         }
+        this.rightHeaderElements=new Content();
+        this.leftHeaderElements=new Content();
     }
-    public Panel(Head head,String id,String heading)
-    {
-        this(head,id, "/resources/html","/widgets/Panel/style.css",heading);
-    }
-    public Panel(Head head,String heading)
-    {
-        this(head,null,heading);
-    }
-    public Panel(String heading)
-    {
-        this(null,heading);
-    }
-
-    public div content()
+    
+    public InnerElement<?> content()
     {
         return this.content;
     }
-    public div heading()
+    public InnerElement<?> header()
     {
-        return this.heading;
+        return this.header;
+    }
+    public Panel style(Style style)
+    {
+        this.content.style(style);
+        return this;
+    }
+    public Panel style(String style)
+    {
+        this.content.style(style);
+        return this;
+    }
+    
+    public Panel addRightInHeader(Element element)
+    {
+        this.rightHeaderElements.addInner(new div().addInner(element).style("float:right"));
+        return this;
+    }
+    public Panel addLeftInHeader(Element element)
+    {
+        this.leftHeaderElements.addInner(new div().addInner(element).style("float:left"));
+        return this;
+    }
+    @Override
+    public void compose(Composer composer) throws Throwable
+    {
+        this.header.addInner(this.leftHeaderElements);
+        this.header.addInner(title);
+        this.header.addInner(this.rightHeaderElements);
+        composer.render(this.panel);
+        
     }
 }

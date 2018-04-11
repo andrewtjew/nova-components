@@ -1,8 +1,8 @@
 package org.nova.html.widgets.w3c;
 
+import org.nova.html.attributes.unit;
 import org.nova.html.elements.Element;
 import org.nova.html.enums.link_rel;
-import org.nova.html.properties.unit;
 import org.nova.html.tags.a;
 import org.nova.html.tags.div;
 import org.nova.html.tags.link;

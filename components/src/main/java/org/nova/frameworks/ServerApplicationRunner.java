@@ -43,13 +43,13 @@ public class ServerApplicationRunner //
         int threads=configuration.getIntegerValue("HttpServer.operator.threads",10);
         int operatorPort=configuration.getIntegerValue("HttpServer.operator.port",10051);
         boolean test=configuration.getBooleanValue("System.test",false);
+        System.out.println("http://"+Utils.getLocalHostName()+":"+operatorPort);
         HttpServer operatorServer=new HttpServer(traceManager,logger, test,JettyServerFactory.createServer(threads, operatorPort));
         operatorServer.addContentDecoders(new GzipContentDecoder());
         operatorServer.addContentEncoders(new GzipContentEncoder());
         operatorServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
         operatorServer.addContentWriters(new HtmlContentWriter(),new HtmlElementWriter(),new JSONContentWriter(),new AjaxQueryResultWriter());
         operatorServer.start();
-        System.out.println("http://"+Utils.getLocalHostName()+":"+operatorPort);
         return operatorServer;
     }
     
@@ -101,6 +101,7 @@ public class ServerApplicationRunner //
         catch (Throwable t)
         {
             showException(coreEnvironment.getLogger(),t);
+            
             return;
         }
         

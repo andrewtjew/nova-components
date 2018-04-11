@@ -15,7 +15,7 @@ public class TableRow extends Element
     
     public tr tr()
     {
-        return this.tr();
+        return this.tr;
     }
     public TableRow add(Object...items)
     {
@@ -26,14 +26,6 @@ public class TableRow extends Element
         return this;
     }
     public TableRow add(td...items)
-    {
-        for (Object item:items)
-        {
-            tr.addInner(item);
-        }
-        return this;
-    }
-    public TableRow addInner(td...items)
     {
         for (Object item:items)
         {

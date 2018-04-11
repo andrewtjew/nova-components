@@ -78,6 +78,10 @@ public class PathAndQueryBuilder
 	}
 	public PathAndQueryBuilder addQuery(String key,String value) throws Exception
 	{
+	    if (value==null)
+	    {
+	        return this;
+	    }
         if (this.separator=='#')
         {
             throw new Exception();

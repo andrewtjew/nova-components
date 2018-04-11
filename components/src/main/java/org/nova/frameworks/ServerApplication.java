@@ -65,11 +65,6 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
         this.test=configuration.getBooleanValue("System.test",false);
         this.disruptorManager=new DisruptorManager();
 
-        //Do not keep these vault information in configuration.
-        configuration.remove("System.vault.secureVaultFile");
-        configuration.remove("System.vault.passwordFile");
-        configuration.remove("System.vault.salt");
-
         this.localHostName=configuration.getValue("ServerApplication.localHostNameOverride",Utils.getLocalHostName());
         
         this.operatorVariableManager=new OperatorVariableManager();

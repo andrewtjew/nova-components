@@ -2,7 +2,7 @@ package org.nova.flow;
 
 import java.util.ArrayList;
 import org.nova.concurrent.Synchronization;
-import org.nova.logging.ThrowablesLog;
+import org.nova.logging.ThrowableEvents;
 import org.nova.metrics.CountMeter;
 import org.nova.metrics.LevelMeter;
 import org.nova.test.Testing;
@@ -18,7 +18,7 @@ public class ThreadWorkerQueue extends Node
     final private int stallSizeThreshold;
     final private Node receiver;
     final private Object lock;
-    final private ThrowablesLog throwablesLog;
+    final private ThrowableEvents throwablesLog;
     private Thread thread;
     private ArrayList<Packet> queue;
     private boolean stop;
@@ -30,7 +30,7 @@ public class ThreadWorkerQueue extends Node
 	
 	public ThreadWorkerQueue(Node receiver,long stallWait,int stallSizeThreshold,int maxQueueSize,int id,CountMeter droppedMeter,CountMeter stalledMeter,LevelMeter threadInUseMeter,LevelMeter waitingMeter)
 	{
-	    this.throwablesLog=new ThrowablesLog();
+	    this.throwablesLog=new ThrowableEvents();
 		this.droppedMeter=droppedMeter;
 		this.stalledMeter=stalledMeter;
 		this.threadInUseMeter=threadInUseMeter;
@@ -172,7 +172,7 @@ public class ThreadWorkerQueue extends Node
         }
 	}
 	
-	public ThrowablesLog getThrowablesLog()
+	public ThrowableEvents getThrowablesLog()
 	{
         return this.throwablesLog;
 	}

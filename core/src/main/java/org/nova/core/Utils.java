@@ -674,20 +674,25 @@ public class Utils
 	}
 	
 	
-	public static String getStrackTraceAsString(Throwable t) throws Exception
+	public static String getStrackTraceAsString(Throwable t)
 	{
-		
-		try (ByteArrayOutputStream outputStream=new ByteArrayOutputStream())
+		try
 		{
-			try (PrintWriter writer=new PrintWriter(outputStream)) 
-			{
-				t.printStackTrace(writer);
-				writer.flush();
-			}
-			outputStream.flush();
-			return new String(outputStream.toByteArray());
+    		try (ByteArrayOutputStream outputStream=new ByteArrayOutputStream())
+    		{
+    			try (PrintWriter writer=new PrintWriter(outputStream)) 
+    			{
+    				t.printStackTrace(writer);
+    				writer.flush();
+    			}
+    			outputStream.flush();
+    			return new String(outputStream.toByteArray());
+    		}
 		}
-			
+		catch (Throwable tt)
+		{
+		    throw new RuntimeException();
+		}
 	}
 
 	public static int bigEndianBytesToInt(byte[] bytes,int index) 

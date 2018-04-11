@@ -385,11 +385,11 @@ public class HttpServer
 		catch (Throwable e)
 		{
 			trace.close(e);
+            servletResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
             if (this.test)
             {
                 servletResponse.getOutputStream().print(Utils.toString(e));
             }
-			servletResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
 		}
 		finally
 		{

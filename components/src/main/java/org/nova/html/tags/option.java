@@ -37,10 +37,6 @@ public class option extends GlobalEventTagElement<option>
         }
         return this;
     }
-    public option value(String text)
-    {
-        return attr("value",text);
-    }
     public option value(Object value)
     {
         return attr("value",value);

@@ -133,9 +133,9 @@ public class JSONFormatter extends Formatter
         }
         else
         {
-            sb.append("\":");
+            sb.append("\":\"");
             ObjectMapper.writeString(sb, value.toString());
-            sb.append("}");
+            sb.append("\"}");
         }
     }
 	
@@ -186,5 +186,4 @@ public class JSONFormatter extends Formatter
 	{
         return "\r\n]";
 	}
-
 }

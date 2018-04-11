@@ -3,14 +3,14 @@ package org.nova.html.widgets.InputFeedBackForm;
 import java.util.ArrayList;
 
 import org.nova.core.NameValue;
+import org.nova.html.attributes.Size;
+import org.nova.html.attributes.Style;
+import org.nova.html.attributes.display;
+import org.nova.html.attributes.font_weight;
+import org.nova.html.attributes.text_align;
+import org.nova.html.attributes.unit;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.properties.Size;
-import org.nova.html.properties.Style;
-import org.nova.html.properties.display;
-import org.nova.html.properties.font_weight;
-import org.nova.html.properties.text_align;
-import org.nova.html.properties.unit;
 import org.nova.html.tags.div;
 import org.nova.html.widgets.Text;
 

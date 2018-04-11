@@ -1,12 +1,14 @@
 package org.nova.html.bootstrap4;
 
 import org.nova.html.bootstrap4.classes.BackgroundColor;
+import org.nova.html.bootstrap4.classes.Margin;
 import org.nova.html.bootstrap4.classes.NavbarColor;
 import org.nova.html.bootstrap4.classes.Responsiveness;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.nav;
 import org.nova.html.tags.span;
+import org.nova.html.widgets.HtmlUtils;
 import org.nova.html.tags.a;
 import org.nova.html.tags.button_button;
 import org.nova.html.tags.div;
@@ -41,27 +43,12 @@ public class Navbar extends Element
         return this;
     }
     
-    public Navbar addBrand(String label,String href)
+    public Navbar add(Element element)
     {
-        this.nav.addInner(new a().class_("navbar-brand").href(href).addInner(label));
+        this.nav.addInner(element);
         return this;
     }
     
-    public NavbarList createToggler(String targetId)
-    {
-        button_button button=this.nav.returnAddInner(new button_button());
-        button.class_("navbar-toggler").data("toggle", "collapse").data("target", "#"+targetId);
-  //      button.attr("aria-controls",targetId).attr("aria-expanded","false").attr("aria-label",label);
-        button.addInner(new span().class_("navbar-toggler-icon"));
-        return this.nav.returnAddInner(new NavbarList(targetId));
-    }
-    
-    public Navbar add(NavbarList list)
-    {
-        this.nav.addInner(list);
-        return this;
-    }
-
     @Override
     public void compose(Composer composer) throws Throwable
     {

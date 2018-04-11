@@ -11,7 +11,7 @@ import org.nova.html.operator.AjaxQueryResultWriter;
 import org.nova.html.tags.hr;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.widgets.HtmlUtils;
-import org.nova.html.widgets.MoreLink;
+import org.nova.html.widgets.MoreButton;
 import org.nova.html.widgets.NameValueList;
 import org.nova.html.widgets.TableRow;
 import org.nova.http.client.PathAndQueryBuilder;
@@ -58,7 +58,7 @@ public class SessionOperatorPages<SESSION extends Session>
         OperatorPage page=this.serverApplication.buildOperatorPage("All Sessions");
         page.content().addInner(new hr());
         OperatorTable table=page.content().returnAddInner(new ServerApplicationPages.OperatorTable(page.head()));
-        table.setHeaderItems("Token","User","Created","Last Accessed","Active","Idle","Accessed","Rate","");
+        table.setHeaderInline("Token","User","Created","Last Accessed","Active","Idle","Accessed","Rate","");
         
         for (Session session:this.sessionManager.getSessionSnapshot())
         {
@@ -74,7 +74,7 @@ public class SessionOperatorPages<SESSION extends Session>
                     ,new PathAndQueryBuilder("/operator/session").addQuery("token",session.getToken()).toString()
                     );
             */
-            row.add(new MoreLink(page.head(),new PathAndQueryBuilder("/operator/session").addQuery("token",session.getToken()).toString()));
+            row.add(new MoreButton(page.head(),new PathAndQueryBuilder("/operator/session").addQuery("token",session.getToken()).toString()));
            table.addRow(row);
         }
         return page;

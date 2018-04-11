@@ -12,7 +12,7 @@ public class SqlConnectorFlatWriter extends Node
 {
     final private Connector connector;
     final private RateMeter rateMeter;
-    final private ThrowablesLog throwablesLog;
+    final private ThrowableEvents throwablesLog;
     final private Formatter formatter;
     final private String categoryOverride;
     final private String insert;
@@ -24,7 +24,7 @@ public class SqlConnectorFlatWriter extends Node
         this.rateMeter=new RateMeter();
         this.formatter=formatter;
         this.categoryOverride=categoryOverride==null?this.getClass().getSimpleName():categoryOverride;
-        this.throwablesLog=new ThrowablesLog();
+        this.throwablesLog=new ThrowableEvents();
     }
     public SqlConnectorFlatWriter(Connector connector,Formatter formatter)
     {
@@ -99,7 +99,7 @@ public class SqlConnectorFlatWriter extends Node
     {
     }
     
-    public ThrowablesLog getFirstAndLastThrowablesLog()
+    public ThrowableEvents getFirstAndLastThrowablesLog()
     {
         return this.throwablesLog;
     }

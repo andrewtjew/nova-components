@@ -64,11 +64,11 @@ public class MenuBar extends Element
         add(enabled,href,names,0,rootItems);
         return this;
     }
-    public MenuBar addSeparator(String...names)
+    public MenuBar addDivider(String...names)
     {
-        String[] namesWithSeparator=new String[names.length+1];
-        System.arraycopy(names, 0, namesWithSeparator, 0, names.length);
-        add(true,null,namesWithSeparator,0,rootItems);
+        String[] namesWithDivider=new String[names.length+1];
+        System.arraycopy(names, 0, namesWithDivider, 0, names.length);
+        add(true,null,namesWithDivider,0,rootItems);
         return this;
     }
 

@@ -81,72 +81,82 @@ public class CoreEnvironment
 		this.timerScheduler=new TimerScheduler(traceManager, this.getLogger());
 		this.timerScheduler.start();
 
-		//Setting up the vault
-        String secureVaultFile=configuration.getValue("Environment.Vault.secureVaultFile",null);
-        if (secureVaultFile!=null)
-        {
-            String password=null;
-            String passwordFile=configuration.getValue("Application.commentFile",null);
-            if (passwordFile!=null)
+    		//Setting up the vault
+   		try
+   		{
+            String secureVaultFile=configuration.getValue("Environment.Vault.secureVaultFile",null);
+            if (secureVaultFile!=null)
             {
-                password=Utils.readTextFile(passwordFile).trim();
-            }
-            else 
-            {
-                if (System.console()==null)
+                String password=null;
+                String passwordFile=configuration.getValue("Environment.vault.key",null);
+                if (passwordFile!=null)
                 {
-                    System.err.println("No console available to enter vault password");
-                    System.exit(1);
+                    password=Utils.readTextFile(passwordFile).trim();
                 }
-                password=new String(System.console().readPassword("Enter vault password:"));
-            }
-            String salt=configuration.getValue("Environment.Vault.salt");
-            this.vault=new SecureFileVault(password, salt, secureVaultFile);
-            if (passwordFile!=null)
-            {
-                if ("false".equalsIgnoreCase(this.vault.get("DeletePasswordFile")))
+                else 
                 {
-                }
-                else
-                {
-                    try
+                    if (System.console()==null)
                     {
-                        if (new File(passwordFile).delete()==false)
+                        System.err.println("No console available to enter vault password");
+                        System.exit(1);
+                    }
+                    password=new String(System.console().readPassword("Enter vault password:"));
+                }
+                String salt=configuration.getValue("Environment.Vault.salt");
+                this.vault=new SecureFileVault(password, salt, secureVaultFile);
+                if (passwordFile!=null)
+                {
+                    if ("false".equalsIgnoreCase(this.vault.get("DeletePasswordFile")))
+                    {
+                    }
+                    else
+                    {
+                        try
+                        {
+                            if (new File(passwordFile).delete()==false)
+                            {
+                                System.err.println("Unable to delete password file.");
+                                System.exit(1);
+                            }
+                        }
+                        catch (Throwable t)
                         {
                             System.err.println("Unable to delete password file.");
+                            t.printStackTrace(System.err);
                             System.exit(1);
                         }
                     }
-                    catch (Throwable t)
-                    {
-                        System.err.println("Unable to delete password file.");
-                        t.printStackTrace(System.err);
-                        System.exit(1);
-                    }
                 }
-            }
-        }
-        else
-        {
-            String unsecureVaultFile=configuration.getValue("Environment.Vault.unsecureVaultFile");
-            if (unsecureVaultFile!=null)
-            {
-                this.vault=new UnsecureFileVault(unsecureVaultFile);
-                this.getLogger().log(Level.CRITICAL,"Using UnsecureVault");
             }
             else
             {
-                this.vault=new UnsecureVault();
+                String unsecureVaultFile=configuration.getValue("Environment.Vault.unsecureVaultFile");
+                if (unsecureVaultFile!=null)
+                {
+                    this.vault=new UnsecureFileVault(unsecureVaultFile);
+                    this.getLogger().log(Level.CRITICAL,"Using UnsecureVault");
+                }
+                else
+                {
+                    this.vault=new UnsecureVault();
+                }
+                printUnsecureVaultWarning(System.err);
             }
-            printUnsecureVaultWarning(System.err);
+		}
+        finally
+        {
+            //Do not keep these vault information in configuration.
+            configuration.remove("System.vault.secureVaultFile");
+            configuration.remove("System.vault.salt");
         }
+
+        
 	}
 	
     private void printUnsecureVaultWarning(PrintStream stream)
     {
         stream.println("**************************************");
         stream.println("**   WARNING: Using UnsecureVault   **");
-        stream.println("**   DO NOT USE IN PRODUCTION!!!!   **");
         stream.println("**************************************");
     }
     

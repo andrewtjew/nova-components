@@ -100,24 +100,6 @@ public class DataTable extends Table
                     }
                 }
                 sb.append('}');
-                /*
-                if ((this.lengthMenu!=null)&&(this.lengthMenu.length>0))
-                {
-                    ArrayList<String> labels=new ArrayList<>();
-                    for (int i=0;i<this.lengthMenu.length;i++)
-                    {
-                        if (this.lengthMenu[i]>=0)
-                        {
-                            labels.add(Integer.toString(this.lengthMenu[i]));
-                        }
-                        else
-                        {
-                            labels.add("'All'");
-                        }
-                    }
-                    sb.append("{'lengthMenu': [["+Utils.combine(Utils.toList(this.lengthMenu), ",")+"], ["+Utils.combine(labels, ",")+"]]}");
-                }
-                */
                 sb.append(");});");
                 return sb.toString();
             }
@@ -133,7 +115,6 @@ public class DataTable extends Table
         }
     }
     
-    final private String id;
     final private Objects objects;
     
     public DataTable(Head head)
@@ -143,33 +124,27 @@ public class DataTable extends Table
     
     public DataTable(Head head,String id)
     {
-        this(head,id,"display","/resources/html/widgets/DataTable");
+        this(head,id,"display","/resources/html/widgets/DataTable/datatables.min.css","/resources/html/widgets/DataTable/datatables.min.js");
     }
     
-    public DataTable(Head head,String id,String class_,String sourcePath)
+    public DataTable(Head head,String id,String class_,String cssFilePath,String scriptFilePath)
     {
+        super(head,class_,cssFilePath);
         if (id==null)
         {
-            id=Integer.toString(this.hashCode());
+            id=HtmlUtils.generateId(this);
         }
         this.table().id(id);
-        this.table().class_(class_);
-        this.table().style("width:100%;");
-        this.id=id;
         this.objects=new Objects(id);
         this.table().addInner(new script().addInner(this.objects));
-        script script=new script().src(sourcePath+"/datatables.min.js");
-        link link=new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+"/datatables.min.css");
+        script script=new script().src(scriptFilePath);
         if (head!=null)
         {
             head.add(DataTable.class.getCanonicalName(),script);
-            head.add(DataTable.class.getCanonicalName(),link);
         }
         else
         {
             this.table().addInner(script);
-            this.table().addInner(link);
-            
         }
     }
 

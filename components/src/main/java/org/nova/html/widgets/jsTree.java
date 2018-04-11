@@ -38,11 +38,6 @@ public class jsTree extends Element
             head.add(jsTree.class.getCanonicalName(),script);
             head.add(jsTree.class.getCanonicalName(),link);
         }
-        else
-        {
-            this.div.addInner(script);
-            this.div.addInner(link);
-        }
         this.ul=this.div.returnAddInner(new ul());
     }
 

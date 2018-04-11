@@ -32,17 +32,15 @@ import org.nova.configuration.Configuration;
 import org.nova.configuration.ConfigurationItem;
 import org.nova.core.Utils;
 import org.nova.flow.Tapper;
-import org.nova.html.properties.Color;
-import org.nova.html.properties.Size;
-import org.nova.html.properties.Style;
-import org.nova.html.properties.unit;
 import org.nova.html.tags.a;
+import org.nova.html.tags.br;
 import org.nova.html.tags.button_button;
 import org.nova.html.tags.button_submit;
 import org.nova.html.tags.div;
 import org.nova.html.tags.fieldset;
 import org.nova.html.tags.form_get;
 import org.nova.html.tags.form_post;
+import org.nova.html.tags.h3;
 import org.nova.html.tags.hr;
 import org.nova.html.tags.input_checkbox;
 import org.nova.html.tags.input_hidden;
@@ -63,14 +61,23 @@ import org.nova.html.tags.textarea;
 import org.nova.html.tags.th;
 import org.nova.html.tags.tr;
 import org.nova.html.widgets.BasicPage;
+import org.nova.html.widgets.ClearTimeout;
+import org.nova.html.widgets.ConfirmButton;
 import org.nova.html.widgets.Content;
 import org.nova.html.widgets.DataTable;
+import org.nova.html.widgets.DisableInputToggler;
 import org.nova.html.widgets.Head;
 import org.nova.html.widgets.HtmlUtils;
 import org.nova.html.widgets.MenuBar;
-import org.nova.html.widgets.MoreLink;
+import org.nova.html.widgets.MoreButton;
 import org.nova.html.widgets.NameValueList;
 import org.nova.html.widgets.Panel;
+import org.nova.html.widgets.Panel1;
+import org.nova.html.widgets.Panel2;
+import org.nova.html.widgets.Panel3;
+import org.nova.html.widgets.Panel4;
+import org.nova.html.widgets.Redirect;
+import org.nova.html.widgets.Refresher;
 import org.nova.html.widgets.Table;
 import org.nova.html.widgets.TableHeader;
 import org.nova.html.widgets.TableRow;
@@ -79,6 +86,9 @@ import org.nova.html.widgets.TreeNode;
 import org.nova.html.widgets.jsTree;
 import org.nova.html.widgets.InputFeedBackForm.NameInputValueList;
 import org.nova.html.widgets.w3c.Accordion;
+import org.nova.html.xtags.input_hidden_name_value;
+import org.nova.html.xtags.location_button;
+import org.nova.html.xtags.SelectEnums;
 import org.nova.html.xtags.th_title;
 import org.nova.http.Header;
 import org.nova.http.client.HttpClientConfiguration;
@@ -107,16 +117,24 @@ import org.nova.http.server.RequestHandlerNotFoundLogEntry;
 import org.nova.http.server.RequestLogEntry;
 import org.nova.http.server.Response;
 import org.nova.http.server.HtmlContentWriter;
+import org.nova.html.attributes.Color;
+import org.nova.html.attributes.Size;
+import org.nova.html.attributes.Style;
+import org.nova.html.attributes.unit;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.elements.InnerElement;
+import org.nova.html.elements.StringComposer;
 import org.nova.html.enums.http_equiv;
 import org.nova.html.operator.AjaxButton;
 import org.nova.html.operator.AjaxQueryResult;
 import org.nova.html.operator.AjaxQueryResultWriter;
+import org.nova.html.operator.HttpRequestWidget;
+import org.nova.html.operator.OperatorUtils;
 import org.nova.html.operator.SelectOptions;
 import org.nova.html.operator.TitleText;
+import org.nova.html.operator.TraceWidget;
 import org.nova.http.server.annotations.ParamName;
 import org.nova.http.server.annotations.ContentDecoders;
 import org.nova.http.server.annotations.ContentEncoders;
@@ -129,6 +147,7 @@ import org.nova.http.server.annotations.POST;
 import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.PathParam;
 import org.nova.http.server.annotations.QueryParam;
+import org.nova.http.server.annotations.Test;
 import org.nova.logging.Item;
 import org.nova.logging.HighPerformanceLogger;
 import org.nova.logging.LogDirectoryInfo;
@@ -152,6 +171,9 @@ import org.nova.metrics.RateSample;
 import org.nova.metrics.RecentSourceEventMeter;
 import org.nova.metrics.RecentSourceEventSample;
 import org.nova.metrics.SourceEvent;
+import org.nova.metrics.StackTraceNode;
+import org.nova.metrics.ThreadExecutionMeter;
+import org.nova.metrics.ThreadExecutionSample;
 import org.nova.operations.OperatorVariable;
 import org.nova.security.Vault;
 import org.nova.test.Testing;
@@ -184,41 +206,10 @@ public class ServerApplicationPages
     {
         public WideTable(Head head)
         {
-            super();
-            
-            head.add(WideTable.class.getCanonicalName(),new style().addInner("table.widetable {border-collapse:collapse;width:100%;} .widetable thead {background-color:#ddd;font-weight:bold;} .widetable td{border:1px solid #888;padding:4px;} "));
-            table().class_("widetable");
+            super(head);
+            table().style("width:100%;");
         }
     }
-    static public class Level1Panel extends Panel
-    {
-        public Level1Panel(Head head,String title)
-        {
-            super(head,null,title);
-        }
-    }
-    static public class Level2Panel extends Level1Panel
-    {
-        public Level2Panel(Head head,String title)
-        {
-            super(head,title);
-            style("padding:4px;");
-            this.heading().style("background-color:#bbb;color:#000;text-align:left;padding:2px 2px 2px 4px;");
-            this.content().style("padding:0px;");
-        }
-    }
-    static public class Level3Panel extends Level1Panel
-    {
-        public Level3Panel(Head head,String title)
-        {
-            super(head,title);
-            //top right bottom left
-            style("padding:4px;");
-            this.heading().style("background-color:#fff;color:#000;text-align:left;font-weight:normal;padding:2px 2px 2px 2px;");
-            this.content().style("padding:2px 2px 2px 2px;");
-        }
-    }
-
     final static String WARNING="&#9888;";
     
     public final ServerApplication serverApplication;
@@ -243,22 +234,22 @@ public class ServerApplicationPages
         menuBar.add("/","Environment","Status");
         menuBar.add("/operator/application/configuration","Environment","Configuration");
         menuBar.add("/operator/jvm","Environment","JVM");
-        menuBar.addSeparator("Environment");       
+        menuBar.addDivider("Environment");       
         menuBar.add("/operator/application/futures","Environment","Futures");
         menuBar.add("/operator/application/timers","Environment","Timer Tasks");
-        menuBar.addSeparator("Environment");       
+        menuBar.addDivider("Environment");       
         menuBar.add("/operator/environment/sourceEventBoard","Environment","Source Event Board");
         menuBar.add("/operator/application/meters","Environment","Meters");
-        menuBar.addSeparator("Environment");       
+        menuBar.addDivider("Environment");       
         menuBar.add("/operator/exception","Environment","Startup Exception");
 
         menuBar.add("/operator/tracing/currentTraceSummary?excludeWaiting=false","Tracing","Current Trace Summary");
-        menuBar.add("/operator/tracing/currentTraceSummary?excludeWaiting=true","Tracing","Current Non Waiting Trace Summary");
+//        menuBar.add("/operator/tracing/currentTraceSummary?excludeWaiting=true","Tracing","Current Non Waiting Trace Summary");
         menuBar.add("/operator/tracing/currentTraces","Tracing","Current Traces");
         menuBar.add("/operator/tracing/sampleCurrent?excludeWaiting=false","Tracing","Sample Current Traces");
         menuBar.add("/operator/tracing/sampleCurrent?excludeWaiting=true","Tracing","Sample Current Non Waiting Traces");
         
-        menuBar.addSeparator("Tracing");       
+        menuBar.addDivider("Tracing");       
         menuBar.add("/operator/tracing/lastTraces","Tracing","Last Traces");
         menuBar.add("/operator/tracing/sampleLast","Tracing","Sample Last Traces");
         menuBar.add("/operator/tracing/sampleAndResetLast","Tracing","Sample and Reset Last Traces");
@@ -269,21 +260,21 @@ public class ServerApplicationPages
         
         menuBar.add("/operator/tracing/sampleAll","Tracing","Sample All Trace Categories");
         
-        menuBar.addSeparator("Tracing");
+        menuBar.addDivider("Tracing");
         menuBar.add("/operator/tracing/watchList","Tracing","Watch","Set Watch Categories");
         menuBar.add(false,"/operator/tracing/sampleWatch","Tracing","Watch","Sample Watch Traces");
         menuBar.add(false,"/operator/tracing/sampleAndResetWatch","Tracing","Watch","Sample and Reset Watch Traces");
         menuBar.add(false,"/operator/tracing/sampleWatchTraceBuffer","Tracing","Watch","Sample Watch Trace Buffer");
         menuBar.add(false,"/operator/tracing/watchListLastTraces","Tracing","Watch","Last Watch Traces");
 
-        menuBar.addSeparator("Tracing");
+        menuBar.addDivider("Tracing");
         menuBar.add("/operator/tracing/secondaryCategories","Tracing","Secondary Categories","Set Secondary Categories");
         menuBar.add("/operator/tracing/sampleLastSecondary","Tracing","Secondary Categories","Sample Secondary Last Traces");
         menuBar.add("/operator/tracing/sampleAndResetLastSecondary","Tracing","Secondary Categories","Sample and Reset Secondary Last Traces");
         menuBar.add("/operator/tracing/lastSecondaryExceptions","Tracing","Secondary Categories","Last Secondary Exception Traces");
         
         
-        menuBar.addSeparator("Tracing");
+        menuBar.addDivider("Tracing");
         menuBar.add("/operator/tracing/stats","Tracing","TraceManager","Stats");
         menuBar.add("/operator/tracing/settings","Tracing","TraceManager","Settings");
 
@@ -335,15 +326,14 @@ public class ServerApplicationPages
         OperatorPage page=this.serverApplication.buildOperatorPage("Configuration"); 
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         
-        table.setHeaderItems("Name","Value","Description","Source","Source Context");
+        table.setHeaderInline("Name","Value","Source");
         for (ConfigurationItem item : this.serverApplication.getConfiguration().getConfigurationItemSnapshot())
         {
             TableRow row=new TableRow();
-            row.add(item.getName());
-            row.add(new TitleText(item.getValue(), 32));
-            row.add(new TitleText(item.getDescription(), 64));
-            row.add(item.getSource());
-            row.add(item.getSourceContext());
+            row.add(new td().addInner(item.getName()).title(item.getDescription()));
+//            row.add(new td().addInner(item.getValue()).style("word-wrap:break-word;overflow-wrap:break-word;word-break:break-word;"));
+            row.add(new td().addInner(item.getValue()).style("word-wrap:break-word;word-break:break-all;"));
+            row.add(new td().addInner(item.getSource()).title(item.getSourceContext()));
             table.addRow(row);
         }
         return page;
@@ -435,7 +425,7 @@ public class ServerApplicationPages
         {
             Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Count Meters"));
             DataTable table=accordion.content().returnAddInner(new OperatorTable(head));
-            table.setHeaderItems("Path","Count");
+            table.setHeaderInline("Path","Count");
             for (MeterAttributeValue av:meters.countMeterAttributeValues.values())
             {
                 TableRow row=new TableRow();
@@ -449,7 +439,7 @@ public class ServerApplicationPages
         {
             Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Level Meters"));
             DataTable table=accordion.content().returnAddInner(new OperatorTable(head));
-            table.setHeaderItems("Path","Level","Base","Min","Min Instant","Max","Max Instant");
+            table.setHeaderInline("Path","Level","Base","Min","Min Instant","Max","Max Instant");
             for (MeterAttributeValue av:meters.levelMeterAttributeValues.values())
             {
                 TableRow row=new TableRow();
@@ -468,7 +458,7 @@ public class ServerApplicationPages
         {
             Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Rate Meters"));
             DataTable table=accordion.content().returnAddInner(new OperatorTable(head));
-            table.setHeaderItems("Path","Rate","Total","Samples");
+            table.setHeaderInline("Path","Rate","Total","Samples");
             for (MeterAttributeValue av:meters.rateMeterAttributeValues.values())
             {
                 TableRow row=new TableRow();
@@ -484,7 +474,7 @@ public class ServerApplicationPages
         {
             Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Long Value Meters"));
             DataTable table=accordion.content().returnAddInner(new OperatorTable(head));
-            table.setHeaderItems("Path","Value","Average","Deviation","Rate","Min","Max","Samples");
+            table.setHeaderInline("Path","Value","Average","Deviation","Rate","Min","Max","Samples");
             for (MeterAttributeValue av:meters.longValueMeterAttributeValues.values())
             {
                 TableRow row=new TableRow();
@@ -504,7 +494,7 @@ public class ServerApplicationPages
         {
             Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Count Meters"));
             DataTable table=accordion.content().returnAddInner(new OperatorTable(head));
-            table.setHeaderItems("Path","Most recent","Most recent instant","State 1","Instant 1","State 2","Instant 2","Count");
+            table.setHeaderInline("Path","Most recent","Most recent instant","State 1","Instant 1","State 2","Instant 2","Count");
             for (MeterAttributeValue av:meters.recentSourceEventMeterAttributeValues.values())
             {
                 TableRow row=new TableRow();
@@ -542,12 +532,12 @@ public class ServerApplicationPages
         OperatorPage page=this.serverApplication.buildOperatorPage("Futures");
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
 
-        table.setHeaderItems("Category","Number","Duration","Waiting","Executing","Completed");
+        table.setHeaderInline("Category","Number","Duration","Waiting","Executing","Completed");
         Progress<?>[] array = this.serverApplication.getMultiTaskScheduler().getProgressSnapshot();
         long now=System.currentTimeMillis();
         for (Progress<?> item : array)
         {
-            table.addRowItems(item.getTrace().getCategory(),item.getTrace().getNumber()
+            table.addRowInline(item.getTrace().getCategory(),item.getTrace().getNumber()
                     ,Utils.millisToNiceDurationString((now-item.getTrace().getCreatedMs())),item.getWaiting(),item.getExecuting(),item.getCompleted());
         }
         return page;
@@ -562,7 +552,7 @@ public class ServerApplicationPages
         table.lengthMenu(-1,20,40,60);
 
         
-        table.setHeaderItems("Name","State","Type","Instant","Source","Count");
+        table.setHeaderInline("Name","State","Type","Instant","Source","Count");
         for (Entry<String, RecentSourceEventMeter> entry:this.serverApplication.getSourceEventBoard().getSnapshot().entrySet())
         {
             TableRow row=new TableRow();
@@ -613,7 +603,7 @@ public class ServerApplicationPages
         OperatorPage page=this.serverApplication.buildOperatorPage("Log Categories");
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
 
-        table.setHeaderItems("Category","Active","Count","Rate","Log Failures","Last Failure","");
+        table.setHeaderInline("Category","Active","Count","Rate","Log Failures","Last Failure","");
         Logger[] loggers=this.serverApplication.getCoreEnvironment().getLoggers();
         for (Logger item : loggers)
         {
@@ -654,7 +644,7 @@ public class ServerApplicationPages
                 {
                     row.add(Utils.toString(exception));
                 }
-                row.add(new MoreLink(page.head(),new PathAndQueryBuilder("/operator/logging/category/lastEntries").addQuery("category",item.getCategory()).toString()));
+                row.add(new RightMoreLink(page.head(),new PathAndQueryBuilder("/operator/logging/category/lastEntries").addQuery("category",item.getCategory()).toString()));
                 
             }
             table.addRow(row);
@@ -679,7 +669,7 @@ public class ServerApplicationPages
         List<LogEntry> entries=logger.getLastLogEntries();
         for (LogEntry entry:entries)
         {
-            Panel panel=page.content().returnAddInner(new Level2Panel(page.head(), "Number:"+entry.getNumber()));
+            Panel panel=page.content().returnAddInner(new Panel3(page.head(), "Number:"+entry.getNumber()));
             WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
             TableHeader header=new TableHeader()
 //                .addWithTitle("Number", "Sequence number")
@@ -690,8 +680,8 @@ public class ServerApplicationPages
             table.setHeader(header);
             TableRow row=new TableRow();
 //            row.addInner(new td().style("width:3em;").addInner(entry.getNumber()));
-            row.addInner(new td().style("width:12em;").addInner(Utils.millisToLocalDateTimeString(entry.getCreated())));
-            row.addInner(new td().style("width:5em;").addInner(entry.getLogLevel()));
+            row.add(new td().style("width:12em;").addInner(Utils.millisToLocalDateTimeString(entry.getCreated())));
+            row.add(new td().style("width:5em;").addInner(entry.getLogLevel()));
             row.add(entry.getMessage());
             table.addRow(row);
             
@@ -721,7 +711,7 @@ public class ServerApplicationPages
             
             if (entry.getTrace()!=null)
             {
-                writeTrace(page.head(),panel.content(),entry.getTrace(),true);
+                OperatorUtils.writeTrace(page.head(),panel.content(),entry.getTrace(),true);
             }
             
         }
@@ -734,7 +724,7 @@ public class ServerApplicationPages
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Timers");
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
-        table.setHeaderItems("Category"
+        table.setHeaderInline("Category"
                 ,new th_title("#", "Number")
                 ,"Created","Status","Due","Countdown","Duration"
                 ,new th_title("Mode","Timer scheduling mode")
@@ -751,7 +741,7 @@ public class ServerApplicationPages
         TimerTask[] timerTasks = this.serverApplication.getTimerScheduler().getTimerTaskSnapshot();
         for (TimerTask timerTask : timerTasks)
         {
-            table.addRowItems(timerTask.getCategory()
+            table.addRowInline(timerTask.getCategory()
                     ,timerTask.getNumber()
                     ,Utils.millisToLocalDateTimeString(timerTask.getCreated())
                     ,timerTask.getExecutableStatus()
@@ -789,6 +779,42 @@ public class ServerApplicationPages
         table.addRow(row);
     }
 
+    
+    static class ActiveTraceTreeElement extends Element
+    {
+        final private Trace trace;
+        
+        
+        public ActiveTraceTreeElement(Trace trace)
+        {
+            this.trace=trace;
+        }
+        @Override
+        public void compose(Composer composer) throws Throwable
+        {
+            Content content=new Content();
+            content.addInner(trace.getCategory());
+            content.addInner(new NameValueRow(", Number: ",trace.getNumber(),null));
+            if (trace.getParent()!=null)
+            {
+                content.addInner(new NameValueRow(", Parent=",trace.getParent().getNumber(),null));
+            }
+            content.addInner(new NameValueRow(", Duration: ",formatNsToMs(trace.getDurationNs())," ms"));
+            content.addInner(new NameValueRow(", Wait: ",formatNsToMs(trace.getWaitNs())," ms"));
+            composer.render(content);
+        }
+        
+    }
+    
+    
+    static enum Units
+    {
+        Seconds,
+        Milliseconds,
+        Microseconds,
+        Nanoseconds,
+    }
+    
     @GET
     @Path("/operator/tracing/activeTrace")
     public Element activeTrace(@QueryParam("number") long number) throws Throwable
@@ -806,16 +832,18 @@ public class ServerApplicationPages
         }
         if (found != null)
         {
-            Level2Panel tracePanel=page.content().returnAddInner(new Level2Panel(page.head(),"Trace"));
-            WideTable table=tracePanel.content().returnAddInner(new WideTable(page.head()));
-            table.setHeaderItems(
-                    new th_title("T", "*=target trace, A=ancestor, C:n=Child")
-                    ,"#","Category","Details","Created"
-                    ,new th_title("Active", "(ms)")
-                    ,new th_title("Wait", "(ms)")
-                    ,new th_title("Duration", "Active+Wait (ms)")
-                    ,"Waiting","thread");
-
+            TreeNode root=new TreeNode(new ActiveTraceTreeElement(found));
+            TreeNode foundNode=root;
+            foundNode.opened(true);
+            foundNode.selected(true);
+            for (Trace trace = found.getParent(); trace != null; trace = trace.getParent())
+            {
+                TreeNode newRoot=new TreeNode(new ActiveTraceTreeElement(trace));
+                newRoot.add(root);
+                newRoot.opened(true);
+                root=newRoot;
+            }
+           
             ArrayList<ArrayList<Trace>> childeren = new ArrayList<>();
             for (Trace trace : traces)
             {
@@ -831,38 +859,297 @@ public class ServerApplicationPages
                 }
             }
 
-            int index = 0;
+            HashMap<Long,TreeNode> childerenMap=new HashMap<>();
+            childerenMap.put(found.getNumber(),foundNode);
+            
             for (ArrayList<Trace> list : childeren)
             {
-                for (Trace trace : list)
+                for (int index=list.size()-1;index>=0;index--)
                 {
-                    write(table, trace, "C:"+index);
+                    Trace trace=list.get(index);
+                    for (Trace parent = trace; parent != null; parent = parent.getParent())
+                    {
+                        TreeNode treeNode=childerenMap.get(trace.getNumber());
+                        if (treeNode==null)
+                        {
+                            continue;
+                        }
+                        TreeNode childNode=new TreeNode(new ActiveTraceTreeElement(trace));
+                        treeNode.add(childNode);
+                        childerenMap.put(trace.getNumber(), childNode);
+                    }
                 }
-                index++;
             }
-            Trace trace = found;
-            write(table, trace, "*");
-            for (trace = found.getParent(); trace != null; trace = trace.getParent())
-            {
-                write(table, trace, "A");
-            }
-            Level2Panel stackTracePanel=page.content().returnAddInner(new Level2Panel(page.head(),"Stack Trace"));
+            jsTree tree=new jsTree(page.head());
+            tree.add(root);
+            Panel3 tracePanel=page.content().returnAddInner(new Panel3(page.head(),"Trace"));
+            tracePanel.content().addInner(tree);
+            Panel3 stackTracePanel=page.content().returnAddInner(new Panel3(page.head(),"Stack Trace"));
             StackTraceElement[] stackTrace = found.getThread().getStackTrace();
             stackTracePanel.content().addInner(toString(stackTrace, 0));
 
+            Panel3 samplePanel=page.content().returnAddInner(new Panel3(page.head(),"Sample"));
+            form_post form=samplePanel.content().returnAddInner(new form_post());
+            form.addInner(new input_hidden_name_value("number",number));
+            form.action("/operator/tracing/sample");
+            
+            SelectOptions options=new SelectOptions("threadPriorityLevel");
+            options.add(Thread.MAX_PRIORITY, "Highest", true);
+            options.add(Thread.NORM_PRIORITY+1, "High");
+            options.add(Thread.NORM_PRIORITY, "Normal");
+            options.add(Thread.NORM_PRIORITY-1, "Low");
+            options.add(Thread.MIN_PRIORITY, "Lowest");
+            
+            NameValueList list=form.returnAddInner(new NameValueList());
+            list.add("Sampling Interval Time Units", new SelectEnums<Units>("unit",Units.class,Units.Milliseconds));
+            list.add("Minimum Samplling Interval", new input_number().name("minimumSamplingInterval").value(1).min(0));
+            list.add("Maximum Samplling Interval", new input_number().name("maximumSamplingInterval").value(1).min(0));
+            list.add("Measurements Per Sample", new input_number().name("measurementsPerSample").value(1).min(1));
+            list.add("Sampling Thread Priority Level", options);
+            list.add("Spin Wait", new input_checkbox().name("spin"));
+            list.add("Sampling Duration (Milliseconds)", new input_number().name("duration").value(5000).min(1).max(1000000));
+            list.add("Refresh Interval (Milliseconds)", new input_number().name("refresh").value(1000).min(0));
+            list.add(null, new input_submit().value("Start"));
         }
         else
         {
-            page.content().addInner("trace ended");
+            page.content().addInner("Trace ended");
         }
-
-        
         return page;
     }
-//    final static TitleText TOTAL_DURATION_COLUMN=new TitleText("Total duration in milliseconds","Tot &#x23F1;");
-//    final static TitleText TOTAL_PERCENTAGE_DURATION_COLUMN=new TitleText("Total duration in milliseconds as percentage","Tot% &#x23F1;");
+    
+    
+    ThreadExecutionMeter threadExecutionMeter;
+
+    @POST
+    @Path("/operator/tracing/sample")
+    public Element sampleTrace(@QueryParam("number") long number,
+            @QueryParam("threadPriorityLevel") int threadPriorityLevel,
+            @QueryParam("unit") Units units,
+            @QueryParam("minimumSamplingInterval") long minimumSamplingInterval,
+            @QueryParam("maximumSamplingInterval") long maximumSamplingInterval,
+            @QueryParam("duration") long duration,
+            @QueryParam("measurementsPerSample") int measurementsPerSample,
+            @QueryParam("refresh") long refresh,
+            @QueryParam("spin") boolean spin
+            
+            ) throws Throwable
+    {
+        OperatorPage page=this.serverApplication.buildOperatorPage("Active Trace Thread Execution");
+        Trace[] traces = this.serverApplication.getTraceManager().getCurrentTraces();
+        Trace found = null;
+        for (Trace trace : traces)
+        {
+            if (trace.getNumber() == number)
+            {
+                found = trace;
+                break;
+            }
+        }
+        if (found != null)
+        {
+            switch (units)
+            {
+                case Seconds:
+                    minimumSamplingInterval*=1000000000;
+                    maximumSamplingInterval*=1000000000;
+                    break;
+                case Milliseconds:
+                    minimumSamplingInterval*=1000000;
+                    maximumSamplingInterval*=1000000;
+                    break;
+                case Microseconds:
+                    minimumSamplingInterval*=1000;
+                    maximumSamplingInterval*=1000;
+                    break;
+                case Nanoseconds:
+                    break;
+                default:
+                    break;
+                
+            }
+            
+            synchronized(this)
+            {
+                if (this.threadExecutionMeter!=null)
+                {
+                    this.threadExecutionMeter.stop(0);
+                }
+                this.threadExecutionMeter=new ThreadExecutionMeter(found.getThread(), spin, minimumSamplingInterval, maximumSamplingInterval, duration*1000000, measurementsPerSample,threadPriorityLevel);
+                this.threadExecutionMeter.start();
+            }
+            button_button button=new button_button().addInner("Stop Sampling");
+            button.onclick("$.post('/operator/tracing/sample/stop',function(data){$('#stackTraceTree').html(data);});");
+            page.content().addInner(button);
+
+            new jsTree(page.head());
+            new Panel3(page.head(),null);
+            Refresher refresher=new Refresher("stackTraceTree","/operator/tracing/sample/refresh", refresh,"refreshTimer");
+            page.content().addInner(refresher);
+        }
+        else
+        {
+            page.content().addInner("Trace ended");
+        }
+        return page;
+    }
+
+    @POST
+    @Path("/operator/tracing/sample/stop")
+    public Element stopSampleTrace(Trace trace) throws Throwable
+    {
+        ThreadExecutionMeter meter;
+        synchronized(this)
+        {
+            meter=this.threadExecutionMeter;
+        }
+        
+        if (meter!=null)
+        {
+            meter.stop(0);
+        }
+        System.out.println("Stopped");
+        return sampleTrace(trace);
+    }
+    
+    @GET
+    @Path("/operator/tracing/sample/refresh")
+    public Element sampleTrace(Trace trace) throws Throwable
+    {
+        Content content=new Content();
+        ThreadExecutionMeter meter;
+        synchronized(this)
+        {
+            meter=this.threadExecutionMeter;
+        }
+        
+        if (meter==null)
+        {
+            content.addInner("No Meter");
+        }
+        else
+        {
+            ThreadExecutionSample sample=meter.sample();
+            if (sample.isEnded())
+            {
+                content.addInner(new ClearTimeout("refreshTimer"));
+                content.addInner(new h3().addInner("Sampling: Stopped"));
+            }
+            else
+            {
+                content.addInner(new h3().addInner("Sampling: Active"));
+                
+            }
+            content.addInner(new p());
+            long totalDurationNs=sample.getRoot().getDurationNs();
+            TreeNode root=new TreeNode("Total duration: "+totalDurationNs+" Ns");
+            root.opened(true);
+            jsTree tree=new jsTree(null);
+            tree.add(root);
+            content.addInner(tree);
+            if (sample.getRoot().getChildNodes()!=null)
+            {
+                for (StackTraceNode node:sample.getRoot().getChildNodes())
+                {
+                    root.add(buildStackTraceBranch(node,totalDurationNs,false,0,false));
+                }
+            }
+        }
+        return content;
+    }
+    
+    private TreeNode buildStackTraceBranch(StackTraceNode node,long sampleDurationNs,boolean showDuration,long hotNs,boolean notHot)
+    {
+        Content content=new Content();
+        TreeNode treeNode=new TreeNode(content);
+        StackTraceElement element=node.getStackTraceElement();
+        long childDurationNs=0;
+        if (node.getChildNodes()!=null)
+        {
+            if (showDuration==false)
+            {
+                showDuration=node.getChildNodes().length>1;
+            }
+            long childHotNs=Long.MIN_VALUE;
+            if (notHot==false)
+            {
+                for (StackTraceNode childNode:node.getChildNodes())
+                {
+                    if (childHotNs<childNode.getDurationNs())
+                    {
+                        childHotNs=childNode.getDurationNs();
+                    }
+                }
+            }
+            for (StackTraceNode childNode:node.getChildNodes())
+            {
+                childDurationNs+=childNode.getDurationNs();
+                treeNode.add(buildStackTraceBranch(childNode,sampleDurationNs,showDuration,childHotNs,childHotNs!=childNode.getDurationNs()));
+                treeNode.opened(true);
+            }
+        }
+        String elementColor="#000";
+        if (showDuration)
+        {
+            long durationNs=node.getDurationNs();
+            long selfDurationNs=durationNs-childDurationNs;
+            double durationPercent=(100.0*node.getDurationNs())/sampleDurationNs;
+            double selfDurationPercent=(100.0*selfDurationNs)/sampleDurationNs;
+            String text=String.format("%.3f", durationPercent)+"%, self="+String.format("%.3f", selfDurationPercent)+"%, ";
+            
+            String title;
+            if (durationNs%1000000000>0)
+            {
+                title=String.format("%.3f",durationNs/1000000000.0)+", self="+String.format("%.3f",selfDurationNs/1000000000.0)+" seconds";
+            }
+            else if (durationNs%1000000>0)
+            {
+                title=String.format("%.3f",durationNs/1000000.0)+", self="+String.format("%.3f",selfDurationNs/1000000.0)+" milliseconds";
+            }
+            else
+            {
+                title=durationNs+", self="+selfDurationNs+" nanoseconds";
+            }
+            
+            if (durationNs==hotNs)
+            {                
+                content.addInner(new span().style("color:#f00;").addInner("&#128293; "+text).title(title));
+            }
+            else
+            {
+                content.addInner(new span().style("color:#000;").addInner(text).title(title));
+            }
+        }
+        else
+        {
+            elementColor="color:#888;";
+        }
+        if (element.getFileName()!=null)
+        {
+            content.addInner(new span().style(elementColor).addInner(element.getClassName()+"."+element.getMethodName()+'('+element.getFileName()+':'+element.getLineNumber()+')'));
+        }
+        else
+        {
+            content.addInner(new span().style(elementColor).addInner(element.getClassName()+"."+element.getMethodName()+"(Unknown)"));
+        }
+        
+        return treeNode;
+    }
+    
+    //    final static TitleText TOTAL_DURATION_COLUMN=new TitleText("Total duration in milliseconds","Tot &#x23F1;");
+//    final static TitleText TOTAL_PERCENTAGE_DURATION_COLUMN=new; TitleText("Total duration in milliseconds as percentage","Tot% &#x23F1;");
 //    final static TitleText TOTAL_WAIT_COLUMN=new TitleText("Total wait duration in milliseconds","Total &#8987;");
 
+    static class RightMoreLink extends MoreButton
+    {
+
+        public RightMoreLink(Head head, String href)
+        {
+            super(head, href);
+            style("float:right;");
+        }
+    }
+    
     @GET
     @Path("/operator/tracing/currentTraceSummary")
     public Element currentTraces(@QueryParam("excludeWaiting") boolean excludeWaiting) throws Throwable
@@ -873,19 +1160,15 @@ public class ServerApplicationPages
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         
         TableHeader header=new TableHeader();
-        writeTraceRowHeading(header,excludeWaiting);
+        writeTraceRowHeading(header);
         header.add("");
         table.setHeader(header);
         
         for (Trace trace : traces)
         {
-            if (trace.isWaiting()&&(excludeWaiting))
-            {
-                continue;
-            }
             TableRow row=new TableRow();
-            writeTraceRow(row,trace,excludeWaiting);
-            row.add(new MoreLink(page.head(),new PathAndQueryBuilder("./activeTrace").addQuery("number", trace.getNumber()).toString()));
+            writeTraceRow(row,trace);
+            row.add(new RightMoreLink(page.head(),new PathAndQueryBuilder("./activeTrace").addQuery("number", trace.getNumber()).toString()));
             table.addRow(row);
         }
         return page;
@@ -951,7 +1234,7 @@ public class ServerApplicationPages
             row.add(new TitleText(sample.getCategory(),80));
             writeTraceSample(detector,row,sample.getSample());
             String location=new PathAndQueryBuilder("/operator/tracing/sampleCurrent/category").addQuery("category", sample.getCategory()).toString();
-            row.add(new MoreLink(page.head(),location));
+            row.add(new RightMoreLink(page.head(),location));
 //            row.addDetailButton(location);
             table.addRow(row);
 
@@ -995,7 +1278,7 @@ public class ServerApplicationPages
             row.add(new TitleText(sample.getCategory(),80));
             writeTraceSample(detector,row,sample.getSample());
             String location=new PathAndQueryBuilder("./trace").addQuery("category", sample.getCategory()).toString();
-            row.add(new MoreLink(page.head(),location));
+            row.add(new RightMoreLink(page.head(),location));
             table.addRow(row);
 
         }
@@ -1070,7 +1353,7 @@ public class ServerApplicationPages
             buildCategories(categories,entry);
         }
         ArrayList<String> list=new ArrayList<>();
-        Level1Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Categories"));
+        Panel2 panel=page.content().returnAddInner(new Panel2(page.head(),"Categories"));
         panel.content().addInner(new hr());
         for (String category:categories.keySet())
         {
@@ -1134,7 +1417,7 @@ public class ServerApplicationPages
             row.add(new TitleText(entry.getKey(),80));
             writeTraceSample(detector,row,sample);
             String location=new PathAndQueryBuilder("/operator/tracing/sampleAll/category").addQuery("category", entry.getKey()).toString();
-            row.add(new MoreLink(page.head(),location));
+            row.add(new RightMoreLink(page.head(),location));
             table.addRow(row);
         }
         
@@ -1195,7 +1478,7 @@ public class ServerApplicationPages
             row.add(new TitleText(entry.getKey(),80));
             writeTraceSample(detector,row,sample);
             String location=new PathAndQueryBuilder("/operator/tracing/sampleAll/category").addQuery("category", entry.getKey()).toString();
-            row.add(new MoreLink(page.head(),location));
+            row.add(new RightMoreLink(page.head(),location));
             table.addRow(row);
         }
         
@@ -1259,7 +1542,7 @@ public class ServerApplicationPages
             buildCategories(categories,entry);
         }
         ArrayList<String> list=new ArrayList<>();
-        Level1Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Categories in watch list"));
+        Panel2 panel=page.content().returnAddInner(new Panel2(page.head(),"Categories in watch list"));
         panel.content().addInner(new hr());
         for (String category:categories.keySet())
         {
@@ -1285,10 +1568,10 @@ public class ServerApplicationPages
 
     static class NameValueRow extends Element
     {
-        final private span span;
-        final private span value;
-        final private span unit;
-        static String STYLE="color:#448;";
+        final private Element span;
+        final private Element value;
+        final private Element unit;
+        static String STYLE="color:#448;border:1px;";
         public NameValueRow(String name,Element value,String unit)
         {
             this.span=new span().style(STYLE).addInner(name);
@@ -1374,7 +1657,7 @@ public class ServerApplicationPages
     {
         return new TitleText(Utils.millisToNiceDurationString(ns/1000000)+" on "+Utils.millisToLocalDateTimeString(instantMs),format_3(ns/1.0e6));        
     }
-    private TitleText formatNsToMs(long durationNs)
+    private static TitleText formatNsToMs(long durationNs)
     {
         return new TitleText(Utils.millisToNiceDurationString(durationNs/1000000),String.format("%.3f",durationNs/1.0e6));
     }
@@ -1660,10 +1943,10 @@ public class ServerApplicationPages
             TraceSample sample=entry.getValue();
             TableRow row=new TableRow();
             row.add(new input_checkbox().name("~"+entry.getKey()));
-            row.add(new TitleText(entry.getKey(),80));
+            row.add(new td().addInner(entry.getKey()).style("word-wrap:break-word;word-break:break-all;"));
             writeTraceSample(detector,row,sample);
             String location=new PathAndQueryBuilder("/operator/tracing/sampleAll/category").addQuery("category", entry.getKey()).toString();
-            row.add(new MoreLink(page.head(),location));
+            row.add(new RightMoreLink(page.head(),location));
             table.addRow(row);
 
         }
@@ -1763,7 +2046,7 @@ public class ServerApplicationPages
                 row.add(new TitleText(sample.getCategory(),80));
                 writeTraceSample(detector,row,sample.getSample());
                 String location=new PathAndQueryBuilder("./trace").addQuery("category", sample.getCategory()).toString();
-                row.add(new MoreLink(page.head(),location));
+                row.add(new RightMoreLink(page.head(),location));
                 table.addRow(row);
 
             }
@@ -1804,7 +2087,7 @@ public class ServerApplicationPages
                 row.add(new TitleText(sample.getCategory(),80));
                 writeTraceSample(detector,row,sample.getSample());
                 String location=new PathAndQueryBuilder("./trace").addQuery("category", sample.getCategory()).toString();
-                row.add(new MoreLink(page.head(),location));
+                row.add(new RightMoreLink(page.head(),location));
                 table.addRow(row);
 
             }
@@ -1845,7 +2128,7 @@ public class ServerApplicationPages
                 row.add(new TitleText(sample.getCategory(),80));
                 writeTraceSample(detector,row,sample.getSample());
                 String location=new PathAndQueryBuilder("./trace").addQuery("category", sample.getCategory()).toString();
-                row.add(new MoreLink(page.head(),location));
+                row.add(new RightMoreLink(page.head(),location));
                 table.addRow(row);
 
             }
@@ -1874,7 +2157,7 @@ public class ServerApplicationPages
     }
     private void writeTraceSample(Head head,InnerElement<?> content,TraceSample sample) throws Exception
     {
-        Level2Panel panel=content.returnAddInner(new Level2Panel(head,"Stats"));
+        Panel3 panel=content.returnAddInner(new Panel3(head,"Stats"));
         NameValueList list=panel.content().returnAddInner(new NameValueList(new Size(20,unit.em)));
         list.add("Rate", String.format("%.3f", sample.getRate())+" per second");
         list.add("Count", sample.getCount());
@@ -1916,7 +2199,7 @@ public class ServerApplicationPages
     }
     private void writeTrace(Head head,InnerElement<?> content,String title,Trace trace) throws Exception
     {
-        Level2Panel panel=content.returnAddInner(new Level2Panel(head,title));
+        Panel3 panel=content.returnAddInner(new Panel3(head,title));
         NameValueList list=panel.content().returnAddInner(new NameValueList(new Size(20,unit.em)));
         list.add("Number",trace.getNumber());
         list.add("Category",trace.getCategory());
@@ -2075,7 +2358,7 @@ public class ServerApplicationPages
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("TraceManager Stats");
         RateSample sample=this.serverApplication.getTraceManager().getRateMeter().sample();
-        Level2Panel panel=page.content().returnAddInner(new Level2Panel(page.head(),"Trace Stats"));
+        Panel3 panel=page.content().returnAddInner(new Panel3(page.head(),"Trace Stats"));
         NameValueList list=panel.content().returnAddInner(new NameValueList());
         list.add("Rate", format_3(sample.getRate())+"");
         list.add("Total", sample.getTotalCount());
@@ -2168,33 +2451,25 @@ public class ServerApplicationPages
 
     private void writeTraces(OperatorPage page, Trace[] traces,String action,boolean enableSecondary) throws Exception
     {
-        page.content().addInner(new span().addInner("Count: " + traces.length));
         if ((action!=null)&&(traces.length>0))
         {
-            form_get form=page.content().returnAddInner(new form_get()).style("float:right;").action(action);
-            form.returnAddInner(new input_checkbox()).name("check");
-            form.returnAddInner(new input_submit()).value("Clear");
+            ConfirmButton confirm=new ConfirmButton(action, "Clear").style("float:right;");
+            page.content().addInner(confirm);
+            page.content().addInner(new br());
+            page.content().addInner(new hr());
         }
-        page.content().addInner(new hr());
+        DataTable table=page.content().returnAddInner(new DataTable(page.head()));
+        table.lengthMenu(10,25,50,100,-1);
+        table.setHeaderInline("#","Traces");
         for (int i = traces.length - 1; i >= 0; i--)
         {
-            Trace trace = traces[i];
-
-            Panel categoryPanel=new Panel(page.head(),trace.getCategory());
-            categoryPanel.style("padding:4px;");
-            categoryPanel.heading().style("background-color:#bbb;color:#000;text-align:left;padding:2px 2px 4px 4px;");
-            categoryPanel.content().style("padding:0px;");
-
+            Trace trace=traces[i];
+            TraceWidget traceWidget=new TraceWidget(page.head(), trace,true,false,false);
             if (enableSecondary)
             {
-                form_get form=categoryPanel.heading().returnAddInner(new form_get()).style("float:right;").action("/operator/traces/exception/secondary");
-                form.returnAddInner(new input_checkbox()).name("check");
-                form.returnAddInner(new input_hidden()).name("category").value(trace.getCategory());
-                form.returnAddInner(new input_submit()).value("Secondary");
+                traceWidget.enableSecondaryButton();
             }
-            
-            Panel panel=page.content().returnAddInner(categoryPanel);
-            writeTrace(page.head(),panel.content(),trace,true);
+            table.addRowInline(trace.getNumber(),traceWidget);
         }
     }
     
@@ -2208,44 +2483,26 @@ public class ServerApplicationPages
 
     @GET
     @Path("/operator/traces/clear/lastTraces")
-    public Element clearLastTraces(@ParamName("check") boolean check) throws Throwable
+    public Element clearLastTraces() throws Throwable
     {
-        if (check==false)
-        {
-            return lastTraces();
-        }
         this.serverApplication.getTraceManager().clearLastTraces();
-        BasicPage page=new BasicPage();
-        page.body().returnAddInner(new script()).addInner("window.location='/operator/tracing/lastTraces';");
-        return page;
+        return new Redirect("/operator/tracing/lastTraces");
     }
 
     @GET
     @Path("/operator/traces/clear/lastExceptions")
-    public Element clearLastExceptions(@ParamName("check") boolean check) throws Throwable
+    public Element clearLastExceptions() throws Throwable
     {
-        if (check==false)
-        {
-            return lastTraces();
-        }
         this.serverApplication.getTraceManager().clearLastExceptionTraces();
-        BasicPage page=new BasicPage();
-        page.body().returnAddInner(new script()).addInner("window.location='/operator/tracing/lastExceptions';");
-        return page;
+        return new Redirect("/operator/tracing/lastExceptions");
     }
     
     @GET
     @Path("/operator/traces/clear/lastSecondaryExceptions")
-    public Element clearLastSecondaryExceptions(@ParamName("check") boolean check) throws Throwable
+    public Element clearLastSecondaryExceptions() throws Throwable
     {
-        if (check==false)
-        {
-            return lastTraces();
-        }
         this.serverApplication.getTraceManager().clearLastSecondaryExceptionTraces();
-        BasicPage page=new BasicPage();
-        page.body().returnAddInner(new script()).addInner("window.location='/operator/tracing/lastSecondaryExceptions';");
-        return page;
+        return new Redirect("/operator/tracing/lastSecondaryExceptions");
     }
     
 
@@ -2259,12 +2516,12 @@ public class ServerApplicationPages
         RateMeter requestRateMeter = httpServer.getRequestRateMeter();
         RateSample sample=requestRateMeter.sample();
         WideTable infoTable=page.content().returnAddInner(new WideTable(page.head()));
-        infoTable.setHeaderItems("Request Rate","Total Requests");
-        infoTable.addRowItems(DOUBLE_FORMAT.format(sample.getRate()),sample.getSamples());
+        infoTable.setHeaderInline("Request Rate","Total Requests");
+        infoTable.addRowInline(DOUBLE_FORMAT.format(sample.getRate()),sample.getSamples());
         
         page.content().addInner(new p());
-        Panel requestHandlerPanel=page.content().returnAddInner(new Level1Panel(page.head(),"RequestHandlers"));
-        DataTable table=requestHandlerPanel.returnAddInner(new OperatorTable(page.head()));
+        Panel requestHandlerPanel=page.content().returnAddInner(new Panel2(page.head(),"RequestHandlers"));
+        DataTable table=requestHandlerPanel.content().returnAddInner(new OperatorTable(page.head()));
         TableHeader header=new TableHeader();
         header.add("Method")
             .add(new th_title("Count","Count of total requests"))
@@ -2318,14 +2575,14 @@ public class ServerApplicationPages
             .add(DOUBLE_FORMAT.format(rate))
             .add(requestHandler.getRequestUncompressedContentSizeMeter().sample().getWeightedAverage(0))
             .add(requestHandler.getResponseUncompressedContentSizeMeter().sample().getWeightedAverage());
-            row.add(new MoreLink(page.head(),new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).addQuery("server", server).toString()));
+            row.add(new RightMoreLink(page.head(),new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).addQuery("server", server).toString()));
             table.addRow(row);
             
         }
         return page;
     }
 
-    private void writeTraceRowHeading(TableHeader header,boolean excludeWaiting)
+    private void writeTraceRowHeading(TableHeader header)
     {
 //      row.addInner(new td().style("width:5em;").addInner(new TitleText("Trace Number","#")));
         header.add(new th().style("width:7em;").addInner(new TitleText("Trace Number","#")));
@@ -2335,14 +2592,11 @@ public class ServerApplicationPages
         
         header.add(new TitleText("Amount of time waiting in milliseconds","Wait"));
         header.add(new TitleText("Duration in milliseconds","Dur"));
-        if (excludeWaiting==false)
-        {
-            header.add(new TitleText("Trace is currently waiting","&#8987;"));
-        }
+        header.add(new TitleText("Thread execution state","State"));
         header.add(new TitleText("Thread id and name shown as id:name","Thread"));
 //        row.add(new TitleText("Thread details","Details"));
     }
-    private void writeTraceRow(TableRow row,Trace trace,boolean excludeWaiting)
+    private void writeTraceRow(TableRow row,Trace trace)
     {
         row.add(trace.getNumber());
         row.add(new TitleText(trace.getCategory(),60));
@@ -2351,10 +2605,49 @@ public class ServerApplicationPages
         row.add(formatNsToMs(trace.getActiveNs()));
         row.add(formatNsToMs(trace.getWaitNs()));
         row.add(formatNsToMs(trace.getDurationNs()));
-        if (excludeWaiting==false)
+
+        
+        StackTraceElement[] elements=trace.getThread().getStackTrace();
+        String status;
+        if (elements.length==0)
         {
-            row.add(trace.isWaiting()?"&#x1f4a4;":"");
+            status="INVALID";
         }
+        else if (elements[0].isNativeMethod())
+        {
+            if (elements[0].getMethodName().contains("wait"))
+            {
+                status="N-WAIT";
+            }
+            else
+            {
+                status="NATIVE";
+            }
+        }
+        else
+        {
+            if (trace.isClosed())
+            {
+                if (trace.getThrowable()!=null)
+                {
+                    status="EXCEPTION";
+                }
+                else
+                {
+                    status="CLOSED";
+                }   
+            }
+            else if (trace.isWaiting())
+            {
+                status="T-WAIT";
+            }
+            else
+            {
+                status="USER";
+            }
+        }
+        row.add(new td().addInner(status).title(Utils.toString(elements)));
+        
         row.add(trace.getThread().getId()+":"+trace.getThread().getName());
     }
     
@@ -2362,11 +2655,11 @@ public class ServerApplicationPages
     {
         WideTable table=content.returnAddInner(new WideTable(head));
         TableHeader header=new TableHeader();
-        writeTraceRowHeading(header,false);
+        writeTraceRowHeading(header);
         table.setHeader(header);
     
         TableRow row=new TableRow();
-        writeTraceRow(row,trace,false);
+        writeTraceRow(row,trace);
         table.addRow(row);
 
         NameValueList list=null;
@@ -2401,7 +2694,7 @@ public class ServerApplicationPages
         }
         if (list!=null)
         {
-            Panel listPanel=content.returnAddInner(new Level3Panel(head,"Additional Trace Info"));
+            Panel listPanel=content.returnAddInner(new Panel4(head,"Additional Trace Info"));
             listPanel.content().addInner(list);
         }
 
@@ -2519,7 +2812,8 @@ public class ServerApplicationPages
         {
             title=entry.getStatusCode()+" | "+entry.getRemoteEndPoint()+" | "+entry.getRequest();
         }
-        Panel panel=new Level2Panel(page.head(),title);
+        Panel panel=new Panel3(page.head(),title);
+        panel.style("width:100%;");
 
         tr tr=dataTable.tbody().returnAddInner(new tr());
         tr.addInner(new td().addInner(new Text(entry.getTrace().getNumber())));
@@ -2537,12 +2831,17 @@ public class ServerApplicationPages
     private void writeRequestLogEntries(OperatorPage page, RequestLogEntry[] entries) throws Exception
     {
         DataTable dataTable=page.content().returnAddInner(new DataTable(page.head()));
-        dataTable.setHeaderItems("#","Entry");
+        dataTable.setHeaderInline("Number","Entry");
         dataTable.lengthMenu(-1,5,10,25);
         for (RequestLogEntry entry : entries)
         {
-            writeRequest(dataTable,page, entry);
-//            page.content().addInner(new p());
+//            writeRequest(dataTable,page, entry);
+            HttpRequestWidget element=new HttpRequestWidget(page.head(),entry);
+
+            TableRow row=new TableRow();
+            row.add(entry.getTrace().getNumber());
+            row.add(element);
+            dataTable.addRow(row);
         }
     }
 
@@ -2583,7 +2882,7 @@ public class ServerApplicationPages
         {
             Trace trace = entry.getTrace();
             String title= entry.getRemoteEndPoint()+" | "+entry.getMethod() + " " + entry.getURI();
-            Panel panel=page.content().returnAddInner(new Level2Panel(page.head(),title));
+            Panel panel=page.content().returnAddInner(new Panel3(page.head(),title));
             writeTrace(page.head(),panel.content(),trace,true);
             writeHeaders(page.head(),"Request Headers",panel.content(),entry.getRequestHeaders());
         }
@@ -2631,7 +2930,7 @@ public class ServerApplicationPages
                 ,statusCodes.get(400)
                 ,statusCodes.get(500)
             );
-            row.add(new MoreLink(page.head(),new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).addQuery("server", server).toString()));
+            row.add(new RightMoreLink(page.head(),new PathAndQueryBuilder("/operator/httpServer/info").addQuery("key", requestHandler.getKey()).addQuery("server", server).toString()));
             table.addRow(row);
         }
         return page;
@@ -2879,7 +3178,7 @@ public class ServerApplicationPages
         OperatorPage page=buildServerOperatorPage("Methods",server);
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
         DataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
-        table.setHeaderItems("Method","Path","Description","Filters","");
+        table.setHeaderInline("Method","Path","Description","Filters","");
         for (RequestHandler requestHandler : requestHandlers)
         {
             TableRow row=new TableRow().add(requestHandler.getHttpMethod());
@@ -2914,7 +3213,7 @@ public class ServerApplicationPages
             {
                 row.add("");
             }
-            row.add(new MoreLink(page.head(),new PathAndQueryBuilder("/operator/httpServer/method/"+server).addQuery("key", requestHandler.getKey()).toString()));
+            row.add(new RightMoreLink(page.head(),new PathAndQueryBuilder("/operator/httpServer/method/"+server).addQuery("key", requestHandler.getKey()).toString()));
             table.addRow(row);
         }
         return page;
@@ -2950,10 +3249,10 @@ public class ServerApplicationPages
         }
 
         Method method = handler.getMethod();
-        Level2Panel panel2=panel.content().returnAddInner(new Level2Panel(head, heading));
+        Panel3 panel2=panel.content().returnAddInner(new Panel3(head, heading));
         
         WideTable table=panel2.content().returnAddInner(new WideTable(head));
-        table.setHeaderItems("Name","Type","Description","Default");
+        table.setHeaderInline("Name","Type","Description","Default");
         for (ParameterInfo info : handler.getParameterInfos())
         {
             if (info.getSource() == filter)
@@ -2965,7 +3264,7 @@ public class ServerApplicationPages
         panel.content().addInner(new p());
     }
 
-    private void writeInputParameterInfos(Head head,InnerElement<?> container, AjaxButton button, String heading, RequestHandler handler, ParameterSource source)
+    private void writeInputParameterInfos(Head head,InnerElement<?> container, AjaxButton button, String heading, RequestHandler handler, ParameterSource source) throws Exception
     {
         if (Arrays.stream(handler.getParameterInfos()).filter(info ->
         {
@@ -2979,7 +3278,7 @@ public class ServerApplicationPages
         fieldset field=container.returnAddInner(new fieldset());
         field.addInner(new legend().addInner(heading));
         WideTable table=field.returnAddInner(new WideTable(head));
-        table.setHeaderItems("Name","Type","Description","Default","Value");
+        table.setHeaderInline("Name","Type","Description","Default","Null","Value");
         for (ParameterInfo info : handler.getParameterInfos())
         {
             if (info.getSource() == source)
@@ -2989,15 +3288,29 @@ public class ServerApplicationPages
                 TableRow row=new TableRow().add(info.getName(),parameter.getType().getName(),getDescription(parameter),info.getDefaultValue());
                 table.addRow(row);
                 String key = source.toString() + name;
-                if (parameter.getType() == boolean.class)
+                
+
+                if (parameter.getType().isPrimitive()) 
                 {
-                    button.val(key, key);
+                    row.add("");
+                }
+                else
+                {
+                    String nullKey="null"+key;
+                    button.prop(nullKey, nullKey,"checked");
+                    row.add(new DisableInputToggler(nullKey, false, key,nullKey));
+                }
+                
+                if ((parameter.getType() == boolean.class)||(parameter.getType() == Boolean.class))
+                {
+                    button.prop(key, key,"checked");
                     row.add(new input_checkbox().id(key).name(key).checked(info.getDefaultValue()==null?false:(boolean)info.getDefaultValue()));
                 }
                 else
                 {
                     button.val(key, key);
-                    input_text input=new input_text().id(key).name(key).style("background-color:#ffa;width:100%;");
+                    input_text input=new input_text().id(key).name(key).style("width:100%;");
+
                     if (info.getDefaultValue()!=null)
                     {
                         input.value(info.getDefaultValue().toString());
@@ -3043,7 +3356,7 @@ public class ServerApplicationPages
                 return;
             }
             this.shownClasses.add(typeName);
-            Level3Panel panel=this.parentPanel.content().returnAddInner(new Level3Panel(this.head,"Type: "+displayTypeName));
+            Panel4 panel=this.parentPanel.content().returnAddInner(new Panel4(this.head,"Type: "+displayTypeName));
             Description description = type.getAnnotation(Description.class);
             if (description != null)
             {
@@ -3067,7 +3380,7 @@ public class ServerApplicationPages
             if (fields.size()>0)
             {
                 WideTable table=panel.content().returnAddInner(new WideTable(head));
-                table.setHeaderItems("Type","Name","Description");
+                table.setHeaderInline("Type","Name","Description");
                 for (Field field : fields)
                 {
                     TableRow row=new TableRow();
@@ -3129,9 +3442,9 @@ public class ServerApplicationPages
         Map<Integer, LongValueSample> meters = requestHandler.sampleStatusMeters();
         if (meters.size()>0)
         {
-            Panel durationPanel=page.content().returnAddInner(new Level1Panel(page.head(),"Durations"));
+            Panel durationPanel=page.content().returnAddInner(new Panel2(page.head(),"Durations"));
             WideTable table=durationPanel.content().returnAddInner(new WideTable(page.head()));
-                table.setHeaderItems(
+                table.setHeaderInline(
                         new th_title("Code", "Status Code")
                         ,new th_title("AC","All time count")
                         ,new th_title("SC","Sample count")
@@ -3177,9 +3490,9 @@ public class ServerApplicationPages
             long responseCompressed = 0;
     
             page.content().addInner(new p());
-            Panel panel=page.content().returnAddInner(new Level1Panel(page.head(), "Content Sizes"));
+            Panel panel=page.content().returnAddInner(new Panel2(page.head(), "Content Sizes"));
             WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
-            table.setHeaderItems(
+            table.setHeaderInline(
                     new th_title("Average", "Average bytes")
                     ,new th_title("StDev", "Standard Deviation")
                     ,"Total Bytes","KB","MB","GB","TB"
@@ -3302,7 +3615,7 @@ public class ServerApplicationPages
             }
 
             page.content().addInner(new p());
-            Panel ratioPanel=page.content().returnAddInner(new Level1Panel(page.head(), "Compression Ratios"));
+            Panel ratioPanel=page.content().returnAddInner(new Panel2(page.head(), "Compression Ratios"));
             NameValueList list=ratioPanel.content().returnAddInner(new NameValueList());
             list.add("Request", requestUncompressed != 0?DOUBLE_FORMAT.format((double) requestCompressed / requestUncompressed):"");
             list.add("Response",responseUncompressed != 0?DOUBLE_FORMAT.format((double) responseCompressed / responseUncompressed):"");
@@ -3403,6 +3716,7 @@ public class ServerApplicationPages
         button.val("target", "target");
         button.val("columns", "columns");
         button.async(true);
+        page.content().addInner(new p());
         page.content().addInner(new div().id("result"));
         return page;
     }
@@ -3414,9 +3728,18 @@ public class ServerApplicationPages
     {
         AjaxQueryResult result = new AjaxQueryResult();
         String text=generateClassDefinitions(server, namespace, columns, target);
-        Panel panel=new Panel(null,null,"C# classes");
-        panel.content().addInner(new textarea().readonly().style("width:99%;").rows(Utils.occurs(text, "\r")+1).addInner(text));
-        result.put("result", panel.toString());
+        Panel panel=new Panel1(null,"C# classes");
+        
+        textarea textarea=new textarea().readonly().style("width:100%;").rows(Utils.occurs(text, "\r")+1).addInner(text);
+        String id=HtmlUtils.autoId(textarea);
+        
+        button_button button=new button_button().addInner("&#128203;").title("Copy to clipboard");
+        button.onclick("var copyText=document.getElementById('"+id+"');copyText.select();document.execCommand('Copy');");
+        
+        
+        panel.addRightInHeader(button);
+        panel.content().addInner(textarea);
+        result.put("result", HtmlUtils.toHtmlText(panel));
         return result;
     }
 
@@ -3443,12 +3766,12 @@ public class ServerApplicationPages
         String text = getDescription(method);
         if (text != null)
         {
-            Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Description"));
-            panel.addInner(text);
+            Panel panel=page.content().returnAddInner(new Panel2(page.head(),"Description"));
+            panel.content().addInner(text);
             page.content().addInner(new p());
         }
         
-        Level1Panel requestPanel=page.content().returnAddInner(new Level1Panel(page.head(),"Request"));
+        Panel2 requestPanel=page.content().returnAddInner(new Panel2(page.head(),"Request"));
         writeParameterInfos(page.head(),requestPanel, "Query Parameters", requestHandler, ParameterSource.QUERY);
         writeParameterInfos(page.head(),requestPanel, "Path Parameters", requestHandler, ParameterSource.PATH);
         writeParameterInfos(page.head(),requestPanel, "Header Parameters", requestHandler, ParameterSource.HEADER);
@@ -3456,7 +3779,7 @@ public class ServerApplicationPages
         ParameterInfo contentParameterInfo = findContentParameter(requestHandler);
         if (contentParameterInfo != null)
         {
-            Level2Panel contentParameterPanel=requestPanel.content().returnAddInner(new Level2Panel(page.head(),"Content Parameter"));
+            Panel3 contentParameterPanel=requestPanel.content().returnAddInner(new Panel3(page.head(),"Content Parameter"));
 
             Parameter contentParameter = method.getParameters()[contentParameterInfo.getIndex()];
             ParameterWriter parameterWriter = new ParameterWriter(page.head(),contentParameterPanel);
@@ -3465,11 +3788,11 @@ public class ServerApplicationPages
             if (requestHandler.getContentReaders().size() > 0)
             {
                 requestPanel.content().addInner(new p());
-                Level2Panel contentReaderPanel=requestPanel.content().returnAddInner(new Level2Panel(page.head(),"Content Readers"));
+                Panel3 contentReaderPanel=requestPanel.content().returnAddInner(new Panel3(page.head(),"Content Readers"));
                 for (ContentReader<?> contentReader : requestHandler.getContentReaders().values())
                 {
                     WideTable table=contentReaderPanel.content().returnAddInner(new WideTable(page.head()));
-                    table.setHeaderItems("Class","Media Type");
+                    table.setHeaderInline("Class","Media Type");
                     table.addRow(new TableRow().add(contentReader.getClass().getName(),contentReader.getMediaType())); 
                     contentReaderPanel.content().addInner(new p());
                     
@@ -3503,9 +3826,9 @@ public class ServerApplicationPages
         Type innerReturnType = null;
         if (returnType != void.class)
         {
-            Level1Panel responsePanel=page.content().returnAddInner(new Level1Panel(page.head(), "Response"));
+            Panel2 responsePanel=page.content().returnAddInner(new Panel2(page.head(), "Response"));
             
-            Level2Panel returnParameterPanel=responsePanel.content().returnAddInner(new Level2Panel(page.head(),"Return Type"));
+            Panel3 returnParameterPanel=responsePanel.content().returnAddInner(new Panel3(page.head(),"Return Type"));
             
             ParameterWriter parameterWriter = new ParameterWriter(page.head(),returnParameterPanel);
             if (returnType == Response.class)
@@ -3544,11 +3867,11 @@ public class ServerApplicationPages
                 }
 
                 responsePanel.content().addInner(new p());
-                Level2Panel contentWriterPanel=responsePanel.content().returnAddInner(new Level2Panel(page.head(),"Content Writers"));
+                Panel3 contentWriterPanel=responsePanel.content().returnAddInner(new Panel3(page.head(),"Content Writers"));
                 for (ContentWriterList list : lists.values())
                 {
                     WideTable table=contentWriterPanel.content().returnAddInner(new WideTable(page.head()));
-                    table.setHeaderItems("Class","Media Type","Accept Types");
+                    table.setHeaderInline("Class","Media Type","Accept Types");
                     table.addRow(new TableRow().add(list.contentWriter.getClass().getName(),list.contentWriter.getMediaType(),Utils.combine(list.types, ", ")));
 
                     if (innerReturnType==null)
@@ -3584,9 +3907,9 @@ public class ServerApplicationPages
 
         if (requestHandler.getContentDecoders().size() > 0)
         {
-            Level1Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Content Decoders"));
+            Panel2 panel=page.content().returnAddInner(new Panel2(page.head(),"Content Decoders"));
             WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
-            table.setHeaderItems("Class","Content-Encoding","Encoder");
+            table.setHeaderInline("Class","Content-Encoding","Encoder");
             for (Entry<String, ContentDecoder> entry : requestHandler.getContentDecoders().entrySet())
             {
                 table.addRow(new TableRow().add(entry.getValue().getClass().getName(),entry.getValue().getCoding(),entry.getKey()));
@@ -3595,9 +3918,9 @@ public class ServerApplicationPages
      }
         if (requestHandler.getContentEncoders().size() > 0)
         {
-            Level1Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Content Encoders"));
+            Panel2 panel=page.content().returnAddInner(new Panel2(page.head(),"Content Encoders"));
             WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
-            table.setHeaderItems("Class","Content-Encoding","Encoder");
+            table.setHeaderInline("Class","Content-Encoding","Encoder");
             for (Entry<String, ContentEncoder> entry : requestHandler.getContentEncoders().entrySet())
             {
                 table.addRow(new TableRow().add(entry.getValue().getClass().getName(),entry.getValue().getCoding(),entry.getKey()));
@@ -3606,7 +3929,7 @@ public class ServerApplicationPages
         }
         if (requestHandler.getFilters().length > 0)
         {
-            Level1Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Filters"));
+            Panel2 panel=page.content().returnAddInner(new Panel2(page.head(),"Filters"));
             WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
             TableRow row=new TableRow();
             for (Filter filter : requestHandler.getFilters())
@@ -3616,15 +3939,15 @@ public class ServerApplicationPages
             table.addRow(row);
             page.content().addInner(new p());
         }
-        Level1Panel methodPanel=page.content().returnAddInner(new Level1Panel(page.head(),"Class Method"));
+        Panel2 methodPanel=page.content().returnAddInner(new Panel2(page.head(),"Class Method"));
         methodPanel.content().addInner(Utils.escapeHtml(method.toGenericString()+";"));
         page.content().addInner(new p());
         
-        Level1Panel executePanel=page.content().returnAddInner(new Level1Panel(page.head(),"Execute: "+key));
+        Panel2 executePanel=page.content().returnAddInner(new Panel2(page.head(),"Execute: "+key));
         String httpMethod = requestHandler.getHttpMethod();
         {
             form_get form=executePanel.content().returnAddInner(new form_get());
-            AjaxButton button = new AjaxButton("button", "Execute call", "/operator/httpServer/method/execute/"+server);
+            AjaxButton button = new AjaxButton("button", "Execute Call", "/operator/httpServer/method/execute/"+server);
             button.parameter("key", key);
             button.style("height:3em;width:10em;margin:10px;");
             writeInputParameterInfos(page.head(),form, button, "Query Parameters", requestHandler, ParameterSource.QUERY);
@@ -3669,13 +3992,13 @@ public class ServerApplicationPages
                         set.add(reader.getMediaType());
                     }
                     SelectOptions options=new SelectOptions();
-                    options.id("accept");
+                    options.id("contentType");
                     for (String type:set)
                     {
                         options.add(type);
                     }
-                    list.add("Accept", options);
-                    button.val("accept", "accept");
+                    list.add("ContentType", options);
+                    button.val("contentType", "contentType");
                 }
             }
             Collection<ContentWriter<?>> writers = requestHandler.getContentWriters().values();
@@ -3687,13 +4010,13 @@ public class ServerApplicationPages
                     set.add(contentWriter.getMediaType());
                 }
                 SelectOptions options=new SelectOptions();
-                options.id("contentType");
+                options.id("accept");
                 for (String type:set)
                 {
                     options.add(type);
                 }
-                list.add("ContentType", options);
-                button.val("contentType", "contentType");
+                list.add("Accept", options);
+                button.val("accept", "accept");
             }
             if (list.size()>0)
             {
@@ -3737,24 +4060,31 @@ public class ServerApplicationPages
         {
             endPoint=endPoint.substring(0,index);
         }
-        int[] ports=httpServer.getPorts();
-        endPoint=endPoint+":"+ports[0];
         Configuration configuration=this.serverApplication.getConfiguration();
-        boolean https=configuration.getBooleanValue("HttpServer.public.https",false);
-        if (https)
+        boolean http=configuration.getBooleanValue("HttpServer.public.http",false);
+        if (http==false)
         {
-            if (this.serverApplication.getPublicServer().getPorts()[0]==ports[0])
+            int[] ports=httpServer.getPorts();
+            endPoint=endPoint+":"+ports[0];
+            boolean https=configuration.getBooleanValue("HttpServer.public.https",false);
+            if (https)
             {
-                Vault vault=this.serverApplication.getVault();
-                String serverCertificatePassword=vault.get("KeyStore.serverCertificate.password");
-                String clientCertificatePassword=vault.get("KeyStore.clientCertificate.password");
-                String serverCertificateKeyStorePath=configuration.getValue("HttpServer.serverCertificate.keyStorePath",null);
-                String clientCertificateKeyStorePath=configuration.getValue("HttpServer.clientCertificate.keyStorePath",null);
-                String clusterName=configuration.getValue("HttpServer.public.clusterName",null);
-                endPoint=endPoint.replace("http", "https");
-                return new HttpClientEndPoint(HttpClientFactory.createSSLClient(new HttpClientConfiguration(), clientCertificateKeyStorePath, clientCertificatePassword, serverCertificateKeyStorePath, serverCertificatePassword, clusterName),endPoint);
+                if (this.serverApplication.getPublicServer().getPorts()[0]==ports[0])
+                {
+                    Vault vault=this.serverApplication.getVault();
+                    String serverCertificatePassword=vault.get("KeyStore.serverCertificate.password");
+                    String clientCertificatePassword=vault.get("KeyStore.clientCertificate.password");
+                    String serverCertificateKeyStorePath=configuration.getValue("HttpServer.serverCertificate.keyStorePath",null);
+                    String clientCertificateKeyStorePath=configuration.getValue("HttpServer.clientCertificate.keyStorePath",null);
+                    String clusterName=configuration.getValue("HttpServer.public.clusterName",null);
+                    endPoint=endPoint.replace("http", "https");
+                    return new HttpClientEndPoint(HttpClientFactory.createSSLClient(new HttpClientConfiguration(), clientCertificateKeyStorePath, clientCertificatePassword, serverCertificateKeyStorePath, serverCertificatePassword, clusterName),endPoint);
+                }
             }
+            throw new Exception();
         }
+        int[] ports=httpServer.getPorts();
+        endPoint=endPoint+":"+ports[ports.length-1];
         return new HttpClientEndPoint(HttpClientFactory.createClient(),endPoint);
     }
     
@@ -3791,17 +4121,33 @@ public class ServerApplicationPages
                 }
             }
             String prefix = "?";
+            HashSet<String> nulls=new HashSet<>();
+            for (Enumeration<String> enumerator = request.getParameterNames(); enumerator.hasMoreElements(); enumerator.hasMoreElements())
+            {
+                String mangledName = enumerator.nextElement();
+                if (mangledName.startsWith("null"))
+                {
+                    String value=request.getParameter(mangledName);
+                    if ("true".equals(value))
+                    {
+                        nulls.add(mangledName);
+                    }
+                }
+            }
             for (Enumeration<String> enumerator = request.getParameterNames(); enumerator.hasMoreElements(); enumerator.hasMoreElements())
             {
                 String mangledName = enumerator.nextElement();
                 if (mangledName.startsWith(ParameterSource.QUERY.toString()))
                 {
-                    String name = mangledName.substring(ParameterSource.QUERY.toString().length());
-                    pathAndQuery.append(prefix);
-                    pathAndQuery.append(name);
-                    pathAndQuery.append("=");
-                    pathAndQuery.append(request.getParameter(mangledName));
-                    prefix = "&";
+                    if (nulls.contains("null"+mangledName)==false)
+                    {
+                        String name = mangledName.substring(ParameterSource.QUERY.toString().length());
+                        pathAndQuery.append(prefix);
+                        pathAndQuery.append(name);
+                        pathAndQuery.append("=");
+                        pathAndQuery.append(request.getParameter(mangledName));
+                        prefix = "&";
+                    }
                 }
                 else if (mangledName.startsWith(ParameterSource.HEADER.toString()))
                 {
@@ -3903,14 +4249,16 @@ public class ServerApplicationPages
             else
             {
                 AjaxQueryResult result = new AjaxQueryResult();
-                Level2Panel panel=new Level2Panel(null, "Not implemented");
+                Panel3 panel=new Panel3(null, "Not implemented");
                 panel.content().addInner("Method=" + method);
-                result.put("result",panel.toString());
+                result.put("result",HtmlUtils.toHtmlText(panel));
                 return result;
+                
+                
             }
             AjaxQueryResult result = new AjaxQueryResult();
-            Level2Panel resultPanel=new Level2Panel(null, "Result");
-            Level3Panel statusPanel=resultPanel.content().returnAddInner(new Level3Panel(null, "Performance and Status"));
+            Panel3 resultPanel=new Panel3(null, "Result");
+            Panel4 statusPanel=resultPanel.content().returnAddInner(new Panel4(null, "Performance and Status"));
             NameValueList list=statusPanel.content().returnAddInner(new NameValueList());
             list.add("Time",Utils.millisToLocalDateTimeString(System.currentTimeMillis()));
             list.add("Duration", duration * 1000 + " ms");
@@ -3920,7 +4268,7 @@ public class ServerApplicationPages
                 if (response.getHeaders().length > 0)
                 {
                     resultPanel.content().addInner(new p());
-                    Level3Panel panel=resultPanel.content().returnAddInner(new Level3Panel(null, "Response Headers"));
+                    Panel4 panel=resultPanel.content().returnAddInner(new Panel4(null, "Response Headers"));
                     NameValueList headerList=panel.content().returnAddInner(new NameValueList());
                     for (Header header : response.getHeaders())
                     {
@@ -3930,25 +4278,26 @@ public class ServerApplicationPages
                 if (response.getText().length() > 0)
                 {
                     resultPanel.content().addInner(new p());
-                    Level3Panel contentPanel=resultPanel.content().returnAddInner(new Level3Panel(null,"Content"));
+                    Panel4 contentPanel=resultPanel.content().returnAddInner(new Panel4(null,"Content"));
                     textarea area=contentPanel.content().returnAddInner(new textarea());
                     String text=response.getText();
                     area.readonly().style("width:100%;").rows(Utils.occurs(text,"\r")+1);
                     area.addInner(text);
                 }
             }
-            result.put("result", resultPanel.toString());
+            result.put("result", HtmlUtils.toHtmlText(resultPanel));
             return result;
         }
         catch (Throwable t)
         {
             AjaxQueryResult result = new AjaxQueryResult();
-            Level2Panel panel=new Level2Panel(null, "Internal Execution Exception");
+            Panel3 panel=new Panel3(null, "Internal Execution Exception");
             String text=Utils.getStrackTraceAsString(t);
             textarea area=panel.content().returnAddInner(new textarea());
             area.readonly().style("width:100%;").rows(Utils.occurs(text, "\r")+1);
             area.addInner(text);
-            result.put("result", panel.toString());
+            
+            result.put("result", HtmlUtils.toHtmlText(panel));
             return result;
             
         }
@@ -4034,19 +4383,19 @@ public class ServerApplicationPages
 
     private void writeSize(Table table, String label, double value)
     {
-        table.addRowItems(label,DOUBLE_FORMAT.format(value),DOUBLE_FORMAT.format(value / 1024),DOUBLE_FORMAT.format(value / 1024 / 1024)
+        table.addRowInline(label,DOUBLE_FORMAT.format(value),DOUBLE_FORMAT.format(value / 1024),DOUBLE_FORMAT.format(value / 1024 / 1024)
                 ,DOUBLE_FORMAT.format(value / 1024 / 1024 / 1024));
     }
 
     private void write(Table table, String label, LevelMeter meter)
     {
         LevelSample sample=meter.sample();
-        table.addRowItems(label,sample.getLevel(),sample.getMaxLevel(),Utils.millisToLocalDateTime(sample.getMaxLevelInstantMs()));
+        table.addRowInline(label,sample.getLevel(),sample.getMaxLevel(),Utils.millisToLocalDateTime(sample.getMaxLevelInstantMs()));
     }
 
     private void write(Table table, String label, CountMeter meter)
     {
-        table.addRowItems(label,meter.getCount(),"","");
+        table.addRowInline(label,meter.getCount(),"","");
     }
 
     @GET
@@ -4061,11 +4410,11 @@ public class ServerApplicationPages
             {
                 HighPerformanceLogger sink = (HighPerformanceLogger) this.serverApplication.getLogQueue();
                 {
-                    Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Logger"));
+                    Panel panel=page.content().returnAddInner(new Panel2(page.head(),"Logger"));
                     {
-                        Panel statsPanel=panel.content().returnAddInner(new Level2Panel(page.head(), "Worker Stats"));
+                        Panel statsPanel=panel.content().returnAddInner(new Panel3(page.head(), "Worker Stats"));
                         Table table=statsPanel.content().returnAddInner(new WideTable(page.head()));
-                        table.setHeaderItems("Name","Value","Max","Max Instant");
+                        table.setHeaderInline("Name","Value","Max","Max Instant");
                         write(table,"Thread Workers Used",sink.getThreadWorkerQueueInUseMeter());
                         write(table,"Waiting in Thread Workers",sink.getThreadWorkerQueueWaitingMeter());
                         write(table,"Stalled in Thread Workers",sink.getThreadWorkerQueueStalledMeter());
@@ -4076,9 +4425,9 @@ public class ServerApplicationPages
                     }
                     {
                         panel.content().addInner(new p());
-                        Panel performancePanel=panel.content().returnAddInner(new Level2Panel(page.head(),"Performance"));
+                        Panel performancePanel=panel.content().returnAddInner(new Panel3(page.head(),"Performance"));
                         Table table=performancePanel.content().returnAddInner(new WideTable(page.head()));
-                        table.setHeaderItems("","Bytes","KB","MB","GB");
+                        table.setHeaderInline("","Bytes","KB","MB","GB");
                         RateSample sample=sink.getWriteRateMeter().sample(this.rateSamplingDuration);
                         writeSize(table, "Write Rate (per second)", sample.getRate());
                         writeSize(table, "Written", sample.getSamples());
@@ -4087,9 +4436,9 @@ public class ServerApplicationPages
             }
             
             {
-                Panel panel=page.content().returnAddInner(new Level1Panel(page.head(),"Volume"));
+                Panel panel=page.content().returnAddInner(new Panel2(page.head(),"Volume"));
 
-                Panel infoPanel=panel.content().returnAddInner(new Level2Panel(page.head(), "Info"));
+                Panel infoPanel=panel.content().returnAddInner(new Panel3(page.head(), "Info"));
                 LogDirectoryInfo info = manager.getLogDirectoryInfo();
                 NameValueList list=infoPanel.content().returnAddInner(new NameValueList());
                 list.addInner(new style().addInner("thead {background-color:#eee;} td {border:1px solid #888;padding:4px;} table{border-collapse:collapse;} "));
@@ -4105,9 +4454,9 @@ public class ServerApplicationPages
                 list.add("Newest file date",Utils.millisToLocalDateTimeString(info.getNewestFileDate()));
 
                 panel.content().addInner(new p());
-                Panel usagePanel=panel.content().returnAddInner(new Level2Panel(page.head(), "Usage"));
+                Panel usagePanel=panel.content().returnAddInner(new Panel3(page.head(), "Usage"));
                 Table table=usagePanel.content().returnAddInner(new WideTable(page.head()));
-                table.setHeaderItems("","Bytes","KB","MB","GB");
+                table.setHeaderInline("","Bytes","KB","MB","GB");
                 writeSize(table, "Directory size", info.getDirectorySize());
                 writeSize(table, "Volume free space", info.getFreeSpace());
                 writeSize(table, "Volume free space", info.getFreeSpace());
@@ -4121,7 +4470,7 @@ public class ServerApplicationPages
                 if (info.getThrowable() != null)
                 {
                     panel.content().addInner(new p());
-                    Panel exceptionPanel=page.content().returnAddInner(new Level2Panel(page.head(),"Exception"));
+                    Panel exceptionPanel=page.content().returnAddInner(new Panel3(page.head(),"Exception"));
                     exceptionPanel.content().addInner(Utils.toString(info.getThrowable()));
                 }
             }
@@ -4184,5 +4533,13 @@ public class ServerApplicationPages
                 (this.cacheControlValue == null || this.cacheControlValue.length() == 0) ? "max-age=" + this.cacheMaxAge : this.cacheControlValue + ",max-age=" + this.cacheMaxAge);
         response.setStatus(HttpStatus.OK_200);
         response.getOutputStream().write(bytes);
+    }
+
+    @Test
+    @GET
+    @Path("/operator/test/exception")
+    public void testException(Trace parent) throws Throwable
+    {
+        throw new Exception("test");
     }
 }

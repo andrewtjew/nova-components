@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.nova.html.elements.Element;
+import org.nova.html.elements.GlobalEventTagElement;
+import org.nova.html.elements.GlobalTagElement;
+import org.nova.html.elements.StringComposer;
 import org.nova.html.tags.meta;
 import org.nova.http.client.PathAndQueryBuilder;
 import org.nova.http.server.Context;
@@ -15,6 +18,24 @@ import org.nova.json.ObjectMapper;
 
 public class HtmlUtils
 {
+    public static String autoId(GlobalTagElement<?> element)
+    {
+        String id=generateId(element);
+        element.id(id);
+        return id;
+    }
+    public static String generateId(Element element)
+    {
+        return "_"+element.hashCode();
+    }
+    
+    public static String toHtmlText(Element element) throws Throwable
+    {
+        StringComposer composer=new StringComposer();
+        composer.render(element);
+        return composer.getStringBuilder().toString();
+    }
+    
     public static String location(PathAndQueryBuilder builder)
     {
         return "window.location='"+builder.toString()+"'";

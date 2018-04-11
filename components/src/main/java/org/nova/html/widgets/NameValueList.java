@@ -3,13 +3,13 @@ package org.nova.html.widgets;
 import java.util.ArrayList;
 
 import org.nova.core.NameValue;
+import org.nova.html.attributes.Color;
+import org.nova.html.attributes.Size;
+import org.nova.html.attributes.Style;
+import org.nova.html.attributes.border_style;
+import org.nova.html.attributes.unit;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.properties.Color;
-import org.nova.html.properties.Size;
-import org.nova.html.properties.Style;
-import org.nova.html.properties.border_style;
-import org.nova.html.properties.unit;
 import org.nova.html.tags.div;
 
 public class NameValueList extends div
