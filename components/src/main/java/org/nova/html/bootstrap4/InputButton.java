@@ -1,7 +1,8 @@
 package org.nova.html.bootstrap4;
 
+/*
 import org.nova.html.attributes.input_type;
-import org.nova.html.bootstrap4.classes.ButtonSize;
+import org.nova.html.bootstrap4.classes.Size;
 import org.nova.html.bootstrap4.classes.ButtonState;
 import org.nova.html.bootstrap4.classes.ButtonStyle;
 import org.nova.html.elements.Composer;
@@ -14,7 +15,7 @@ public class InputButton extends Element
     final private String label;
     private boolean outline=false;
     private ButtonStyle buttonStyle;
-    private ButtonSize buttonSize;
+    private Size buttonSize;
     private ButtonState buttonState;
     private boolean block;
     
@@ -42,7 +43,7 @@ public class InputButton extends Element
         return this;
     }
     
-    public InputButton buttonSize(ButtonSize value)
+    public InputButton buttonSize(Size value)
     {
         this.buttonSize=value;
         return this;
@@ -82,3 +83,4 @@ public class InputButton extends Element
         return this.button;
     }
 }
+*/

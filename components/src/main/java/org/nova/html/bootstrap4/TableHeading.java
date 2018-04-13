@@ -1,9 +1,7 @@
 package org.nova.html.bootstrap4;
 
 import org.nova.html.attributes.Style;
-import org.nova.html.bootstrap4.classes.BackgroundColor;
-import org.nova.html.bootstrap4.classes.TableColor;
-import org.nova.html.bootstrap4.classes.TextColor;
+import org.nova.html.bootstrap4.classes.ThemeColor;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.td;
@@ -14,9 +12,9 @@ public class TableHeading extends Element
 {
     final private thead thead;
     final private tr tr;
-    private TableColor color;
-    private BackgroundColor backgroundColor;
-    private TextColor textColor;
+    private ThemeColor color;
+    private ThemeColor backgroundColor;
+    private ThemeColor textColor;
     
     public TableHeading()
     {
@@ -24,17 +22,17 @@ public class TableHeading extends Element
         this.tr=this.thead.returnAddInner(new tr());
     }
     
-    public TableHeading color(TableColor value)
+    public TableHeading color(ThemeColor value)
     {
         this.color=value;
         return this;
     }
-    public TableHeading backgroundColor(BackgroundColor value)
+    public TableHeading backgroundColor(ThemeColor value)
     {
         this.backgroundColor=value;
         return this;
     }
-    public TableHeading textColor(TextColor value)
+    public TableHeading textColor(ThemeColor value)
     {
         this.textColor=value;
         return this;
@@ -90,9 +88,9 @@ public class TableHeading extends Element
     public void compose(Composer composer) throws Throwable
     {
         ClassBuilder theadClass=new ClassBuilder();
-        theadClass.add(this.color);
-        theadClass.add(this.textColor);
-        theadClass.add(this.backgroundColor);
+        theadClass.addIf(this.color!=null,"table",this.color);
+        theadClass.addIf(this.textColor!=null,"text",this.textColor);
+        theadClass.addIf(this.backgroundColor!=null,"bg",this.backgroundColor);
         
         theadClass.applyTo(this.thead);
         composer.render(this.thead);

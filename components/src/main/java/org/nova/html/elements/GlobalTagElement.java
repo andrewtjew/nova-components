@@ -3,6 +3,7 @@ package org.nova.html.elements;
 import org.nova.html.attributes.Style;
 import org.nova.html.enums.dir;
 import org.nova.html.enums.dropzone;
+import org.nova.html.widgets.HtmlUtils;
 
 public class GlobalTagElement<ELEMENT extends TagElement<ELEMENT>> extends TagElement<ELEMENT>
 {
@@ -101,6 +102,11 @@ public class GlobalTagElement<ELEMENT extends TagElement<ELEMENT>> extends TagEl
     }
     public String id()
     {
+        if (this.id==null)
+        {
+            this.id=HtmlUtils.generateId(this);
+            id(this.id);
+        }
         return this.id;
     }
     public String class_()

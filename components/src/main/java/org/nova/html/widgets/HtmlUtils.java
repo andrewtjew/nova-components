@@ -18,6 +18,10 @@ import org.nova.json.ObjectMapper;
 
 public class HtmlUtils
 {
+    public static String passwordPeekScript(String id)
+    {
+        return "var x = document.getElementById('"+id+"');if (x.type === 'password') {x.type = 'text';} else {x.type = 'password';}";
+    }
     public static String autoId(GlobalTagElement<?> element)
     {
         String id=generateId(element);

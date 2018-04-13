@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.http.HttpStatus;
 import org.nova.http.server.Context;
+import org.nova.http.server.Response;
 import org.nova.tracing.Trace;
 
 public class AbnormalBrowserSessionResponder implements AbnormalSessionRequestHandling
@@ -20,7 +21,7 @@ public class AbnormalBrowserSessionResponder implements AbnormalSessionRequestHa
     }
     
     @Override
-    public Session handleNoSessionRequest(Trace parent,SessionFilter sessionFilter, Context context)
+    public Response<?>  handleNoSessionRequest(Trace parent,SessionFilter sessionFilter, Context context)
     {
         HttpServletResponse response=context.getHttpServletResponse();
         response.addHeader("Location", noSessionURL);
@@ -29,19 +30,21 @@ public class AbnormalBrowserSessionResponder implements AbnormalSessionRequestHa
     }
 
     @Override
-    public void handleAccessDeniedRequest(Trace parent,SessionFilter sessionFilter, Session session, Context context)
+    public Response<?> handleAccessDeniedRequest(Trace parent,SessionFilter sessionFilter, Session session, Context context)
     {
         HttpServletResponse response=context.getHttpServletResponse();
         response.addHeader("Location", accessDeniedURL);
         response.setStatus(HttpStatus.TEMPORARY_REDIRECT_307);
+        return null;
     }
 
     @Override
-    public void handleNoLockRequest(Trace parent,SessionFilter sessionFilter, Session session, Context context)
+    public Response<?>  handleNoLockRequest(Trace parent,SessionFilter sessionFilter, Session session, Context context)
     {
         HttpServletResponse response=context.getHttpServletResponse();
         response.addHeader("Location", noLockURL);
         response.setStatus(HttpStatus.TEMPORARY_REDIRECT_307);
+        return null;
     }
 
     @Override

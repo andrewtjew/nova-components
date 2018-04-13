@@ -1,6 +1,6 @@
 package org.nova.html.bootstrap4;
-import org.nova.html.bootstrap4.classes.BackgroundColor;
-import org.nova.html.bootstrap4.classes.TextColor;
+
+import org.nova.html.bootstrap4.classes.ThemeColor;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.div;
@@ -8,12 +8,13 @@ import org.nova.html.tags.label;
 import org.nova.html.tags.option;
 import org.nova.html.tags.select;
 
+
 public class SelectList extends Element
 {
     final private div div;
     final private select select;
-    private BackgroundColor backgroundColor;
-    private TextColor textColor;
+    private ThemeColor backgroundColor;
+    private ThemeColor textColor;
     private Integer borderSize;
     
     public SelectList(String id,String label)
@@ -24,16 +25,15 @@ public class SelectList extends Element
             div.addInner(new label().for_(id).addInner(label));
         }
         this.select=this.div.returnAddInner(new select()).id(id);
-//        this.select.style("background-color:#000;");
     }
    
-    public SelectList backgroundColor(BackgroundColor value)
+    public SelectList backgroundColor(ThemeColor value)
     {
         this.backgroundColor=value;
         return this;
     }
     
-    public SelectList textColor(TextColor value)
+    public SelectList textColor(ThemeColor value)
     {
         this.textColor=value;
         return this;
@@ -73,8 +73,8 @@ public class SelectList extends Element
     public void compose(Composer composer) throws Throwable
     {
         ClassBuilder cb=new ClassBuilder("form-control");
-        cb.add(this.backgroundColor);
-        cb.add(this.textColor);
+        cb.addIf(this.backgroundColor!=null,"bg",this.backgroundColor);
+        cb.addIf(this.textColor!=null,"text",this.textColor);
         if (this.borderSize!=null)
         {
             cb.add("border",this.borderSize);

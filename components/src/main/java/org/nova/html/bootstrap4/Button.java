@@ -1,6 +1,7 @@
+/*
 package org.nova.html.bootstrap4;
 
-import org.nova.html.bootstrap4.classes.ButtonSize;
+import org.nova.html.bootstrap4.classes.Size;
 import org.nova.html.bootstrap4.classes.ButtonState;
 import org.nova.html.bootstrap4.classes.ButtonStyle;
 import org.nova.html.elements.Composer;
@@ -13,15 +14,19 @@ public class Button extends Element
     final private String label;
     private boolean outline=false;
     private ButtonStyle buttonStyle;
-    private ButtonSize buttonSize;
+    private Size buttonSize;
     private ButtonState buttonState;
     private boolean block;
     private String modelTargetID;
     
-    public Button(String label)
+    public Button(String label,String onClickLocation)
     {
         this.label=label;
         this.button=new button_button().addInner(label);
+        if (onClickLocation!=null)
+        {
+            this.button.onclick("window.location='"+onClickLocation+"';");
+        }
     }
     
     public Button buttonStyle(ButtonStyle value)
@@ -42,7 +47,7 @@ public class Button extends Element
         return this;
     }
     
-    public Button buttonSize(ButtonSize value)
+    public Button buttonSize(Size value)
     {
         this.buttonSize=value;
         return this;
@@ -90,3 +95,4 @@ public class Button extends Element
         return this.button;
     }
 }
+*/

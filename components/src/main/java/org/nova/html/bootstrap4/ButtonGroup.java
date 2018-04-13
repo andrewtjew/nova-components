@@ -1,6 +1,6 @@
 package org.nova.html.bootstrap4;
 
-import org.nova.html.bootstrap4.classes.ButtonSize;
+import org.nova.html.bootstrap4.classes.Size;
 import org.nova.html.bootstrap4.classes.DropdownPosition;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
@@ -9,15 +9,15 @@ import org.nova.html.tags.div;
 public class ButtonGroup extends Element
 {
     final private div div;
-    private ButtonSize buttonSize;
+    private Size buttonSize;
     private DropdownPosition dropdownPosition;
     
-    public ButtonGroup(String label)
+    public ButtonGroup()
     {
         this.div=new div();
     }
     
-    public ButtonGroup buttonSize(ButtonSize value)
+    public ButtonGroup buttonSize(Size value)
     {
         this.buttonSize=value;
         return this;

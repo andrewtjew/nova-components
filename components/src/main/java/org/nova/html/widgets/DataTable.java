@@ -122,9 +122,9 @@ public class DataTable extends Table
         this(head,null);
     }
     
-    public DataTable(Head head,String id)
+    public DataTable(Head head,String class_)
     {
-        this(head,id,"display","/resources/html/widgets/DataTable/datatables.min.css","/resources/html/widgets/DataTable/datatables.min.js");
+        this(head,null,class_,"/resources/html/widgets/DataTable/datatables.min.css","/resources/html/widgets/DataTable/datatables.min.js");
     }
     
     public DataTable(Head head,String id,String class_,String cssFilePath,String scriptFilePath)

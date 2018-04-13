@@ -1,9 +1,9 @@
 package org.nova.html.bootstrap4;
 
-import org.nova.html.bootstrap4.classes.BackgroundColor;
-import org.nova.html.bootstrap4.classes.Margin;
-import org.nova.html.bootstrap4.classes.NavbarColor;
+import org.nova.html.bootstrap4.classes.Fixed;
+import org.nova.html.bootstrap4.classes.Placement;
 import org.nova.html.bootstrap4.classes.Responsiveness;
+import org.nova.html.bootstrap4.classes.ThemeColor;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.nav;
@@ -17,8 +17,9 @@ public class Navbar extends Element
 {
     final private nav nav;
     private Responsiveness responsiveness;
-    private BackgroundColor backgroundColor;
-    private NavbarColor color;
+    private ThemeColor backgroundColor;
+    private ThemeColor color;
+    private Fixed fixed;
     
     public Navbar()
     {
@@ -31,19 +32,50 @@ public class Navbar extends Element
         return this;
     }
     
-    public Navbar color(NavbarColor value)
+    public Navbar color(ThemeColor value)
     {
         this.color=value;
         return this;
     }
     
-    public Navbar backgroundColor(BackgroundColor value)
+    public Navbar fixed(Fixed value)
+    {
+        this.fixed=value;
+        return this;
+    }
+    
+    public Navbar backgroundColor(ThemeColor value)
     {
         this.backgroundColor=value;
         return this;
     }
     
-    public Navbar add(Element element)
+    public Navbar add(NavbarCollapse element)
+    {
+        this.nav.addInner(element);
+        return this;
+    }
+
+    public Navbar add(String text)
+    {
+        span span=new span().class_("navbar-text").addInner(text);
+        this.nav.addInner(span);
+        return this;
+    }
+
+    public Navbar add(Brand element)
+    {
+        this.nav.addInner(element);
+        return this;
+    }
+
+    public Navbar add(NavbarToggler element)
+    {
+        this.nav.addInner(element);
+        return this;
+    }
+    
+    public Navbar add(NavbarList element)
     {
         this.nav.addInner(element);
         return this;
@@ -54,8 +86,9 @@ public class Navbar extends Element
     {
         ClassBuilder navClass=new ClassBuilder("navbar");
         navClass.addIf(this.responsiveness!=null,"navbar-expand",this.responsiveness);
-        navClass.add(this.backgroundColor);
-        navClass.add(this.color);
+        navClass.addIf(this.backgroundColor!=null,"bg",this.backgroundColor);
+        navClass.addIf(this.color!=null,"navbar",this.color);
+        navClass.addIf(this.fixed!=null,"fixed",this.fixed);
         navClass.applyTo(this.nav);
 
         div top=new div().addInner(this.nav);

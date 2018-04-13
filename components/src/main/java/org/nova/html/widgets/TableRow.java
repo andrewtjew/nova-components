@@ -21,7 +21,18 @@ public class TableRow extends Element
     {
         for (Object item:items)
         {
-            tr.addInner(new td().addInner(item));
+            if (item==null)
+            {
+                tr.addInner(new td());
+            }
+            else if (item instanceof td)
+            {
+                tr.addInner(item);
+            }
+            else
+            {
+                tr.addInner(new td().addInner(item));
+            }
         }
         return this;
     }

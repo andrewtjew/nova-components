@@ -1,32 +1,32 @@
+
 package org.nova.html.bootstrap4;
 
 import org.nova.html.attributes.input_type;
-import org.nova.html.bootstrap4.classes.ButtonSize;
+import org.nova.html.bootstrap4.classes.Size;
+import org.nova.html.bootstrap4.classes.ThemeColor;
 import org.nova.html.bootstrap4.classes.ButtonState;
-import org.nova.html.bootstrap4.classes.ButtonStyle;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.input;
+import org.nova.html.tags.input_submit;
 
 public class SubmitButton extends Element
 {
-    final private input button;
-    final private String label;
+    final private input_submit button;
     private boolean outline=false;
-    private ButtonStyle buttonStyle;
-    private ButtonSize buttonSize;
+    private ThemeColor color;
+    private Size size;
     private ButtonState buttonState;
     private boolean block;
     
     public SubmitButton(String label)
     {
-        this.label=label;
-        this.button=new input().type(input_type.submit).addInner(label);
+        this.button=new input_submit().value(label);
     }
     
-    public SubmitButton buttonStyle(ButtonStyle value)
+    public SubmitButton color(ThemeColor value)
     {
-        this.buttonStyle=value;
+        this.color=value;
         return this;
     }
     
@@ -42,9 +42,9 @@ public class SubmitButton extends Element
         return this;
     }
     
-    public SubmitButton buttonSize(ButtonSize value)
+    public SubmitButton size(Size value)
     {
-        this.buttonSize=value;
+        this.size=value;
         return this;
     }
     
@@ -60,25 +60,17 @@ public class SubmitButton extends Element
     public void compose(Composer composer) throws Throwable
     {
         ClassBuilder cb=new ClassBuilder("btn");
+        cb.add("form-control");
         cb.add("btn");
-        if (this.outline)
-        {
-            cb.addFragments("outline");
-        }
-        cb.add("btn",buttonSize);
+        cb.addFragmentsIf(this.outline,"outline");
+        cb.addFragments(this.color);
+
+        cb.addIf(this.size!=null,"btn",size);
         cb.add(this.buttonState);
-        if (this.block)
-        {
-            cb.add("btn-block");
-        }
-        
-        cb.addFragments(this.buttonStyle);
+        cb.addIf(this.block,"btn-block");
+
         cb.applyTo(this.button);
         composer.render(this.button);
     }
     
-    public input button()
-    {
-        return this.button;
-    }
 }

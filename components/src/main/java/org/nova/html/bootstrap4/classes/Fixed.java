@@ -1,13 +1,13 @@
 package org.nova.html.bootstrap4.classes;
 
-public enum NavbarColor
+public enum Fixed
 {
-    light("navbar-light"), 
-    dark("navbar-dark"), 
+    top("top"), 
+    bottom("bottom"), 
     ;
     private String value;
 
-    NavbarColor(String value)
+    Fixed(String value)
     {
         this.value = value;
     }

@@ -1,19 +1,25 @@
 package org.nova.html.bootstrap4.classes;
 
-public enum ButtonStyle
+import org.nova.html.elements.Element;
+import org.nova.html.elements.GlobalTagElement;
+
+public enum ThemeColor
 {
+    muted("muted"), 
     primary("primary"), 
-    secondary("secondary"), 
     success("success"), 
     info("info"), 
     warninig("warninig"), 
     danger("danger"), 
-    dark("dark"), 
+    secondary("secondary"), 
+    active("active"), 
     light("light"), 
-        ;
+    dark("dark"), 
+    white("white"), 
+    ;
     private String value;
 
-    ButtonStyle(String value)
+    ThemeColor(String value)
     {
         this.value = value;
     }
@@ -22,4 +28,5 @@ public enum ButtonStyle
     {
         return this.value;
     }
+    
 }

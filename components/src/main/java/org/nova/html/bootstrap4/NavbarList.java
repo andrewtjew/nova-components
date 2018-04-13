@@ -1,6 +1,6 @@
 package org.nova.html.bootstrap4;
 
-import org.nova.html.bootstrap4.classes.Margin;
+import org.nova.html.bootstrap4.classes.Placement;
 import org.nova.html.bootstrap4.classes.NavbarState;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
@@ -13,26 +13,19 @@ import org.nova.html.widgets.HtmlUtils;
 public class NavbarList extends Element
 {
     final private ul ul;
-    private Margin margin;
+    private Placement placement;
+    private Integer placementNumber;
 
     public NavbarList()
     {
         this.ul=new ul();
     }
 
-    public NavbarList margin(Margin value)
+    public NavbarList placement(Placement placement,Integer number)
     {
-        this.margin=value;
+        this.placement=placement;
+        this.placementNumber=number;
         return this;
-    }
-
-    @Override
-    public void compose(Composer composer) throws Throwable
-    {
-        ClassBuilder cb=new ClassBuilder("navbar-nav");
-        cb.addIf(this.margin!=null,this.margin);
-        cb.applyTo(this.ul);
-        composer.render(this.ul);
     }
 
     public NavbarList add(Element element)
@@ -51,12 +44,32 @@ public class NavbarList extends Element
         cb.applyTo(a);
         return this;
     }
+    public NavbarList addLink(String label,String href)
+    {
+        return addLink(label,href,NavbarState.active);
+    }
     
     public NavbarList add(ButtonDropdown dropdown)
     {
         li li=this.ul.returnAddInner(new li().class_("nav-item dropdown"));
         li.returnAddInner(dropdown);
         return this;
+    }
+
+    public NavbarList add(LinkDropdown dropdown)
+    {
+        li li=this.ul.returnAddInner(new li().class_("nav-item dropdown"));
+        li.returnAddInner(dropdown);
+        return this;
+    }
+
+    @Override
+    public void compose(Composer composer) throws Throwable
+    {
+        ClassBuilder cb=new ClassBuilder("nav navbar-nav");
+        cb.add(this.placement,this.placementNumber);
+        cb.applyTo(this.ul);
+        composer.render(this.ul);
     }
 
 

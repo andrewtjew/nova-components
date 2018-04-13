@@ -32,7 +32,7 @@ public class BootStrapPage extends Element
 //    	this.head.add(new script().src("https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js").integrity("sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl").crossorigin(crossorigin.anonymous));
 //        this.head.add(new link().rel(link_rel.stylesheet).href("https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css").integrity("sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm").crossorigin(crossorigin.anonymous));
 //        this.head.add(new script().src("https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js").integrity("sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb").crossorigin(crossorigin.anonymous));
-    	this.head.add(new link().rel(link_rel.stylesheet).href("https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"));
+        this.head.add(new link().rel(link_rel.stylesheet).href("https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"));
         this.head.add(new script().src("https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"));
         this.head.add(new script().src("https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"));
         this.head.add(new script().src("https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"));

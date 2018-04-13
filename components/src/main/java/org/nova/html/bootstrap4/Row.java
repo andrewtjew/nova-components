@@ -37,9 +37,9 @@ public class Row extends Element
         return this;
     }
     
-    public Row add(Column col)
+    public Row add(Column column)
     {
-        this.content.addInner(col);
+        this.content.addInner(column);
         return this;
     }
     

@@ -107,7 +107,13 @@ public class SessionFilter extends Filter
         {
             if (this.debugSession==null)
             {
-                session=getAbnormalSessionRequestHandler(context).handleNoSessionRequest(parent,this, context);
+                Response<?> response=getAbnormalSessionRequestHandler(context).handleNoSessionRequest(parent,this, context);
+                if (response!=null)
+                {
+                    return response;
+                }
+                // handleNoSessionRequest() can create a valid session, so we check again.
+                session=this.sessionManager.getSessionByToken(token);
                 if (session==null)
                 {
                     return null;
@@ -121,16 +127,14 @@ public class SessionFilter extends Filter
         Lock<String> lock=sessionManager.waitForLock(parent,session.getToken());
         if (lock==null)
         {
-            getAbnormalSessionRequestHandler(context).handleNoLockRequest(parent,this, session, context);
-            return null;
+            return getAbnormalSessionRequestHandler(context).handleNoLockRequest(parent,this, session, context);
         }
         session.update(lock);
         try
         {
             if (session.isAccessDenied(parent,context))
             {
-                getAbnormalSessionRequestHandler(context).handleAccessDeniedRequest(parent,this, session, context);
-                return null;
+                return getAbnormalSessionRequestHandler(context).handleAccessDeniedRequest(parent,this, session, context);
             }
             context.setState(session);
             return filterChain.next(parent, context);

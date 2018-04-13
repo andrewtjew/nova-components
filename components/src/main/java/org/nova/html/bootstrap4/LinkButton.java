@@ -1,8 +1,8 @@
 package org.nova.html.bootstrap4;
 
-import org.nova.html.bootstrap4.classes.ButtonSize;
+import org.nova.html.bootstrap4.classes.Size;
+import org.nova.html.bootstrap4.classes.ThemeColor;
 import org.nova.html.bootstrap4.classes.ButtonState;
-import org.nova.html.bootstrap4.classes.ButtonStyle;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.a;
@@ -10,22 +10,27 @@ import org.nova.html.tags.a;
 public class LinkButton extends Element
 {
     final private a button;
-    final private String label;
     private boolean outline=false;
-    private ButtonStyle buttonStyle;
-    private ButtonSize buttonSize;
+    private ThemeColor color;
+    private ThemeColor textColor;
+    private Size buttonSize;
     private ButtonState buttonState;
     private boolean block;
     
-    public LinkButton(String label)
+    public LinkButton(String label,String href)
     {
-        this.label=label;
-        this.button=new a().attr("role","button").addInner(label);
+        this.button=new a().attr("role","button").addInner(label).href(href);
     }
     
-    public LinkButton buttonStyle(ButtonStyle value)
+    public LinkButton color(ThemeColor value)
     {
-        this.buttonStyle=value;
+        this.color=value;
+        return this;
+    }
+    
+    public LinkButton textColor(ThemeColor value)
+    {
+        this.textColor=value;
         return this;
     }
     
@@ -41,7 +46,7 @@ public class LinkButton extends Element
         return this;
     }
     
-    public LinkButton buttonSize(ButtonSize value)
+    public LinkButton buttonSize(Size value)
     {
         this.buttonSize=value;
         return this;
@@ -59,19 +64,19 @@ public class LinkButton extends Element
     public void compose(Composer composer) throws Throwable
     {
         ClassBuilder cb=new ClassBuilder("btn");
+        cb.add("form-control");
         cb.add("btn");
-        if (this.outline)
-        {
-            cb.addFragments("outline");
-        }
-        cb.add("btn",buttonSize);
+        cb.addFragmentsIf(this.outline,"outline");
+        cb.addFragments(this.color);
+
+        cb.addIf(this.textColor!=null,"text",this.textColor);
+        //        cb.add("btn",buttonSize);
         cb.add(this.buttonState);
         if (this.block)
         {
             cb.add("btn-block");
         }
         
-        cb.addFragments(this.buttonStyle);
         cb.applyTo(this.button);
         composer.render(this.button);
     }

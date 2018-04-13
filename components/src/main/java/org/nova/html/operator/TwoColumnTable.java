@@ -17,7 +17,7 @@ public class TwoColumnTable extends Table
     
     public void addItems(Element first,Element second)
     {
-        this.tbody().addInner(new tr().addInners(new td().addInner(first),this.seperator,new td().addInner(second)));
+        this.addRow(new tr().addInners(new td().addInner(first),this.seperator,new td().addInner(second)));
     }
     public void addItems(Object first,Element second)
     {
