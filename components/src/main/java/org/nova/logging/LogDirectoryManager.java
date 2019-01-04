@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 import java.util.Map.Entry;
 
 import org.nova.annotations.Description;
-import org.nova.core.Utils;
 import org.nova.metrics.CountMeter;
+import org.nova.utils.Utils;
 
 import java.util.TreeMap;
 
@@ -332,5 +332,11 @@ public class LogDirectoryManager
             return fileOutputStream;
         }
     }
-	
+	public File[] getSnapshotOfFiles()
+	{
+        synchronized(this.writeLock)
+        {
+            return this.map.values().toArray(new File[this.map.size()]);
+        }
+	}
 }

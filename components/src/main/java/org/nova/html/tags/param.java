@@ -6,7 +6,7 @@ public class param extends GlobalEventTagElement<param>
 {
     public param()
     {
-        super("param");
+        super("param",true);
     }
     
     public param name(String name)

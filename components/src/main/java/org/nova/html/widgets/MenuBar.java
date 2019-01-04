@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.enums.link_rel;
+import org.nova.html.ext.Head;
 import org.nova.html.tags.ul;
 import org.nova.html.tags.a;
 import org.nova.html.tags.hr;
@@ -128,7 +129,7 @@ public class MenuBar extends Element
     public void compose(Composer builder) throws Throwable
     {
         ul menu=new ul();
-        menu.class_("menu-level-0");
+        menu.addClass("menu-level-0");
         write(menu,0,this.rootItems);
         menu.compose(builder);
     }
@@ -172,7 +173,7 @@ public class MenuBar extends Element
             {
                 li li=ul.returnAddInner(new li());
                 //Seperator
-                li.class_("menu-separator-item");
+                li.addClass("menu-separator-item");
                 li.returnAddInner(new hr());
             }
             else
@@ -191,7 +192,7 @@ public class MenuBar extends Element
                     }
                     if ((subItems!=null)&&(level>0))
                     {
-                        a.addInner(new span().class_("menu-expand").addInner("&#x27a4;"));
+                        a.addInner(new span().addClass("menu-expand").addInner("&#x27a4;"));
                         a.addInner(item.name);
                     //    a.addInner(new span().class_("menu-expand").addInner("&#9658;"));
                         ;            
@@ -203,7 +204,7 @@ public class MenuBar extends Element
                 }
                 else
                 {
-                    li.returnAddInner(new label().class_("menu-item-disabled").addInner(item.name));
+                    li.returnAddInner(new label().addClass("menu-item-disabled").addInner(item.name));
                 }
                 if (subItems!=null)
                 {
@@ -212,7 +213,7 @@ public class MenuBar extends Element
                         li.style("width:"+longestSubMenu+"em;");
                     }
                     ul subMenu=li.returnAddInner(new ul());
-                    subMenu.class_("menu-level-"+(level+1));
+                    subMenu.addClass("menu-level-"+(level+1));
                     write(subMenu,level+1,subItems);
                 }
             }

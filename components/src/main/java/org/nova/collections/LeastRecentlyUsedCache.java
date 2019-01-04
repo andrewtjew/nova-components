@@ -180,5 +180,5 @@ public abstract class LeastRecentlyUsedCache<KEY,VALUE>
 		return this.misses;
 	}
 	
-	abstract protected VALUE load(Trace trace,KEY key) throws Throwable; 
+	abstract protected VALUE load(Trace parent,KEY key) throws Throwable; 
 }

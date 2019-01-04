@@ -3,26 +3,21 @@ package org.nova.html.elements;
 import org.nova.html.attributes.Style;
 import org.nova.html.enums.dir;
 import org.nova.html.enums.dropzone;
-import org.nova.html.widgets.HtmlUtils;
 
 public class GlobalTagElement<ELEMENT extends TagElement<ELEMENT>> extends TagElement<ELEMENT>
 {
-    private String id;
-    private String class_;
-    GlobalTagElement(String tag)
+    public GlobalTagElement(String tag)
     {
         super(tag);
+    }
+    public GlobalTagElement(String tag,boolean noEndTag)
+    {
+        super(tag,noEndTag);
     }
 
     public ELEMENT accesskey(String value)
     {
         return attr("accesskey",value);
-    }
-
-    public ELEMENT class_(String value)
-    {
-        this.class_=value;
-        return attr("class",value);
     }
 
     public ELEMENT contenteditable(boolean value)
@@ -67,11 +62,6 @@ public class GlobalTagElement<ELEMENT extends TagElement<ELEMENT>> extends TagEl
     {
         return attr("hidden");
     }
-    public ELEMENT id(String value)
-    {
-        this.id=value;
-        return attr("id",value);
-    }
     public ELEMENT lang(String value)
     {
         return attr("lang",value);
@@ -99,18 +89,5 @@ public class GlobalTagElement<ELEMENT extends TagElement<ELEMENT>> extends TagEl
     public ELEMENT translate(boolean value)
     {
         return attr("translate",value);
-    }
-    public String id()
-    {
-        if (this.id==null)
-        {
-            this.id=HtmlUtils.generateId(this);
-            id(this.id);
-        }
-        return this.id;
-    }
-    public String class_()
-    {
-        return this.class_;
     }
 }

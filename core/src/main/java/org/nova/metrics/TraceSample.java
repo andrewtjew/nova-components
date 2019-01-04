@@ -9,14 +9,10 @@ public class TraceSample
     final double totalDuration2Ns;
     final private long totalWaitNs;
     final double totalWait2Ns;
-    final private long maxDurationNs;
-    final private long maxWaitNs;
-    final private long maxDurationInstantMs;
-    final private long maxWaitInstantMs;
-    final private long minDurationNs;
-    final private long minWaitNs;
-    final private long minDurationInstantMs;
-    final private long minWaitInstantMs;
+    final private Trace maxDurationTrace;
+    final private Trace maxWaitTrace;
+    final private Trace minDurationTrace;
+    final private Trace minWaitTrace;
     final private long count;
     final private long createdMs;
     final private Trace firstExceptionTrace;
@@ -33,14 +29,10 @@ public class TraceSample
         this.totalDuration2Ns=meter.totalDuration2Ns;
         this.totalWaitNs = meter.totalWaitNs;
         this.totalWait2Ns=meter.totalWait2Ns;
-        this.maxDurationNs = meter.maxDurationNs;
-        this.maxWaitNs = meter.maxWaitNs;
-        this.maxDurationInstantMs = meter.maxDurationInstantMs;
-        this.maxWaitInstantMs = meter.maxWaitInstantMs;
-        this.minDurationNs = meter.minDurationNs;
-        this.minWaitNs = meter.minWaitNs;
-        this.minDurationInstantMs = meter.minDurationInstantMs;
-        this.minWaitInstantMs = meter.minWaitInstantMs;
+        this.maxDurationTrace=meter.maxDurationTrace;
+        this.minDurationTrace=meter.minDurationTrace;
+        this.maxWaitTrace=meter.maxWaitTrace;
+        this.minWaitTrace=meter.minWaitTrace;
         this.count = meter.count;
         this.firstExceptionTrace=meter.firstExceptionTrace;
         this.lastExceptionTrace=meter.lastExceptionTrace;
@@ -58,65 +50,27 @@ public class TraceSample
     {
        return this.rate; 
     }
-    public double getMaxDurationS()
+
+    public Trace getMaxDurationTrace()
     {
-        return getMaxDurationNs() / 1.0e9;
+        return this.maxDurationTrace;
     }
 
-    public long getMaxDurationNs()
+    public Trace getMinDurationTrace()
     {
-        return maxDurationNs;
+        return this.minDurationTrace;
     }
 
-    public long getMaxDurationInstantMs()
+    public Trace getMaxWaitTrace()
     {
-        return this.maxDurationInstantMs;
+        return this.maxWaitTrace;
     }
 
-    public double getMinDurationS()
+    public Trace getMinWaitTrace()
     {
-        return getMinDurationNs() / 1.0e9;
+        return this.minWaitTrace;
     }
 
-    public long getMinDurationNs()
-    {
-        return minDurationNs;
-    }
-
-    public long getMinDurationInstantMs()
-    {
-        return this.minDurationInstantMs;
-    }
-
-    public double getMaxWaitS()
-    {
-        return getMaxWaitNs() / 1.0e9;
-    }
-
-    public long getMaxWaitNs()
-    {
-        return maxWaitNs;
-    }
-    public long getMaxWaitInstantMs()
-    {
-        return this.maxWaitInstantMs;
-    }
-
-    public double getMinWaitS()
-    {
-        return getMinWaitNs() / 1.0e9;
-    }
-
-
-    public long getMinWaitNs()
-    {
-        return minWaitNs;
-    }
-
-    public long getMinWaitInstantMs()
-    {
-        return this.minWaitInstantMs;
-    }
 
 
     public double getTotalDurationS()

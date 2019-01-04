@@ -12,7 +12,7 @@ public class NotifyWaiter
 		this.start=System.currentTimeMillis();
 	}
 	
-	public boolean waitForNotify()
+	public boolean waitForOldNotify()
 	{
 		if (System.currentTimeMillis()-this.start<this.timeout)
 		{
@@ -28,4 +28,20 @@ public class NotifyWaiter
 		}
 		return true;
 	}
+    public boolean waitForNewNotify()
+    {
+        if (System.currentTimeMillis()-this.start<this.timeout)
+        {
+            try
+            {
+                synchronizationObject.wait(this.timeout);
+            }
+            catch (InterruptedException e)
+            {
+                return false;
+            }
+            return System.currentTimeMillis()-this.start<this.timeout;
+        }
+        return true;
+    }
 }

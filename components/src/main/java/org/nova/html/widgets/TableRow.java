@@ -36,18 +36,10 @@ public class TableRow extends Element
         }
         return this;
     }
-    public TableRow add(td...items)
-    {
-        for (Object item:items)
-        {
-            tr.addInner(item);
-        }
-        return this;
-    }
 
     @Override
     public void compose(Composer composer) throws Throwable
     {
-        composer.render(this.tr);
+        composer.compose(this.tr);
     }
 }

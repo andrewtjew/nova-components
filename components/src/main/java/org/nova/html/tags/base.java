@@ -7,7 +7,7 @@ public class base extends GlobalEventTagElement<base>
 {
     public base()
     {
-        super("base");
+        super("base",true);
     }
     
     public base href(String URL)

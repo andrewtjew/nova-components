@@ -6,6 +6,6 @@ public class br extends GlobalEventTagElement<br>
 {
     public br()
     {
-        super("br");
+        super("br",true);
     }
 }

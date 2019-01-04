@@ -6,5 +6,6 @@ public enum TaskStatus
 		READY,		// ready to run, but not scheduled
 		WAITING,    // scheduled to run, but waiting for resources
 		EXECUTING,	
-		COMPLETED,	 
+		COMPLETED,
+		CANCELLED,
 }

@@ -75,5 +75,5 @@ public abstract class CoreEnvironmentApplication
     {
         return this.name;
     }
-    abstract public void run(Trace parent) throws Throwable;
+    abstract public void join(Trace parent) throws Throwable;
 }

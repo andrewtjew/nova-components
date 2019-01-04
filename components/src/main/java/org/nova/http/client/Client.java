@@ -14,12 +14,13 @@ import org.nova.concurrent.MultiTaskScheduler;
 import org.nova.concurrent.TimerScheduler;
 import org.nova.concurrent.TimerTask;
 import org.nova.concurrent.TimerTask.TimeBase;
-import org.nova.core.Utils;
 import org.nova.http.Header;
 import org.nova.logging.Item;
 import org.nova.logging.Logger;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
+import org.nova.utils.FileUtils;
+import org.nova.utils.Utils;
 
 import com.amazonaws.util.IOUtils;
 import com.nova.disrupt.Disruptor;
@@ -145,7 +146,7 @@ public class Client
         {
             context.addLogItem(new Item("responseHeader:"+header.getName(),header.getValue()));
         }
-        String responseContent=Utils.readString(response.getEntity().getContent());
+        String responseContent=FileUtils.readString(response.getEntity().getContent());
         if (responseContent.length()>0)
         {
             context.addLogItem(new Item("response",responseContent));
@@ -167,45 +168,38 @@ public class Client
     {
         try (DisruptorTraceContext context=new DisruptorTraceContext(parent, this.traceManager, this.logger, this.disruptor, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery,this.endPoint))
         {
-            try 
+            HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
+            context.addLogItem(new Item("endPoint",this.endPoint));
+            context.addLogItem(new Item("pathAndQuery",pathAndQuery));
+
+            if (this.headers!=null)
             {
-                HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
-                context.addLogItem(new Item("endPoint",this.endPoint));
-                context.addLogItem(new Item("pathAndQuery",pathAndQuery));
-    
-                if (this.headers!=null)
-                {
-                    for (Header header:this.headers)
-                    {
-                        get.setHeader(header.getName(),header.getValue());
-                    }
-                }
-                for (Header header:headers)
+                for (Header header:this.headers)
                 {
                     get.setHeader(header.getName(),header.getValue());
                 }
-                if (acceptContentType!=null)
-                {
-                    get.setHeader("Accept",acceptContentType);
-                }
-                logHeaders(context,get.getAllHeaders());
-    
-                context.beginWait();
-                HttpResponse response=this.client.execute(get);
-                context.endWait();
-                try
-                {
-                    processResponse(response, context);
-                    return response.getStatusLine().getStatusCode();
-                }
-                finally
-                {
-                    response.getEntity().getContent().close();
-                }
-            }       
-            catch (Throwable t)
+            }
+            for (Header header:headers)
             {
-                throw context.handleThrowable(t);
+                get.setHeader(header.getName(),header.getValue());
+            }
+            if (acceptContentType!=null)
+            {
+                get.setHeader("Accept",acceptContentType);
+            }
+            logHeaders(context,get.getAllHeaders());
+
+            context.beginWait();
+            HttpResponse response=this.client.execute(get);
+            context.endWait();
+            try
+            {
+                processResponse(response, context);
+                return response.getStatusLine().getStatusCode();
+            }
+            finally
+            {
+                response.getEntity().getContent().close();
             }
         }
     }
@@ -223,47 +217,40 @@ public class Client
     {
         try (DisruptorTraceContext context=new DisruptorTraceContext(parent, this.traceManager, this.logger, this.disruptor, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery,this.endPoint))
         {
-            try 
+            HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
+            context.addLogItem(new Item("endPoint",this.endPoint));
+            context.addLogItem(new Item("pathAndQuery",pathAndQuery));
+
+            if (this.headers!=null)
             {
-                HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
-                context.addLogItem(new Item("endPoint",this.endPoint));
-                context.addLogItem(new Item("pathAndQuery",pathAndQuery));
-    
-                if (this.headers!=null)
-                {
-                    for (Header header:this.headers)
-                    {
-                        get.setHeader(header.getName(),header.getValue());
-                    }
-                }
-                for (Header header:headers)
+                for (Header header:this.headers)
                 {
                     get.setHeader(header.getName(),header.getValue());
                 }
-                if (acceptContentType!=null)
-                {
-                    get.setHeader("Accept",acceptContentType);
-                }
-                logHeaders(context,get.getAllHeaders());
-    
-                context.beginWait();
-                HttpResponse response=this.client.execute(get);
-                context.endWait();
-                try
-                {
-                    IOUtils.copy(response.getEntity().getContent(), outputStream);
-                    int statusCode=response.getStatusLine().getStatusCode();
-                    context.addLogItem(new Item("statusCode",statusCode));
-                    return statusCode;
-                }
-                finally
-                {
-                    response.getEntity().getContent().close();
-                }
-            }       
-            catch (Throwable t)
+            }
+            for (Header header:headers)
             {
-                throw context.handleThrowable(t);
+                get.setHeader(header.getName(),header.getValue());
+            }
+            if (acceptContentType!=null)
+            {
+                get.setHeader("Accept",acceptContentType);
+            }
+            logHeaders(context,get.getAllHeaders());
+
+            context.beginWait();
+            HttpResponse response=this.client.execute(get);
+            context.endWait();
+            try
+            {
+                IOUtils.copy(response.getEntity().getContent(), outputStream);
+                int statusCode=response.getStatusLine().getStatusCode();
+                context.addLogItem(new Item("statusCode",statusCode));
+                return statusCode;
+            }
+            finally
+            {
+                response.getEntity().getContent().close();
             }
         }
     }
@@ -277,42 +264,35 @@ public class Client
 	{
         try (DisruptorTraceContext context=createContext(parent, traceCategoryOverride,pathAndQuery))
         {
-            try 
+			HttpDelete delete=new HttpDelete(this.endPoint+pathAndQuery);
+            context.addLogItem(new Item("endPoint",this.endPoint));
+            context.addLogItem(new Item("pathAndQuery",pathAndQuery));
+
+            if (this.headers!=null)
+			{
+				for (Header header:this.headers)
+				{
+					delete.setHeader(header.getName(),header.getValue());
+				}
+			}
+            for (Header header:headers)
             {
-    			HttpDelete delete=new HttpDelete(this.endPoint+pathAndQuery);
-                context.addLogItem(new Item("endPoint",this.endPoint));
-                context.addLogItem(new Item("pathAndQuery",pathAndQuery));
-    
-                if (this.headers!=null)
-    			{
-    				for (Header header:this.headers)
-    				{
-    					delete.setHeader(header.getName(),header.getValue());
-    				}
-    			}
-                for (Header header:headers)
-                {
-                    delete.setHeader(header.getName(),header.getValue());
-                }
-                logHeaders(context,delete.getAllHeaders());
-                
-                context.beginWait();
-                HttpResponse response=this.client.execute(delete);
-                context.endWait();
-    			try
-    			{
-    			    processResponse(response, context);
-    				return response.getStatusLine().getStatusCode();
-    			}
-    			finally
-    			{
-    				response.getEntity().getContent().close();
-    			}
-    		}		
-            catch (Throwable t)
-            {
-                throw context.handleThrowable(t);
+                delete.setHeader(header.getName(),header.getValue());
             }
+            logHeaders(context,delete.getAllHeaders());
+            
+            context.beginWait();
+            HttpResponse response=this.client.execute(delete);
+            context.endWait();
+			try
+			{
+			    processResponse(response, context);
+				return response.getStatusLine().getStatusCode();
+			}
+			finally
+			{
+				response.getEntity().getContent().close();
+			}
         }
 	}
     

@@ -7,7 +7,7 @@ public class keygen extends GlobalEventTagElement<keygen>
 {
     public keygen()
     {
-        super("keygen");
+        super("keygen",true);
     }
     
     public keygen autofocus()

@@ -2,8 +2,6 @@ package org.nova.html.widgets;
 
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.elements.GlobalTagElement;
-import org.nova.html.tags.div;
 import org.nova.html.tags.script;
 
 public class ClearTimeout extends Element

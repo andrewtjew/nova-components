@@ -2,11 +2,14 @@ package org.nova.http.server;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.nova.collections.RingBuffer;
 import org.nova.metrics.LongValueMeter;
 import org.nova.metrics.LongValueSample;
+
 import java.util.TreeMap;
 
 public class RequestHandler
@@ -37,8 +40,9 @@ public class RequestHandler
 	final private LongValueMeter responseUncompressedContentSizeMeter;
 	final private LongValueMeter requestCompressedContentSizeMeter;
 	final private LongValueMeter responseCompressedContentSizeMeter;
+    final private RingBuffer<RequestLogEntry> lastRequestsLogEntries;
 	
-	RequestHandler(Object object,Method method,String httpMethod,String path,Filter[] filters,ParameterInfo[] parameterInfos,	Map<String,ContentDecoder> contentDecoders,Map<String,ContentEncoder> contentEncoders,Map<String,ContentReader<?>> contentReaders,Map<String,ContentWriter<?>> contentWriters,boolean log,boolean logRequestHeaders,boolean logRequestParameters,boolean logRequestContent,boolean logResponseHeaders,boolean logResponseContent,boolean logLastRequestsInMemory,boolean public_)
+	RequestHandler(Object object,Method method,String httpMethod,String path,Filter[] filters,ParameterInfo[] parameterInfos,	Map<String,ContentDecoder> contentDecoders,Map<String,ContentEncoder> contentEncoders,Map<String,ContentReader<?>> contentReaders,Map<String,ContentWriter<?>> contentWriters,boolean log,boolean logRequestHeaders,boolean logRequestParameters,boolean logRequestContent,boolean logResponseHeaders,boolean logResponseContent,boolean logLastRequestsInMemory,boolean public_,int bufferSize)
 	{
 		this.object=object;
 		this.method=method;
@@ -65,6 +69,7 @@ public class RequestHandler
         this.logResponseHeaders=logResponseHeaders;
         this.logResponseContent=logResponseContent;
         this.logLastRequestsInMemory=logLastRequestsInMemory;
+        this.lastRequestsLogEntries=new RingBuffer<>(new RequestLogEntry[bufferSize]);
 	}
 
 	public Object getObject()
@@ -146,18 +151,31 @@ public class RequestHandler
 		this.responseCompressedContentSizeMeter.update(responseCompressedContentSize);
 	}
 
-	public Map<Integer,LongValueSample> sampleStatusMeters()
-	{
-		synchronized (this)
-		{
-			TreeMap<Integer,LongValueSample> results =new TreeMap<>();
-			for (Entry<Integer, LongValueMeter> entry:this.meters.entrySet())
-			{
-			    results.put(entry.getKey(), entry.getValue().sample());
-			}
-			return results;
-		}		
-	}
+    public Map<Integer,LongValueSample> sampleStatusMeters()
+    {
+        synchronized (this)
+        {
+            TreeMap<Integer,LongValueSample> results =new TreeMap<>();
+            for (Entry<Integer, LongValueMeter> entry:this.meters.entrySet())
+            {
+                results.put(entry.getKey(), entry.getValue().sample());
+            }
+            return results;
+        }       
+    }
+
+    public Map<Integer,LongValueMeter> getStatusMeters()
+    {
+        synchronized (this)
+        {
+            TreeMap<Integer,LongValueMeter> results =new TreeMap<>();
+            for (Entry<Integer, LongValueMeter> entry:this.meters.entrySet())
+            {
+                results.put(entry.getKey(), entry.getValue());
+            }
+            return results;
+        }       
+    }
 
 	public LongValueMeter getRequestUncompressedContentSizeMeter()
 	{
@@ -212,7 +230,21 @@ public class RequestHandler
     {
         return logLastRequestsInMemory;
     }
-    
-    
+    public void log(RequestLogEntry entry)
+    {
+        synchronized(this.lastRequestsLogEntries)
+        {
+            this.lastRequestsLogEntries.add(entry);
+        }
+    }
+    public RequestLogEntry[] getLastRequestLogEntries()
+    {
+        synchronized (this.lastRequestsLogEntries)
+        {
+            List<RequestLogEntry> list=this.lastRequestsLogEntries.getSnapshot();
+            return list.toArray(new RequestLogEntry[list.size()]);
+        }
+    }
+        
 	
 }

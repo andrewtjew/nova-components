@@ -1,18 +1,19 @@
 package org.nova.logging;
-
+ 
 import java.io.IOException;
-import org.nova.core.Utils;
+
 import org.nova.json.ObjectMapper;
 import org.nova.logging.Item;
 import org.nova.logging.LogEntry;
 import org.nova.tracing.Trace;
+import org.nova.utils.Utils;
 
 public class JSONFormatter extends Formatter
 {
     private boolean commaNeededBetweenEntries=false;
 	@SuppressWarnings("resource")
     @Override
-	public String format(LogEntry entry) throws Exception
+	public String format(LogEntry entry) throws Throwable
 	{
 		StringBuilder sb=new StringBuilder();
 	    if (this.commaNeededBetweenEntries)
@@ -57,6 +58,7 @@ public class JSONFormatter extends Formatter
             writeString(true,sb,"created",Utils.millisToUTCDateTimeString(trace.getCreatedMs()));
             writeString(true,sb,"category",trace.getCategory());
             write(true,sb,"duration",trace.getDurationS());
+            write(true,sb,"wait",trace.getWaitS());
             Trace parent=trace.getParent();
             if (parent!=null)
             {
@@ -102,7 +104,7 @@ public class JSONFormatter extends Formatter
         return sb.toString();
 	}
 	
-	private void writeString(boolean comma,StringBuilder sb,String key,String value)
+	private void writeString(boolean comma,StringBuilder sb,String key,String value) throws Throwable 
 	{
 	    if (value!=null)
 	    {
@@ -112,13 +114,12 @@ public class JSONFormatter extends Formatter
 	        }
             sb.append('"');
 	        sb.append(key);
-            sb.append("\":\"");
-            ObjectMapper.writeString(sb, value);
-            sb.append('"');
+            sb.append("\":");
+	        sb.append(ObjectMapper.writeObjectToString(value));
 	    }
 	}
 
-	private void writeItem(boolean comma,StringBuilder sb,Item item)
+	private void writeItem(boolean comma,StringBuilder sb,Item item) throws Throwable
     {
         if (comma)
         {
@@ -126,7 +127,7 @@ public class JSONFormatter extends Formatter
         }
         sb.append("{\"");
         sb.append(item.getName());
-        Object value=item.getValue();
+        String value=item.getValue();
         if (value==null)
         {
             sb.append("\":null}");
@@ -134,7 +135,7 @@ public class JSONFormatter extends Formatter
         else
         {
             sb.append("\":\"");
-            ObjectMapper.writeString(sb, value.toString());
+	        sb.append(value);
             sb.append("\"}");
         }
     }

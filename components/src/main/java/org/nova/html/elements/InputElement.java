@@ -2,25 +2,38 @@ package org.nova.html.elements;
 
 public class InputElement<ELEMENT extends InputElement<ELEMENT>> extends GlobalEventTagElement<ELEMENT>
 {
+    private String name; 
     protected InputElement()
     {
         super("input");
+    }
+
+    protected InputElement(String tag)
+    {
+        super(tag,false);
     }
 
     public ELEMENT autofocus()
     {
         return attr("autofocus");
     }
+    public ELEMENT autofocus(boolean autofocus)
+    {
+        if (autofocus)
+        {
+            return attr("autofocus");
+        }
+        return (ELEMENT)this;
+    }
     public ELEMENT disabled()
     {
         return attr("disabled");
     }
-    @SuppressWarnings("unchecked")
     public ELEMENT disabled(boolean disabled)
     {
         if (disabled)
         {
-            attr("disabled");
+            return attr("disabled");
         }
         return (ELEMENT)this;
     }
@@ -28,9 +41,9 @@ public class InputElement<ELEMENT extends InputElement<ELEMENT>> extends GlobalE
     {
         return attr("form",form_id);
     }
-    public ELEMENT name(String text)
+    public ELEMENT form(TagElement<?> element)
     {
-        return attr("name",text);
+        return attr("form",element.id());
     }
     public ELEMENT readonly()
     {
@@ -44,7 +57,27 @@ public class InputElement<ELEMENT extends InputElement<ELEMENT>> extends GlobalE
         }
         return (ELEMENT)this;
     }
-
+    public ELEMENT name(String name)
+    {
+        this.name=name;
+        return (ELEMENT)this;
+    }
+    public String name()
+    {
+        if (this.name==null)
+        {
+            this.name="_"+this.hashCode();
+            return this.name;
+        }
+        return this.name;
+    }
+    
+    @Override
+    public void compose(Composer composer) throws Throwable
+    {
+        attr("name",this.name);
+        super.compose(composer);
+    }
 
     /*
     public input accept(String value) //file

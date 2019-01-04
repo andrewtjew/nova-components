@@ -43,7 +43,7 @@ public class JSONArrayWriter extends JSONWriter
         return this;
     }
 
-    public JSONArrayWriter write(String value) throws Exception
+    public JSONArrayWriter write(String value) throws Throwable
     {
         if (value==null)
         {
@@ -51,7 +51,7 @@ public class JSONArrayWriter extends JSONWriter
         }
         prepare();
         sb.append('"');
-        ObjectMapper.writeString(this.sb, value);
+        sb.append(ObjectMapper.writeObjectToString(value));
         sb.append('"');
         return this;
     }

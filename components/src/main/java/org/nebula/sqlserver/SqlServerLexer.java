@@ -1,11 +1,11 @@
 package org.nebula.sqlserver;
 
-import org.nova.scan.Lexeme;
-import org.nova.scan.ScanException;
-import org.nova.scan.Scanner;
-import org.nova.scan.Snippet;
-import org.nova.scan.Source;
-import org.nova.scan.Token;
+import org.nova.parsing.scan.Lexeme;
+import org.nova.parsing.scan.ScanException;
+import org.nova.parsing.scan.Scanner;
+import org.nova.parsing.scan.Snippet;
+import org.nova.parsing.scan.Source;
+import org.nova.parsing.scan.Token;
 
 public class SqlServerLexer extends Scanner
 {

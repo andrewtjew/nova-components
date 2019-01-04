@@ -5,6 +5,8 @@ public enum Token
     OPERATOR,
     PUNCTUATOR,
     KEYWORD,
+    TAB,
+    END_OF_LINE,
     TEXT,
     IDENTIFIER,
     STRING, 

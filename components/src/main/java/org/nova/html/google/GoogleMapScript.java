@@ -2,14 +2,9 @@ package org.nova.html.google;
 
 import java.util.ArrayList;
 
-import org.nova.html.attributes.Color;
-import org.nova.html.attributes.Size;
-import org.nova.html.attributes.Style;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.tags.div;
 import org.nova.html.tags.script;
-import org.nova.html.widgets.HtmlUtils;
 
 public class GoogleMapScript extends Element
 {
@@ -47,8 +42,8 @@ public class GoogleMapScript extends Element
         }        
         sb.append('}');
         
-        composer.render(new script().addInner(sb.toString()));
-        composer.render(new script().src("https://maps.googleapis.com/maps/api/js?key="+this.apiKey+"&callback="+function));
+        composer.compose(new script().addInner(sb.toString()));
+        composer.compose(new script().src("https://maps.googleapis.com/maps/api/js?key="+this.apiKey+"&callback="+function));
         
     }
     

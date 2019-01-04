@@ -10,7 +10,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import org.nova.core.Utils;
+import org.nova.utils.FileUtils;
 
 public class SocketUtils
 {
@@ -39,7 +39,7 @@ public class SocketUtils
             }
 
             KeyStore keyStore = KeyStore.getInstance("JKS");
-            try (FileInputStream inputStream = new FileInputStream(Utils.toNativePath(keyStorePath)))
+            try (FileInputStream inputStream = new FileInputStream(FileUtils.toNativePath(keyStorePath)))
             {
                 keyStore.load(inputStream, keyStorePassword.toCharArray());
             }
@@ -75,7 +75,7 @@ public class SocketUtils
             }
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(algorithm);
             KeyStore keyStore = KeyStore.getInstance("JKS");
-            try (FileInputStream inputStream = new FileInputStream(Utils.toNativePath(keyStorePath)))
+            try (FileInputStream inputStream = new FileInputStream(FileUtils.toNativePath(keyStorePath)))
             {
                 keyStore.load(inputStream, keyStorePassword.toCharArray());
             }

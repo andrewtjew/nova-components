@@ -8,7 +8,7 @@ public class img extends GlobalEventTagElement<img>
 {
     public img()
     {
-        super("img");
+        super("img",true);
     }
     
     public img alt(String text)

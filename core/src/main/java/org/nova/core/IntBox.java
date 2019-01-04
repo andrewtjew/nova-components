@@ -1,5 +1,7 @@
 package org.nova.core;
 
+// For passing back reference results as in: void func(IntBox result) { result.set(42);}
+
 public class IntBox
 {
     private int value;

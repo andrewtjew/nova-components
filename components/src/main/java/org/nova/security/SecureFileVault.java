@@ -1,6 +1,8 @@
 package org.nova.security;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
@@ -12,7 +14,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.nova.core.Utils;
+import org.nova.configuration.Configuration;
+import org.nova.utils.FileUtils;
 
 // Using FileVault:
 // Secret file should contain one line entries of format: key=value
@@ -23,7 +26,7 @@ public class SecureFileVault extends Vault
 {
 	public static final void encrypt(String password,String salt,String inputFileName, String outputFileName) throws Exception
 	{
-		String text=Utils.readTextFile(inputFileName);
+		String text=FileUtils.readTextFile(inputFileName);
 		byte[] byteText = text.getBytes();
 
 		SecretKey secretKey = buildKey(password,salt);
@@ -46,7 +49,7 @@ public class SecureFileVault extends Vault
 	
 	public static final String decrypt(String password,String salt,String inputFileName) throws Exception
 	{
-		byte[] bytes=Utils.readFile(inputFileName);
+		byte[] bytes=FileUtils.readFile(inputFileName);
 		SecretKey secretKey = buildKey(password,salt);
 		Cipher AesCipher = Cipher.getInstance("AES");
 		AesCipher.init(Cipher.DECRYPT_MODE, secretKey);
@@ -94,4 +97,105 @@ public class SecureFileVault extends Vault
 		return new String(bytePlainText).trim();
 	}
 
+	static private String makePasswordFile(String in)
+	{
+	    return FileUtils.toNativePath(in+"/map.cnf");
+	}
+	
+	public static Vault getVault(Configuration configuration) throws Throwable
+	{
+	    try
+	    {
+            String secureVaultFile=configuration.getValue("Environment.Vault.secureVaultFile",null);
+            if (secureVaultFile!=null)
+            {
+                PasswordMethod passwordMethod=configuration.getEnumValue("Environment.alert",PasswordMethod.class);
+                String password=null;
+                
+                switch (passwordMethod)
+                {
+                    case system:
+                        if (System.console()==null)
+                        {
+                            System.err.println("Error code: 8614");
+                            System.exit(1);
+                        }
+                        password=new String(System.console().readPassword("Enter vault password:"));
+                        break;
+                    case high:
+                    {
+                        String passwordFile=makePasswordFile(configuration.getValue("Environment.preferences",null));
+                        try
+                        {
+                            password=FileUtils.readTextFile(passwordFile).trim();
+                        }
+                        catch (Throwable t)
+                        {
+                            System.err.println("Error code: 6762");
+                            System.exit(1);
+                        }
+                        try
+                        {
+                            if (new File(passwordFile).delete()==false)
+                            {
+                                System.err.println("Error code: 5367");
+                                System.exit(1);
+                            }
+                        }
+                        catch (Throwable t)
+                        {
+                            System.err.println("Error code: 5367");
+                            System.exit(1);
+                        }
+                    }
+                        break;
+                    case normal:
+                    {
+                        String passwordFile=makePasswordFile(configuration.getValue("Environment.preferences",null));
+                        if (passwordFile==null)
+                        {
+                            System.err.println("Error code: 4665");
+                            System.exit(1);
+                        }
+                        try
+                        {
+                            password=FileUtils.readTextFile(passwordFile).trim();
+                        }
+                        catch (Throwable t)
+                        {
+                            System.err.println("Error code: 6762");
+                            System.exit(1);
+                        }
+                    }
+                        break;
+                    default:
+                        break;
+                    
+                }
+                String salt=configuration.getValue("Environment.Vault.salt");
+                return new SecureFileVault(password, salt, secureVaultFile);
+            }
+            else
+            {
+                printUnsecureVaultWarning(System.err);
+                String unsecureVaultFile=configuration.getValue("Environment.Vault.unsecureVaultFile");
+                return new UnsecureFileVault(unsecureVaultFile);
+            }
+	    }
+	    finally
+	    {
+            configuration.remove("Environment.preferences");
+            configuration.remove("Environment.Vault.secureVaultFile");
+            configuration.remove("Environment.alert");
+            configuration.remove("Environment.Vault.salt");
+	    }
+	    
+	}
+    private static void printUnsecureVaultWarning(PrintStream stream)
+    {
+        stream.println("**************************************");
+        stream.println("**   WARNING: Using UnsecureVault   **");
+        stream.println("**************************************");
+    }
+	
 }

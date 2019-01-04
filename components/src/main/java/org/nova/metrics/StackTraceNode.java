@@ -6,16 +6,21 @@ public class StackTraceNode
 {
     final StackTraceElement stackTraceElement;
     private HashMap<String,StackTraceNode> childNodes;
-    private long durationNs; 
+    private long activeNs; 
+    private long waitNs;
+    private int count;
     
     StackTraceNode(StackTraceElement stackTraceElement)
     {
         this.stackTraceElement=stackTraceElement;
     }
-    StackTraceNode(StackTraceElement stackTraceElement,long totalDurationNs)
+    StackTraceNode(StackTraceElement stackTraceElement,long totalActiveNs,long totalWaitNs,int count)
     {
         this.stackTraceElement=stackTraceElement;
-        this.durationNs=totalDurationNs;
+        this.activeNs=totalActiveNs;
+        this.waitNs=totalWaitNs;
+        this.count=count;
+                
     }
     void addChildNode(StackTraceNode node)
     {
@@ -35,36 +40,78 @@ public class StackTraceNode
     {
         return element.getClassName()+'.'+element.getMethodName()+"."+element.getLineNumber();
     }
-    void update(long durationNs,StackTraceElement[] stackTrace,int index)
+    public boolean isThreadWaiting(StackTraceElement element)
     {
-        this.durationNs+=durationNs;
-        if (index==0)
+        if ("java.lang.Object".equals(element.getClassName()))
         {
-            return;
+            return "wait".equals(element.getMethodName());
         }
-        StackTraceElement element=stackTrace[--index];
-        String key=getKey(element);
+        if ("java.lang.Thread".equals(element.getClassName()))
+        {
+            return "sleep".equals(element.getMethodName());
+        }
+        return false;
+    }
+    
+    boolean update(long durationNs,StackTraceElement[] stackTrace,int index)
+    {
+        this.count++;
+        if (index<=1)
+        {
+            StackTraceElement element=stackTrace[index];
+            boolean wait=isThreadWaiting(element);
+            if (wait)
+            {
+                this.waitNs+=durationNs;
+                return true;
+            }
+            this.activeNs+=durationNs;
+            if (index==0)
+            {
+                return false;
+            }
+        }
+        StackTraceElement childElement=stackTrace[index-1];
+        String childKey=getKey(childElement);
+        StackTraceNode childNode;
         if (this.childNodes==null)
         {
             this.childNodes=new HashMap<>();
-            StackTraceNode node=new StackTraceNode(element);
-            this.childNodes.put(key, node);
-            node.update(durationNs, stackTrace, index);
+            childNode=new StackTraceNode(childElement);
+            this.childNodes.put(childKey, childNode);
         }
         else
         {
-            StackTraceNode stackNode=this.childNodes.get(key);
-            if (stackNode==null)
+            childNode=this.childNodes.get(childKey);
+            if (childNode==null)
             {
-                stackNode=new StackTraceNode(element);
-                this.childNodes.put(key, stackNode);
+                childNode=new StackTraceNode(childElement);
+                this.childNodes.put(childKey, childNode);
             }            
-            stackNode.update(durationNs, stackTrace, index);
         }
+        boolean wait=childNode.update(durationNs,stackTrace,index-1);
+        if (wait)
+        {
+            this.waitNs+=durationNs;
+        }
+        else
+        {
+            this.activeNs+=durationNs;
+        }
+        return wait;
+            
     }
-    public long getDurationNs()
+    public long getActiveNs()
     {
-        return this.durationNs;
+        return this.activeNs;
+    }
+    public int getCount()
+    {
+        return this.count;
+    }
+    public long getWaitNs()
+    {
+        return this.waitNs;
     }
     public StackTraceElement getStackTraceElement()
     {

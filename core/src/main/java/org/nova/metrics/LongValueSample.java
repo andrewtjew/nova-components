@@ -13,10 +13,11 @@ public class LongValueSample
     final private long total;
     final private double total2;
     final private long createdMs;
-    final private long totalCount;
+    final private long meterTotalCount;
+    final private long meterTotal;
     final private long value;
 
-    public LongValueSample(LongValueSample lastSample, long value,long min, long minInstantMs, long max, long maxInstantMs, long durationNs, long samples, long total, double total2, long totalCount)
+    public LongValueSample(LongValueSample lastSample, long value,long min, long minInstantMs, long max, long maxInstantMs, long durationNs, long samples, long total, double total2, long meterTotalCount,long meterTotal)
     {
         this.lastSample = lastSample;
         this.value=value;
@@ -28,13 +29,27 @@ public class LongValueSample
         this.samples = samples;
         this.total = total;
         this.total2 = total2;
-        this.totalCount=totalCount;
+        this.meterTotalCount=meterTotalCount;
+        this.meterTotal=meterTotal;
         this.createdMs = System.currentTimeMillis();
     }
 
-    public long getTotalCount()
+    public long getMeterTotalCount()
     {
-        return this.totalCount;
+        return this.meterTotalCount;
+    }
+    public long getMeterTotal()
+    {
+        return this.meterTotal;
+    }
+    public double getMeterAverage(double invalidValue)
+    {
+        if (this.meterTotalCount<1)
+        {
+            return invalidValue;
+        }
+        return (double)this.meterTotal/(double)this.meterTotalCount;
+        
     }
     public LongValueSample getLastSample()
     {

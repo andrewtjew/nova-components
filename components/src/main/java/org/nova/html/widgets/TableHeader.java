@@ -23,15 +23,18 @@ public class TableHeader extends Element
     {
         for (Object item:items)
         {
-            tr.addInner(new th().addInner(item));
-        }
-        return this;
-    }
-    public TableHeader add(th...items)
-    {
-        for (Object item:items)
-        {
-            tr.addInner(item);
+            if (item==null)
+            {
+                tr.addInner(new th());
+            }
+            else if (item instanceof th)
+            {
+                tr.addInner(item);
+            }
+            else
+            {
+                tr.addInner(new th().addInner(item));
+            }
         }
         return this;
     }
@@ -39,6 +42,6 @@ public class TableHeader extends Element
     @Override
     public void compose(Composer composer) throws Throwable
     {
-        composer.render(this.thead);
+        composer.compose(this.thead);
     }
 }

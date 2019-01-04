@@ -1,6 +1,6 @@
 package org.nova.html.bootstrap4;
 
-import org.nova.html.bootstrap4.classes.ThemeColor;
+import org.nova.html.bootstrap4.classes.StyleColor;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.div;
@@ -13,13 +13,13 @@ public class SelectList extends Element
 {
     final private div div;
     final private select select;
-    private ThemeColor backgroundColor;
-    private ThemeColor textColor;
+    private StyleColor backgroundColor;
+    private StyleColor textColor;
     private Integer borderSize;
     
     public SelectList(String id,String label)
     {
-        this.div=new div().class_("form-group");
+        this.div=new div().addClass("form-group");
         if (label!=null)
         {
             div.addInner(new label().for_(id).addInner(label));
@@ -27,13 +27,13 @@ public class SelectList extends Element
         this.select=this.div.returnAddInner(new select()).id(id);
     }
    
-    public SelectList backgroundColor(ThemeColor value)
+    public SelectList backgroundColor(StyleColor value)
     {
         this.backgroundColor=value;
         return this;
     }
     
-    public SelectList textColor(ThemeColor value)
+    public SelectList textColor(StyleColor value)
     {
         this.textColor=value;
         return this;
@@ -77,11 +77,11 @@ public class SelectList extends Element
         cb.addIf(this.textColor!=null,"text",this.textColor);
         if (this.borderSize!=null)
         {
-            cb.add("border",this.borderSize);
+            cb.addClass("border",this.borderSize);
         }
-        cb.applyTo(this.select);
+        this.select.addClass(cb.toString());
         
-        composer.render(this.div);
+        composer.compose(this.div);
     }
     
     public select select()

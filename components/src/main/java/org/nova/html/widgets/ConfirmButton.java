@@ -6,7 +6,6 @@ import org.nova.html.elements.Element;
 import org.nova.html.tags.button_button;
 import org.nova.html.tags.div;
 import org.nova.html.tags.input_checkbox;
-import org.nova.html.tags.span;
 
 public class ConfirmButton extends Element
 {
@@ -15,7 +14,7 @@ public class ConfirmButton extends Element
     public ConfirmButton(String location,String label,String title)
     {
         input_checkbox check=new input_checkbox();
-        HtmlUtils.autoId(check);
+        check.id();
         button_button button=new button_button();
         button.addInner(label);
         if (title!=null)
@@ -47,6 +46,6 @@ public class ConfirmButton extends Element
     @Override
     public void compose(Composer composer) throws Throwable
     {
-        composer.render(this.content);
+        composer.compose(this.content);
     }
 }

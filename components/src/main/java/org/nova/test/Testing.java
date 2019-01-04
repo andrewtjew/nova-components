@@ -1,7 +1,7 @@
 package org.nova.test;
 
 import java.util.concurrent.atomic.AtomicLong;
-
+@SuppressWarnings("unused")
 public class Testing
 {
     public final static boolean ENABLED=false;

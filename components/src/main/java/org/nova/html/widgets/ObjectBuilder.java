@@ -1,7 +1,10 @@
 package org.nova.html.widgets;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Stack;
 
+import org.nova.annotations.Alias;
 import org.nova.json.ObjectMapper;
 
 public class ObjectBuilder
@@ -45,7 +48,7 @@ public class ObjectBuilder
         }
         else
         {
-            sb.append(ObjectMapper.write(value));
+            sb.append(ObjectMapper.writeObjectToString(value));
         }
     }
     public void addRawString(String name,String value) throws Throwable
@@ -74,7 +77,7 @@ public class ObjectBuilder
         }
         else
         {
-            sb.append(ObjectMapper.write(value));
+            sb.append(ObjectMapper.writeObjectToString(value));
         }
     }
     
@@ -91,6 +94,38 @@ public class ObjectBuilder
         sb.append('}');
         this.comma=this.commas.pop();
     }
+    
+    public void add(Object object) throws Throwable
+    {
+        if (object==null)
+        {
+            return;
+        }
+        Class<?> c=object.getClass();
+        
+        for (Field field : c.getDeclaredFields())
+        {
+            int modifiers = field.getModifiers();
+            if (Modifier.isTransient(modifiers))
+            {
+                continue;
+            }
+            if (Modifier.isStatic(modifiers))
+            {
+                continue;
+            }
+            Alias alias=(Alias)field.getAnnotation(Alias.class);
+            if (alias==null)
+            {
+                addIfNotNull(field.getName(),field.get(object));
+            }
+            else
+            {
+                addIfNotNull(alias.value(),field.get(object));
+            }
+        }
+    }
+    
     
     @Override
     public String toString()

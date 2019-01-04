@@ -2,7 +2,6 @@ package org.nova.metrics;
 
 import java.util.List;
 
-import org.nova.collections.RingBuffer;
 import org.nova.tracing.Trace;
 
 public class TraceHistorySample

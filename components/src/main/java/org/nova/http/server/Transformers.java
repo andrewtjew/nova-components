@@ -79,12 +79,15 @@ public class Transformers
 	
 	public Filter getFilter(Class<? extends Filter> type)
 	{
-		for (Filter item:this.filters)
+		for (Filter filter:this.filters)
 		{
-			if (item.getClass()==type)
-			{
-				return item;
-			}
+		    for (Class<?> filterClass=filter.getClass();filterClass!=null;filterClass=filterClass.getSuperclass())
+		    {
+    			if (filterClass==type)
+    			{
+    				return filter;
+    			}
+		    }
 		}
 		return null;
 	}

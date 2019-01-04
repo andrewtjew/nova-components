@@ -1,6 +1,6 @@
 package org.nova.pathStore;
 
-import org.nova.core.Utils;
+import org.nova.utils.Utils;
 
 public class AttributeValue<A,V> extends Node
 {

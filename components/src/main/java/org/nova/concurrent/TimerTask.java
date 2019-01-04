@@ -94,21 +94,22 @@ public class TimerTask
 				}
 			}
 			this.totalDuration+=trace.getDurationNs();
+            Key key=getSchedule();
 			synchronized(this)
 			{
 				if (this.cancel)
 				{
-					this.executeStatus=TaskStatus.COMPLETED;
+					this.executeStatus=TaskStatus.CANCELLED;
 					return null;
 				}
-				if (period<=0)
+				if (key==null)
 				{
 					this.executeStatus=TaskStatus.COMPLETED;
 					return null;
 				}
 				this.executeStatus=TaskStatus.READY;
 			}
-			return getSchedule();
+			return key;
 		}
 	}
 	
@@ -125,6 +126,10 @@ public class TimerTask
             }
             else
             {
+                if (this.period==0)
+                {
+                    return null;
+                }
                 long duration=now-this.due;
                 long misses=duration/period;
                 this.misses+=misses;
@@ -142,6 +147,10 @@ public class TimerTask
             }
             else
             {
+                if (this.period==0)
+                {
+                    return null;
+                }
                 long duration=now-this.due;
                 this.misses+=duration/period;
                 this.due=now+this.period;

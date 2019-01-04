@@ -6,6 +6,6 @@ public class hr extends GlobalEventTagElement<hr>
 {
     public hr()
     {
-        super("hr");
+        super("hr",true);
     }
 }

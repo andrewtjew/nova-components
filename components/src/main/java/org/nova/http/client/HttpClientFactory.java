@@ -23,7 +23,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.eclipse.jetty.util.resource.PathResource;
 import org.eclipse.jetty.util.security.CertificateUtils;
-import org.nova.core.Utils;
+import org.nova.utils.FileUtils;
+import org.nova.utils.Utils;
 
 public class HttpClientFactory
 {
@@ -159,8 +160,8 @@ public class HttpClientFactory
 
     static public HttpClient createSSLClient(HttpClientConfiguration configuration,String clientCertficateStorePath, String clientCertficateStorePassword,String serverCertificateStorePath,String serverCertificateStorePassword,String clusterName,String tls) throws Throwable
     {
-        KeyStore clientCertficateStore=CertificateUtils.getKeyStore(new PathResource(new File(Utils.toNativePath(clientCertficateStorePath))), "JKS", null, clientCertficateStorePassword);
-        KeyStore serverCertificateStore=CertificateUtils.getKeyStore(new PathResource(new File(Utils.toNativePath(serverCertificateStorePath))), "JKS", null, serverCertificateStorePassword);
+        KeyStore clientCertficateStore=CertificateUtils.getKeyStore(new PathResource(new File(FileUtils.toNativePath(clientCertficateStorePath))), "JKS", null, clientCertficateStorePassword);
+        KeyStore serverCertificateStore=CertificateUtils.getKeyStore(new PathResource(new File(FileUtils.toNativePath(serverCertificateStorePath))), "JKS", null, serverCertificateStorePassword);
         SSLContextBuilder contextBuilder=new SSLContextBuilder().
                 loadKeyMaterial(clientCertficateStore,clientCertficateStorePassword.toCharArray()).  
                 loadTrustMaterial(serverCertificateStore,null);

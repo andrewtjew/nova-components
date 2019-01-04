@@ -1,37 +1,32 @@
 package org.nova.html.bootstrap4;
 
 import org.nova.html.elements.Composer;
-import org.nova.html.elements.Element;
-import org.nova.html.tags.div;
-import org.nova.html.widgets.Content;
 
-public class Container extends Element 
+public class Container extends StyleComponent<Container>
 {
-    boolean fluid;
-    final private Content content;
+    private boolean fluid;
     
 	public Container()
 	{
-	    this.content=new Content();
+	    super("div",null);
 	}
-    public Container fluid(boolean fluid)
+    public Container fluid()
     {
-        this.fluid=fluid;
+        this.fluid=true;
         return this;
     }
-	@Override
+    
+    @Override
     public void compose(Composer composer) throws Throwable
     {
-	    div div=new div();
-	    ClassBuilder class_=this.fluid?new ClassBuilder("container","fluid"):new ClassBuilder("container");
-	    class_.applyTo(div);
-	    div.addInner(this.content);
-        composer.render(div);
+        if (fluid)
+        {
+            this.addClass("container","fluid");
+        }
+        else
+        {
+            this.addClass("container");
+        }
+        super.compose(composer);
     }
-	
-	public Container add(Row row)
-	{
-	    this.content.addInner(row);
-	    return this;
-	}
 }

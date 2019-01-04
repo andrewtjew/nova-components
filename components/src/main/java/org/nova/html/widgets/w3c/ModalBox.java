@@ -3,11 +3,11 @@ package org.nova.html.widgets.w3c;
 import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.elements.TagElement;
 import org.nova.html.enums.link_rel;
+import org.nova.html.ext.Head;
 import org.nova.html.tags.div;
 import org.nova.html.tags.link;
 import org.nova.html.tags.script;
 import org.nova.html.tags.span;
-import org.nova.html.widgets.Head;
 
 public class ModalBox extends div
 {
@@ -20,20 +20,20 @@ public class ModalBox extends div
     {
         this.id=id;
         id(id);
-        class_("modal");
+        addClass("modal");
         if (head!=null)
         {
             head.add(ModalBox.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
         }
         this.addInner(new script().addInner("window.onclick=function(event){if (event.target==document.getElementById('"+id+"')){getElementById('"+id+"').style.display='none';}}"));
-        this.box=this.returnAddInner(new div()).class_("modal-content");
-        this.header=this.box.returnAddInner(new div()).class_("modal-header");
-        this.header.addInner(new span().class_("modal-close").addInner("&times;").onclick("document.getElementById('"+this.id+"').style.display='none'"));
+        this.box=this.returnAddInner(new div()).addClass("modal-content");
+        this.header=this.box.returnAddInner(new div()).addClass("modal-header");
+        this.header.addInner(new span().addClass("modal-close").addInner("&times;").onclick("document.getElementById('"+this.id+"').style.display='none'"));
         this.header.addInner(new span().addInner(header));
-        this.content=this.box.returnAddInner(new div()).class_("modal-body");
+        this.content=this.box.returnAddInner(new div()).addClass("modal-body");
         if (footer!=null)
         {
-            this.footer=this.box.returnAddInner(new div()).class_("modal-footer").addInner(footer);
+            this.footer=this.box.returnAddInner(new div()).addClass("modal-footer").addInner(footer);
         }
         else
         {

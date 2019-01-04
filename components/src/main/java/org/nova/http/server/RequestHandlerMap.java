@@ -12,8 +12,7 @@ import java.util.Map.Entry;
 
 import javax.servlet.http.Cookie;
 
-import org.nova.core.Utils;
-import org.nova.http.client.PathAndQueryBuilder;
+import org.nova.http.client.PathAndQuery;
 import org.nova.http.server.annotations.ParamName;
 import org.nova.http.server.annotations.ContentDecoders;
 import org.nova.http.server.annotations.ContentEncoders;
@@ -38,6 +37,10 @@ import org.nova.http.server.annotations.StateParam;
 import org.nova.http.server.annotations.TRACE;
 import org.nova.http.server.annotations.Test;
 import org.nova.tracing.Trace;
+import org.nova.utils.TypeUtils;
+import org.nova.utils.Utils;
+
+import com.jcraft.jsch.Buffer;
 
 //TODO!!! Resolve Consumes and ContentReaders just like produces and contentwriters
 
@@ -69,8 +72,9 @@ class RequestHandlerMap
 	final private Map traceMap;
 	final private HashMap<String, RequestHandler> requestHandlers;
 	final private boolean test;
+	final private int bufferSize;
 
-	RequestHandlerMap(boolean test)
+	RequestHandlerMap(boolean test,int bufferSize)
 	{
 	    this.test=test;
 		this.putMap = new Map();
@@ -82,6 +86,7 @@ class RequestHandlerMap
 		this.traceMap = new Map();
 		this.patchMap = new Map();
 		this.requestHandlers = new HashMap<>();
+		this.bufferSize=bufferSize;
 	}
 
 	public RequestHandler[] getRequestHandlers()
@@ -701,14 +706,23 @@ class RequestHandlerMap
 				    ParameterizedType writerType=(ParameterizedType)writer.getClass().getGenericSuperclass();
 				    Type writerContentType=writerType.getActualTypeArguments()[0];
 
-				    int distance=Utils.getAncestorDistance((Class<?>)returnType, (Class<?>)writerContentType);
-				    if (distance>=0)
+				    try
 				    {
-    				    String mediaType=writer.getMediaType();
-    				    storeClosestDistanceWriter(closestDistanceWriters, mediaType, distance, writer);
-    					String anySubType = org.nova.http.server.WsUtils.toAnySubMediaType(mediaType);
-                        storeClosestDistanceWriter(closestDistanceWriters, anySubType, distance, writer);
-                        storeClosestDistanceWriter(closestDistanceWriters, "*/*", distance, writer);
+    				    int distance=TypeUtils.getAncestorDistance((Class<?>)returnType, (Class<?>)writerContentType);
+    				    if (distance>=0)
+    				    {
+        				    String mediaType=writer.getMediaType();
+        				    storeClosestDistanceWriter(closestDistanceWriters, mediaType, distance, writer);
+        					String anySubType = org.nova.http.server.WsUtils.toAnySubMediaType(mediaType);
+                            storeClosestDistanceWriter(closestDistanceWriters, anySubType, distance, writer);
+                            storeClosestDistanceWriter(closestDistanceWriters, "*/*", distance, writer);
+    				    }
+				    }
+				    catch (Throwable t)
+				    {
+	                    throw new Exception("Cannot match return type with suitable content writer. Generic return type?. "
+	                            + object.getClass().getCanonicalName() + "." + method.getName(),t);
+				        
 				    }
     			}
     			for (Entry<String, DistanceContentWriter> entry:closestDistanceWriters.entrySet())
@@ -777,7 +791,7 @@ class RequestHandlerMap
         boolean logResponseContent=true;
         boolean logRequestParameters=true;
         
-        PathAndQueryBuilder path=new PathAndQueryBuilder();
+        PathAndQuery path=new PathAndQuery();
         if (root!=null)
         {
             path.addSegment(root);
@@ -818,16 +832,28 @@ class RequestHandlerMap
                 logResponseContent=false;
 	        }
 	    }
-	    if (fullPath.endsWith("/#"))
-	    {
-	        fullPath=fullPath.substring(0, fullPath.length()-1)+method.getName();
-	 //       System.out.println("METHOD:"+fullPath);
-	    }
-        RequestHandler requestHandler = new RequestHandler(object, method, httpMethod, fullPath, handlerFilters.toArray(new Filter[handlerFilters.size()]),
+        if (fullPath.endsWith("/#"))
+        {
+            fullPath=fullPath.substring(0, fullPath.length()-1)+method.getName();
+     //       System.out.println("METHOD:"+fullPath);
+        }
+        else if (fullPath.endsWith("/@"))
+        {
+            fullPath=fullPath.substring(0, fullPath.length()-1)+object.getClass().getSimpleName()+"/"+method.getName(); 
+        }
+	    Filter[] filters=handlerFilters.toArray(new Filter[handlerFilters.size()]);
+	    
+        RequestHandler requestHandler = new RequestHandler(object, method, httpMethod, fullPath, filters,
                 parameterInfos.toArray(new ParameterInfo[parameterInfos.size()]), contentDecoderMap, contentEncoderMap, contentReaderMap, contentWriterMap,
                 log,logRequestHeaders,logRequestParameters,logRequestContent,logResponseHeaders,logResponseContent,logLastRequestsInMemory,
-                true);
+                true,this.bufferSize);
         add(httpMethod, fullPath, requestHandler);
+        
+        for (Filter filter:filters)
+        {
+            filter.onRegister(requestHandler);
+        }
+        
 	}
 	
 

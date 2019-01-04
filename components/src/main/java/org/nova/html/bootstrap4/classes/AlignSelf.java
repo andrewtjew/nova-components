@@ -2,9 +2,11 @@ package org.nova.html.bootstrap4.classes;
 
 public enum AlignSelf
 {
-    start("align-self-start"), 
-    center("align-self-center"), 
-    end("align-self-end"), 
+    start("start"), 
+    center("center"), 
+    end("end"),
+    baseline("baseline"),
+    stretch("stretch"),
     ;
     private String value;
 

@@ -2,7 +2,6 @@ package org.nova.html.widgets;
 
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.elements.InputElement;
 import org.nova.html.tags.input_checkbox;
 
 public class InputToggler extends Element
@@ -23,6 +22,6 @@ public class InputToggler extends Element
     @Override
     public void compose(Composer composer) throws Throwable
     {
-        composer.render(this.checkbox);
+        composer.compose(this.checkbox);
     }
 }

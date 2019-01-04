@@ -21,7 +21,7 @@ public class LongValueMeter
 	{
 	    this.min=Long.MAX_VALUE;
 	    this.max=Long.MIN_VALUE;
-	    this.lastSample=new LongValueSample(null, 0,0,0,0,0,0,0,0,0,0);
+	    this.lastSample=new LongValueSample(null, 0,0,0,0,0,0,0,0,0,0,0);
 	    this.markNs=System.nanoTime();
 	}
 	
@@ -72,14 +72,14 @@ public class LongValueMeter
 	        return sample(1);
 	    }
 	}
-
-	public long getValue()
-	{
-        synchronized(this)
-        {
-            return this.value;
-        }
-	}
+	
+//	public long getValue()
+//	{
+//        synchronized(this)
+//        {
+//            return this.value;
+//        }
+//	}
 	
 	public void resetExtremas()
 	{
@@ -104,7 +104,7 @@ public class LongValueMeter
             {
                 this.lastSample.lastSample=null;
             }
-            LongValueSample result=new LongValueSample(this.lastSample, this.value, this.min, this.minInstantMs, this.max, this.maxInstantMs, durationNs, this.samples, this.markTotal, this.markTotal2,this.totalCount);
+            LongValueSample result=new LongValueSample(this.lastSample, this.value, this.min, this.minInstantMs, this.max, this.maxInstantMs, durationNs, this.samples, this.markTotal, this.markTotal2,this.totalCount,this.total);
             if (this.samples>minimalResetCount)
             {
                 this.lastSample=result;

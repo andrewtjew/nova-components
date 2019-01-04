@@ -27,6 +27,11 @@ public class PrecisionTimer
 	{
 	    this.elapsedNs=0;
 	}
+	public void resetStart()
+	{
+        this.elapsedNs=0;
+        this.startNs=System.nanoTime();
+	}
 	public long getElapsedNs()
 	{
 		return this.elapsedNs;

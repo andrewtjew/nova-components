@@ -11,8 +11,8 @@ import org.nova.html.attributes.text_align;
 import org.nova.html.attributes.unit;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
+import org.nova.html.ext.Text;
 import org.nova.html.tags.div;
-import org.nova.html.widgets.Text;
 
 public class NameInputValueList extends div
 {

@@ -247,5 +247,13 @@ public class Row
 	{
 	    return this.data;
 	}
+	public int getColumns()
+	{
+	    if (this.data==null)
+	    {
+	        return 0;
+	    }
+	    return this.data.length;
+	}
 	
 }

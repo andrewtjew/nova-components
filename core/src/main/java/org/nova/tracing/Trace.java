@@ -22,6 +22,7 @@ public class Trace implements AutoCloseable
 	private String fromLink;
 	private StackTraceElement[] closeStackTrace;
 	private TraceContext context;
+	private boolean closed;
 	
 	public Trace(TraceManager traceManager,Trace parent,String category,String details,boolean waiting)
 	{
@@ -43,6 +44,7 @@ public class Trace implements AutoCloseable
 			this.createStackTrace=null;
 		}
 		this.traceNode=traceManager.getTraceNode(category, parent);
+		this.closed=false;
 	}
 	public Trace(TraceManager traceManager,Trace parent,String category,boolean waiting)
 	{
@@ -98,7 +100,7 @@ public class Trace implements AutoCloseable
 	{
 		synchronized (this)
 		{
-			return this.traceManager==null;
+			return this.closed;
 		}
 	}
 	public long getCreatedMs()
@@ -142,7 +144,7 @@ public class Trace implements AutoCloseable
 		    {
 		        this.throwable=t;
 		    }
-			if (this.traceManager!=null)
+			if (this.closed==false)
 			{
 				if (this.context.captureCloseStack)
 				{
@@ -157,7 +159,7 @@ public class Trace implements AutoCloseable
 				}
 				this.duration=nowNs-this.start;
                 this.traceNode.update(this);
-				this.traceManager=null;
+				this.closed=true;
 			}
 		}
 	}
@@ -177,7 +179,7 @@ public class Trace implements AutoCloseable
 	{
 		synchronized(this)
 		{
-		    if (this.traceManager==null)
+		    if (this.closed)
 		    {
 		        return false;
 		    }
@@ -194,7 +196,7 @@ public class Trace implements AutoCloseable
 	{
 		synchronized(this)
 		{
-            if (this.traceManager==null)
+            if (this.closed)
             {
                 return false;
             }
@@ -212,7 +214,7 @@ public class Trace implements AutoCloseable
 	{
 		synchronized(this)
 		{
-			if (this.traceManager!=null)
+            if (this.closed==false)
 			{
 				return System.nanoTime()-this.start;
 			}
@@ -223,7 +225,7 @@ public class Trace implements AutoCloseable
 	{
 		synchronized(this)
 		{
-			if (this.traceManager!=null)
+            if (this.closed==false)
 			{
 				if (this.waiting)
 				{
@@ -238,7 +240,7 @@ public class Trace implements AutoCloseable
 	{
 		synchronized(this)
 		{
-			if (this.traceManager!=null)
+            if (this.closed==false)
 			{
 				if (this.waiting)
 				{
@@ -348,4 +350,11 @@ public class Trace implements AutoCloseable
 	    }	
 	    return null;
 	}
+	
+	public Trace newChild(String category)
+	{
+	    return new Trace(this.traceManager,this,category);
+	}
+	
+	
 }

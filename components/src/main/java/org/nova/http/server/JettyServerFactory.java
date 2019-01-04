@@ -10,7 +10,7 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
-import org.nova.core.Utils;
+import org.nova.utils.FileUtils;
 
 public class JettyServerFactory
 {
@@ -48,13 +48,13 @@ public class JettyServerFactory
         SslContextFactory sslContextFactory = new SslContextFactory();
         if (serverCertificateKeyPassword!=null)
         {
-            sslContextFactory.setKeyStorePath(Utils.toNativePath(serverCertificateKeyStorePath));
+            sslContextFactory.setKeyStorePath(FileUtils.toNativePath(serverCertificateKeyStorePath));
             sslContextFactory.setKeyStorePassword(serverCertificateKeyPassword);
         }
         if (clientCertificatePassword!=null)
         {
             sslContextFactory.setNeedClientAuth(true);
-            sslContextFactory.setTrustStorePath(Utils.toNativePath(clientCertificateKeyStorePath));
+            sslContextFactory.setTrustStorePath(FileUtils.toNativePath(clientCertificateKeyStorePath));
             sslContextFactory.setTrustStorePassword(clientCertificatePassword);
         }
         

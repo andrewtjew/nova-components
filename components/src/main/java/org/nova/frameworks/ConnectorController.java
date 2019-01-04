@@ -8,17 +8,16 @@ import org.nebula.sqlserver.DatabaseUpdatePermissions;
 import org.nebula.sqlserver.DatabaseUpdater;
 import org.nova.annotations.Description;
 import org.nova.configuration.Configuration;
-import org.nova.core.Utils;
+import org.nova.html.DataTables.DataTableOld;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.tags.hr;
 import org.nova.html.tags.p;
 import org.nova.html.tags.textarea;
-import org.nova.html.widgets.DataTable;
+import org.nova.html.tags.ext.th_title;
 import org.nova.html.widgets.NameValueList;
 import org.nova.html.widgets.TableHeader;
 import org.nova.html.widgets.TableRow;
-import org.nova.html.xtags.th_title;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
 import org.nova.http.server.JSONContentReader;
@@ -40,6 +39,7 @@ import org.nova.metrics.RateSample;
 import org.nova.sqldb.Accessor;
 import org.nova.sqldb.Connector;
 import org.nova.tracing.Trace;
+import org.nova.utils.Utils;
 
 @Description("Handlers for server operator pages")
 @ContentDecoders(GzipContentDecoder.class)
@@ -101,7 +101,7 @@ public class ConnectorController
     public Element viewAll(@QueryParam("minimalResetDurationS") @DefaultValue("10.0") double minimalResetDurationS) throws Throwable
     {
         OperatorPage page=this.application.buildOperatorPage("View Connector Stats");
-        DataTable table=page.content().returnAddInner(new DataTable(page.head()));
+        DataTableOld table=page.content().returnAddInner(new DataTableOld(page.head()));
         table.lengthMenu(-1,40,60,100);
         TableHeader header=new TableHeader();
         header.add("Name");
@@ -187,10 +187,10 @@ public class ConnectorController
     private void write(TableRow row,LongValueMeter meter,long used)
     {
         LongValueSample sample=meter.sample();
-        row.add(sample.getTotalCount());
+        row.add(sample.getMeterTotalCount());
         if (used>0)
         {
-            double percentage=(sample.getTotalCount()*100.0)/used;
+            double percentage=(sample.getMeterTotalCount()*100.0)/used;
             row.add(String.format("%.3f",percentage));
         }
         else
@@ -216,7 +216,7 @@ public class ConnectorController
     public Element viewUsage(@DefaultValue("1.0") @QueryParam("minimalResetDurationS") double minimalResetDurationS) throws Throwable
     {
         OperatorPage page=this.application.buildOperatorPage("View Connector Pools");
-        DataTable table=page.content().returnAddInner(new DataTable(page.head()));
+        DataTableOld table=page.content().returnAddInner(new DataTableOld(page.head()));
         table.lengthMenu(-1,40,60,100);
         TableHeader header=new TableHeader();
         header.add("Name");

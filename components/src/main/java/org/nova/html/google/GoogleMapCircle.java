@@ -1,9 +1,5 @@
 package org.nova.html.google;
 
-import org.nova.html.attributes.Color;
-
-import com.amazonaws.services.ec2.model.Storage;
-
 public class GoogleMapCircle
 {
     final String strokeColor;

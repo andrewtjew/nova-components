@@ -6,6 +6,6 @@ public class wbr extends GlobalEventTagElement<wbr>
 {
     public wbr()
     {
-        super("wbr");
+        super("wbr",true);
     }
 }

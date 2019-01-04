@@ -13,7 +13,7 @@ public class TextResponse
 		this.content=content;
 		this.headers=headers;
 	}
-	public String getText()
+	public String get()
 	{
 		return content;
 	}

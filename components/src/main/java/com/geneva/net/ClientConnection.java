@@ -6,10 +6,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import org.nova.concurrent.Synchronization;
-import org.nova.core.Utils;
 import org.nova.test.Testing;
 import org.nova.testing.TestTraceClient;
 import org.nova.tracing.Trace;
+import org.nova.utils.TypeUtils;
 
 public class ClientConnection
 {
@@ -115,9 +115,9 @@ public class ClientConnection
 						}
 						readRequestHeader(header);
 						trace.endWait();
-						long id=Utils.bigEndianBytesToLong(header,0);
-						int type=Utils.bigEndianBytesToInt(header,8);
-						int size=Utils.bigEndianBytesToInt(header,12);
+						long id=TypeUtils.bigEndianBytesToLong(header,0);
+						int type=TypeUtils.bigEndianBytesToInt(header,8);
+						int size=TypeUtils.bigEndianBytesToInt(header,12);
 						byte[] content=read(size);
 						this.server.bytesReceivedMeter.update(size+header.length);
 						Trace processingTrace=new Trace(this.server.traceManager,trace, this.processCategory,true);
@@ -184,14 +184,14 @@ public class ClientConnection
 	void sendResponse(long id,byte[] responseContent) throws Throwable 
 	{
 		byte[] header=new byte[12];
-		Utils.bigEndianLongToBytes(id,header,0);
+		TypeUtils.bigEndianLongToBytes(id,header,0);
 		if (responseContent!=null)
 		{
-			Utils.bigEndianIntToBytes(responseContent.length,header,8);
+		    TypeUtils.bigEndianIntToBytes(responseContent.length,header,8);
 		}
 		else
 		{
-			Utils.bigEndianIntToBytes(-1,header,8);
+		    TypeUtils.bigEndianIntToBytes(-1,header,8);
 		}
 		synchronized (this)
 		{
@@ -207,8 +207,8 @@ public class ClientConnection
 	void sendErrorResponse(long id) throws Throwable 
 	{
 		byte[] header=new byte[12];
-		Utils.bigEndianLongToBytes(id,header,0);
-		Utils.bigEndianIntToBytes(-2,header,8);
+		TypeUtils.bigEndianLongToBytes(id,header,0);
+		TypeUtils.bigEndianIntToBytes(-2,header,8);
 		synchronized (this)
 		{
 			this.outputStream.write(header);

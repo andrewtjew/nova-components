@@ -1,67 +1,39 @@
 package org.nova.html.bootstrap4;
 
-import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.elements.InputElement;
-import org.nova.html.tags.div;
-import org.nova.html.tags.form;
-import org.nova.html.tags.i;
-import org.nova.html.tags.input_password;
-import org.nova.html.tags.input_text;
-import org.nova.html.tags.label;
-import org.nova.html.tags.span;
-import org.nova.html.tags.textarea;
 
-public class InputGroup extends Element
+public class InputGroup extends StyleComponent<InputGroup>
 {
-    final private div div;
-    final private Element input;
-    private div prepend;
-    private div append;
-    
-    public InputGroup(InputElement<?> input)
+    public InputGroup()
     {
-        input.class_("form-control");
-        this.input=input;
-        this.div=new div().class_("input-group");
+        super("div","input-group");
     }
 
-    public InputGroup(Element input)
-    {
-        this.input=input;
-        this.div=new div().class_("input-group");
-    }
-    
-    public InputGroup prepend(String label)
-    {
-        this.prepend=new div().class_("input-group-prepend").addInner(new span().class_("input-group-text").addInner(label));
-        return this;
-    }
     public InputGroup prepend(Element element)
     {
-        this.prepend=new div().class_("input-group-append").addInner(new span().class_("input-group-text").addInner(element));
+//        returnAddInner(new InputGroupPrepend()).addInner(new InputGroupText().addInner(element));
+        returnAddInner(new InputGroupPrepend()).addInner(element);
         return this;
     }
 
-    public InputGroup append(String label)
-    {
-        this.append=new div().class_("input-group-append").addInner(new span().class_("input-group-text").addInner(label));
-        return this;
-    }
     public InputGroup append(Element element)
     {
-        this.append=new div().class_("input-group-append").addInner(new span().class_("input-group-text").addInner(element));
+        returnAddInner(new InputGroupAppend()).addInner(element);
+//        returnAddInner(new InputGroupAppend()).addInner(new InputGroupText().addInner(element));
         return this;
     }
 
-    
-    @Override
-    public void compose(Composer composer) throws Throwable
+    public InputGroup prepend(String text)
     {
-        this.div.addInner(this.prepend);
-        this.div.addInner(this.input);
-        this.div.addInner(this.append);
-        composer.render(this.div);
+        returnAddInner(new InputGroupPrepend()).returnAddInner(new InputGroupText(text));
+        return this;
     }
+
+    public InputGroup append(String text)
+    {
+        returnAddInner(new InputGroupAppend()).returnAddInner(new InputGroupText(text));
+        return this;
+    }
+
     
 }

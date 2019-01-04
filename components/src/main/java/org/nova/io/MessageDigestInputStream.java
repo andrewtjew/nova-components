@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 
-import org.nova.core.Utils;
+import org.nova.utils.TypeUtils;
 
 public class MessageDigestInputStream extends InputStream
 {
@@ -21,7 +21,7 @@ public class MessageDigestInputStream extends InputStream
 	public int read() throws IOException
 	{
 		int read=this.inputStream.read();
-        this.messageDigest.update(Utils.bigEndianIntToBytes(read));
+        this.messageDigest.update(TypeUtils.bigEndianIntToBytes(read));
 		return read;
 	}
     @Override

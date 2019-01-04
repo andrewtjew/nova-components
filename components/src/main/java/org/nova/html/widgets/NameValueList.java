@@ -10,6 +10,7 @@ import org.nova.html.attributes.border_style;
 import org.nova.html.attributes.unit;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
+import org.nova.html.ext.Text;
 import org.nova.html.tags.div;
 
 public class NameValueList extends div

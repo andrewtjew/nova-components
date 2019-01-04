@@ -1,10 +1,10 @@
 package org.nova.testing;
 
-import org.nova.core.Utils;
 import org.nova.http.client.JSONClient;
 import org.nova.test.PrintMessage;
 import org.nova.test.Testing;
 import org.nova.tracing.TraceManager;
+import org.nova.utils.Utils;
 
 public class TestTraceClient
 {

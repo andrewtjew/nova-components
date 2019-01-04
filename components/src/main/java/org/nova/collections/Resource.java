@@ -11,6 +11,7 @@ public abstract class Resource implements AutoCloseable
 	private long recentlyUsedCount;
     private Thread activateThread;
     private StackTraceElement[] activateStackTrace;
+    private boolean activated;
 	
 	public Resource(Pool<?> pool)
 	{
@@ -23,6 +24,7 @@ public abstract class Resource implements AutoCloseable
 	{
 		synchronized(this)
 		{
+		    this.activated=true;
 			this.parent=parent;
 			this.activateThread=Thread.currentThread();
 	        if (pool.captureActiveStackTrace())
@@ -60,13 +62,14 @@ public abstract class Resource implements AutoCloseable
 	{
 		synchronized(this)
 		{
-			if (this.parent!=null)
+			if (this.activated)
 			{
                 park();
                 pool.release(this);
 				this.parent=null;
 				this.activateThread=null;
 				this.activateStackTrace=null;
+				this.activated=false;
 			}
 		}
 	}

@@ -9,7 +9,7 @@ public class meta extends GlobalEventTagElement<meta>
 {
     public meta()
     {
-        super("meta");
+        super("meta",true);
     }
     
     public meta charset(character_set character_set)

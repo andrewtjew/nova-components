@@ -6,7 +6,7 @@ public class embed extends GlobalEventTagElement<embed>
 {
     public embed()
     {
-        super("embed");
+        super("embed",true);
     }
     
     public embed height(int height)

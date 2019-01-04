@@ -14,7 +14,7 @@ public class DisruptorTraceContext implements AutoCloseable
     final private Logger logger;
     final private Disruptor disruptor;
     final private ArrayList<Item> logItems;
-    private Throwable throwable;
+    private boolean cancel;
     
     public DisruptorTraceContext(Trace parent,TraceManager traceManager,Logger logger,Disruptor disruptor,String traceCategory,String logMessage)
     {
@@ -50,8 +50,12 @@ public class DisruptorTraceContext implements AutoCloseable
     }
     public Throwable handleThrowable(Throwable throwable)
     {
-        this.throwable=throwable;
+//        this.throwable=throwable;
         return throwable;
+    }
+    public void cancel()
+    {
+        this.cancel=true;
     }
     public void addLogItem(Item item)
     {
@@ -100,9 +104,10 @@ public class DisruptorTraceContext implements AutoCloseable
         {
             return;
         }
+        Throwable throwable=null;
         try
         {
-            if (this.throwable==null)
+            if (this.cancel==false)
             {
                 if (this.disruptor!=null)
                 {
@@ -116,15 +121,14 @@ public class DisruptorTraceContext implements AutoCloseable
                     }
                     catch (Throwable t)
                     {
-                        this.throwable=t;
-                        throw t;
+                        throwable=t;
                     }
                 }
             }
         }
         finally
         {
-            this.trace.close(this.throwable);
+            this.trace.close(throwable);
             this.logger.log(trace,this.logMessage,Logger.toArray(this.logItems));
             this.trace=null;
         }

@@ -2,9 +2,10 @@ package org.nova.html.bootstrap4.classes;
 
 public enum AlignItems
 {
-    start("align-items-start"), 
-    center("align-items-center"), 
-    end("align-items-end"), 
+    start("start"), 
+    center("center"), 
+    end("end"), 
+    baseline("baseline"), 
     ;
     private String value;
 

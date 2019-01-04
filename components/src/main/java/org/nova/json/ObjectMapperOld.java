@@ -10,7 +10,8 @@ import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.nova.core.Utils;
+
+import org.nova.utils.FileUtils;
 
 public class ObjectMapperOld
 {
@@ -575,7 +576,7 @@ public class ObjectMapperOld
 
 	public static <OBJECT> OBJECT readFromFile(String fileName, Class<OBJECT> type) throws Exception
 	{
-		try (FileInputStream inputStream=new FileInputStream(Utils.toNativePath(fileName)))
+		try (FileInputStream inputStream=new FileInputStream(FileUtils.toNativePath(fileName)))
 		{
 			return MAPPER.readObject(inputStream,type);
 		}

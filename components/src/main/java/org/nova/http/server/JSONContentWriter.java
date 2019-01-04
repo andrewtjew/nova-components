@@ -18,7 +18,7 @@ public class JSONContentWriter extends ContentWriter<Object>
 	@Override
 	public void write(Context context, OutputStream outputStream, Object content) throws Throwable
 	{
-		String contentText=ObjectMapper.write(content);
+		String contentText=ObjectMapper.writeObjectToString(content);
 		outputStream.write(contentText.getBytes(StandardCharsets.UTF_8));
 		context.setResponseContentText(contentText);
 	}

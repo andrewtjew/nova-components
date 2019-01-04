@@ -1,6 +1,6 @@
 package org.nova.test;
 
-import org.nova.core.Utils;
+import org.nova.utils.Utils;
 
 public class PrintMessage
 {

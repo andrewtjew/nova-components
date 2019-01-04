@@ -100,14 +100,14 @@ public abstract class Connector
     }
     public RowSet executeQuery(Trace parent, String traceCategoryOverride, Object[] parameters,String sql) throws Throwable
     {
-        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeQuery"))
+        try (Accessor accessor=openAccessor(parent))
         {
             return accessor.executeQuery(parent, traceCategoryOverride,  parameters,sql);
         }
     }
     public RowSet executeQuery(Trace parent, String traceCategoryOverride, List<Object> parameters,String sql) throws Throwable
     {
-        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeQuery"))
+        try (Accessor accessor=openAccessor(parent))
         {
             return accessor.executeQuery(parent, traceCategoryOverride,  parameters,sql);
         }
@@ -119,14 +119,14 @@ public abstract class Connector
 	}
     public int executeUpdate(Trace parent, String traceCategoryOverride, Object[] parameters,String sql) throws Throwable
     {
-        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeUpdate"))
+        try (Accessor accessor=openAccessor(parent))
         {
             return accessor.executeUpdate(parent, traceCategoryOverride, parameters,sql);
         }
     }
     public int executeUpdate(Trace parent, String traceCategoryOverride, List<Object> parameters,String sql) throws Throwable
     {
-        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeUpdate"))
+        try (Accessor accessor=openAccessor(parent))
         {
             return accessor.executeUpdate(parent, traceCategoryOverride, parameters,sql);
         }
@@ -138,14 +138,14 @@ public abstract class Connector
     }
     public GeneratedKeys executeUpdateAndReturnGeneratedKeys(Trace parent, String traceCategoryOverride, Object[] parameters,String sql) throws Throwable
     {
-        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeUpdate"))
+        try (Accessor accessor=openAccessor(parent))
         {
             return accessor.executeUpdateAndReturnGeneratedKeys(parent, traceCategoryOverride, parameters,sql);
         }
     }
     public GeneratedKeys executeUpdateAndReturnGeneratedKeys(Trace parent, String traceCategoryOverride, List<Object> parameters,String sql) throws Throwable
     {
-        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeUpdate"))
+        try (Accessor accessor=openAccessor(parent))
         {
             return accessor.executeUpdateAndReturnGeneratedKeys(parent, traceCategoryOverride, parameters,sql);
         }
@@ -153,68 +153,55 @@ public abstract class Connector
     
     public int[] executeBatchUpdate(Trace parent, String traceCategoryOverride, Object[][] parameters,String sql) throws Throwable
     {
-        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeUpdate"))
+        try (Accessor accessor=openAccessor(parent))
         {
             return accessor.executeBatchUpdate(parent, traceCategoryOverride, parameters,sql);
         }
     }
     public int[] executeUpdateBatch(Trace parent, String traceCategoryOverride, List<List<Object>> parameters,String sql) throws Throwable
     {
-        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeUpdate"))
+        try (Accessor accessor=openAccessor(parent))
         {
             return accessor.executeBatchUpdate(parent, traceCategoryOverride, parameters,sql);
         }
     }
-	
-	public <TYPE> TYPE executeQuerySingle(Trace parent, String traceCategoryOverride, Class<TYPE> type, String sql,Object...parameters) throws Throwable
-	{
-		return executeQuerySingle(parent,traceCategoryOverride,type,parameters,sql);
-	}
-	public <TYPE> TYPE executeQuerySingle(Trace parent, String traceCategoryOverride, Class<TYPE> type, Object[] parameters, String sql) throws Throwable
-	{
-		try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeQuerySingle"))
-		{
-			return accessor.executeQuerySingle(parent,traceCategoryOverride,type,parameters,sql);
-		}
-	}
-
 	public <TYPE> TYPE[] executeQuery(Trace parent, String traceCategoryOverride, Class<TYPE> type, String sql, Object... parameters) throws Throwable
     {
         return executeQuery(parent,traceCategoryOverride,type,parameters,sql);
     }
     public <TYPE> TYPE[] executeQuery(Trace parent, String traceCategoryOverride, Class<TYPE> type, List<Object> parameters, String sql) throws Throwable
     {
-        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeQuery"))
+        try (Accessor accessor=openAccessor(parent))
         {
             return accessor.executeQuery(parent,traceCategoryOverride,type,parameters,sql);
         }
     }
     public <TYPE> TYPE[] executeQuery(Trace parent, String traceCategoryOverride, Class<TYPE> type, Object[] parameters, String sql) throws Throwable
     {
-        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeQuery"))
+        try (Accessor accessor=openAccessor(parent))
         {
             return accessor.executeQuery(parent,traceCategoryOverride,type,parameters,sql);
         }
     }
-
+    
 	
     public <RETURN_TYPE> CallResult<RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<RETURN_TYPE> returnType,Param[] parameters,String name) throws Throwable
     {
-        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeCall"))
+        try (Accessor accessor=openAccessor(parent))
         {
             return accessor.executeCall(parent, traceCategoryOverride, returnType, parameters, name);
         }
     }
     public <RETURN_TYPE> CallResult<RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<RETURN_TYPE> returnType,List<Param> parameters,String name) throws Throwable
     {
-        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeCall"))
+        try (Accessor accessor=openAccessor(parent))
         {
             return accessor.executeCall(parent, traceCategoryOverride, returnType, parameters, name);
         }
     }
     public <RETURN_TYPE> CallResult<RETURN_TYPE> executeCall(Trace parent, String traceCategoryOverride, Class<RETURN_TYPE> returnType,String name,Param...parameters) throws Throwable
     {
-        try (Accessor accessor=openAccessor(parent, "Connector."+getName()+".executeCall"))
+        try (Accessor accessor=openAccessor(parent))
         {
             return accessor.executeCall(parent, traceCategoryOverride, returnType, name, parameters);
         }

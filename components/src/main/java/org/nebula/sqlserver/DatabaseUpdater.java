@@ -3,7 +3,6 @@ package org.nebula.sqlserver;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 
-import org.nova.core.Utils;
 import org.nova.frameworks.CoreEnvironment;
 import org.nova.json.ObjectMapper;
 import org.nova.logging.Item;
@@ -16,6 +15,7 @@ import org.nova.sqldb.Row;
 import org.nova.sqldb.RowSet;
 import org.nova.sqldb.SqlServerConnector;
 import org.nova.tracing.Trace;
+import org.nova.utils.FileUtils;
 
 public class DatabaseUpdater
 {
@@ -60,7 +60,7 @@ public class DatabaseUpdater
             {
                 return;
             }
-            String text=Utils.readTextFile(scriptFile,charset);
+            String text=FileUtils.readTextFile(scriptFile,charset);
             SqlServerObjects objects=ScriptParser.parse(text);
             try (Accessor accessor=connector.openAccessor(parent))
             {
@@ -83,8 +83,8 @@ public class DatabaseUpdater
         }
         finally
         {
-            String executed=ObjectMapper.write(this.executed);
-            String blocked=ObjectMapper.write(this.blocked);
+            String executed=ObjectMapper.writeObjectToString(this.executed);
+            String blocked=ObjectMapper.writeObjectToString(this.blocked);
             this.logger.log(Level.NOTICE,"End of database updates",new Item("blocked",blocked),new Item("executed",executed));
             this.statusBoard.set("blocked@"+this.getClass().getName(),blocked);
             this.statusBoard.set("executed@"+this.getClass().getName(),executed);

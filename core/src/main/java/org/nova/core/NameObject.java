@@ -2,8 +2,8 @@ package org.nova.core;
 
 public class NameObject extends Pair<String, Object>
 {
-    public NameObject(String key, Object value)
+    public NameObject(String name, Object value)
     {
-        super(key, value);
+        super(name, value);
     }
 }

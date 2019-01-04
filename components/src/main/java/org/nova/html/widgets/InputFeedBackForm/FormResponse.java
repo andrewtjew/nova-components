@@ -2,6 +2,7 @@ package org.nova.html.widgets.InputFeedBackForm;
 
 import java.util.List;
 
+
 public class FormResponse
 {
     public InputFeedback[] inputFeedbacks;

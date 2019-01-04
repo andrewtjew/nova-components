@@ -907,6 +907,7 @@ public class ObjectMapper2
     {
         final Map<String,FieldReader> fieldReaders;
         final Class<?> type;
+        @SuppressWarnings("rawtypes")
         final Constructor constructor;
         final Object[] parameters;
 

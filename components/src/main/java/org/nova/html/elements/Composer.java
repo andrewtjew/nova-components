@@ -4,8 +4,11 @@ package org.nova.html.elements;
 public abstract class Composer
 {
     public abstract StringBuilder getStringBuilder();
-    public void render(Element element) throws Throwable
+    public void compose(Element element) throws Throwable
     {
-        element.compose(this);
+        if (element!=null)
+        {
+            element.compose(this);
+        }
     }
 }

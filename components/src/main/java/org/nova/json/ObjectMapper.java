@@ -1,6 +1,10 @@
 package org.nova.json;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -10,97 +14,50 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.nova.utils.FileUtils;
+
 public class ObjectMapper
 {
-    final static String NULL="null";
     final static private HashMap<String, FieldWriter[]> FIELD_WRITERS=new HashMap<>();
     final static private HashMap<String, Writer> WRITERS=new HashMap<>();
 
-    public static void writeString(StringBuilder sb,String text)
-    {
-        for (int index=0;index<text.length();index++)
-        {
-            char c=text.charAt(index);
-            if (c=='\\')
-            {
-                sb.append(c);
-                sb.append(c);
-            }
-            else if (c>'"')
-            { 
-                sb.append(c);
-            }
-            else if (c=='"')
-            {
-                sb.append('\\');
-                sb.append('"');
-            }
-            else if (c=='\b')
-            {
-                sb.append('\\');
-                sb.append('b');
-            }
-            else if (c=='\f')
-            {
-                sb.append('\\');
-                sb.append('f');
-            }
-            else if (c=='\n')
-            {
-                sb.append('\\');
-                sb.append('n');
-            }
-            else if (c=='\r')
-            {
-                sb.append('\\');
-                sb.append('r');
-            }
-            else if (c=='\t')
-            {
-                sb.append('\\');
-                sb.append('t');
-            }
-            else
-            {
-                sb.append(c);
-            }
-        }
-    }
-
     static abstract class Writer
     {
-        abstract void write(StringBuilder sb,Object object) throws Throwable;
+        abstract void write(WriteState writeState,Object object) throws Throwable;
     }
     static class PrimitiveWriter extends  Writer
     {
-        void write(StringBuilder sb,Object object)
+        void write(WriteState writeState,Object object)
         {
-            sb.append(object);
+            writeState.write(object.toString());
         }
     }
     static class StringWriter extends  Writer
     {
-        void write(StringBuilder sb,Object object)
+        void write(WriteState writeState,Object object)
         {
-            sb.append('"');
-            writeString(sb, (String)object);
-            sb.append('"');
+            writeState.writeEscapedString((String)object);
         }
     }
     static class EnumWriter extends  Writer
     {
-        void write(StringBuilder sb,Object object)
+        void write(WriteState writeState,Object object)
         {
-            sb.append('"');
-            sb.append(object);
-            sb.append('"');
+            if (object==null)
+            {
+                writeState.writeNull();
+            }
+            else
+            {
+                writeState.writeQuoted(object.toString());
+            }
         }
     }
     static class ObjectWriter extends  Writer
     {
-        void write(StringBuilder sb,Object object) throws Throwable
+        void write(WriteState writeState,Object object) throws Throwable
         {
-            sb.append('{');
+            writeState.begin('{');
             boolean needComma = false;
             FieldWriter[] fieldWriters = getFieldWriters(object.getClass());
             for (FieldWriter fieldWriter:fieldWriters)
@@ -108,225 +65,189 @@ public class ObjectMapper
                 Object fieldObject = fieldWriter.field.get(object);
                 if (fieldObject!=null)
                 {
-                    fieldWriter.write(sb, needComma, fieldObject);
+                    fieldWriter.write(writeState, needComma, fieldObject);
                     needComma=true;
                 }
             }
-            sb.append('}');
+            writeState.end('}');
         }
     }
     static class booleanArrayWriter extends  Writer
     {
-        void write(StringBuilder sb,Object object)
+        void write(WriteState writeState,Object object) throws Throwable
         {
-            sb.append('[');
+            writeState.begin('[');
             boolean[] array = (boolean[]) object;
             for (int i = 0; i < array.length; i++)
             {
-                if (i>0)
-                {
-                    sb.append(',');
-                }
-                sb.append(array[i]);
+                writeState.writeSeperator(i>0);
+                writeState.write(Boolean.toString(array[i]));
             }
-            sb.append(']');
+            writeState.end(']');
         }
     }
     static class byteArrayWriter extends  Writer
     {
-        void write(StringBuilder sb,Object object)
+        void write(WriteState writeState,Object object) throws Throwable
         {
-            sb.append('[');
+            writeState.begin('[');
             byte[] array = (byte[]) object;
             for (int i = 0; i < array.length; i++)
             {
-                if (i>0)
-                {
-                    sb.append(',');
-                }
-                sb.append(array[i]);
+                writeState.writeSeperator(i>0);
+                writeState.write(Byte.toString(array[i]));
             }
-            sb.append(']');
+            writeState.end(']');
         }
     }
+    /*
     static class charArrayWriter extends  Writer
     {
-        void write(StringBuilder sb,Object object)
+        void write(WriteState writeState,Object object) throws Throwable
         {
-            sb.append('[');
-            byte[] array = (byte[]) object;
+            writeState.begin('[');
+            char[] array = (char[]) object;
             for (int i = 0; i < array.length; i++)
             {
-                if (i>0)
-                {
-                    sb.append(',');
-                }
-                sb.append(array[i]);
+                writeState.writeEndOfLine(i>0);
+                writeState.write(Char.toString(array[i]));
             }
-            sb.append(']');
+            writeState.end(']');
         }
     }
+    */
     static class shortArrayWriter extends  Writer
     {
-        void write(StringBuilder sb,Object object)
+        void write(WriteState writeState,Object object) throws Throwable
         {
-            sb.append('[');
-            byte[] array = (byte[]) object;
+            writeState.begin('[');
+            short[] array = (short[]) object;
             for (int i = 0; i < array.length; i++)
             {
-                if (i>0)
-                {
-                    sb.append(',');
-                }
-                sb.append(array[i]);
+                writeState.writeSeperator(i>0);
+                writeState.write(Short.toString(array[i]));
             }
-            sb.append(']');
+            writeState.end(']');
         }
     }
     static class intArrayWriter extends  Writer
     {
-        void write(StringBuilder sb,Object object)
+        void write(WriteState writeState,Object object) throws Throwable
         {
-            sb.append('[');
+            writeState.begin('[');
             int[] array = (int[]) object;
             for (int i = 0; i < array.length; i++)
             {
-                if (i>0)
-                {
-                    sb.append(',');
-                }
-                sb.append(array[i]);
+                writeState.writeSeperator(i>0);
+                writeState.write(Integer.toString(array[i]));
             }
-            sb.append(']');
+            writeState.end(']');
         }
     }
     static class longArrayWriter extends  Writer
     {
-        void write(StringBuilder sb,Object object)
+        void write(WriteState writeState,Object object) throws Throwable
         {
-            sb.append('[');
+            writeState.begin('[');
             long[] array = (long[]) object;
             for (int i = 0; i < array.length; i++)
             {
-                if (i>0)
-                {
-                    sb.append(',');
-                }
-                sb.append(array[i]);
+                writeState.writeSeperator(i>0);
+                writeState.write(Long.toString(array[i]));
             }
-            sb.append(']');
+            writeState.end(']');
         }
     }
     static class floatArrayWriter extends  Writer
     {
-        void write(StringBuilder sb,Object object)
+        void write(WriteState writeState,Object object) throws Throwable
         {
-            sb.append('[');
+            writeState.begin('[');
             float[] array = (float[]) object;
             for (int i = 0; i < array.length; i++)
             {
-                if (i>0)
-                {
-                    sb.append(',');
-                }
-                sb.append(array[i]);
+                writeState.writeSeperator(i>0);
+                writeState.write(Float.toString(array[i]));
             }
-            sb.append(']');
+            writeState.end(']');
         }
     }
     static class doubleArrayWriter extends  Writer
     {
-        void write(StringBuilder sb,Object object)
+        void write(WriteState writeState,Object object) throws Throwable
         {
-            sb.append('[');
+            writeState.begin('[');
             double[] array = (double[]) object;
             for (int i = 0; i < array.length; i++)
             {
-                if (i>0)
-                {
-                    sb.append(',');
-                }
-                sb.append(array[i]);
+                writeState.writeSeperator(i>0);
+                writeState.write(Double.toString(array[i]));
             }
-            sb.append(']');
+            writeState.end(']');
         }
     }
 
     static class StringArrayWriter extends  Writer
     {
-        void write(StringBuilder sb,Object object)
+        void write(WriteState writeState,Object object) throws Throwable
         {
-            sb.append('[');
+            writeState.begin('[');
             String[] array = (String[]) object;
             for (int i = 0; i < array.length; i++)
             {
-                if (i>0)
-                {
-                    sb.append(',');
-                }
+                writeState.writeSeperator(i>0);
                 if (array[i]==null)
                 {
-                    sb.append(NULL);
+                    writeState.writeNull();
                 }
                 else
                 {
-                    sb.append('"');
-                    writeString(sb,array[i]);
-                    sb.append('"');
+                    writeState.writeEscapedString(array[i]);
                 }
             }
-            sb.append(']');
+            writeState.end(']');
         }
     }
     static class EnumArrayWriter extends  Writer
     {
-        void write(StringBuilder sb,Object object)
+        void write(WriteState writeState,Object object) throws Throwable
         {
-            sb.append('[');
+            writeState.begin('[');
             Enum<?>[] array = (Enum<?>[]) object;
             for (int i = 0; i < array.length; i++)
             {
-                if (i>0)
-                {
-                    sb.append(',');
-                }
+                writeState.writeSeperator(i>0);
                 if (array[i]==null)
                 {
-                    sb.append(NULL);
+                    writeState.writeNull();
                 }
                 else
                 {
-                    sb.append(',');
-                    sb.append('"');
-                    sb.append(array[i]);
-                    sb.append('"');
+                    writeState.writeQuoted(array[i].toString());
                 }
             }
-            sb.append(']');
+            writeState.end(']');
         }
     }
     static class NullablePrimitiveArrayWriter<TYPE> extends  Writer
     {
-        void write(StringBuilder sb,Object object)
+        void write(WriteState writeState,Object object) throws Throwable
         {
-            sb.append('[');
+            writeState.begin('[');
             TYPE[] array = (TYPE[])object;
             for (int i = 0; i < array.length; i++)
             {
-                if (i>0)
-                {
-                    sb.append(',');
-                }
+                writeState.writeSeperator(i>0);
                 if (array[i]==null)
                 {
-                    sb.append(NULL);
+                    writeState.writeNull();
                 }
                 else
                 {
-                    sb.append(array[i]);
+                    writeState.write(array[i].toString());
                 }
             }
-            sb.append(']');
+            writeState.end(']');
         }
     }
     static class ArrayWriter extends Writer
@@ -336,51 +257,45 @@ public class ObjectMapper
         {
             this.writer=getWriter(componentType);
         }
-        void write(StringBuilder sb,Object object) throws Throwable
+        void write(WriteState writeState,Object object) throws Throwable
         {
-            sb.append('[');
+            writeState.begin('[');
             Object[] array = (Object[])object;
             for (int i = 0; i < array.length; i++)
             {
-                if (i>0)
-                {
-                    sb.append(',');
-                }
+                writeState.writeSeperator(i>0);
                 if (array[i]==null)
                 {
-                    sb.append(NULL);
+                    writeState.writeNull();
                 }
                 else
                 {
-                    this.writer.write(sb, array[i]);
+                    this.writer.write(writeState, array[i]);
                 }
             }
-            sb.append(']');
+            writeState.end(']');
         }
     }
     static class ObjectArrayWriter extends Writer
     {
-        void write(StringBuilder sb,Object object) throws Throwable
+        void write(WriteState writeState,Object object) throws Throwable
         {
-            sb.append('[');
+            writeState.begin('[');
             Object[] array = (Object[])object;
             for (int i = 0; i < array.length; i++)
             {
                 Object element=array[i];
-                if (i>0)
-                {
-                    sb.append(',');
-                }
+                writeState.writeSeperator(i>0);
                 if (element==null)
                 {
-                    sb.append(NULL);
+                    writeState.writeNull();
                 }
                 else
                 {
-                    getWriter(element.getClass()).write(sb, element);
+                    getWriter(element.getClass()).write(writeState, element);
                 }
             }
-            sb.append(']');
+            writeState.end(']');
         }
     }
     
@@ -388,24 +303,19 @@ public class ObjectMapper
     {
         final Field field;
         final char[] jsonName;
-  //      final char[] commaJsonName;
         final Writer writer;
 
         FieldWriter(Field field,Writer writer)
         {
             this.writer=writer;
             this.field = field;
-//            this.commaJsonName = (",\"" + field.getName() + '"' + ':').toCharArray();
             this.jsonName = ('"' + field.getName() + '"' + ':').toCharArray();
         }
-        void write(StringBuilder sb,boolean needComma,Object object) throws Throwable
+        void write(WriteState writeState,boolean needComma,Object object) throws Throwable
         {
-            if (needComma)
-            {
-                sb.append(',');
-            }
-            sb.append(jsonName);
-            writer.write(sb, object);
+            writeState.writeSeperator(needComma);
+            writeState.writeName(jsonName);
+            writer.write(writeState,object);
         }
     }
 
@@ -435,10 +345,12 @@ public class ObjectMapper
         {
             return new byteArrayWriter();
         }
+        /*
         else if (componentType == char.class)
         {
             return new charArrayWriter();
         }
+        */
         else if (componentType == short.class)
         {
             return new shortArrayWriter();
@@ -612,38 +524,67 @@ public class ObjectMapper
         return fieldWriters;
     }
 
-    public static String write(Object object) throws Throwable
+    public static String writeObjectToString(Object object) throws Throwable
     {
-        return writeObjectAsString(object);
-    }
-    public static void write(OutputStream outputStream,Object object) throws Throwable
-    {
-        writeObject(outputStream,object);
+        return writeObjectToString(4096,null,null,object);
     }
 
-    static public String writeObjectAsString(Object object) throws Throwable
+    public static String writeObjectToStringUsingDefaultFormatting(Object object) throws Throwable
     {
-        if (object==null)
+        return writeObjectToString(4096,"  ","\r\n",object);
+    }
+
+
+    static public String writeObjectToString(int initalStringBufferSize,String indent,String endOfLine,Object object) throws Throwable
+    {
+        try (ByteArrayOutputStream outputStream=new ByteArrayOutputStream(initalStringBufferSize))
         {
-            return "";
+            writeObject(indent,endOfLine,outputStream,object);
+            return outputStream.toString();
         }
-        StringBuilder sb = new StringBuilder();
-        Writer writer=getWriter(object.getClass());
-        writer.write(sb, object);
-        return sb.toString();
     }
     
-    static public void writeObject(OutputStream outputStream,Object object) throws Throwable
+    static public void writeObject(String indent,String endOfLine,OutputStream outputStream,Object object) throws Throwable
     {
-        outputStream.write(writeObjectAsString(object).getBytes());
-        
+        try (PrintStream printStream=new PrintStream(outputStream))
+        {
+            WriteState writeState=new WriteState(indent, endOfLine, printStream);
+            Writer writer=getWriter(object.getClass());
+            writer.write(writeState, object);
+        }
+    }
+    
+    static public void writeObject(String indent,String endOfLine,PrintStream printStream,Object object) throws Throwable
+    {
+        WriteState writeState=new WriteState(indent, endOfLine, printStream);
+        if (object!=null)
+        {
+            Writer writer=getWriter(object.getClass());
+            writer.write(writeState, object);
+        }
+        else
+        {
+            writeState.write(null);
+        }
+    }
+    
+    static public void writeObjectToFile(int bufferSize,String indent,String endOfLine,String fileName,Object object) throws Throwable
+    {
+        try (FileOutputStream outputStream=new FileOutputStream(fileName))
+        {
+            try (BufferedOutputStream bufferedOutputStream=new BufferedOutputStream(outputStream,bufferSize))
+            {
+                writeObject(indent,endOfLine,bufferedOutputStream,object);
+            }
+        }
+    }
+    
+    static public void writeObjectToFileUsingDefaultFormatting(String fileName,Object object) throws Throwable
+    {
+        writeObjectToFile(65536,"\t","\r\n",fileName,object);
     }
     
     // ------ read
-
-    
-   
-    
     
 /*  
      %x20 /              ; Space
@@ -651,12 +592,11 @@ public class ObjectMapper
      %x0A /              ; Line feed or New line
      %x0D                ; Carriage return
 */
-   
-    static class Parser
+    static class Scanner
     {
         private int position;
         final private String text;
-        public Parser(String text)
+        public Scanner(String text)
         {
             this.text=text;
         }
@@ -809,7 +749,7 @@ public class ObjectMapper
             }
             else if (c=='{')
             {
-                if (isNext('}')==false)
+                if (nextNonWhiteSpaceCharacter()!='}')
                 {
                     for (;;)
                     {
@@ -827,7 +767,7 @@ public class ObjectMapper
             }
             else if (c=='[')
             {
-                if (isNext(']')==false)
+                if (nextNonWhiteSpaceCharacter()!=']')
                 {
                     for (;;)
                     {
@@ -882,16 +822,9 @@ public class ObjectMapper
             }
             throw new Exception(", or ] expected: "+getError());
         }
-        public boolean isNext(char end) throws Exception
+        public boolean isNext4(char end) throws Exception
         {
-            char c=nextNonWhiteSpaceCharacter();
-            if (c==end)
-            {
-                return true;
-            }
-            this.position--;
-            return false;
-            
+            return nextNonWhiteSpaceCharacter()==end;
         }
         
         public boolean isNonEmptyElements() throws Exception
@@ -1021,7 +954,7 @@ public class ObjectMapper
             {
                 if (this.position>this.text.length())
                 {
-                    String value=this.text.substring(start, this.position);
+                    String value=this.text.substring(start, this.text.length());
                     return value;
                 }
                 else if ((character==',')||(character=='}')||(character==']'))
@@ -1102,7 +1035,7 @@ public class ObjectMapper
                 end=this.text.length()-1;
             }
             String message="position="+this.position+", text="+text.substring(start, this.position)+"^"+this.text.substring(this.position, end);
-            return message.replace("\n", "").replace("\r","");
+            return message.replace("\n", "\\n").replace("\r","\\r");
         }
         
         public long getPrimitiveLong() throws Exception
@@ -1258,12 +1191,12 @@ public class ObjectMapper
     
     static abstract class Reader
     {
-        abstract Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable;
+        abstract Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable;
     }
     static class PrimitiveBooleanReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getPrimitiveBoolean();
         }
@@ -1271,7 +1204,7 @@ public class ObjectMapper
     static class PrimitiveIntegerReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getPrimitiveInteger();
         }
@@ -1279,7 +1212,7 @@ public class ObjectMapper
     static class PrimitiveLongReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getPrimitiveLong();
         }
@@ -1287,7 +1220,7 @@ public class ObjectMapper
     static class PrimitiveFloatReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getPrimitiveFloat();
         }
@@ -1295,7 +1228,7 @@ public class ObjectMapper
     static class PrimitiveDoubleReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getPrimitiveDouble();
         }
@@ -1303,7 +1236,7 @@ public class ObjectMapper
     static class PrimitiveByteReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getPrimitiveByte();
         }
@@ -1311,7 +1244,7 @@ public class ObjectMapper
     static class PrimitiveCharacterReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getPrimitiveCharacter();
         }
@@ -1319,7 +1252,7 @@ public class ObjectMapper
     static class PrimitiveShortReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getPrimitiveShort();
         }
@@ -1327,7 +1260,7 @@ public class ObjectMapper
     static class StringReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getString();
         }
@@ -1335,7 +1268,7 @@ public class ObjectMapper
     static class BooleanReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getBoolean();
         }
@@ -1343,7 +1276,7 @@ public class ObjectMapper
     static class IntegerReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getInteger();
         }
@@ -1351,7 +1284,7 @@ public class ObjectMapper
     static class LongReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getLong();
         }
@@ -1359,7 +1292,7 @@ public class ObjectMapper
     static class FloatReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getFloat();
         }
@@ -1367,7 +1300,7 @@ public class ObjectMapper
     static class DoubleReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getDouble();
         }
@@ -1375,7 +1308,7 @@ public class ObjectMapper
     static class ByteReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getByte();
         }
@@ -1383,7 +1316,7 @@ public class ObjectMapper
     static class CharacterReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getCharacter();
         }
@@ -1391,7 +1324,7 @@ public class ObjectMapper
     static class ShortReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return parser.getShort();
         }
@@ -1399,7 +1332,7 @@ public class ObjectMapper
     static class EnumReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             String value=parser.getString();
             return Enum.valueOf((Class<Enum>) type, value);
@@ -1408,7 +1341,7 @@ public class ObjectMapper
     static class BigDecimalReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             return new BigDecimal(parser.getValueText()); 
         }
@@ -1416,7 +1349,7 @@ public class ObjectMapper
     static class ArrayReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             char c=parser.nextNonWhiteSpaceCharacter();
             if (c=='n')
@@ -1453,7 +1386,7 @@ public class ObjectMapper
     static class ObjectReader extends Reader
     {
         @Override
-        Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+        Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             char c=parser.nextNonWhiteSpaceCharacter();
             if (c=='n')
@@ -1485,7 +1418,7 @@ public class ObjectMapper
                         }
                         else
                         {
-                            throw new Exception("Unknown name "+name+parser.getError());
+                            throw new Exception(name+" not in type:"+parser.getError());
                         }
                     }
                     else
@@ -1513,7 +1446,7 @@ public class ObjectMapper
             this.reader=reader;
             this.field = field;
         }
-        void read(Parser parser,Object object,boolean ignoreUnknownFields) throws Throwable
+        void read(Scanner parser,Object object,boolean ignoreUnknownFields) throws Throwable
         {
             field.set(object, reader.read(parser,this.field.getType(),ignoreUnknownFields));
         }
@@ -1636,6 +1569,7 @@ public class ObjectMapper
     {
         final Map<String,FieldReader> fieldReaders;
         final Class<?> type;
+        @SuppressWarnings("rawtypes")
         final Constructor constructor;
         final Object[] parameters;
 
@@ -1760,22 +1694,32 @@ public class ObjectMapper
         return classReader;
     }
 
-    static public <OBJECT> OBJECT read(String text,Class<OBJECT> type) throws Throwable
+    static public <OBJECT> OBJECT readObjectFromFile(String fileName,Class<OBJECT> type) throws Throwable
+    {
+        return readObjectFromFile(fileName,type,true);
+    }
+    static public <OBJECT> OBJECT readObjectFromFile(String fileName,Class<OBJECT> type,boolean ignoreUnknownFields) throws Throwable
+    {
+        String text=FileUtils.readTextFile(fileName);
+        return readObject(text,type,ignoreUnknownFields);
+    }
+    
+    static public <OBJECT> OBJECT readObject(String text,Class<OBJECT> type) throws Throwable
     {
         if ((text==null)||(text.length()==0))
         {
             return null;
         }
-        return read(text,type,true);
+        return readObject(text,type,true);
     }
     
-    static public <OBJECT> OBJECT read(String text,Class<OBJECT> type,boolean ignoreUnknownFields) throws Throwable
+    static public <OBJECT> OBJECT readObject(String text,Class<OBJECT> type,boolean ignoreUnknownFields) throws Throwable
     {
-        Parser parser=new Parser(text);
-        return (OBJECT)read(parser,type,ignoreUnknownFields);
+        Scanner parser=new Scanner(text);
+        return (OBJECT)readObject(parser,type,ignoreUnknownFields);
     }
 
-    static Object read(Parser parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
+    static Object readObject(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
     {
         Reader reader=getReader(type);
         return reader.read(parser,type,ignoreUnknownFields);

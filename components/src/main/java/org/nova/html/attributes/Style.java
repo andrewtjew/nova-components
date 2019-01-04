@@ -237,7 +237,7 @@ public class Style
     }
     public Style font_weight(font_weight value)
     {
-        sb.append("font-size:"+value+";");
+        sb.append("font-weight:"+value+";");
         return this;
     }
     public Style font_size(Size value)

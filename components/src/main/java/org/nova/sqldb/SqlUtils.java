@@ -1,8 +1,14 @@
 package org.nova.sqldb;
 
+import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
 
+import org.nova.annotations.Alias;
 import org.nova.core.NameObject;
+import org.nova.sqldb.FieldMaps.ConstructorFieldMap;
 import org.nova.tracing.Trace;
 
 public class SqlUtils
@@ -81,11 +87,64 @@ public class SqlUtils
             return insertAndGetLongKey(parent, accessor, table, nameObjects);
         }
     }
-    static public int insert(Trace parent,Accessor accessor,String table,NameObject...nameObjects) throws Throwable
+    static public void insert(Trace parent,Accessor accessor,String table,NameObject...nameObjects) throws Throwable
     {
-        return insert(parent,null,accessor,table,nameObjects);
+        insert(parent,null,accessor,table,nameObjects);
     }
-    static public int insert(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject...nameObjects) throws Throwable
+    /*
+    public static int insert(Trace parent, String traceCategoryOverride, Accessor accessor, String table, Object object) throws Throwable
+    {
+        Class<?> type=object.getClass();
+        if (traceCategoryOverride==null)
+        {
+            traceCategoryOverride="INSERT INTO TABLE "+table+" OBJECT "+type.getCanonicalName();
+        }
+        ConstructorFieldMap constructorFieldMap=FieldMaps.get(type);
+        HashMap<String,Field> map=constructorFieldMap.map;
+        StringBuilder sb=new StringBuilder();
+        sb.append("INSERT INTO ").append(table).append(" (");
+        ArrayList<Object> parameters=new ArrayList<>();
+        boolean needComma=false;
+        for (Field field:map.values())
+        {
+            if (needComma)
+            {
+                sb.append(',');
+            }
+            else
+            {
+                needComma=true;
+            }
+            Alias alias=field.getAnnotation(Alias.class);
+            String name=alias!=null?alias.value():field.getName();
+            sb.append(name);
+            parameters.add(field.get(object));
+        }
+        sb.append(") VALUES(");
+        needComma=false;
+        for (int i=0;i<map.size();i++)
+        {
+            if (needComma)
+            {
+                sb.append(',');
+            }
+            else
+            {
+                needComma=true;
+            }
+            sb.append('?');
+        }
+        sb.append(')');
+        String sql=sb.toString();
+        if (traceCategoryOverride==null)
+        {
+            traceCategoryOverride=sql;
+        }
+        return accessor.executeUpdate(parent, traceCategoryOverride, parameters,sql);
+    
+    }
+    */
+    static public void insert(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject...nameObjects) throws Throwable
     {
         StringBuilder sb=new StringBuilder();
         sb.append("INSERT INTO ").append(table).append(" (");
@@ -104,7 +163,7 @@ public class SqlUtils
             sb.append(",?");
         }
         sb.append(')');
-        return accessor.executeUpdate(parent, categoryOverride, sb.toString(),parameters);
+        accessor.executeUpdate(parent, categoryOverride, sb.toString(),parameters);
     }
     static public int[] insertBatch(Trace parent,String categoryOverride,Accessor accessor,String table,Object[][] parameters,String...columns) throws Throwable
     {
@@ -125,11 +184,11 @@ public class SqlUtils
         return accessor.executeBatchUpdate(parent, categoryOverride, parameters,sb.toString());
     }
 
-    static public int insert(Trace parent,String categoryOverride,Connector connector,String table,NameObject...nameObjects) throws Throwable
+    static public void insert(Trace parent,String categoryOverride,Connector connector,String table,NameObject...nameObjects) throws Throwable
     {
         try (Accessor accessor=connector.openAccessor(parent))
         {
-            return insert(parent,categoryOverride,accessor,table,nameObjects);
+            insert(parent,categoryOverride,accessor,table,nameObjects);
         }
     }
     
@@ -213,7 +272,7 @@ public class SqlUtils
             return key;
         }
     }
-    static public int insertIfNotExist(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject[] keyObjects,NameObject[] additionalObjects) throws Throwable
+    static public void insertIfNotExist(Trace parent,String categoryOverride,Accessor accessor,String table,NameObject[] keyObjects,NameObject[] additionalObjects) throws Throwable
     {
         StringBuilder sb=new StringBuilder();
         Object[] parameters=new Object[keyObjects.length];
@@ -231,7 +290,11 @@ public class SqlUtils
             if (rowSet.size()>0)
             {
                 transaction.rollback();
-                return 0;
+                if (rowSet.size()==1)
+                {
+                    return;
+                }
+                throw new Exception("Size="+rowSet.size());
             }
 
             sb=new StringBuilder();
@@ -266,10 +329,73 @@ public class SqlUtils
                 }
             }
             sb.append(')');
-            int inserted=accessor.executeUpdate(parent, categoryOverride, sb.toString(),parameters);
+            accessor.executeUpdate(parent, categoryOverride, sb.toString(),parameters);
             transaction.commit();
-            return inserted;
         }
+    }
+    
+    static public long insertIfNotExistAndGetLongKey(Trace parent,String categoryOverride,Accessor accessor,String table,String identityColumnName,NameObject[] keyObjects,NameObject[] additionalObjects) throws Throwable
+    {
+        StringBuilder sb=new StringBuilder();
+        Object[] parameters=new Object[keyObjects.length];
+        sb.append("SELECT "+identityColumnName+" FROM ").append(table).append(" WHERE ");
+        sb.append(keyObjects[0].getName()).append("=?");
+        parameters[0]=keyObjects[0].getValue();
+        for (int i=1;i<keyObjects.length;i++)
+        {
+            sb.append(" AND ").append(keyObjects[i].getName()).append("=?");
+            parameters[i]=keyObjects[i].getValue();
+        }
+        long key;
+        try (Transaction transaction=accessor.beginTransaction("insertIfNotExist"))
+        {
+            RowSet rowSet=accessor.executeQuery(parent, categoryOverride, sb.toString(), parameters);
+            if (rowSet.size()>0)
+            {
+                transaction.rollback();
+                if (rowSet.size()==1)
+                {
+                    return rowSet.getRow(0).getBIGINT(0);
+                }
+                throw new Exception("Size="+rowSet.size());
+            }
+
+            sb=new StringBuilder();
+            parameters=new Object[keyObjects.length];
+            sb.append("INSERT INTO ").append(table).append(" (");
+            sb.append(keyObjects[0].getName());
+            parameters[0]=keyObjects[0].getValue();
+            for (int i=1;i<keyObjects.length;i++)
+            {
+                sb.append(',').append(keyObjects[i].getName());
+                parameters[i]=keyObjects[i].getValue();
+            }
+            if (additionalObjects!=null)
+            {
+                for (int i=0;i<additionalObjects.length;i++)
+                {
+                    sb.append(',').append(additionalObjects[i].getName());
+                    parameters[i]=additionalObjects[i].getValue();
+                }
+            }
+            sb.append(") VALUES(");
+            sb.append('?');
+            for (int i=1;i<keyObjects.length;i++)
+            {
+                sb.append(",?");
+            }
+            if (additionalObjects!=null)
+            {
+                for (int i=0;i<additionalObjects.length;i++)
+                {
+                    sb.append(",?");
+                }
+            }
+            sb.append(')');
+            key=accessor.executeUpdateAndReturnGeneratedKeys(parent, categoryOverride, sb.toString(),parameters).getBigDecimal(0).longValue();
+            transaction.commit();
+        }
+        return key;
     }
     
     static public void updateInsert(Trace parent,String categoryOverride,Connector connector,String table,NameObject[] keyObjects,NameObject[] nameObjects) throws Throwable
@@ -286,12 +412,12 @@ public class SqlUtils
             throw new Exception();
         }
         StringBuilder update=new StringBuilder();
-        update.append("UPDATE "+table+"SET ");
+        update.append("UPDATE "+table+" SET ");
         Object[] updateParameters=new Object[nameObjects.length+keyObjects.length];
         for (int i=0;i<nameObjects.length;i++)
         {
             NameObject nameObject=nameObjects[i];
-            updateParameters[i]=nameObject.getName();
+            updateParameters[i]=nameObject.getValue();
             if (i>0)
             {
                 update.append(',');
@@ -437,17 +563,84 @@ public class SqlUtils
             transaction.commit();
         }
     }
-
-    public static RowSet getFirstRowSet(Trace parent,Connector connector,String call,Param...params) throws Throwable
+    public static RowSet executeCallOneRowSet(Trace parent,Connector connector,String call,Param...params) throws Throwable
     {
         try (Accessor accessor=connector.openAccessor(parent))
         {
             CallResult<Void> result=accessor.executeCall(parent, null, Void.class, call,params);
+            if (result.getRowSets().length>1)
+            {
+                throw new Exception("Unexpected rowsets:"+result.getRowSets().length);
+            }
+            if (result.getRowSets().length==0)
+            {
+                return null;
+            }
             return result.getRowSet(0);
         }
     }
+    public static Row executeCallOne(Trace parent,Connector connector,String call,Param...params) throws Throwable
+    {
+        try (Accessor accessor=connector.openAccessor(parent))
+        {
+            CallResult<Void> result=accessor.executeCall(parent, null, Void.class, call,params);
+            if (result.getRowSets().length>1)
+            {
+                throw new Exception("Unexpected rowsets:"+result.getRowSets().length);
+            }
+            if (result.getRowSets().length==0)
+            {
+                return null;
+            }
+            RowSet rowSet=result.getRowSet(0);
+            if (rowSet.size()>1)
+            {
+                throw new Exception("Unexpected row:"+rowSet.size());
+            }
+            return rowSet.getRow(0);
+        }
+    }
+    public static RowSet executeCallOneRowSet(Trace parent,Connector connector,String call,Object...inObjects) throws Throwable
+    {
+        Param[] params=new Param[inObjects.length];
+        for (int i=0;i<inObjects.length;i++)
+        {
+            params[i]=Param.In(inObjects[i]);
+        }
+        return executeCallOneRowSet(parent,connector,call,params);
+    }
+    public static Row executeCallOne(Trace parent,Connector connector,String call,Object...inObjects) throws Throwable
+    {
+        Param[] params=new Param[inObjects.length];
+        for (int i=0;i<inObjects.length;i++)
+        {
+            params[i]=Param.In(inObjects[i]);
+        }
+        return executeCallOne(parent,connector,call,params);
+    }
     
-    public static int getSelectCount(Trace parent,Accessor accessor,String table,String where,Object...params) throws Throwable
+    public static Row executeQueryOne(Trace parent, Accessor accessor,String traceCategoryOverride, String sql, Object... parameters) throws Throwable
+    {
+        RowSet rowSet=accessor.executeQuery(parent, traceCategoryOverride, parameters, sql);
+        if (rowSet.size()>1)
+        {
+            throw new SQLException("Rows returned: "+rowSet.size());
+        }
+        else if (rowSet.size()==0)
+        {
+            return null;
+        }
+        return rowSet.getRow(0);
+    }
+    public static Row executeQueryOne(Trace parent, Connector connector,String traceCategoryOverride, String sql, Object... parameters) throws Throwable
+    {
+        try (Accessor accessor=connector.openAccessor(parent))
+        {
+            return executeQueryOne(parent,accessor,traceCategoryOverride,sql,parameters);
+        }
+    }
+    
+    public static int selectCount(Trace parent,Accessor accessor,String table,String where,Object...params) throws Throwable
     {
         RowSet rowSet=accessor.executeQuery(parent, null, "SELECT count(*) as Size FROM "+table+" WHERE "+where,params);
         if (rowSet.size()==0)

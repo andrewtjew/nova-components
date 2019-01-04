@@ -8,14 +8,14 @@ public class ReservableLock
     private long delayInstantMs;
     private Object object;
     private boolean reserved;
-    private final long lockDelayMs;
+    private final long delayMs;
     private final TraceManager traceManager;
     
-    public ReservableLock(TraceManager traceManager,long lockDelayMs)
+    public ReservableLock(TraceManager traceManager,long delayMs)
     {
         this.object=null;
         this.traceManager=traceManager;
-        this.lockDelayMs=lockDelayMs;
+        this.delayMs=delayMs;
         this.delayInstantMs=0;
     }
     
@@ -27,9 +27,9 @@ public class ReservableLock
             {
                 return false;
             }
-            if (this.lockDelayMs>0)
+            if (this.delayMs>0)
             {
-                if (System.currentTimeMillis()-this.delayInstantMs<=this.lockDelayMs)
+                if (System.currentTimeMillis()-this.delayInstantMs<=this.delayMs)
                 {
                     return false;
                 }
@@ -47,9 +47,9 @@ public class ReservableLock
         synchronized (this)
         {
             boolean open=this.reserved==false&&this.object==null;
-            if (open&&(this.lockDelayMs>0))
+            if (open&&(this.delayMs>0))
             {
-                if (System.currentTimeMillis()-this.delayInstantMs<=this.lockDelayMs)
+                if (System.currentTimeMillis()-this.delayInstantMs<=this.delayMs)
                 {
                     open=false;
                 }
@@ -85,7 +85,7 @@ public class ReservableLock
         }
     }
     
-    void setObject(Object object)
+    void setLockObject(Object object)
     {
         synchronized(this)
         {
@@ -126,7 +126,7 @@ public class ReservableLock
             @SuppressWarnings("unchecked")
             OBJECT object=(this.object.getClass()==type)?(OBJECT)this.object:null;
             this.object=null;
-            if (this.lockDelayMs>0)
+            if (this.delayMs>0)
             {
                 this.delayInstantMs=System.currentTimeMillis();
             }

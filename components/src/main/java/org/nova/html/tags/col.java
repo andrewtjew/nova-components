@@ -6,7 +6,7 @@ public class col extends GlobalEventTagElement<col>
 {
     public col()
     {
-        super("col");
+        super("col",true);
     }
     
     public col span(int number)

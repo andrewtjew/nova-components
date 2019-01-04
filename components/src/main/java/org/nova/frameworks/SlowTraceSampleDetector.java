@@ -40,7 +40,7 @@ public class SlowTraceSampleDetector
         double out=0;
         if (sample.getStandardDeviationDurationNs()>0)
         {
-            out=(sample.getMaxDurationNs()-sample.getAverageDurationNs())/sample.getStandardDeviationDurationNs();
+            out=(sample.getMaxDurationTrace().getDurationNs()-sample.getAverageDurationNs())/sample.getStandardDeviationDurationNs();
         }
         this.topMaxDurationOutliers.update(out);
         
@@ -50,7 +50,7 @@ public class SlowTraceSampleDetector
         out=0;
         if (sample.getStandardDeviationWaitNs()>0)
         {
-            out=(sample.getMaxWaitNs()-sample.getAverageWaitNs())/sample.getStandardDeviationWaitNs();
+            out=(sample.getMaxWaitTrace().getDurationNs()-sample.getAverageWaitNs())/sample.getStandardDeviationWaitNs();
         }
         this.topWaitOutliers.update(out);
     }
@@ -71,7 +71,7 @@ public class SlowTraceSampleDetector
         double out=0;
         if (sample.getStandardDeviationDurationNs()>0)
         {
-            out=(sample.getMaxDurationNs()-sample.getAverageDurationNs())/sample.getStandardDeviationDurationNs();
+            out=(sample.getMaxDurationTrace().getDurationNs()-sample.getAverageDurationNs())/sample.getStandardDeviationDurationNs();
         }
         return this.topMaxDurationOutliers.isInsideTop(out);
     }
@@ -88,7 +88,7 @@ public class SlowTraceSampleDetector
         double out=0;
         if (sample.getStandardDeviationWaitNs()>0)
         {
-            out=(sample.getMaxWaitNs()-sample.getAverageWaitNs())/sample.getStandardDeviationWaitNs();
+            out=(sample.getMaxWaitTrace().getDurationNs()-sample.getAverageWaitNs())/sample.getStandardDeviationWaitNs();
         }
         return this.topWaitOutliers.isInsideTop(out);
     }

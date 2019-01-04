@@ -3,7 +3,6 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.nova.annotations.Description;
 import org.nova.concurrent.TimerTask;
 import org.nova.concurrent.TimerTask.TimeBase;
-import org.nova.core.Utils;
 import org.nova.frameworks.ServerApplication;
 import org.nova.frameworks.ServerApplicationUtils;
 import org.nova.http.client.JSONClient;
@@ -23,6 +22,7 @@ import org.nova.logging.Item;
 import org.nova.logging.Level;
 import org.nova.metrics.CountMeter;
 import org.nova.tracing.Trace;
+import org.nova.utils.Utils;
 
 @Description("Handlers for server operator pages")
 @ContentDecoders(GzipContentDecoder.class)

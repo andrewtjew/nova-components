@@ -26,151 +26,158 @@ public class FilterChain
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Object buildParameter(ParameterInfo parameterInfo,String value) throws Exception 
 	{
-		if (value==null)
-		{
-			if (parameterInfo.getDefaultValue()!=null)
-			{
-				return parameterInfo.getDefaultValue();
-			}
-		}
-		Class<?> type=parameterInfo.getType();
-		if (type==String.class)
-		{
-			return value;
-		}
-		if (type==int.class)
-		{
-			return Integer.parseInt(value);
-		}
-        if (type==Integer.class)
-        {
-            if (value==null)
+	    try
+	    {
+    		if (value==null)
+    		{
+    			if (parameterInfo.getDefaultValue()!=null)
+    			{
+    				return parameterInfo.getDefaultValue();
+    			}
+    		}
+    		Class<?> type=parameterInfo.getType();
+    		if (type==String.class)
+    		{
+    			return value;
+    		}
+    		if (type==int.class)
+    		{
+    			return Integer.parseInt(value);
+    		}
+            if (type==Integer.class)
             {
-                return null;
+                if (value==null)
+                {
+                    return null;
+                }
+                if (value.length()==0)
+                {
+                    return null;
+                }
+                return Integer.parseInt(value);
             }
-            if (value.length()==0)
+    		if (type==long.class)
+    		{
+                if (value==null)
+                {
+                    return null;
+                }
+    			return Long.parseLong(value);
+    		}
+            if (type==Long.class)
             {
-                return null;
+                if (value==null)
+                {
+                    return null;
+                }
+                if (value.length()==0)
+                {
+                    return null;
+                }
+                return Long.parseLong(value);
             }
-            return Integer.parseInt(value);
-        }
-		if (type==long.class)
-		{
-            if (value==null)
+    		if (type==short.class)
+    		{
+    			return Short.parseShort(value);
+    		}
+            if (type==Short.class)
             {
-                return null;
+                if (value==null)
+                {
+                    return null;
+                }
+                if (value.length()==0)
+                {
+                    return null;
+                }
+                return Short.parseShort(value);
             }
-			return Long.parseLong(value);
-		}
-        if (type==Long.class)
-        {
-            if (value==null)
+    		if (type==float.class)
+    		{
+    			return Float.parseFloat(value);
+    		}
+            if (type==Float.class)
             {
-                return null;
+                if (value==null)
+                {
+                    return null;
+                }
+                if (value.length()==0)
+                {
+                    return null;
+                }
+                return Float.parseFloat(value);
             }
-            if (value.length()==0)
+    		if (type==double.class)
+    		{
+    			return Double.parseDouble(value);
+    		}
+            if (type==Double.class)
             {
-                return null;
+                if (value==null)
+                {
+                    return null;
+                }
+                if (value.length()==0)
+                {
+                    return null;
+                }
+                return Double.parseDouble(value);
             }
-            return Long.parseLong(value);
-        }
-		if (type==short.class)
-		{
-			return Short.parseShort(value);
-		}
-        if (type==Short.class)
-        {
-            if (value==null)
+    		if (type==boolean.class)
+    		{
+                if ("on".equals(value))
+                {
+                    return true;
+                }
+    		    return "true".equals(value);
+    		}
+            if (type==Boolean.class)
             {
-                return null;
+                if (value==null)
+                {
+                    return null;
+                }
+                if (value.length()==0)
+                {
+                    return null;
+                }
+                if ("on".equals(value))
+                {
+                    return true;
+                }
+                return !("false".equals(value));
             }
-            if (value.length()==0)
+            if (type.isEnum())
             {
-                return null;
+                if (value==null)
+                {
+                    return null;
+                }
+                if (value.length()==0)
+                {
+                    return null;
+                }
+                return Enum.valueOf((Class<Enum>)type, value);
             }
-            return Short.parseShort(value);
-        }
-		if (type==float.class)
-		{
-			return Float.parseFloat(value);
-		}
-        if (type==Float.class)
-        {
-            if (value==null)
+            if (type==BigDecimal.class)
             {
-                return null;
+                if (value==null)
+                {
+                    return null;
+                }
+                if (value.length()==0)
+                {
+                    return null;
+                }
+                return new BigDecimal(value);
             }
-            if (value.length()==0)
-            {
-                return null;
-            }
-            return Float.parseFloat(value);
-        }
-		if (type==double.class)
-		{
-			return Double.parseDouble(value);
-		}
-        if (type==Double.class)
-        {
-            if (value==null)
-            {
-                return null;
-            }
-            if (value.length()==0)
-            {
-                return null;
-            }
-            return Double.parseDouble(value);
-        }
-		if (type==boolean.class)
-		{
-            if ("on".equals(value))
-            {
-                return true;
-            }
-		    return "true".equals(value);
-		}
-        if (type==Boolean.class)
-        {
-            if (value==null)
-            {
-                return null;
-            }
-            if (value.length()==0)
-            {
-                return null;
-            }
-            if ("on".equals(value))
-            {
-                return true;
-            }
-            return !("false".equals(value));
-        }
-        if (type.isEnum())
-        {
-            if (value==null)
-            {
-                return null;
-            }
-            if (value.length()==0)
-            {
-                return null;
-            }
-            return Enum.valueOf((Class<Enum>)type, value);
-        }
-        if (type==BigDecimal.class)
-        {
-            if (value==null)
-            {
-                return null;
-            }
-            if (value.length()==0)
-            {
-                return null;
-            }
-            return new BigDecimal(value);
-        }
-        throw new Exception("Cannot parse parameter "+parameterInfo.getName());
+	    }
+	    catch (Throwable t)
+	    {
+            throw new Exception("Error parsing parameter "+parameterInfo.getName()+", value="+value,t);
+	    }
+        throw new Exception("Unable to parse parameter "+parameterInfo.getName()+", value="+value);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -334,15 +341,27 @@ public class FilterChain
 				return new Response(HttpStatus.OK_200,result);
 			}
 		}
+        catch (IllegalArgumentException e)
+        {
+            StringBuilder sb=new StringBuilder("IllegalArguments for "+context.getRequestHandler().getKey());
+            for (int i=0;i<parameterInfos.length;i++)
+            {
+                ParameterInfo parameterInfo=parameterInfos[i];
+                if (parameterInfo.getParameterType().isPrimitive())
+                {
+                    if (parameters[i]==null)
+                    {
+                        sb.append(", missing "+parameterInfo.getName());
+                    }
+                }
+            }
+            Exception exception=new Exception(sb.toString(),e);
+            exception.printStackTrace();
+            throw exception;
+        }
 		catch (IllegalAccessException e)
 		{
-			e.printStackTrace();
 			throw e;
-		}
-		catch (IllegalArgumentException e)
-		{
-			e.printStackTrace();
-            throw e;
 		}
 		catch (InvocationTargetException e)
 		{

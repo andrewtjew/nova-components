@@ -41,37 +41,46 @@ public class ResourceController
     @GET
     @Path("/resources/{+}")
     @Log(responseContent=false)
-    public void resource(@PathParam(PathParam.AT_LEAST_ONE_SEGMENT) String file, Context context, Trace trace) throws Throwable
+    public void resource(@PathParam(PathParam.AT_LEAST_ONE_SEGMENT) String file, Context context, Trace parent) throws Throwable
     {
-        HttpServletResponse response = context.getHttpServletResponse();
-        context.setCaptured(true);
-        byte[] bytes;
+        Trace trace=new Trace(parent,"ResourceController.resource");
+        trace.setDetails(file);
         try
         {
-            bytes = this.serverApplication.getFileCache().get(trace, file);
-            if (TEST)
+            HttpServletResponse response = context.getHttpServletResponse();
+            context.setCaptured(true);
+            byte[] bytes;
+            try
             {
-                Testing.printf("Resource:"+file);
+                bytes = this.serverApplication.getFileCache().get(parent, file);
+                if (TEST)
+                {
+                    Testing.printf("Resource:"+file);
+                }
             }
-        }
-        catch (Throwable t)
-        {
-            if (TEST)
+            catch (Throwable t)
             {
-                Testing.printf("Resource: "+file + " not found");
+                trace.close(t);
+                if (TEST)
+                {
+                    Testing.printf("Resource: "+file + " not found");
+                }
+                response.setStatus(HttpStatus.NOT_FOUND_404);
+                return;
             }
-            System.out.println("Resource: "+file + " not found");
-            response.setStatus(HttpStatus.NOT_FOUND_404);
-            return;
+            String contentType = this.serverApplication.getContentTypeMappings().getContentType(file);
+            if (contentType != null)
+            {
+                response.setContentType(contentType);
+            }
+//            response.setContentLength(bytes.length);
+            response.setHeader("Cache-Control",(this.cacheControlValue == null || this.cacheControlValue.length() == 0) ? "max-age=" + this.cacheMaxAge : this.cacheControlValue + ",max-age=" + this.cacheMaxAge);
+            response.setStatus(HttpStatus.OK_200);
+            response.getOutputStream().write(bytes);
         }
-        String contentType = this.serverApplication.getTypeMappings().getContentType(file);
-        if (contentType != null)
+        finally
         {
-            response.setContentType(contentType);
+            trace.close();
         }
-        response.setContentLength(bytes.length);
-        response.setHeader("Cache-Control",(this.cacheControlValue == null || this.cacheControlValue.length() == 0) ? "max-age=" + this.cacheMaxAge : this.cacheControlValue + ",max-age=" + this.cacheMaxAge);
-        response.setStatus(HttpStatus.OK_200);
-        response.getOutputStream().write(bytes);
     }
 }

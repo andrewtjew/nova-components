@@ -1,8 +1,8 @@
 package org.nova.html.tags;
 
-import org.nova.core.Utils;
 import org.nova.html.elements.InputElement;
 import org.nova.html.enums.autocomplete;
+import org.nova.utils.Utils;
 
 public class input_datetime_local extends InputElement<input_datetime_local>
 {

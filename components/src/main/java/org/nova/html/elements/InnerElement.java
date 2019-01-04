@@ -2,9 +2,9 @@ package org.nova.html.elements;
 
 import java.util.ArrayList;
 
-import org.nova.html.widgets.Text;
+import org.nova.html.ext.Text;
 
-public abstract class InnerElement<ELEMENT extends InnerElement<ELEMENT>> extends Element
+public class InnerElement<ELEMENT extends InnerElement<ELEMENT>> extends Element
 {
     protected Element inner=null;
     protected ArrayList<Element> inners=null; 

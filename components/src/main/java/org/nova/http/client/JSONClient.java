@@ -16,13 +16,14 @@ import org.apache.http.entity.StringEntity;
 import org.nova.concurrent.TimerScheduler;
 import org.nova.concurrent.TimerTask;
 import org.nova.concurrent.TimerTask.TimeBase;
-import org.nova.core.Utils;
 import org.nova.http.Header;
 import org.nova.json.ObjectMapper;
 import org.nova.logging.Item;
 import org.nova.logging.Logger;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
+import org.nova.utils.FileUtils;
+import org.nova.utils.Utils;
 
 import com.amazonaws.util.IOUtils;
 import com.nova.disrupt.Disruptor;
@@ -146,48 +147,41 @@ public class JSONClient
        {
            return new JSONResponse<TYPE>(statusCode, null);
        }
-       return new JSONResponse<TYPE>(statusCode,ObjectMapper.read(json, responseContentType));
+       return new JSONResponse<TYPE>(statusCode,ObjectMapper.readObject(json, responseContentType));
     }
     
     public <TYPE> JSONResponse<TYPE> get(Trace parent,String traceCategoryOverride,String pathAndQuery,Class<TYPE> responseContentType,Header...headers) throws Throwable
     {
         try (DisruptorTraceContext context=createContext(parent, traceCategoryOverride, pathAndQuery))
         {
-            try 
+            HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
+            context.addLogItem(new Item("endPoint",this.endPoint));
+            context.addLogItem(new Item("pathAndQuery",pathAndQuery));
+
+            if (this.headers!=null)
             {
-                HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
-                context.addLogItem(new Item("endPoint",this.endPoint));
-                context.addLogItem(new Item("pathAndQuery",pathAndQuery));
-    
-                if (this.headers!=null)
-                {
-                    for (Header header:this.headers)
-                    {
-                        get.setHeader(header.getName(),header.getValue());
-                    }
-                }
-                for (Header header:headers)
+                for (Header header:this.headers)
                 {
                     get.setHeader(header.getName(),header.getValue());
                 }
-                get.setHeader("Accept",this.contentType);
-                logHeaders(context,get.getAllHeaders());
-    
-                context.beginWait();
-                HttpResponse response=this.client.execute(get);
-                context.endWait();
-                try
-                {
-                    return processResponse(response, context,responseContentType);
-                }
-                finally
-                {
-                    response.getEntity().getContent().close();
-                }
-            }       
-            catch (Throwable t)
+            }
+            for (Header header:headers)
             {
-                throw context.handleThrowable(t);
+                get.setHeader(header.getName(),header.getValue());
+            }
+            get.setHeader("Accept",this.contentType);
+            logHeaders(context,get.getAllHeaders());
+
+            context.beginWait();
+            HttpResponse response=this.client.execute(get);
+            context.endWait();
+            try
+            {
+                return processResponse(response, context,responseContentType);
+            }
+            finally
+            {
+                response.getEntity().getContent().close();
             }
         }
     }
@@ -302,7 +296,7 @@ public class JSONClient
     
     			if (content!=null)
     			{
-                    String jsonContent=ObjectMapper.write(content);
+                    String jsonContent=ObjectMapper.writeObjectToString(content);
                     context.addLogItem(new Item("request",jsonContent));
                     StringEntity entity=new StringEntity(jsonContent);
     				put.setEntity(entity);
@@ -351,51 +345,44 @@ public class JSONClient
 	{
         try (DisruptorTraceContext context=createContext(parent, traceCategoryOverride, pathAndQuery))
         {
-            try 
+            HttpPatch patch=new HttpPatch(this.endPoint+pathAndQuery);
+            context.addLogItem(new Item("endPoint",this.endPoint));
+            context.addLogItem(new Item("pathAndQuery",pathAndQuery));
+
+            if (content!=null)
             {
-                HttpPatch patch=new HttpPatch(this.endPoint+pathAndQuery);
-                context.addLogItem(new Item("endPoint",this.endPoint));
-                context.addLogItem(new Item("pathAndQuery",pathAndQuery));
-    
-                if (content!=null)
-                {
-                    String jsonContent=ObjectMapper.write(content);
-                    context.addLogItem(new Item("request",jsonContent));
-                    StringEntity entity=new StringEntity(jsonContent);
-                    patch.setEntity(entity);
-                }
-                if (this.headers!=null)
-                {
-                    for (Header header:this.headers)
-                    {
-                        patch.setHeader(header.getName(),header.getValue());
-                    }
-                }
-                for (Header header:headers)
+                String jsonContent=ObjectMapper.writeObjectToString(content);
+                context.addLogItem(new Item("request",jsonContent));
+                StringEntity entity=new StringEntity(jsonContent);
+                patch.setEntity(entity);
+            }
+            if (this.headers!=null)
+            {
+                for (Header header:this.headers)
                 {
                     patch.setHeader(header.getName(),header.getValue());
                 }
-                patch.setHeader("Accept",this.contentType);
-                patch.setHeader("Content-Type",this.patchType);
-                logHeaders(context,patch.getAllHeaders());
-                
-                context.beginWait();
-                HttpResponse response=this.client.execute(patch);
-                context.endWait();
-                try
-                {
-                    processResponse(response, context);
-                    int statusCode=response.getStatusLine().getStatusCode();
-                    return statusCode;
-                }
-                finally
-                {
-                    response.getEntity().getContent().close();
-                }
             }
-            catch (Throwable t)
+            for (Header header:headers)
             {
-                throw context.handleThrowable(t);
+                patch.setHeader(header.getName(),header.getValue());
+            }
+            patch.setHeader("Accept",this.contentType);
+            patch.setHeader("Content-Type",this.patchType);
+            logHeaders(context,patch.getAllHeaders());
+            
+            context.beginWait();
+            HttpResponse response=this.client.execute(patch);
+            context.endWait();
+            try
+            {
+                processResponse(response, context);
+                int statusCode=response.getStatusLine().getStatusCode();
+                return statusCode;
+            }
+            finally
+            {
+                response.getEntity().getContent().close();
             }
         }
 	}
@@ -403,48 +390,41 @@ public class JSONClient
 	{
         try (DisruptorTraceContext context=createContext(parent, traceCategoryOverride, pathAndQuery))
         {
-    		try 
-    		{
-    			HttpPost post=new HttpPost(this.endPoint+pathAndQuery);
-                context.addLogItem(new Item("endPoint",this.endPoint));
-                context.addLogItem(new Item("pathAndQuery",pathAndQuery));
-    			if (content!=null)
-    			{
-    			    String jsonContent=ObjectMapper.write(content);
-                    context.addLogItem(new Item("request",jsonContent));
-    				StringEntity entity=new StringEntity(jsonContent);
-    				post.setEntity(entity);
-    			}
-    			if (this.headers!=null)
-    			{
-    				for (Header header:this.headers)
-    				{
-    					post.setHeader(header.getName(),header.getValue());
-    				}
-    			}
-                for (Header header:headers)
-                {
-                    post.setHeader(header.getName(),header.getValue());
-                }
-    			post.setHeader("Accept",this.contentType);
-    			post.setHeader("Content-Type",this.contentType);
-                logHeaders(context,post.getAllHeaders());
-                context.beginWait();
-    			HttpResponse response=this.client.execute(post);
-    			context.endWait();
-    			try
-    			{
-                    return processResponse(response,context,responseContentType);
-    			}
-    			finally
-    			{
-    	            response.getEntity().getContent().close();
-    			}
-    	    }
-    		catch (Throwable t)
-    		{
-                throw context.handleThrowable(t);
-    		}
+			HttpPost post=new HttpPost(this.endPoint+pathAndQuery);
+            context.addLogItem(new Item("endPoint",this.endPoint));
+            context.addLogItem(new Item("pathAndQuery",pathAndQuery));
+			if (content!=null)
+			{
+			    String jsonContent=ObjectMapper.writeObjectToString(content);
+                context.addLogItem(new Item("request",jsonContent));
+				StringEntity entity=new StringEntity(jsonContent);
+				post.setEntity(entity);
+			}
+			if (this.headers!=null)
+			{
+				for (Header header:this.headers)
+				{
+					post.setHeader(header.getName(),header.getValue());
+				}
+			}
+            for (Header header:headers)
+            {
+                post.setHeader(header.getName(),header.getValue());
+            }
+			post.setHeader("Accept",this.contentType);
+			post.setHeader("Content-Type",this.contentType);
+            logHeaders(context,post.getAllHeaders());
+            context.beginWait();
+			HttpResponse response=this.client.execute(post);
+			context.endWait();
+			try
+			{
+                return processResponse(response,context,responseContentType);
+			}
+			finally
+			{
+	            response.getEntity().getContent().close();
+			}
         }
 	}
     public <TYPE> JSONResponse<TYPE> post(Trace parent,String traceCategoryOverride,String pathAndQuery,Object content,Class<TYPE> responseContentType) throws Throwable
@@ -467,48 +447,41 @@ public class JSONClient
     {
         try (DisruptorTraceContext context=createContext(parent, traceCategoryOverride, pathAndQuery))
         {
-            try 
+            HttpPost post=new HttpPost(this.endPoint+pathAndQuery);
+            context.addLogItem(new Item("endPoint",this.endPoint));
+            context.addLogItem(new Item("pathAndQuery",pathAndQuery));
+            if (content!=null)
             {
-                HttpPost post=new HttpPost(this.endPoint+pathAndQuery);
-                context.addLogItem(new Item("endPoint",this.endPoint));
-                context.addLogItem(new Item("pathAndQuery",pathAndQuery));
-                if (content!=null)
-                {
-                    String jsonContent=ObjectMapper.write(content);
-                    context.addLogItem(new Item("request",jsonContent));
-                    StringEntity entity=new StringEntity(jsonContent);
-                    post.setEntity(entity);
-                }
-                if (this.headers!=null)
-                {
-                    for (Header header:this.headers)
-                    {
-                        post.setHeader(header.getName(),header.getValue());
-                    }
-                }
-                for (Header header:headers)
+                String jsonContent=ObjectMapper.writeObjectToString(content);
+                context.addLogItem(new Item("request",jsonContent));
+                StringEntity entity=new StringEntity(jsonContent);
+                post.setEntity(entity);
+            }
+            if (this.headers!=null)
+            {
+                for (Header header:this.headers)
                 {
                     post.setHeader(header.getName(),header.getValue());
                 }
-                post.setHeader("Accept",this.contentType);
-                post.setHeader("Content-Type",this.contentType);
-                logHeaders(context,post.getAllHeaders());
-                context.beginWait();
-                HttpResponse response=this.client.execute(post);
-                context.endWait();
-                try
-                {
-                    processResponse(response,context);
-                    return response.getStatusLine().getStatusCode();
-                }
-                finally
-                {
-                    response.getEntity().getContent().close();
-                }
             }
-            catch (Throwable t)
+            for (Header header:headers)
             {
-                throw context.handleThrowable(t);
+                post.setHeader(header.getName(),header.getValue());
+            }
+            post.setHeader("Accept",this.contentType);
+            post.setHeader("Content-Type",this.contentType);
+            logHeaders(context,post.getAllHeaders());
+            context.beginWait();
+            HttpResponse response=this.client.execute(post);
+            context.endWait();
+            try
+            {
+                processResponse(response,context);
+                return response.getStatusLine().getStatusCode();
+            }
+            finally
+            {
+                response.getEntity().getContent().close();
             }
         }
     }
@@ -520,7 +493,7 @@ public class JSONClient
         {
             context.addLogItem(new Item("responseHeader:"+header.getName(),header.getValue()));
         }
-        String responseContent=Utils.readString(response.getEntity().getContent());
+        String responseContent=FileUtils.readString(response.getEntity().getContent());
         if (responseContent.length()>0)
         {
             context.addLogItem(new Item("response",responseContent));
@@ -549,44 +522,37 @@ public class JSONClient
     {
         try (DisruptorTraceContext context=new DisruptorTraceContext(parent, this.traceManager, this.logger, this.disruptor, traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery,this.endPoint))
         {
-            try 
+            HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
+            context.addLogItem(new Item("endPoint",this.endPoint));
+            context.addLogItem(new Item("pathAndQuery",pathAndQuery));
+
+            if (this.headers!=null)
             {
-                HttpGet get=new HttpGet(this.endPoint+pathAndQuery);
-                context.addLogItem(new Item("endPoint",this.endPoint));
-                context.addLogItem(new Item("pathAndQuery",pathAndQuery));
-    
-                if (this.headers!=null)
-                {
-                    for (Header header:this.headers)
-                    {
-                        get.setHeader(header.getName(),header.getValue());
-                    }
-                }
-                for (Header header:headers)
+                for (Header header:this.headers)
                 {
                     get.setHeader(header.getName(),header.getValue());
                 }
-                get.setHeader("Accept",this.contentType);
-                logHeaders(context,get.getAllHeaders());
-    
-                context.beginWait();
-                HttpResponse response=this.client.execute(get);
-                context.endWait();
-                try
-                {
-                    IOUtils.copy(response.getEntity().getContent(), outputStream);
-                    int statusCode=response.getStatusLine().getStatusCode();
-                    context.addLogItem(new Item("statusCode",statusCode));
-                    return statusCode;
-                }
-                finally
-                {
-                    response.getEntity().getContent().close();
-                }
-            }       
-            catch (Throwable t)
+            }
+            for (Header header:headers)
             {
-                throw context.handleThrowable(t);
+                get.setHeader(header.getName(),header.getValue());
+            }
+            get.setHeader("Accept",this.contentType);
+            logHeaders(context,get.getAllHeaders());
+
+            context.beginWait();
+            HttpResponse response=this.client.execute(get);
+            context.endWait();
+            try
+            {
+                IOUtils.copy(response.getEntity().getContent(), outputStream);
+                int statusCode=response.getStatusLine().getStatusCode();
+                context.addLogItem(new Item("statusCode",statusCode));
+                return statusCode;
+            }
+            finally
+            {
+                response.getEntity().getContent().close();
             }
         }
     }

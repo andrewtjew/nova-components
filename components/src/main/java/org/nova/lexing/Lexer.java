@@ -84,6 +84,7 @@ public abstract class Lexer
     final private int length;
     private int position;
     private int mark;
+    private boolean ignoreEndOfLine;
     
     private ArrayList<Lexeme> lexemes;
     private ArrayList<Lexeme> comments;
@@ -92,8 +93,9 @@ public abstract class Lexer
 
     private final OperatorTree operatorTree;
     
-    public Lexer(Source source,String[] operators,char[] punctuators,String[] keywords,boolean caseSensitive)
+    public Lexer(Source source,String[] operators,char[] punctuators,String[] keywords,boolean caseSensitive,boolean ignoreEndOfLine)
     {
+        this.ignoreEndOfLine=ignoreEndOfLine;
         this.source=source;
         this.text=source.getText();
         this.length=this.text.length();
@@ -234,7 +236,7 @@ public abstract class Lexer
     }
 
 
-    public abstract boolean match(char digits);
+    public abstract boolean match(char first);
 
     int getNumberOfDigits()
     {
@@ -401,13 +403,27 @@ public abstract class Lexer
     
     public void process()
     {
-        for (char c=mark();c!=0;c=mark())
+        if (this.ignoreEndOfLine==false)
         {
-            if (match(c))
+            for (char c=markSpaces();c!=0;c=markSpaces())
             {
-                continue;
+                if (match(c))
+                {
+                    continue;
+                }
+                addExtraUnrecognized("Unable to handle character");
             }
-            addExtraUnrecognized("Unable to handle character");
+        }
+        else 
+        {
+            for (char c=mark();c!=0;c=mark())
+            {
+                if (match(c))
+                {
+                    continue;
+                }
+                addExtraUnrecognized("Unable to handle character");
+            }
         }
     }
     public List<Lexeme> getLexemes()
@@ -433,6 +449,27 @@ public abstract class Lexer
         return this.text.charAt(this.position++);
     }
     
+    protected char markSpaces()
+    {
+        for (this.mark=this.position;this.mark<this.text.length();this.mark++)
+        {
+            char c=this.text.charAt(this.mark);
+            if (c=='\n')
+            {
+                addLexeme(new Lexeme(this.source,Token.END_OF_LINE,c,this.mark,this.mark+1));
+            }
+            else if (Character.isWhitespace(c)==false)
+            {
+                if (c!=65279) //BOM or zero width space
+                {
+                    this.position=this.mark+1;
+                    return c;
+                }
+            }
+        }
+        return 0;
+    }
+    
     protected char mark()
     {
         for (this.mark=this.position;this.mark<this.text.length();this.mark++)
@@ -449,7 +486,6 @@ public abstract class Lexer
         }
         return 0;
     }
-    
     protected void back(int amount)
     {
         this.position-=amount;
@@ -512,13 +548,13 @@ public abstract class Lexer
 
     protected boolean matchText(char first)
     {
-        if (Character.isLetterOrDigit(first)==false)
+        if (Character.isWhitespace(first))
         {
             return false;
         }
         for (char c=next();c!=0;c=next())
         {
-            if ((c==' ')||(Character.isLetterOrDigit(c)==false))
+            if (Character.isWhitespace(c))
             {
                 break;
             }
@@ -530,13 +566,13 @@ public abstract class Lexer
 
     protected boolean matchTextOrKeyword(char first)
     {
-        if (Character.isLetterOrDigit(first)==false)
+        if (Character.isWhitespace(first))
         {
             return false;
         }
         for (char c=next();c!=0;c=next())
         {
-            if ((c==' ')||(Character.isLetterOrDigit(c)==false))
+            if (Character.isWhitespace(c))
             {
                 break;
             }
@@ -582,14 +618,13 @@ public abstract class Lexer
                         back(1);
                         return addLexeme(new Lexeme(this.source,Token.OPERATOR,this.text.substring(this.mark, this.position),this.mark,this.position));
                     }
-                    
                 }
             }
         }
         return reset();
     }
     
-    protected boolean matchSeperator(char first)
+    protected boolean matchPunctuator(char first)
     {
         if (this.punctuators.contains(first)==false)
         {
@@ -686,6 +721,110 @@ public abstract class Lexer
         {
             String text=this.text.substring(this.mark, end);
             long value=Long.parseLong(text);
+            return addLexeme(new Lexeme(this.source,Token.INTEGER,value,modifier,this.mark,this.position));
+        }
+        catch (Throwable t)
+        {
+            return addExtraNumber("Unexpected exception when parsing integer.");
+        }
+    }
+
+    protected boolean matchCommaNumber(char first)
+    {
+        boolean fraction;
+        boolean base;
+        if (first=='.')
+        {
+            fraction=true;
+            base=false;
+        }
+        else if ((first>='0')&&(first<='9'))
+        {
+            base=true;
+            fraction=false;
+        }
+        else
+        {
+            return false;
+        }
+        StringBuilder sb=new StringBuilder();
+        sb.append(first);
+        char c;
+        for (c=next();c!=0;c=next())
+        {
+            if (Character.isDigit(c))
+            {
+                sb.append(c);
+                base=true;
+                continue;
+            }
+            if ((c==',')&&(base))
+            {
+                continue;
+            }
+            if ((c=='.')&&(fraction==false))
+            {
+                sb.append(c);
+                fraction=true;
+                continue;
+            }
+            if ((c=='e')||(c=='E'))
+            {
+                sb.append(c);
+                c=next();
+                if ((c=='-')||(c=='+'))
+                {
+                    sb.append(c);
+                    c=next();
+                }
+                if (c==0)
+                {
+                    return addExtraNumber("Incomplete number caused by end of text.");
+                }
+                if (Character.isDigit(c)==false)
+                {
+                    return addExtraNumber("Invalid number caused by invalid character.");
+                }
+                for (c=next();Character.isDigit(c);c=next())
+                {
+                    sb.append(c);
+                }
+            }
+            break;
+        }
+        if (base==false)
+        {
+            return reset();
+        }
+        if (Character.isJavaIdentifierStart(c))
+        {
+            return reset();
+        }
+        if (fraction)
+        {
+            back(1);
+            try
+            {
+                double value=Double.parseDouble(sb.toString());
+                return addLexeme(new Lexeme(this.source,Token.FLOAT,value,this.mark,this.position));
+            }
+            catch (Throwable t)
+            {
+                return addExtraNumber("Unexpected exception when parsing float.");
+            }
+        }
+        String modifier=null;
+        if ((c!='L')&&(c!='l'))
+        {
+            back(1);
+        }
+        else
+        {
+            modifier="L";
+        }
+        try
+        {
+            long value=Long.parseLong(sb.toString());
             return addLexeme(new Lexeme(this.source,Token.INTEGER,value,modifier,this.mark,this.position));
         }
         catch (Throwable t)

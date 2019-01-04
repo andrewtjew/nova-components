@@ -57,7 +57,7 @@ public class CoreEnvironmentApplicationRunner //
         {
             try
             {
-                application.run(trace);
+                application.join(trace);
             }
             catch (Throwable t)
             {
@@ -72,7 +72,7 @@ public class CoreEnvironmentApplicationRunner //
     
     public void run(String[] args,CoreEnvironmentApplicationInstantiator instantiator)
     {
-        Configuration configuration=ConfigurationReader.search(args);
+        Configuration configuration=ConfigurationReader.read(args,null);
         if (configuration==null)
         {
             System.err.println("Cannot locate configuration files.");

@@ -1,33 +1,19 @@
 package org.nova.html.bootstrap4;
 
-import org.nova.html.bootstrap4.classes.Responsiveness;
-import org.nova.html.elements.Composer;
-import org.nova.html.elements.Element;
-import org.nova.html.tags.table;
 import org.nova.html.tags.tbody;
-import org.nova.html.tags.div;
 
-public class Table extends Element
+public class Table extends StyleComponent<Table>
 {
-    private final table table;
     private final tbody tbody;
-    
-    private boolean hover;
-    private boolean striped;
-    private boolean dark;
-    private boolean bordered;
-    private Responsiveness responsiveness;
-    private boolean tableResponsive;
-    private Responsiveness tableResponsiveness;
     
     public Table(TableHeading heading)
     {
-       this.table=new table();
+       super("table","table");
        if (heading!=null)
        {
-           this.table.addInner(heading);
+           addInner(heading);
        }
-       this.tbody=this.table.returnAddInner(new tbody());
+       this.tbody=returnAddInner(new tbody());
     }
 
     public Table()
@@ -35,71 +21,43 @@ public class Table extends Element
         this(null);
     }
 
-    public Table hover(boolean value)
+    public Table hover()
     {
-        this.hover=value;
+        addClass("table-hover");
         return this;
     }
-    public Table striped(boolean value)
+    public Table striped()
     {
-        this.striped=value;
+        addClass("table-striped");
         return this;
     }
-    public Table dark(boolean value)
+    public Table bordered()
     {
-        this.dark=value;
+        addClass("table-bordered");
         return this;
     }
-    public Table bordered(boolean value)
+    public Table responsive()
     {
-        this.bordered=value;
+        addClass("table-responsive");
         return this;
     }
-    public Table responsiveness(Responsiveness value)
-    {
-        this.responsiveness=value;
-        return this;
-    }
-    public Table tableResponsiveness(Responsiveness value)
-    {
-        this.tableResponsiveness=value;
-        return this;
-    }
-    public Table tableResponsive(boolean value)
-    {
-        this.tableResponsive=value;
-        return this;
-    }
-    
-    public Table add(TableRow row)
+
+    public Table addRow(TableRow row)
     {
         this.tbody.addInner(row);
         return this;
     }
-    
-    @Override
-    public void compose(Composer composer) throws Throwable
+    public Table addRowInline(Object...objects)
     {
-        ClassBuilder tableClass=new ClassBuilder("table");
-        tableClass.addIf(this.hover,"table-hover");
-        tableClass.addIf(this.striped,"table-striped");
-        tableClass.addIf(this.dark,"table-dark");
-        tableClass.addIf(this.bordered,"table-bordered");
-        tableClass.addIf(this.responsiveness!=null,"table",this.responsiveness);
-        tableClass.applyTo(this.table);
-        
-        div div=new div();
-        
-        if ((this.tableResponsive)||(this.tableResponsiveness!=null))
-        {
-            ClassBuilder divClass=new ClassBuilder("class");
-            divClass.addFragments("responsive");
-            divClass.addFragments(this.tableResponsiveness.toString());
-            divClass.applyTo(div);
-        }
-        div.addInner(this.table);
-        composer.render(div);
-        
+        this.tbody.addInner(new TableRow().add(objects));
+        return this;
+    }
+    
+    public TableRow returnAddRow()
+    {
+        TableRow tableRow=new TableRow();
+        addRow(tableRow);
+        return tableRow;
     }
     
 }

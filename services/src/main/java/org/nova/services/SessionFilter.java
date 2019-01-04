@@ -129,7 +129,7 @@ public class SessionFilter extends Filter
         {
             return getAbnormalSessionRequestHandler(context).handleNoLockRequest(parent,this, session, context);
         }
-        session.update(lock);
+        session.beginSessionProcessing(lock);
         try
         {
             if (session.isAccessDenied(parent,context))
@@ -141,7 +141,7 @@ public class SessionFilter extends Filter
         }
         finally
         {
-            session.closeLock();
+            session.endSessionProcessing();
         }
         
     }
@@ -160,4 +160,5 @@ public class SessionFilter extends Filter
     {
         return cookieTokenKey;
     }
+
 }

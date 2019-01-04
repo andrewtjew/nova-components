@@ -2,9 +2,9 @@ package org.nova.html.Chartjs;
 
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
+import org.nova.html.ext.Head;
 import org.nova.html.tags.canvas;
 import org.nova.html.tags.script;
-import org.nova.html.widgets.Head;
 import org.nova.json.ObjectMapper;
 
 public class BarChart extends Element
@@ -28,7 +28,7 @@ public class BarChart extends Element
     
     public String script() throws Throwable
     {
-        String data=ObjectMapper.write(this.type);
+        String data=ObjectMapper.writeObjectToString(this.type);
         
         StringBuilder sb=new StringBuilder();
         String ctx=this.id+"_idx";
@@ -42,9 +42,9 @@ public class BarChart extends Element
     @Override
     public void compose(Composer composer) throws Throwable
     {
-        composer.render(this.canvas);
+        composer.compose(this.canvas);
         script script=new script();
         script.addInner(script());
-        composer.render(script);
+        composer.compose(script);
     }
 }

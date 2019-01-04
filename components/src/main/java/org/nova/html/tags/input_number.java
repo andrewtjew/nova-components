@@ -62,5 +62,13 @@ public class input_number extends InputElement<input_number>
     {
         return attr("value",value);
     }
+    public input_number size(int number) //text, search, tel, url, email, and password.
+    {
+        return attr("size",number);
+    }
+    public input_number placeholder(String text) //text, search, url, tel, email, and password.
+    {
+        return attr("placeholder",text);
+    }
     
 }

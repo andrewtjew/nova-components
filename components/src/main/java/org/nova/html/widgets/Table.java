@@ -4,6 +4,7 @@ import org.nova.html.attributes.Style;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.enums.link_rel;
+import org.nova.html.ext.Head;
 import org.nova.html.tags.link;
 import org.nova.html.tags.table;
 import org.nova.html.tags.tbody;
@@ -34,7 +35,7 @@ public class Table extends Element
         this.table=new table();
         this.tbody=new tbody();
 
-        this.table.class_(class_);
+        this.table.addClass(class_);
         link link=new link().rel(link_rel.stylesheet).type("text/css").href(cssFilePath);
         if (head!=null)
         {
@@ -79,9 +80,15 @@ public class Table extends Element
     {
         this.header=header;
     }
-    public void setHeaderInline(Object...objects)
+    public void setHeader(Object...objects)
     {
         this.header=new TableHeader().add(objects);
+    }
+    public TableRow returnAddRow()
+    {
+        TableRow row=new TableRow();
+        this.tbody.addInner(row);
+        return row;
     }
     public void addRow(TableRow row)
     {
@@ -91,10 +98,17 @@ public class Table extends Element
     {
         this.tbody.addInner(row);
     }
-    
     public void addRowInline(Object...objects)
     {
         this.tbody.addInner(new TableRow().add(objects));
+    }
+    public void setFooter(TableFooter footer)
+    {
+        this.footer=footer;
+    }
+    public void setFooterInline(Object...objects)
+    {
+        this.footer=new TableFooter().add(objects);
     }
 
     @Override
@@ -103,6 +117,6 @@ public class Table extends Element
         this.table.addInner(this.header);
         this.table.addInner(this.tbody);
         this.table.addInner(this.footer);
-        composer.render(this.table);
+        composer.compose(this.table);
     }
 }

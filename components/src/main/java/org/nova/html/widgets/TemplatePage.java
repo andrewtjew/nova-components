@@ -3,8 +3,9 @@ package org.nova.html.widgets;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
+import org.nova.html.ext.Head;
 import org.nova.html.tags.div;
-import org.nova.html.templates.Template;
+import org.nova.html.templates.deprecated.Template;
 
 public abstract class TemplatePage extends Element
 {

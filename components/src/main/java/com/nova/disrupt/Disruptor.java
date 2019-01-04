@@ -12,13 +12,11 @@ public class Disruptor
     final private Random random;
     final private DisruptProfile beginDisruptProfile;
     final private DisruptProfile endDisruptProfile;
-    final private DisruptProfile disruptProfile;
     
-    public Disruptor(DisruptProfile beginDisruptProfile,DisruptProfile endDisruptProfile,DisruptProfile disruptProfile)
+    public Disruptor(DisruptProfile beginDisruptProfile,DisruptProfile endDisruptProfile)
     {
         this.beginDisruptProfile=beginDisruptProfile;
         this.endDisruptProfile=endDisruptProfile;
-        this.disruptProfile=disruptProfile;
         this.random=new Random();
     }
     
@@ -90,33 +88,6 @@ public class Disruptor
         {
             return null;
         }
-        trace.beginWait();
-        try
-        {
-            
-        }
-        finally
-        {
-            trace.endWait();
-        }
-        return null;
-    }
-    
-    public Item disrupt(Trace trace) throws RuntimeException
-    {
-        if (ENABLED==false)
-        {
-            return null;
-        }
-        trace.beginWait();
-        try
-        {
-            
-        }
-        finally
-        {
-            trace.endWait();
-        }
-        return null;
+        return executeProfile(trace,this.endDisruptProfile);
     }
 }

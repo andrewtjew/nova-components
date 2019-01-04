@@ -18,7 +18,6 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.nova.annotations.Description;
 import org.nova.collections.RingBuffer;
-import org.nova.core.Utils;
 import org.nova.http.Header;
 import org.nova.logging.Item;
 import org.nova.logging.Logger;
@@ -27,6 +26,8 @@ import org.nova.operations.OperatorVariable;
 import org.nova.test.Testing;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
+import org.nova.utils.Utils;
+
 import com.google.common.base.Strings;
 
 public class HttpServer 
@@ -59,7 +60,7 @@ public class HttpServer
 	        this.ports[i]=((ServerConnector)((servers[i].getConnectors())[0])).getPort();
 	    }
 		this.categoryPrefix=configuration.categoryPrefix+"@";
-		this.requestHandlerMap = new RequestHandlerMap(test);
+		this.requestHandlerMap = new RequestHandlerMap(test,configuration.requestLastRequestLogEntryBufferSize);
 		this.traceManager = traceManager;
 		this.servers = servers;
 		this.requestRateMeter = new RateMeter();
@@ -182,7 +183,7 @@ public class HttpServer
 		{
 			return null;
 		}
-		contentType = org.nova.core.Utils.split(contentType, ';')[0];
+		contentType = org.nova.utils.Utils.split(contentType, ';')[0];
 
 		ContentReader<?> reader = handler.getContentReaders().get(contentType);
 		if (reader != null)
@@ -372,6 +373,10 @@ public class HttpServer
 					}
 				}
 			}
+			catch (Throwable e)
+			{
+			    throw new Exception(requestHandlerWithParameters.requestHandler.getKey(),e);
+			}
 			finally
 			{
 				if (decoderContext!=null)
@@ -399,14 +404,9 @@ public class HttpServer
 			
 			if (handler.isLogLastRequestsInMemory())
 			{
-    			if (trace.getThrowable()==null)
-    			{
-    				synchronized (this.lastRequestsLogEntries)
-    				{
-    					this.lastRequestsLogEntries.add(entry);
-    				}
-    			}
-    			else
+			    handler.log(entry);
+                this.lastRequestsLogEntries.add(entry);
+    			if (trace.getThrowable()!=null)
     			{
     				synchronized (this.lastExceptionRequestsLogEntries)
     				{

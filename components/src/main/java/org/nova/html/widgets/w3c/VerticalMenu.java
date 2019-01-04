@@ -1,10 +1,10 @@
 package org.nova.html.widgets.w3c;
 
 import org.nova.html.enums.link_rel;
+import org.nova.html.ext.Head;
 import org.nova.html.tags.a;
 import org.nova.html.tags.div;
 import org.nova.html.tags.link;
-import org.nova.html.widgets.Head;
 
 public class VerticalMenu extends div
 {
@@ -14,7 +14,7 @@ public class VerticalMenu extends div
         {
             id=Integer.toString(this.hashCode());
         }
-        id(id).class_("verticalmenu");
+        id(id).addClass("verticalmenu");
         if (head!=null)
         {
             head.add(VerticalMenu.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));

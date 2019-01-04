@@ -33,7 +33,7 @@ public class input_checkbox extends InputElement<input_checkbox>
         }
         return this;
     }
-    public input_checkbox value(String text) //button, reset, submit, text, password, hidden, checkbox, radio, image
+    public input_checkbox value(Object text) //button, reset, submit, text, password, hidden, checkbox, radio, image
     {
         return attr("value",text);
     }

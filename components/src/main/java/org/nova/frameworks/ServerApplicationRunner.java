@@ -1,9 +1,9 @@
 package org.nova.frameworks;
 
+//11:47
 import org.eclipse.jetty.http.HttpStatus;
 import org.nova.configuration.Configuration;
 import org.nova.configuration.ConfigurationReader;
-import org.nova.core.Utils;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.operator.AjaxQueryResultWriter;
 import org.nova.http.server.Context;
@@ -21,6 +21,7 @@ import org.nova.logging.Level;
 import org.nova.logging.Logger;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
+import org.nova.utils.Utils;
 
 
 public class ServerApplicationRunner //
@@ -66,18 +67,33 @@ public class ServerApplicationRunner //
         logger.log(t);
     }
     
+    public void run(String[] args,String configurationFileKey,ServerApplicationInstantiator instantiator)
+    {
+        Configuration configuration=ConfigurationReader.read(args,configurationFileKey);
+        if (configuration==null)
+        {
+            System.err.println("Cannot locate configuration file.");
+            return;
+        }
+        run(configuration,instantiator);
+    }
     public void run(String[] args,ServerApplicationInstantiator instantiator)
     {
-        Configuration configuration=ConfigurationReader.search(args);
+        run(args,null,instantiator);
+    }
+    
+    public void start(String[] args,String configurationFileKey,ServerApplicationInstantiator instantiator)
+    {
+        Configuration configuration=ConfigurationReader.read(args,configurationFileKey);
         if (configuration==null)
         {
             System.err.println("Cannot locate configuration files.");
             return;
         }
-        run(configuration,instantiator);
+        start(configuration,instantiator);
     }
-    
-    public void run(Configuration configuration,ServerApplicationInstantiator instantiator)
+
+    public ServerApplication start(Configuration configuration,ServerApplicationInstantiator instantiator)
     {
         CoreEnvironment coreEnvironment=null;
         try
@@ -88,7 +104,7 @@ public class ServerApplicationRunner //
         catch (Throwable t)
         {
             t.printStackTrace(System.err);
-            return;
+            return null;
         }
         
         HttpServer operatorServer=null;
@@ -101,8 +117,7 @@ public class ServerApplicationRunner //
         catch (Throwable t)
         {
             showException(coreEnvironment.getLogger(),t);
-            
-            return;
+            return null;
         }
         
         ServerApplication serverApplication=null;
@@ -114,7 +129,7 @@ public class ServerApplicationRunner //
         catch (Throwable t)
         {
             showException(coreEnvironment.getLogger(),t);
-            return;
+            return null;
         }
 
         try
@@ -125,14 +140,20 @@ public class ServerApplicationRunner //
         catch (Throwable t)
         {
             showException(coreEnvironment.getLogger(),t);
-            return;
+            return null;
         }
         showNotice(coreEnvironment.getLogger(),"Started");
-        try (Trace trace=new Trace(coreEnvironment.getTraceManager(),"run"))
-        {
-            serverApplication.run(trace);
-        }
+        return serverApplication;
     }
+    
+    public void run(Configuration configuration,ServerApplicationInstantiator instantiator)
+    {
+        ServerApplication serverApplication=start(configuration,instantiator);
+        try (Trace trace=new Trace(serverApplication.getTraceManager(),"run"))
+        {
+            serverApplication.join(trace);
+        }
+    } 
 
     @GET
     @Path("/operator/exception")
@@ -144,7 +165,6 @@ public class ServerApplicationRunner //
         }
         else
         {
-            
             context.getHttpServletResponse().setHeader("Location","/operator/noStartupExceptions");
             context.getHttpServletResponse().setStatus(HttpStatus.TEMPORARY_REDIRECT_307);
         }

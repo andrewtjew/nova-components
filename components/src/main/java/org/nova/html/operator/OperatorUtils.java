@@ -1,24 +1,20 @@
 package org.nova.html.operator;
 
-import org.nova.core.Utils;
-import org.nova.frameworks.ServerApplicationPages.WideTable;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
+import org.nova.html.ext.Head;
 import org.nova.html.tags.p;
 import org.nova.html.tags.textarea;
-import org.nova.html.tags.th;
-import org.nova.html.widgets.Head;
+import org.nova.html.tags.ext.th_title;
 import org.nova.html.widgets.NameValueList;
-import org.nova.html.widgets.Panel;
-import org.nova.html.widgets.Panel2;
 import org.nova.html.widgets.Panel3;
 import org.nova.html.widgets.Panel4;
 import org.nova.html.widgets.Table;
 import org.nova.html.widgets.TableHeader;
 import org.nova.html.widgets.TableRow;
 import org.nova.html.widgets.w3c.Accordion;
-import org.nova.html.xtags.th_title;
 import org.nova.tracing.Trace;
+import org.nova.utils.Utils;
 
 public class OperatorUtils
 {

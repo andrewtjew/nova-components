@@ -1,10 +1,10 @@
 package org.nova.services;
 
 
-import org.nova.core.Utils;
 import org.nova.frameworks.CoreEnvironment;
 import org.nova.frameworks.ServerApplication;
 import org.nova.http.server.HttpServer;
+import org.nova.utils.Utils;
 
 public abstract class SessionServerApplication<SESSION extends Session> extends ServerApplication
 {
@@ -55,17 +55,17 @@ public abstract class SessionServerApplication<SESSION extends Session> extends 
 
     public String generateSessionToken()
     {
-        String token=this.tokenGenerator.generate();
+        String token=this.tokenGenerator.next();
         while (this.sessionManager.getSessionByToken(token)!=null)
         {
-            token=this.tokenGenerator.generate();
+            token=this.tokenGenerator.next();
         }
         return token;
     }
 
     public String generateToken()
     {
-        return this.tokenGenerator.generate();
+        return this.tokenGenerator.next();
     }
     
 }

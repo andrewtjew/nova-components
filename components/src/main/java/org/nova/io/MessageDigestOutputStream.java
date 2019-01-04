@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 
-import org.nova.core.Utils;
+import org.nova.utils.TypeUtils;
 
 public class MessageDigestOutputStream extends OutputStream
 {
@@ -21,7 +21,7 @@ public class MessageDigestOutputStream extends OutputStream
 	public void write(int b) throws IOException
 	{
 		this.outputStream.write(b);
-		this.message.update(Utils.bigEndianIntToBytes(b));
+		this.message.update(TypeUtils.bigEndianIntToBytes(b));
 	}
 
 	@Override

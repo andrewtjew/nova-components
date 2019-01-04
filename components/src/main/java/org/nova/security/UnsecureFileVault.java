@@ -2,7 +2,7 @@ package org.nova.security;
 
 import java.util.HashMap;
 
-import org.nova.core.Utils;
+import org.nova.utils.FileUtils;
 
 public class UnsecureFileVault extends Vault
 {
@@ -11,7 +11,7 @@ public class UnsecureFileVault extends Vault
 	public UnsecureFileVault(String inputFileName) throws Exception
 	{
 	    this.map=new HashMap<>();
-		String text=Utils.readTextFile(inputFileName);
+		String text=FileUtils.readTextFile(inputFileName);
 		String[] lines=text.split("\n");
 		for (String line:lines)
 		{

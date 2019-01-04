@@ -9,8 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.nova.annotations.Description;
-import org.nova.core.Utils;
 import org.nova.frameworks.InteropTarget;
+import org.nova.utils.TypeUtils;
+import org.nova.utils.Utils;
 
 public class CSharpClassWriter
 {
@@ -193,6 +194,19 @@ public class CSharpClassWriter
     
     private void write(StringBuilder sb, Class<?> type, int indentLevel, int columns, InteropTarget target)
     {
+        if (type.isArray())
+        {
+            return;
+        }
+        if (type.isPrimitive())
+        {
+            return;
+        }
+        if (TypeUtils.isDerivedFrom(type, Number.class))
+        {
+            return;
+        }
+            
         Description description = type.getAnnotation(Description.class);
         if (description != null)
         {
@@ -305,115 +319,139 @@ public class CSharpClassWriter
 
     private void discoverDependents(HashMap<String, Class<?>> roots, HashMap<String, Class<?>> dependents, Class<?> type)
     {
-        if (roots.containsKey(type.getCanonicalName()) == false)
+        this.level++;
+        if (this.level==50)
         {
-            if (dependents.containsKey(type.getCanonicalName()))
+            for (String key:roots.keySet())
             {
-                return;
+                System.out.println("Root2="+key);
             }
-            dependents.put(type.getCanonicalName(), type);
+            throw new RuntimeException();
         }
-        for (Field field : type.getDeclaredFields())
+        if (this.level>47)
         {
-            int modifiers = field.getModifiers();
-            if (Modifier.isTransient(modifiers))
-            {
-                continue;
-            }
-            if (Modifier.isStatic(modifiers))
-            {
-                continue;
-            }
-            Class<?> fieldType = field.getType();
-            if (fieldType.isArray())
-            {
-                fieldType = fieldType.getComponentType();
-            }
-            if (fieldType == boolean.class)
-            {
-                continue;
-            }
-            else if (fieldType == Boolean.class)
-            {
-                continue;
-            }
-            else if (fieldType == Integer.class)
-            {
-                continue;
-            }
-            else if (fieldType == int.class)
-            {
-                continue;
-            }
-            else if (fieldType == Short.class)
-            {
-                continue;
-            }
-            else if (fieldType == short.class)
-            {
-                continue;
-            }
-            else if (fieldType == Long.class)
-            {
-                continue;
-            }
-            else if (fieldType == long.class)
-            {
-                continue;
-            }
-            else if (fieldType == Float.class)
-            {
-                continue;
-            }
-            else if (fieldType == float.class)
-            {
-                continue;
-            }
-            else if (fieldType == Double.class)
-            {
-                continue;
-            }
-            else if (fieldType == double.class)
-            {
-                continue;
-            }
-            else if (fieldType == byte.class)
-            {
-                continue;
-            }
-            else if (fieldType == Byte.class)
-            {
-                continue;
-            }
-            else if (fieldType == char.class)
-            {
-                continue;
-            }
-            else if (fieldType == Character.class)
-            {
-                continue;
-            }
-            else if (fieldType == String.class)
-            {
-                continue;
-            }
-            else if (fieldType == BigDecimal.class)
-            {
-                continue;
-            }
-            if (type.isArray())
-            {
-                fieldType = fieldType.getComponentType();
-            }
-            discoverDependents(roots, dependents, fieldType);
+//            System.out.println(type.getName());
+            System.out.println(type.getCanonicalName());
         }
-        Class<?> superClass=type.getSuperclass();
-        if ((superClass!=null)&&(superClass!=Object.class))
+        try
         {
-            discoverDependents(roots, dependents, superClass);
+            if (roots.containsKey(type.getCanonicalName()) == false)
+            {
+                if (dependents.containsKey(type.getCanonicalName()))
+                {
+                    return;
+                }
+                dependents.put(type.getCanonicalName(), type);
+            }
+            for (Field field : type.getDeclaredFields())
+            {
+                int modifiers = field.getModifiers();
+                if (Modifier.isTransient(modifiers))
+                {
+                    continue;
+                }
+                if (Modifier.isStatic(modifiers))
+                {
+                    continue;
+                }
+                Class<?> fieldType = field.getType();
+                while (fieldType.isArray())
+                {
+                    fieldType = fieldType.getComponentType();
+                    
+                }
+                if (fieldType == boolean.class)
+                {
+                    continue;
+                }
+                else if (fieldType == Boolean.class)
+                {
+                    continue;
+                }
+                else if (fieldType == Integer.class)
+                {
+                    continue;
+                }
+                else if (fieldType == int.class)
+                {
+                    continue;
+                }
+                else if (fieldType == Short.class)
+                {
+                    continue;
+                }
+                else if (fieldType == short.class)
+                {
+                    continue;
+                }
+                else if (fieldType == Long.class)
+                {
+                    continue;
+                }
+                else if (fieldType == long.class)
+                {
+                    continue;
+                }
+                else if (fieldType == Float.class)
+                {
+                    continue;
+                }
+                else if (fieldType == float.class)
+                {
+                    continue;
+                }
+                else if (fieldType == Double.class)
+                {
+                    continue;
+                }
+                else if (fieldType == double.class)
+                {
+                    continue;
+                }
+                else if (fieldType == byte.class)
+                {
+                    continue;
+                }
+                else if (fieldType == Byte.class)
+                {
+                    continue;
+                }
+                else if (fieldType == char.class)
+                {
+                    continue;
+                }
+                else if (fieldType == Character.class)
+                {
+                    continue;
+                }
+                else if (fieldType == String.class)
+                {
+                    continue;
+                }
+                else if (fieldType == BigDecimal.class)
+                {
+                    continue;
+                }
+                if (type.isArray())
+                {
+                    fieldType = fieldType.getComponentType();
+                }
+                discoverDependents(roots, dependents, fieldType);
+            }
+            Class<?> superClass=type.getSuperclass();
+            if ((superClass!=null)&&(superClass!=Object.class))
+            {
+                discoverDependents(roots, dependents, superClass);
+            }
+        }
+        finally
+        {
+            this.level--;
         }
     }
 
+    int level=0;
+    
     private StringBuilder writeIndent(StringBuilder sb, int indentLevel)
     {
         for (int i = 0; i < indentLevel; i++)

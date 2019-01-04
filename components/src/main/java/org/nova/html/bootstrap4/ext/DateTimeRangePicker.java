@@ -1,0 +1,136 @@
+package org.nova.html.bootstrap4.ext;
+
+import org.nova.html.bootstrap4.StyleComponent;
+import org.nova.html.elements.Composer;
+import org.nova.html.enums.link_rel;
+import org.nova.html.ext.Head;
+import org.nova.html.tags.link;
+import org.nova.html.tags.script;
+import org.nova.html.widgets.ObjectBuilder;
+
+//From http://www.daterangepicker.com/
+public class DateTimeRangePicker extends StyleComponent<DateTimeRangePicker>
+{
+    private final String name;
+    final private DateTimeRangePickerOptions options; 
+    final private DateTimeRangePickerEvents events;
+    
+    public DateTimeRangePicker(Head head,String name,String value,int size,DateTimeRangePickerOptions options,DateTimeRangePickerEvents events,String cssFilePath)
+    {
+        super("input",null);
+        attr("type","text");
+        attr("value",value);
+        attr("size",size);
+        attr("name",name);
+        this.name=name; 
+        this.options=options;
+        this.events=events;
+
+        link link=new link().rel(link_rel.stylesheet).type("text/css").href(cssFilePath);
+        script script=new script().src("/resources/html/xbootstrap4/datetimepicker/js/daterangepicker.js");
+        script momentScript=new script().src("/resources/html/xbootstrap4/datetimepicker/js/moment.min.js");
+        if (head!=null)
+        {
+            head.add(this.getClass().getCanonicalName(),link);
+            head.add(this.getClass().getCanonicalName()+"_moment",momentScript);
+            head.add(this.getClass().getCanonicalName(),script);
+        }
+        else
+        {
+            addInner(script);
+            addInner(link); 
+        }
+    }
+    
+
+    public DateTimeRangePicker(Head head,String name,String value,int size,DateTimeRangePickerOptions options,DateTimeRangePickerEvents events)
+    {
+        this(head,name,value,size,options,events,"/resources/html/xbootstrap4/datetimepicker/css/daterangepicker.css");
+    }
+    
+    public DateTimeRangePicker(Head head,String name,String value,int size,DateTimeRangePickerOptions options)
+    {
+        this(head,name,value,size,options,null);
+    }
+
+    public DateTimeRangePickerOptions getOptions()
+    {
+        return this.options;
+    }
+    public DateTimeRangePickerEvents getEvents()
+    {
+        return this.events;
+    }
+    private String buildEvent(String event,String function)
+    {
+        return "'"+event+".daterangepicker',"+function;
+    }
+    
+    @Override
+    public void compose(Composer composer) throws Throwable
+    {
+        super.compose(composer);
+        StringBuilder sb=new StringBuilder();
+      
+        String head="$('#"+id()+"')";
+        if (this.options!=null)
+        {
+            ObjectBuilder ob=new ObjectBuilder();
+            ob.addIfNotNull("showDropdowns",this.options.showDropdowns);
+            ob.addIfNotNull("showWeekNumbers",this.options.showWeekNumbers);
+            ob.addIfNotNull("showISOWeekNumbers",this.options.showISOWeekNumbers);
+            ob.addIfNotNull("singleDatePicker",this.options.singleDatePicker);
+            ob.addIfNotNull("timePicker",this.options.timePicker);
+            ob.addIfNotNull("timePicker24Hour",this.options.timePicker24Hour);
+            ob.addIfNotNull("timePickerSeconds",this.options.timePickerSeconds);
+            ob.addIfNotNull("timePickerIncrement",this.options.timePickerIncrement);
+            ob.addIfNotNull("autoApply",this.options.autoApply);
+            ob.addIfNotNull("linkedCalendars",this.options.linkedCalendars);
+            ob.addIfNotNull("autoUpdateInput",this.options.autoUpdateInput);
+            ob.addIfNotNull("alwaysShowCalendars",this.options.alwaysShowCalendars);
+            ob.addIfNotNull("showCustomRangeLabel",this.options.showCustomRangeLabel);
+            ob.addIfNotNull("buttonClasses",this.options.buttonClasses);
+            ob.addIfNotNull("applyClass",this.options.applyClass);
+            ob.addIfNotNull("cancelClass",this.options.cancelClass);
+            ob.addIfNotNull("startDate",this.options.startDate);
+            ob.addIfNotNull("endDate",this.options.endDate);
+            ob.addIfNotNull("minDate",this.options.minDate);
+            ob.addIfNotNull("maxDate",this.options.maxDate);
+            ob.addIfNotNull("opens",this.options.opens);
+            ob.addIfNotNull("drops",this.options.drops);
+            if (this.options.ranges!=null)
+            {
+                ob.begin("ranges");
+                for (DateTimeRange range:this.options.ranges)
+                {
+                    ob.addRawString(range.label, "[\""+range.from+"\",\""+range.to+"\"]");
+                }
+                ob.end();
+            }          
+            ob.addIfNotNull("locale", this.options.locale);
+            
+            
+//            String name="$('input[name=\""+this.name+"\"]')";
+//            sb.append("$(function() {");
+//            sb.append(name+".daterangepicker("+ob+");");
+//            sb.append("});");
+            sb.append(head).append(".daterangepicker(").append(ob).append(");");
+        }
+        if (this.events!=null)
+        {
+            sb.append(head).append(".on(").append(buildEvent("apply.daterangepicker",this.events.apply)).append(");");
+            sb.append(head).append(".on(").append(buildEvent("cancel.daterangepicker",this.events.cancel)).append(");");
+            sb.append(head).append(".on(").append(buildEvent("hide.daterangepicker",this.events.hide)).append(");");
+            sb.append(head).append(".on(").append(buildEvent("show.daterangepicker",this.events.show)).append(");");
+            sb.append(head).append(".on(").append(buildEvent("hideCalendar.daterangepicker",this.events.hideCalendar)).append(");");
+            sb.append(head).append(".on(").append(buildEvent("showCalendar.daterangepicker",this.events.showCalendar)).append(");");
+        }
+            
+        if (sb.length()>0)
+        {
+            script script=new script().addInner(sb.toString());
+            composer.getStringBuilder().append(script.toString());
+        }
+    }
+
+}

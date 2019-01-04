@@ -11,33 +11,24 @@ import java.util.TimeZone;
 import org.nova.frameworks.OperatorPage;
 import org.nova.frameworks.ServerApplication;
 import org.nova.frameworks.ServerApplicationPages.WideTable;
-import org.nova.html.Attribute;
-import org.nova.html.HtmlWriter;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.operator.AjaxButton;
-import org.nova.html.operator.AjaxQueryResult;
-import org.nova.html.operator.AjaxQueryResultWriter;
 import org.nova.html.operator.SelectOptions;
 import org.nova.html.operator.TitleText;
 import org.nova.html.tags.div;
 import org.nova.html.tags.input_checkbox;
 import org.nova.html.tags.input_text;
 import org.nova.html.tags.p;
+import org.nova.html.tags.ext.th_title;
 import org.nova.html.widgets.MenuBar;
 import org.nova.html.widgets.Panel3;
 import org.nova.html.widgets.TableHeader;
 import org.nova.html.widgets.TableRow;
-import org.nova.html.xtags.th_title;
 import org.nova.http.server.annotations.ContentWriters;
-import org.nova.http.server.annotations.DefaultValue;
 import org.nova.http.server.annotations.GET;
 import org.nova.http.server.annotations.Path;
-import org.nova.http.server.annotations.PathParam;
-import org.nova.http.server.annotations.QueryParam;
 import org.nova.operations.OperatorVariable;
-import org.nova.operations.Status;
-import org.nova.operations.ValidationResult;
 import org.nova.operations.VariableInstance;
 
 @ContentWriters(HtmlElementWriter.class)
@@ -77,7 +68,7 @@ public class OperatorPages
 			page.content().addInner(new p());
 			WideTable table=panel.content().returnAddInner(new WideTable(page.head()));
 			
-            table.setHeaderInline("Name","Type","Validator","Default","Value","Modified","Description");
+            table.setHeader("Name","Type","Validator","Default","Value","Modified","Description");
 
 			for (VariableInstance instance:instances)
 			{
@@ -226,46 +217,47 @@ public class OperatorPages
 	    }
 	    return "\""+s+"\"";
 	}
+
 	
-	
-	@GET
-	@Path("/operator/variable/{category}/{name}")
-	@ContentWriters(AjaxQueryResultWriter.class)
-	public AjaxQueryResult update(@PathParam("category") String category,@PathParam("name") String name,@QueryParam("value") String value,@QueryParam("nullString") @DefaultValue("") String nullString) throws Throwable
-	{
-		VariableInstance instance=this.serverApplication.getOperatorVariableManager().getInstance(category, name);
-		OperatorVariable variable=instance.getOperatorVariable();
-		AjaxQueryResult result=new AjaxQueryResult();
-        String resultKey=(category+name+"Result").replace('.', '_');
-        String resultValue=(category+name+"Value").replace('.', '_');
-		if ("true".equals(nullString))
-		{
-		    value=null;
-		}
-		try
-		{
-		    
-			Object old=instance.getValue();
-			ValidationResult validationResult=instance.set(value);
-			if (validationResult.getStatus()==Status.SUCCESS)
-			{
-    			if (instance.getField().getType()==String.class)
-    			{
-                    old=formatStringOutput((String)old);
-                    value=formatStringOutput((String)value);
-    			}
-                result.put(resultKey, formatDateTime(instance.getModified())+": "+old+"\u21D2"+value);
-                result.put(resultValue, value);
-			}
-			else
-			{
-	            result.put(resultKey, new HtmlWriter().tag("font",validationResult.getMessage(),new Attribute("color","red")).toString());
-			}
-		}
-		catch (Throwable t)
-		{
-			result.put(resultKey, new HtmlWriter().tag("font",t.getMessage(),new Attribute("color","red")).toString());
-		}
-		return result;
-	}
+	//!!Refactor out HtmlWriter
+//	@GET
+//	@Path("/operator/variable/{category}/{name}")
+//	@ContentWriters(AjaxQueryResultWriter.class)
+//	public AjaxQueryResult update(@PathParam("category") String category,@PathParam("name") String name,@QueryParam("value") String value,@QueryParam("nullString") @DefaultValue("") String nullString) throws Throwable
+//	{
+//		VariableInstance instance=this.serverApplication.getOperatorVariableManager().getInstance(category, name);
+//		OperatorVariable variable=instance.getOperatorVariable();
+//		AjaxQueryResult result=new AjaxQueryResult();
+//        String resultKey=(category+name+"Result").replace('.', '_');
+//        String resultValue=(category+name+"Value").replace('.', '_');
+//		if ("true".equals(nullString))
+//		{
+//		    value=null;
+//		}
+//		try
+//		{
+//		    
+//			Object old=instance.getValue();
+//			ValidationResult validationResult=instance.set(value);
+//			if (validationResult.getStatus()==Status.SUCCESS)
+//			{
+//    			if (instance.getField().getType()==String.class)
+//    			{
+//                    old=formatStringOutput((String)old);
+//                    value=formatStringOutput((String)value);
+//    			}
+//                result.put(resultKey, formatDateTime(instance.getModified())+": "+old+"\u21D2"+value);
+//                result.put(resultValue, value);
+//			}
+//			else
+//			{
+//	            result.put(resultKey, new HtmlWriter().tag("font",validationResult.getMessage(),new Attribute("color","red")).toString());
+//			}
+//		}
+//		catch (Throwable t)
+//		{
+//			result.put(resultKey, new HtmlWriter().tag("font",t.getMessage(),new Attribute("color","red")).toString());
+//		}
+//		return result;
+//	}
 }

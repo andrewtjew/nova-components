@@ -20,13 +20,14 @@ abstract public class ContentCache<KEY,VALUE>
 		Node<KEY,VALUE> previous;
 		Node<KEY,VALUE> next;
 		
-		long accessed;
+        long accessed;
+        long created;
 		public Node(KEY key,VALUE value,long size)
 		{
 			this.size=size;
 			this.value=value;
 			this.key=key;
-			this.accessed=System.currentTimeMillis();
+			this.created=this.accessed=System.currentTimeMillis();
 		}
 	}
 	
@@ -41,11 +42,11 @@ abstract public class ContentCache<KEY,VALUE>
 		}
 	}
 
-	public ContentCache(int capacity,long maxAgeMs,long maxSize) throws Exception
+	public ContentCache(int capacity,long maxAgeMs,long maxSize)
 	{
 		if (capacity<1)
 		{
-			throw new Exception("capacity="+capacity);
+			throw new RuntimeException("capacity="+capacity);
 		}
 		this.hits=new CountMeter();
 		this.misses=new CountMeter();
@@ -89,7 +90,7 @@ abstract public class ContentCache<KEY,VALUE>
 			if (node!=null)
 			{
 				long now=System.currentTimeMillis();
-				if (now-node.accessed<this.maxAgeMs)
+				if ((this.maxAgeMs>0)&&(now-node.created<this.maxAgeMs))
 				{
     				if (node.previous!=null)
     				{
@@ -117,10 +118,10 @@ abstract public class ContentCache<KEY,VALUE>
 //		System.out.println(Utils.toString(stack,2));
 //		System.out.println("Content miss:"+key);
 		this.misses.increment();
-		return preload(parent,key);
+		return fill(parent,key);
 	}
 
-	public VALUE preload(Trace parent,KEY key) throws Throwable
+	public VALUE fill(Trace parent,KEY key) throws Throwable
 	{
 		synchronized(this)
 		{
@@ -128,22 +129,25 @@ abstract public class ContentCache<KEY,VALUE>
 			Node<KEY,VALUE> node=new Node<KEY,VALUE>(key,valueSize.value,valueSize.size);
 			synchronized(this.nodeMap)
 			{
-				while (this.totalContentSize+node.size>this.maxSize)
-				{
-					this.nodeMap.remove(this.last.key);
-					this.totalContentSize-=this.last.size;
-					this.sizeEvicts.increment();
-					this.last=last.previous;
-					if (this.last!=null)
-					{
-						this.last.next=null;
-					}
-					else
-					{
-						this.first=null;
-						break;
-					}
-				}
+			    if (this.maxSize>0)
+			    {
+    				while (this.totalContentSize+node.size>this.maxSize)
+    				{
+    					this.nodeMap.remove(this.last.key);
+    					this.totalContentSize-=this.last.size;
+    					this.sizeEvicts.increment();
+    					this.last=last.previous;
+    					if (this.last!=null)
+    					{
+    						this.last.next=null;
+    					}
+    					else
+    					{
+    						this.first=null;
+    						break;
+    					}
+    				}
+			    }
 				if (this.nodeMap.size()==this.capacity)
 				{
 					this.nodeMap.remove(this.last.key);
@@ -251,8 +255,5 @@ abstract public class ContentCache<KEY,VALUE>
 		return this.sizeEvicts;
 	}
 	
-	
 	abstract protected ValueSize<VALUE> load(Trace trace,KEY key) throws Throwable; 
-
-
 }

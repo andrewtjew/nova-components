@@ -2,14 +2,11 @@ package org.nova.html.google;
 
 import java.util.ArrayList;
 
-import org.nova.html.attributes.Color;
 import org.nova.html.attributes.Size;
 import org.nova.html.attributes.Style;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.div;
-import org.nova.html.tags.script;
-import org.nova.html.widgets.HtmlUtils;
 
 public class GoogleMap extends Element
 {
@@ -22,7 +19,7 @@ public class GoogleMap extends Element
     public GoogleMap(Size width,Size height,double lattitude,double longtitude,double zoom)
     {
         this.div=new div();
-        HtmlUtils.autoId(this.div);
+        this.div.id();
         div.style(new Style().width(width).height(height));
         this.lattitude=lattitude;
         this.longtitude=longtitude;
@@ -38,7 +35,7 @@ public class GoogleMap extends Element
     @Override
     public void compose(Composer composer) throws Throwable
     {
-        composer.render(this.div);
+        composer.compose(this.div);
     }
     
 

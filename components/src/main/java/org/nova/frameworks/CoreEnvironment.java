@@ -1,20 +1,16 @@
 package org.nova.frameworks;
 
-import java.io.File;
-import java.io.PrintStream;
 import java.util.HashMap;
 
 import org.nova.concurrent.MultiTaskScheduler;
 import org.nova.concurrent.TimerScheduler;
 import org.nova.configuration.Configuration;
-import org.nova.core.Utils;
 import org.nova.flow.SourceQueue;
 import org.nova.flow.SourceQueueConfiguration;
 import org.nova.logging.ConsoleWriter;
 import org.nova.logging.HighPerformanceLogger;
 import org.nova.logging.HighPerformanceConfiguration;
 import org.nova.logging.JSONFormatter;
-import org.nova.logging.Level;
 import org.nova.logging.LogDirectoryManager;
 import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
@@ -23,8 +19,6 @@ import org.nova.logging.SourceQueueLogger;
 import org.nova.metrics.MeterStore;
 import org.nova.metrics.SourceEventEventBoard;
 import org.nova.security.SecureFileVault;
-import org.nova.security.UnsecureFileVault;
-import org.nova.security.UnsecureVault;
 import org.nova.security.Vault;
 import org.nova.tracing.TraceManager;
 
@@ -81,85 +75,9 @@ public class CoreEnvironment
 		this.timerScheduler=new TimerScheduler(traceManager, this.getLogger());
 		this.timerScheduler.start();
 
-    		//Setting up the vault
-   		try
-   		{
-            String secureVaultFile=configuration.getValue("Environment.Vault.secureVaultFile",null);
-            if (secureVaultFile!=null)
-            {
-                String password=null;
-                String passwordFile=configuration.getValue("Environment.vault.key",null);
-                if (passwordFile!=null)
-                {
-                    password=Utils.readTextFile(passwordFile).trim();
-                }
-                else 
-                {
-                    if (System.console()==null)
-                    {
-                        System.err.println("No console available to enter vault password");
-                        System.exit(1);
-                    }
-                    password=new String(System.console().readPassword("Enter vault password:"));
-                }
-                String salt=configuration.getValue("Environment.Vault.salt");
-                this.vault=new SecureFileVault(password, salt, secureVaultFile);
-                if (passwordFile!=null)
-                {
-                    if ("false".equalsIgnoreCase(this.vault.get("DeletePasswordFile")))
-                    {
-                    }
-                    else
-                    {
-                        try
-                        {
-                            if (new File(passwordFile).delete()==false)
-                            {
-                                System.err.println("Unable to delete password file.");
-                                System.exit(1);
-                            }
-                        }
-                        catch (Throwable t)
-                        {
-                            System.err.println("Unable to delete password file.");
-                            t.printStackTrace(System.err);
-                            System.exit(1);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                String unsecureVaultFile=configuration.getValue("Environment.Vault.unsecureVaultFile");
-                if (unsecureVaultFile!=null)
-                {
-                    this.vault=new UnsecureFileVault(unsecureVaultFile);
-                    this.getLogger().log(Level.CRITICAL,"Using UnsecureVault");
-                }
-                else
-                {
-                    this.vault=new UnsecureVault();
-                }
-                printUnsecureVaultWarning(System.err);
-            }
-		}
-        finally
-        {
-            //Do not keep these vault information in configuration.
-            configuration.remove("System.vault.secureVaultFile");
-            configuration.remove("System.vault.salt");
-        }
-
-        
+        this.vault=SecureFileVault.getVault(configuration);
 	}
 	
-    private void printUnsecureVaultWarning(PrintStream stream)
-    {
-        stream.println("**************************************");
-        stream.println("**   WARNING: Using UnsecureVault   **");
-        stream.println("**************************************");
-    }
-    
 	public MeterStore getMeterManager()
 	{
 		return meterStore;

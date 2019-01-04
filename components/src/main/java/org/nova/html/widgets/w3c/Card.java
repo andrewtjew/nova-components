@@ -1,9 +1,9 @@
 package org.nova.html.widgets.w3c;
 
 import org.nova.html.enums.link_rel;
+import org.nova.html.ext.Head;
 import org.nova.html.tags.div;
 import org.nova.html.tags.link;
-import org.nova.html.widgets.Head;
 import org.nova.html.tags.img;
 
 public class Card extends div
@@ -13,10 +13,10 @@ public class Card extends div
     
     public Card(Head head,String id,String sourcePath,String cssFile)
     {
-        id(id).class_("card");
+        id(id).addClass("card");
         head.add(Card.class.getCanonicalName(), new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
         this.img=this.returnAddInner(new img()).style("width:100%");
-        this.content=this.returnAddInner(new div()).class_("container");
+        this.content=this.returnAddInner(new div()).addClass("container");
     }
     public Card(Head head,String id)
     {

@@ -1,20 +1,19 @@
 package org.nova.services;
 
 import org.nova.core.NameObject;
-import org.nova.core.Utils;
 import org.nova.frameworks.OperatorPage;
 import org.nova.frameworks.ServerApplication;
 import org.nova.frameworks.ServerApplicationPages;
 import org.nova.frameworks.ServerApplicationPages.OperatorTable;
 import org.nova.html.elements.Element;
 import org.nova.html.operator.AjaxQueryResultWriter;
+import org.nova.html.operator.MoreButton;
 import org.nova.html.tags.hr;
 import org.nova.html.elements.HtmlElementWriter;
-import org.nova.html.widgets.HtmlUtils;
-import org.nova.html.widgets.MoreButton;
+import org.nova.html.ext.Redirect;
 import org.nova.html.widgets.NameValueList;
 import org.nova.html.widgets.TableRow;
-import org.nova.http.client.PathAndQueryBuilder;
+import org.nova.http.client.PathAndQuery;
 import org.nova.http.server.Context;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
@@ -30,6 +29,7 @@ import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.QueryParam;
 import org.nova.metrics.RateSample;
 import org.nova.tracing.Trace;
+import org.nova.utils.Utils;
 
 @ContentDecoders(GzipContentDecoder.class)
 @ContentEncoders(GzipContentEncoder.class)
@@ -58,7 +58,7 @@ public class SessionOperatorPages<SESSION extends Session>
         OperatorPage page=this.serverApplication.buildOperatorPage("All Sessions");
         page.content().addInner(new hr());
         OperatorTable table=page.content().returnAddInner(new ServerApplicationPages.OperatorTable(page.head()));
-        table.setHeaderInline("Token","User","Created","Last Accessed","Active","Idle","Accessed","Rate","");
+        table.setHeader("Token","User","Created","Last Accessed","Active","Idle","Accessed","Rate","");
         
         for (Session session:this.sessionManager.getSessionSnapshot())
         {
@@ -74,7 +74,7 @@ public class SessionOperatorPages<SESSION extends Session>
                     ,new PathAndQueryBuilder("/operator/session").addQuery("token",session.getToken()).toString()
                     );
             */
-            row.add(new MoreButton(page.head(),new PathAndQueryBuilder("/operator/session").addQuery("token",session.getToken()).toString()));
+            row.add(new MoreButton(page.head(),new PathAndQuery("/operator/session").addQuery("token",session.getToken()).toString()));
            table.addRow(row);
         }
         return page;
@@ -85,7 +85,7 @@ public class SessionOperatorPages<SESSION extends Session>
     public Element delete(Trace parent,Context context,@QueryParam("token") String token) throws Exception, Throwable
     {
         this.sessionManager.removeSessionByToken(parent, token);
-        return HtmlUtils.redirect("/operator/sessions");
+        return new Redirect("/operator/sessions");
     }   
 
     @GET

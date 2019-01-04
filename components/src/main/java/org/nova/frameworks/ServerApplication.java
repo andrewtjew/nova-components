@@ -6,12 +6,10 @@ import org.nova.collections.FileCache;
 import org.nova.collections.FileCacheConfiguration;
 import org.nova.concurrent.Synchronization;
 import org.nova.configuration.Configuration;
-import org.nova.core.Utils;
 import org.nova.html.TypeMappings;
 import org.nova.html.elements.HtmlElementWriter;
-import org.nova.html.operator.AjaxQueryResultWriter;
-import org.nova.html.templates.Template;
-import org.nova.html.templates.TemplateManager;
+import org.nova.html.remoting.HtmlResultWriter;
+import org.nova.html.templating.Template;
 import org.nova.html.widgets.MenuBar;
 import org.nova.http.server.JettyServerFactory;
 import org.nova.http.server.GzipContentDecoder;
@@ -26,6 +24,8 @@ import org.nova.operations.OperatorVariable;
 import org.nova.operations.OperatorVariableManager;
 import org.nova.security.Vault;
 import org.nova.tracing.Trace;
+import org.nova.utils.Utils;
+
 import com.nova.disrupt.DisruptorManager;
 
 public abstract class ServerApplication extends CoreEnvironmentApplication
@@ -37,7 +37,6 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
 	final private FileCache fileCache;
 	final private String baseDirectory;
 	final private TypeMappings typeMappings;
-	final private TemplateManager operationTemplateManager;
 	final private DisruptorManager disruptorManager;
 	private long startTime;
 	final private MenuBar menuBar;
@@ -70,90 +69,124 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
         this.operatorVariableManager=new OperatorVariableManager();
 		this.typeMappings=TypeMappings.DefaultTypeMappings();
 		
-        String operationTemplateDirectory=configuration.getValue("HttpServer.operator.templateDirectory","../resources/html/operator/");
-        this.operationTemplateManager=new TemplateManager(this.getTraceManager(), operationTemplateDirectory);
-
         int operatorPort=this.operatorServer.getPorts()[0];
-
-        //Private http server
-        int privatePort=configuration.getIntegerValue("HttpServer.private.port",operatorPort+1);
-        if (privatePort>0)
-        {
-            int threads=configuration.getIntegerValue("httpServer.private.threads",1000);
-            this.privateServer=new HttpServer(this.getTraceManager(), getLogger("HttpServer.Operator"),this.isTest(),JettyServerFactory.createServer(threads, privatePort));
-            this.privateServer.addContentDecoders(new GzipContentDecoder());
-            this.privateServer.addContentEncoders(new GzipContentEncoder());
-            this.privateServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
-            this.privateServer.addContentWriters(new HtmlContentWriter(),new HtmlElementWriter(),new JSONContentWriter(),new AjaxQueryResultWriter());
-        }
-        else
-        {
-            this.privateServer=null;
-        }
-        
-        //Public http server
-        boolean https=configuration.getBooleanValue("HttpServer.public.https",true);
-        boolean http=configuration.getBooleanValue("HttpServer.public.http",false);
-        int ports=0;
-        if (https)
-        {
-            ports++;
-        }
-        if (http)
-        {
-            ports++;
-        }
-        if (ports>0)
-        {
-            int threads=configuration.getIntegerValue("HttpServer.public.threads",100);
-            HttpServerConfiguration publicServerConfiguration=getConfiguration().getNamespaceObject("HttpServer.public", HttpServerConfiguration.class);
-            
-            int publicHttpsPort=configuration.getIntegerValue("HttpServer.public.https.port",-1);
-            int publicHttpPort=configuration.getIntegerValue("HttpServer.public.http.port",-1);
-
-            Server[] servers=new Server[ports];
-            int portIndex=0;
+ 
+        { //Private
+            boolean https=configuration.getBooleanValue("HttpServer.private.https",false);
+            boolean http=configuration.getBooleanValue("HttpServer.private.http",true);
+            int ports=0;
             if (https)
             {
-                if (publicHttpsPort<0)
-                {
-                    publicHttpsPort=operatorPort+2;
-                }
-                Vault vault=coreEnvironment.getVault();
-                String serverCertificatePassword=vault.get("KeyStore.serverCertificate.password");
-                String clientCertificatePassword=vault.get("KeyStore.clientCertificate.password");
-                String keyManagerPassword=vault.get("KeyManager.password");
-
-                String serverCertificateKeyStorePath=configuration.getValue("HttpServer.serverCertificate.keyStorePath",null);
-                String clientCertificateKeyStorePath=configuration.getValue("HttpServer.clientCertificate.keyStorePath",null);
-                servers[portIndex]=JettyServerFactory.createHttpsServer(threads, publicHttpsPort, serverCertificateKeyStorePath, serverCertificatePassword,clientCertificateKeyStorePath,clientCertificatePassword,keyManagerPassword);
-                portIndex++;
+                ports++;
             }
             if (http)
             {
-                if (publicHttpPort<0)
-                {
-                    if (https)
-                    {
-                        publicHttpPort=publicHttpsPort+1;
-                    }
-                    else
-                    {
-                        publicHttpPort=operatorPort+2;
-                    }
-                }
-                servers[portIndex]=JettyServerFactory.createServer(threads, publicHttpPort);
+                ports++;
             }
-            this.publicServer=new HttpServer(this.getTraceManager(), this.getLogger("HttpServer"),isTest(),publicServerConfiguration, servers);
-            
-            this.publicServer.addContentDecoders(new GzipContentDecoder());
-            this.publicServer.addContentEncoders(new GzipContentEncoder());
-            this.publicServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
-            this.publicServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter());
+            if (ports>0)
+            {
+                int threads=configuration.getIntegerValue("HttpServer.private.threads",10);
+                HttpServerConfiguration publicServerConfiguration=getConfiguration().getNamespaceObject("HttpServer.private", HttpServerConfiguration.class);
+                
+                int httpsPort=configuration.getIntegerValue("HttpServer.private.https.port",-1);
+                int httpPort=configuration.getIntegerValue("HttpServer.private.http.port",-1);
+    
+                Server[] servers=new Server[ports];
+                int portIndex=0;
+                if (https)
+                {
+                    if (httpsPort<0)
+                    {
+                        httpsPort=operatorPort+2;
+                    }
+                    Vault vault=coreEnvironment.getVault();
+                    String serverCertificatePassword=vault.get("KeyStore.private.serverCertificate.password");
+                    String clientCertificatePassword=vault.get("KeyStore.private.clientCertificate.password");
+                    String keyManagerPassword=vault.get("KeyManager.password");
+    
+                    String serverCertificateKeyStorePath=configuration.getValue("HttpServer.private.serverCertificate.keyStorePath",null);
+                    String clientCertificateKeyStorePath=configuration.getValue("HttpServer.private.clientCertificate.keyStorePath",null);
+                    servers[portIndex]=JettyServerFactory.createHttpsServer(threads, httpsPort, serverCertificateKeyStorePath, serverCertificatePassword,clientCertificateKeyStorePath,clientCertificatePassword,keyManagerPassword);
+                    portIndex++;
+                }
+                if (http)
+                {
+                    if (httpPort<0)
+                    {
+                        httpPort=operatorPort+1;
+                    }
+                    servers[portIndex]=JettyServerFactory.createServer(threads, httpPort);
+                }
+                this.privateServer=new HttpServer(this.getTraceManager(), this.getLogger("HttpServer"),isTest(),publicServerConfiguration, servers);
+                
+                this.privateServer.addContentDecoders(new GzipContentDecoder());
+                this.privateServer.addContentEncoders(new GzipContentEncoder());
+                this.privateServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
+                this.privateServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter(),new HtmlResultWriter());
+            }
+            else
+            {
+                this.privateServer=null;
+            }
         }
-        else
-        {
-            this.publicServer=null;
+        
+        { //Public http server
+            boolean https=configuration.getBooleanValue("HttpServer.public.https",true);
+            boolean http=configuration.getBooleanValue("HttpServer.public.http",false);
+            int ports=0;
+            if (https)
+            {
+                ports++;
+            }
+            if (http)
+            {
+                ports++;
+            }
+            if (ports>0)
+            {
+                int threads=configuration.getIntegerValue("HttpServer.public.threads",100);
+                HttpServerConfiguration publicServerConfiguration=getConfiguration().getNamespaceObject("HttpServer.public", HttpServerConfiguration.class);
+                
+                int httpsPort=configuration.getIntegerValue("HttpServer.public.https.port",-1);
+                int httpPort=configuration.getIntegerValue("HttpServer.public.http.port",-1);
+    
+                Server[] servers=new Server[ports];
+                int portIndex=0;
+                if (https)
+                {
+                    if (httpsPort<0)
+                    {
+                        httpsPort=operatorPort+4;
+                    }
+                    Vault vault=coreEnvironment.getVault();
+                    String serverCertificatePassword=vault.get("KeyStore.public.serverCertificate.password");
+                    String clientCertificatePassword=vault.get("KeyStore.public.clientCertificate.password");
+                    String keyManagerPassword=vault.get("KeyManager.password");
+    
+                    String serverCertificateKeyStorePath=configuration.getValue("HttpServer.public.serverCertificate.keyStorePath",null);
+                    String clientCertificateKeyStorePath=configuration.getValue("HttpServer.public.clientCertificate.keyStorePath",null);
+                    servers[portIndex]=JettyServerFactory.createHttpsServer(threads, httpsPort, serverCertificateKeyStorePath, serverCertificatePassword,clientCertificateKeyStorePath,clientCertificatePassword,keyManagerPassword);
+                    portIndex++;
+                }
+                if (http)
+                {
+                    if (httpPort<0)
+                    {
+                        httpPort=operatorPort+3;
+                    }
+                    servers[portIndex]=JettyServerFactory.createServer(threads, httpPort);
+                }
+                this.publicServer=new HttpServer(this.getTraceManager(), this.getLogger("HttpServer"),isTest(),publicServerConfiguration, servers);
+                
+                this.publicServer.addContentDecoders(new GzipContentDecoder());
+                this.publicServer.addContentEncoders(new GzipContentEncoder());
+                this.publicServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
+                this.publicServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter(),new HtmlResultWriter());
+            }
+            else
+            {
+                this.publicServer=null;
+            }
         }
 
 
@@ -223,7 +256,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
 	final private Object runLock=new Object();
 	private Status status;
 	
-	public void run(Trace parent)
+	public void join(Trace parent)
 	{
         synchronized (runLock)
         {
@@ -281,16 +314,12 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
 		return this.baseDirectory;
 	}
 
-	public TemplateManager getOperatorTemplateManager()
-	{
-	    return this.operationTemplateManager;
-	}
 	public FileCache getFileCache()
 	{
 		return this.fileCache;
 	}
 
-	public TypeMappings getTypeMappings()
+	public TypeMappings getContentTypeMappings()
 	{
 		return this.typeMappings;
 	}
@@ -317,21 +346,11 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
     
     public OperatorPage buildOperatorPage(String title) throws Throwable
     {
-        if (this.test)
-        {
-            Template template=new Template(OperatorPage.buildTemplate(this.menuBar, this.getName(), this.hostName));
-            template.fill("title", title);
-            template.fill("now", Utils.nowToLocalDateTimeString());
-            return new OperatorPage(template);
-        }
-        else
-        {
-            Template template=new Template(this.template);
-            template.fill("title", title);
-            template.fill("now", Utils.nowToLocalDateTimeString());
-            return new OperatorPage(template);
-            
-        }
+        Template template=this.test?OperatorPage.buildTemplate(this.menuBar, this.getName(), this.hostName):this.template;
+        OperatorPage page=new OperatorPage(template);
+        page.fill("title", title);
+        page.fill("now", Utils.nowToLocalDateTimeString());
+        return page;
     }
 
     public String getLocalHostName()

@@ -2,8 +2,6 @@ package org.nova.testing;
 
 import java.util.LinkedList;
 
-import org.nova.core.Utils;
-import org.nova.html.HtmlWriter;
 import org.nova.http.server.JettyServerFactory;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.HtmlContentWriter;
@@ -12,11 +10,8 @@ import org.nova.http.server.JSONContentReader;
 import org.nova.http.server.JSONContentWriter;
 import org.nova.http.server.Transformers;
 import org.nova.http.server.annotations.ContentParam;
-import org.nova.http.server.annotations.DefaultValue;
-import org.nova.http.server.annotations.GET;
 import org.nova.http.server.annotations.PUT;
 import org.nova.http.server.annotations.Path;
-import org.nova.http.server.annotations.QueryParam;
 import org.nova.logging.LogUtils;
 import org.nova.test.PrintMessage;
 import org.nova.test.Testing;
@@ -62,17 +57,6 @@ public class TestTraceServer
 		}
 	}
 
-	@GET
-	@Path("/print/test")
-	public HtmlWriter test() throws Exception
-	{
-		System.out.println("TestTraceServer");
-		TestTraceClient.clientLog("hello");
-		HtmlWriter writer=new HtmlWriter();
-		writer.text("hello");
-		return writer;
-	}
-	
 	@PUT
 	@Path("/print/message")
 	public void message(@ContentParam PrintMessage debugMessage)
@@ -91,39 +75,50 @@ public class TestTraceServer
 		}
 	}
 	
-	@GET
-	@Path("/")
-	public HtmlWriter getMessages()
-	{
-		return getMessages("","");
-	}
-
-	@GET
-	@Path("/print/messages")
-	public HtmlWriter getMessages(@DefaultValue("") @QueryParam("hostFilters") String hostFilters,@DefaultValue("") @QueryParam("categoryFilters") String categoryFilters)
-	{
-		HtmlWriter writer=new HtmlWriter();
-		writer.begin_sortableTable(1);
-		writer.tr(writer.inner().th("Received").th("Created").th("Host").th("Category").th("Source").th("Text"));
-		synchronized (this.messages)
-		{
-			for (ReceivedDebugMessage item:this.messages)
-			{
-				if (((hostFilters.length()==0)||(hostFilters.equals(item.message.host)))
-					&&((categoryFilters.length()==0)||(categoryFilters.equals(item.message.category))))
-				{
-					writer.tr(writer.inner()
-							.td(Utils.millisToLocalDateTimeString(item.received))
-							.td(Utils.millisToLocalDateTimeString(item.message.created))
-							.td(writer.inner().a(item.message.host,"/print/messages?hostFilters="+item.message.host))
-							.td(writer.inner().a(item.message.category,"/print/messages?categoryFilters="+item.message.category))
-							.td(item.message.source)
-							.td(item.message.text)
-							);
-				}
-			}
-		}
-		writer.end_table();
-		return writer;
-	}
+//    @GET
+//    @Path("/print/test")
+//    public HtmlWriter test() throws Exception
+//    {
+//        System.out.println("TestTraceServer");
+//        TestTraceClient.clientLog("hello");
+//        HtmlWriter writer=new HtmlWriter();
+//        writer.text("hello");
+//        return writer;
+//    }
+//    
+//	@GET
+//	@Path("/")
+//	public HtmlWriter getMessages()
+//	{
+//		return getMessages("","");
+//	}
+//
+//	@GET
+//	@Path("/print/messages")
+//	public HtmlWriter getMessages(@DefaultValue("") @QueryParam("hostFilters") String hostFilters,@DefaultValue("") @QueryParam("categoryFilters") String categoryFilters)
+//	{
+//		HtmlWriter writer=new HtmlWriter();
+//		writer.begin_sortableTable(1);
+//		writer.tr(writer.inner().th("Received").th("Created").th("Host").th("Category").th("Source").th("Text"));
+//		synchronized (this.messages)
+//		{
+//			for (ReceivedDebugMessage item:this.messages)
+//			{
+//				if (((hostFilters.length()==0)||(hostFilters.equals(item.message.host)))
+//					&&((categoryFilters.length()==0)||(categoryFilters.equals(item.message.category))))
+//				{
+//					writer.tr(writer.inner()
+//							.td(Utils.millisToLocalDateTimeString(item.received))
+//							.td(Utils.millisToLocalDateTimeString(item.message.created))
+//							.td(writer.inner().a(item.message.host,"/print/messages?hostFilters="+item.message.host))
+//							.td(writer.inner().a(item.message.category,"/print/messages?categoryFilters="+item.message.category))
+//							.td(item.message.source)
+//							.td(item.message.text)
+//							);
+//				}
+//			}
+//		}
+//		writer.end_table();
+//		return writer;
+//	}
 }

@@ -198,6 +198,10 @@ public class TimerScheduler
 	    TimerTask timerTask = new TimerTask(this.number.getAndIncrement(),traceCategory, this, timeBase, offset, period,executable);
 	    
 	    Key key=timerTask.getSchedule();
+	    if (key==null)
+	    {
+	        throw new Exception("TimeBase="+timeBase+", offset="+offset+",period="+period);//bug
+	    }
 		synchronized(this)
 		{
 			this.map.put(key, timerTask);

@@ -3,10 +3,10 @@ package org.nova.html.widgets.w3c;
 import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.elements.TagElement;
 import org.nova.html.enums.link_rel;
+import org.nova.html.ext.Head;
 import org.nova.html.tags.a;
 import org.nova.html.tags.div;
 import org.nova.html.tags.link;
-import org.nova.html.widgets.Head;
 
 public class SideNavigationMenu extends div
 {
@@ -25,8 +25,8 @@ public class SideNavigationMenu extends div
         this.id=id;
         this.width=width;
         id(id);
-        class_("sidenav");
-        this.addInner(new a().href("javascript:void(0)").class_("closebtn").onclick("document.getElementById('"+id+"').style.width = '0';").addInner("&times;"));
+        addClass("sidenav");
+        this.addInner(new a().href("javascript:void(0)").addClass("closebtn").onclick("document.getElementById('"+id+"').style.width = '0';").addInner("&times;"));
     }
     public SideNavigationMenu(Head head,String id,int width)
     {

@@ -8,7 +8,7 @@ public class link extends GlobalEventTagElement<link>
 {
     public link()
     {
-        super("link");
+        super("link",true);
     }
     
     public link integrity(String code)

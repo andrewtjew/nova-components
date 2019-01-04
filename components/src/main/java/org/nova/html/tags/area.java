@@ -9,7 +9,7 @@ public class area extends GlobalEventTagElement<area>
 {
     public area()
     {
-        super("area");
+        super("area",true);
     }
     
     public area alt(String text)

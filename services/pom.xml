@@ -13,7 +13,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.nova</groupId>
-			<artifactId>components</artifactId>
+			<artifactId>nova-components</artifactId>
 			<version>0.1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>

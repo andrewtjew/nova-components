@@ -7,7 +7,7 @@ public class source extends GlobalEventTagElement<source>
 {
     public source()
     {
-        super("source");
+        super("source",true);
     }
     
     public source src(String URL)

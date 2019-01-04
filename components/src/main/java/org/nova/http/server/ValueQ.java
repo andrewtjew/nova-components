@@ -26,15 +26,15 @@ class ValueQ
 	
 	static List<ValueQ> sort(String accept)
 	{
-		String[] parts=org.nova.core.Utils.split(accept.trim(), ',');
+		String[] parts=org.nova.utils.Utils.split(accept.trim(), ',');
 		ArrayList<ValueQ> list=new ArrayList<>();
 		for (String item:parts)
 		{
 			double q=1;
-			String[] mediaTypeParameter=org.nova.core.Utils.split(item.trim(), ';');
+			String[] mediaTypeParameter=org.nova.utils.Utils.split(item.trim(), ';');
 			if (mediaTypeParameter.length>1)
 			{
-				String[] qvalue=org.nova.core.Utils.split(mediaTypeParameter[1].trim(), '=');
+				String[] qvalue=org.nova.utils.Utils.split(mediaTypeParameter[1].trim(), '=');
 				if ((qvalue.length==2)&&("q".equals(qvalue[0])))
 				{
 					try

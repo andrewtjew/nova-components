@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.nova.core.Utils;
+import org.nova.utils.Utils;
 
 public class Store<A,V,AV extends AttributeValue<A,V>>
 {

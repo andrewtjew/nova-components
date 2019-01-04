@@ -1,13 +1,11 @@
 package org.nova.html.widgets;
 
-import java.io.File;
-import java.util.ArrayList;
-
 import org.nova.html.attributes.Style;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
 import org.nova.html.enums.link_rel;
+import org.nova.html.ext.Head;
 import org.nova.html.tags.div;
 import org.nova.html.tags.link;
 
@@ -23,9 +21,9 @@ public class Panel extends Element
     public Panel(Head head,String class_,String cssFilePath,String title)
     {
         this.title=title;
-        this.panel=new div().class_(class_);
-        this.header=this.panel.returnAddInner(new div().class_(class_+"-Heading"));
-        this.content=this.panel.returnAddInner(new div().class_(class_+"-Content"));
+        this.panel=new div().addClass(class_);
+        this.header=this.panel.returnAddInner(new div().addClass(class_+"-Heading"));
+        this.content=this.panel.returnAddInner(new div().addClass(class_+"-Content"));
         if (head!=null)
         {
             head.add(class_,new link().rel(link_rel.stylesheet).type("text/css").href(cssFilePath));
@@ -69,7 +67,7 @@ public class Panel extends Element
         this.header.addInner(this.leftHeaderElements);
         this.header.addInner(title);
         this.header.addInner(this.rightHeaderElements);
-        composer.render(this.panel);
+        composer.compose(this.panel);
         
     }
 }

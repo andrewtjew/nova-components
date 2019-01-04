@@ -6,8 +6,8 @@ import java.net.Socket;
 import java.util.HashMap;
 
 import org.nova.concurrent.Synchronization;
-import org.nova.core.Utils;
 import org.nova.metrics.LongValueMeter;
+import org.nova.utils.TypeUtils;
 
 public class TcpClient
 {
@@ -83,8 +83,8 @@ public class TcpClient
 	public Response sendReceive(int type,byte[] bytes,int offset,int length,long timeoutMs) throws Throwable
 	{
 		byte[] header=new byte[16];
-		Utils.bigEndianIntToBytes(type,header,8);
-		Utils.bigEndianIntToBytes(bytes.length,header,12);
+		TypeUtils.bigEndianIntToBytes(type,header,8);
+		TypeUtils.bigEndianIntToBytes(bytes.length,header,12);
 		Waiter waiter=new Waiter();
 		long id=0;
 		try
@@ -93,7 +93,7 @@ public class TcpClient
 			{
 				id=this.id++;
 				this.waiters.put(id, waiter);
-				Utils.bigEndianLongToBytes(id,header,0);
+				TypeUtils.bigEndianLongToBytes(id,header,0);
 				this.outputStream.write(header);
 				this.outputStream.write(bytes,offset,length);
 				this.outputStream.flush();
@@ -130,9 +130,9 @@ public class TcpClient
 	public void send(int type,byte[] bytes,int offset,int length) throws Throwable
 	{
 		byte[] header=new byte[16];
-		Utils.bigEndianLongToBytes(0,header,0);
-		Utils.bigEndianIntToBytes(type,header,8);
-		Utils.bigEndianIntToBytes(bytes.length,header,12);
+		TypeUtils.bigEndianLongToBytes(0,header,0);
+		TypeUtils.bigEndianIntToBytes(type,header,8);
+		TypeUtils.bigEndianIntToBytes(bytes.length,header,12);
 		synchronized(this.waiters)
 		{
 			this.outputStream.write(header);
@@ -189,8 +189,8 @@ public class TcpClient
 		for (;;)
 		{
 			readResponseHeader(header);
-			long id=Utils.bigEndianBytesToLong(header,0);
-			int size=Utils.bigEndianBytesToInt(header,8);
+			long id=TypeUtils.bigEndianBytesToLong(header,0);
+			int size=TypeUtils.bigEndianBytesToInt(header,8);
 			byte[] response=null;
 			if (size>=0)
 			{

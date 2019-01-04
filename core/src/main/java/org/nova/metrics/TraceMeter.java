@@ -9,14 +9,10 @@ public class TraceMeter
     long totalWaitNs;
     double totalDuration2Ns;
     double totalWait2Ns;
-    long maxDurationNs;
-    long maxWaitNs;
-    long maxDurationInstantMs;
-    long maxWaitInstantMs;
-    long minDurationNs;
-    long minWaitNs;
-    long minDurationInstantMs;
-    long minWaitInstantMs;
+    Trace maxDurationTrace;
+    Trace maxWaitTrace;
+    Trace minDurationTrace;
+    Trace minWaitTrace;
     int count;
     Trace firstExceptionTrace;
     Trace lastExceptionTrace;
@@ -26,10 +22,6 @@ public class TraceMeter
     public TraceMeter()
     {
         this.createdMs=System.currentTimeMillis();
-        this.maxDurationNs=Long.MIN_VALUE;
-        this.maxWaitNs=Long.MIN_VALUE;
-        this.minDurationNs=Long.MAX_VALUE;
-        this.minWaitNs=Long.MAX_VALUE;
     }
     public void update(Trace trace)
     {
@@ -50,26 +42,39 @@ public class TraceMeter
                 }
                 this.lastExceptionTrace=trace;
             }
-            if (durationNs>=this.maxDurationNs)
+            if (this.maxDurationTrace==null)
             {
-                this.maxDurationNs=durationNs;
-                this.maxDurationInstantMs=System.currentTimeMillis();
+                this.maxDurationTrace=trace;
             }
-            if (durationNs<=this.minDurationNs)
+            else if (durationNs>=this.maxDurationTrace.getDurationNs())
             {
-                this.minDurationNs=durationNs;
-                this.minDurationInstantMs=System.currentTimeMillis();
+                this.maxDurationTrace=trace;
             }
-            if (waitNs>=this.maxWaitNs)
+            if (this.minDurationTrace==null)
             {
-                this.maxWaitNs=waitNs;
-                this.maxWaitInstantMs=System.currentTimeMillis();
+                this.minDurationTrace=trace;
             }
-            if (durationNs<=this.minWaitNs)
+            else if (durationNs<=this.minDurationTrace.getDurationNs())
             {
-                this.minWaitNs=durationNs;
-                this.minWaitInstantMs=System.currentTimeMillis();
+                this.minDurationTrace=trace;
             }
+            if (this.maxWaitTrace==null)
+            {
+                this.maxWaitTrace=trace;
+            }
+            else if (waitNs>=this.maxWaitTrace.getWaitNs())
+            {
+                this.maxWaitTrace=trace;
+            }
+            if (this.minWaitTrace==null)
+            {
+                this.minWaitTrace=trace;
+            }
+            else if (waitNs<=this.minWaitTrace.getWaitNs())
+            {
+                this.minWaitTrace=trace;
+            }
+
             this.lastTrace=trace;
             this.totalDurationNs+=durationNs;
             this.totalDuration2Ns+=durationNs*durationNs;
@@ -78,6 +83,7 @@ public class TraceMeter
             this.count++;
         }
     }
+
     public void update(TraceSample sample)
     {
         if (sample.getCount()==0)
@@ -95,7 +101,7 @@ public class TraceMeter
                     this.lastExceptionTrace=sample.getLastExceptionTrace();
                 }
             }
-            else if (this.sample().getLastExceptionTrace()!=null)
+            else if (sample.getLastExceptionTrace()!=null)
             {
                 //Both this and sample have exception traces
                 if (sample.getFirstExceptionTrace().getCreatedMs()<this.firstExceptionTrace.getCreatedMs())
@@ -108,26 +114,40 @@ public class TraceMeter
                 }
             }
             
-            if (sample.getMaxDurationNs()>=this.maxDurationNs)
+            if (this.maxDurationTrace==null)
             {
-                this.maxDurationNs=sample.getMaxDurationNs();
-                this.maxDurationInstantMs=sample.getMaxDurationInstantMs();
+                this.maxDurationTrace=sample.getMaxDurationTrace();
             }
-            if (sample.getMinDurationNs()<=this.minDurationNs)
+            else if (sample.getMaxDurationTrace().getDurationNs()>=this.maxDurationTrace.getDurationNs())
             {
-                this.minDurationNs=sample.getMinDurationNs();
-                this.minDurationInstantMs=sample.getMinDurationInstantMs();
+                this.maxDurationTrace=sample.getMaxDurationTrace();
             }
-            if (sample.getMaxWaitNs()>=this.maxWaitNs)
+            if (this.minDurationTrace==null)
             {
-                this.maxWaitNs=sample.getMaxWaitNs();
-                this.maxWaitInstantMs=sample.getMaxWaitInstantMs();
+                this.minDurationTrace=sample.getMinDurationTrace();
             }
-            if (sample.getMinWaitNs()<=this.minWaitNs)
+            else if (sample.getMinDurationTrace().getDurationNs()<=this.minDurationTrace.getDurationNs())
             {
-                this.minWaitNs=sample.getMinWaitNs();
-                this.minWaitInstantMs=sample.getMinWaitInstantMs();
+                this.minDurationTrace=sample.getMinDurationTrace();
             }
+            if (this.maxWaitTrace==null)
+            {
+                this.maxWaitTrace=sample.getMaxWaitTrace();
+            }
+            else if (sample.getMaxWaitTrace().getDurationNs()>=this.maxWaitTrace.getDurationNs())
+            {
+                this.maxWaitTrace=sample.getMaxWaitTrace();
+            }
+            if (this.minWaitTrace==null)
+            {
+                this.minWaitTrace=sample.getMinWaitTrace();
+            }
+            else if (sample.getMinWaitTrace().getDurationNs()<=this.minWaitTrace.getDurationNs())
+            {
+                this.minWaitTrace=sample.getMinWaitTrace();
+            }
+
+            
             this.totalDurationNs+=sample.getTotalDurationNs();
             this.totalDuration2Ns+=sample.totalDuration2Ns;
             this.totalWaitNs+=sample.getTotalWaitNs();
@@ -135,6 +155,7 @@ public class TraceMeter
             this.count+=sample.getCount();
         }        
     }
+
     public TraceSample sample()
     {
         synchronized(this)

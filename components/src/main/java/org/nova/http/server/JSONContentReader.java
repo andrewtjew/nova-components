@@ -5,10 +5,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.nova.core.Utils;
 import org.nova.json.ObjectExample;
 import org.nova.json.ObjectMapper;
 import org.nova.json.SchemaWriter;
+import org.nova.utils.FileUtils;
 
 public class JSONContentReader extends ContentReader<Object>
 {
@@ -22,9 +22,9 @@ public class JSONContentReader extends ContentReader<Object>
 	@Override
 	public Object read(Context context, int contentLength,InputStream inputStream,Class<?> contentType) throws Throwable
 	{
-		String contentText=Utils.readString(inputStream, StandardCharsets.UTF_8);
+		String contentText=FileUtils.readString(inputStream, StandardCharsets.UTF_8);
 		context.setRequestContentText(contentText);
-		return ObjectMapper.read(contentText,contentType);
+		return ObjectMapper.readObject(contentText,contentType);
 	}
 
 	@Override

@@ -29,7 +29,7 @@ public class LockReservation implements AutoCloseable
         {
             throw new Exception("no reservation");
         }
-        this.lock.setObject(object);
+        this.lock.setLockObject(object);
     }
     @Override
     public void close() throws Exception

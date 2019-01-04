@@ -3,7 +3,7 @@ package org.nova.http.client;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.nova.core.Utils;
+import org.nova.utils.Utils;
 
 public class RequestURI
 {

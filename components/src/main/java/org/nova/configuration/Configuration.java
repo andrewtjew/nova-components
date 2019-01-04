@@ -4,8 +4,8 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import org.nova.annotations.Alias;
-import org.nova.core.Utils;
 import org.nova.json.ObjectMapper;
+import org.nova.utils.Utils;
 
 public class Configuration
 {
@@ -431,14 +431,23 @@ public class Configuration
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <ENUM> ENUM getEnumValue(String name,ENUM defaultValue,Class<ENUM> type)
 	{
-		return (ENUM) Enum.valueOf((Class<Enum>)type, getValue(name,defaultValue));
+	    String value=getValue(name,defaultValue);
+	    if (value==null)
+	    {
+	        return null;
+	    }
+	    if ("null".equals(value))
+	    {
+	        return null;
+	    }
+		return (ENUM) Enum.valueOf((Class<Enum>)type, value);
 	}
 	
 	public <OBJECT> OBJECT getJSONObject(String name,Class<OBJECT> type) throws Throwable
 	{
         synchronized (this)
         {
-            return updateJSONObjectValue(name,ObjectMapper.read(getValue(name),type));
+            return updateJSONObjectValue(name,ObjectMapper.readObject(getValue(name),type));
         }
 	}
 
@@ -446,12 +455,12 @@ public class Configuration
 	{
         synchronized (this)
         {
-    	    String text=getValue(name,defaultValue==null?null:ObjectMapper.write(defaultValue));
+    	    String text=getValue(name,defaultValue==null?null:ObjectMapper.writeObjectToString(defaultValue));
     	    if (text==null)
     	    {
     	        return defaultValue;
     	    }
-    		return updateJSONObjectValue(name,ObjectMapper.read(text,type));
+    		return updateJSONObjectValue(name,ObjectMapper.readObject(text,type));
         }
 	}
         
@@ -459,13 +468,13 @@ public class Configuration
     {
         synchronized (this)
         {
-            return updateJSONObjectValue(name,ObjectMapper.read(getValue(name,defaultText),type));
+            return updateJSONObjectValue(name,ObjectMapper.readObject(getValue(name,defaultText),type));
         }
     }
     
     private <OBJECT> OBJECT updateJSONObjectValue(String name,OBJECT object) throws Throwable
     {
-        String text=ObjectMapper.write(object);
+        String text=ObjectMapper.writeObjectToString(object);
         ConfigurationItem item=this.getConfigurationItem(name);
         add(new ConfigurationItem(name, text, item.getSource(), item.getSourceContext(), item.getDescription()));
         return object;
@@ -555,7 +564,7 @@ public class Configuration
             }
             else 
             {
-                field.set(object, ObjectMapper.read(getValue(key), fieldType));
+                field.set(object, ObjectMapper.readObject(getValue(key), fieldType));
             }
 	    }
 	    return object;

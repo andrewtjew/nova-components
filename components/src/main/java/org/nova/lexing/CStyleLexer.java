@@ -8,7 +8,7 @@ public class CStyleLexer extends Lexer
                 , new String[]{"=","+","-","*","/","%","++","--","!","==","!=",">",">=","<","<=","&&","||","?",":","~","<<",">>","&","^"}
                 , new char[]{';',',','{','}','(',')'}
                 , new String[]{"null"}
-                , true
+                , true,true
                 );
     }
 
@@ -31,7 +31,7 @@ public class CStyleLexer extends Lexer
         {
             return true;
         }
-        if (matchSeperator(c))
+        if (matchPunctuator(c))
         {
             return true;
         }

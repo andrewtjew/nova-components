@@ -4,23 +4,20 @@ public class BenchmarkTimer
 {
 	final private double rate;
 	final private PrecisionTimer timer;
-	final private long sum;
 	
-	static public interface Code<LONG>
+	static public interface Code
 	{
-	    long execute(Long i) throws Throwable;
+	    void execute(long i) throws Throwable;
 	}
 	
-	public BenchmarkTimer(long count,Code<Long> executable) throws Throwable
+	public BenchmarkTimer(long count,Code code) throws Throwable
 	{
 		this.timer=new PrecisionTimer();
 		this.timer.start();
-		long sum=0;
 		for (long i=0;i<count;i++)
 		{
-			sum+=executable.execute(i);
+			code.execute(i);
 		}
-		this.sum=sum;
 		this.timer.stop();
 		this.rate=((double)count*1.0e9)/timer.getElapsedNs();
 	}
@@ -33,10 +30,6 @@ public class BenchmarkTimer
 	public PrecisionTimer getTimer()
 	{
 		return timer;
-	}
-	public long getSum()
-	{
-	    return this.sum;
 	}
 	
 }

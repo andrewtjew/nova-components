@@ -1,57 +1,44 @@
 package org.nova.html.bootstrap4;
 
-import org.nova.html.attributes.Style;
-import org.nova.html.bootstrap4.classes.ThemeColor;
-import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.td;
-import org.nova.html.tags.tr;
 
-public class TableRow extends Element
+public class TableRow extends StyleComponent<TableRow>
 {
-    final private tr tr;
-    private ThemeColor tableColor;
-    
     public TableRow()
     {
-        this.tr=new tr();
+        super("tr","table");
     }
     
-    public TableRow color(ThemeColor value)
-    {
-        this.tableColor=value;
-        return this;
-    }
     public TableRow add(Object...objects)
     {
-        for (Object object:objects)
+        if (objects==null)
         {
-            if (object==null)
+            addInner(new td());
+        }
+        else
+        {
+            for (Object object:objects)
             {
-                this.tr.addInner(new td());
-            }
-            else if (object instanceof td)
-            {
-                this.tr.addInner(object);
-            }
-            else
-            {
-                this.tr.addInner(new td().addInner(object.toString()));
+                if (object==null)
+                {
+                    addInner(new td());
+                }
+                else if (object instanceof td)
+                {
+                    addInner(object);
+                }
+                else if (object instanceof Element)
+                {
+                    addInner(new td().addInner((Element)object));
+                }
+                else
+                {
+                    addInner(new td().addInner(object.toString()));
+                }
             }
         }
         return this;
-    }
-
-    @Override
-    public void compose(Composer composer) throws Throwable
-    {
-        ClassBuilder cb=new ClassBuilder();
-        cb.addIf(this.tableColor!=null, "table",this.tableColor);
-        cb.applyTo(this.tr);
-        composer.render(this.tr);
-    }
-    public tr tr()
-    {
-        return this.tr;
+        
     }
 }

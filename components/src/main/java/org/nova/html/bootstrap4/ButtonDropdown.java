@@ -1,39 +1,31 @@
 package org.nova.html.bootstrap4;
 
-import org.nova.html.bootstrap4.classes.Size;
-import org.nova.html.bootstrap4.classes.ThemeColor;
-import org.nova.html.bootstrap4.classes.ButtonState;
-import org.nova.html.bootstrap4.classes.DropdownPosition;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.a;
-import org.nova.html.tags.button_button;
 import org.nova.html.tags.div;
-import org.nova.html.widgets.HtmlUtils;
 
-public class ButtonDropdown extends Element
+public class ButtonDropdown extends ButtonComponent<ButtonDropdown>
 {
-    final private div menu;
-    private boolean outline=false;
-    private ThemeColor color;
-    private ThemeColor textColor;
-    private Size buttonSize;
-    final private String label;
+    final private Item menu;
     private boolean split;
     private boolean menuRight;
     
     public ButtonDropdown(String label)
     {
-        this.label=label;
-        this.menu=new div();
+        super("button");
+        attr("type","button");
+        attr("data-toggle","dropdown");
+        addInner(label);
+        this.menu=new Item();
     }
     
-    public ButtonDropdown add(String label,String href)
+    public ButtonDropdown addToMenu(String label,String href)
     {
-        this.menu.addInner(new a().class_("dropdown-item").href(href).addInner(label));
+        this.menu.addInner(new a().addClass("dropdown-item").href(href).addInner(label));
         return this;
     }
-    public ButtonDropdown add(Element element)
+    public ButtonDropdown addToMenu(Element element)
     {
         this.menu.addInner(element);
         return this;
@@ -41,89 +33,55 @@ public class ButtonDropdown extends Element
 
     public ButtonDropdown addDivider()
     {
-        this.menu.addInner(new div().class_("dropdown-divider"));
+        this.menu.addInner(new div().addClass("dropdown-divider"));
         return this;
     }
-    public ButtonDropdown size(Size value)
-    {
-        this.buttonSize=value;
-        return this;
-    }
-    
-    
-    public ButtonDropdown color(ThemeColor value)
-    {
-        this.color=value;
-        return this;
-    }
-    
-    public ButtonDropdown textColor(ThemeColor value)
-    {
-        this.textColor=value;
-        return this;
-    }
-    
     public ButtonDropdown menuRight(boolean value)
     {
         this.menuRight=value;
         return this;
     }
-    
-    public ButtonDropdown outline(boolean value)
+
+    public ButtonDropdown split()
     {
-        this.outline=value;
+        this.split=true;
         return this;
     }
-
-    public ButtonDropdown split(boolean value)
-    {
-        this.split=value;
-        return this;
-    }
-
-    
     
     @Override
     public void compose(Composer composer) throws Throwable
     {
-        ClassBuilder cb=new ClassBuilder("btn");
-        cb.add("btn");
-        cb.addFragmentsIf(this.outline,"outline");
-        cb.addFragments(this.color);
-        cb.addIf(this.buttonSize!=null,"btn",this.buttonSize);
-        cb.addIf(this.textColor!=null,"text",this.textColor);
-
-        if (split)
+        this.menu.addClass("dropdown-menu");
+        if (this.menuRight)
         {
-            div div=new div().class_("btn-group");
-            
-            button_button button=new button_button().addInner(label).attr("data-toggle","dropdown");//.attr("aria-haspopup",true).attr("aria-expanded",false);
-            cb.applyTo(button);
-
-            button_button splitter=new button_button().attr("data-toggle","dropdown").attr("aria-haspopup",true).attr("aria-expanded",false);
-            cb.add("dropdown-toggle");
-            cb.add("dropdown-toggle-split");
-            cb.applyTo(splitter);
-
-            cb=new ClassBuilder("dropdown-menu");
-            cb.addIf(this.menuRight, "dropdown-menu-right");
-            cb.applyTo(this.menu);
-            
-            div.addInner(button);
-            div.addInner(splitter);
-            div.addInner(this.menu);
-            composer.render(div);
+            this.menu.addClass(this.menuRight, "dropdown-menu-right");
+        }
+        
+        if (this.split)
+        {
+            div group=new div().addClass("btn-group");
+            group.addInner(new Element()
+            {
+                @Override
+                public void compose(Composer composer) throws Throwable
+                {
+                    attr("data-toggle","dropdown");
+                    composeThis(composer);
+                    Button splitter=new Button().attr("data-toggle","dropdown").attr("aria-haspopup",true).attr("aria-expanded",false);
+                    splitter.addClass(class_());
+                    splitter.addClass("dropdown-toggle");
+                    splitter.addClass("dropdown-toggle-split");
+                    splitter.compose(composer);
+                    menu.compose(composer);
+                }
+            });
+            group.compose(composer);
         }
         else
         {
-            button_button button=new button_button().addInner(label).attr("data-toggle","dropdown");//.attr("aria-haspopup",true).attr("aria-expanded",false);
-            cb.add("dropdown-toggle");
-            cb.applyTo(button);
-            composer.render(button);
-            cb=new ClassBuilder("dropdown-menu");
-            cb.addIf(this.menuRight, "dropdown-menu-right");
-            cb.applyTo(this.menu);
-            composer.render(this.menu);
+            addClass("dropdown-toggle");
+            super.compose(composer);
+            this.menu.compose(composer);
         }
         
     }

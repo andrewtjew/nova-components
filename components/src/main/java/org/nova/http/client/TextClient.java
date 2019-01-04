@@ -8,11 +8,11 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
-import org.nova.core.Utils;
 import org.nova.http.Header;
 import org.nova.logging.Logger;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
+import org.nova.utils.FileUtils;
 
 public class TextClient
 {
@@ -57,7 +57,7 @@ public class TextClient
 			{
 				int statusCode=response.getStatusLine().getStatusCode();
 				org.apache.http.Header contentType=response.getEntity().getContentType();
-				String text=Utils.readString(response.getEntity().getContent());
+				String text=FileUtils.readString(response.getEntity().getContent());
 				org.apache.http.Header[] responseHeaders=response.getAllHeaders();
 				Header[] textResponseHeaders=new Header[responseHeaders.length];
 				for (int i=0;i<responseHeaders.length;i++)
@@ -104,7 +104,7 @@ public class TextClient
                 {
                     textResponseHeaders[i]=new Header(responseHeaders[i].getName(),responseHeaders[i].getValue());
                 }
-                return new TextResponse(statusCode,Utils.readString(response.getEntity().getContent()),textResponseHeaders);
+                return new TextResponse(statusCode,FileUtils.readString(response.getEntity().getContent()),textResponseHeaders);
             }
             finally
             {

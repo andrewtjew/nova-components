@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 
 import org.nova.collections.ContentCache;
-import org.nova.core.Utils;
 import org.nova.tracing.Trace;
+import org.nova.utils.FileUtils;
 
 public class FileCache extends ContentCache<String,byte[]>
 {
@@ -15,8 +15,8 @@ public class FileCache extends ContentCache<String,byte[]>
 	public FileCache(FileCacheConfiguration configuration) throws Exception
 	{
 		super(configuration.capacity,configuration.maxAgeMs,configuration.maxSize);
-        this.sharedDirectory=new File(Utils.toNativePath(configuration.sharedDirectory)).getCanonicalPath();
-        this.localDirectory=new File(Utils.toNativePath(configuration.localDirectory)).getCanonicalPath();
+        this.sharedDirectory=new File(FileUtils.toNativePath(configuration.sharedDirectory)).getCanonicalPath();
+        this.localDirectory=new File(FileUtils.toNativePath(configuration.localDirectory)).getCanonicalPath();
 	}
 	
 	public void preload(Trace trace) throws Throwable
@@ -54,7 +54,7 @@ public class FileCache extends ContentCache<String,byte[]>
 	@Override
 	protected ValueSize<byte[]> load(Trace trace, String filePath) throws Throwable
 	{
-        File file=new File(Utils.toNativePath(this.localDirectory+File.separator+filePath));
+        File file=new File(FileUtils.toNativePath(this.localDirectory+File.separator+filePath));
         if (file.getCanonicalPath().startsWith(this.localDirectory))
         {
             byte[] bytes=readFile(file);
@@ -63,7 +63,7 @@ public class FileCache extends ContentCache<String,byte[]>
                 return new ValueSize<byte[]>(bytes,bytes.length);
             }
         }
-        file=new File(Utils.toNativePath(this.sharedDirectory+File.separator+filePath));
+        file=new File(FileUtils.toNativePath(this.sharedDirectory+File.separator+filePath));
         if (file.getCanonicalPath().startsWith(this.sharedDirectory))
         {
             byte[] bytes=readFile(file);

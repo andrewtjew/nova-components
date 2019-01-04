@@ -25,6 +25,6 @@ public class CheckActionPostForm extends Element
     @Override
     public void compose(Composer composer) throws Throwable
     {
-        composer.render(this.form);
+        composer.compose(this.form);
     }
 }

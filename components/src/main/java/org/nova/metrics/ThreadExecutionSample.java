@@ -1,10 +1,5 @@
 package org.nova.metrics;
 
-import java.util.Random;
-
-import org.nova.html.Chartjs.BarChart;
-import org.nova.html.tags.var;
-
 public class ThreadExecutionSample
 {
     final private StackTraceNode root;
@@ -18,7 +13,7 @@ public class ThreadExecutionSample
     
     private StackTraceNode copy(StackTraceNode node)
     {
-        StackTraceNode copy=new StackTraceNode(node.getStackTraceElement(),node.getDurationNs());
+        StackTraceNode copy=new StackTraceNode(node.getStackTraceElement(),node.getActiveNs(),node.getWaitNs(),node.getCount());
         if (node.getChildNodes()!=null)
         {
             for (StackTraceNode childNode:node.getChildNodes())
