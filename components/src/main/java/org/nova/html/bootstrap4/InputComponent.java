@@ -1,22 +1,25 @@
 package org.nova.html.bootstrap4;
 
 import org.nova.html.elements.Composer;
+import org.nova.html.elements.InputElement;
 import org.nova.html.elements.TagElement;
 
-public abstract class InputComponent<ELEMENT extends InputComponent<ELEMENT>> extends StyleComponent<ELEMENT> 
+public abstract class InputComponent<ELEMENT extends InputComponent<ELEMENT>> extends InputElement<ELEMENT> 
 {
     private String name; 
     protected InputComponent(String componentClass,String type)
     {
-        super("input",componentClass);
+        addClass(componentClass);
         attr("type",type);
     }
     protected InputComponent(String tag,String componentClass,String type)
     {
-        super(tag,componentClass);
+        super(tag);
+        addClass(componentClass);
         attr("type",type);
     }
 
+    /*
     public ELEMENT autofocus()
     {
         return attr("autofocus");
@@ -83,5 +86,5 @@ public abstract class InputComponent<ELEMENT extends InputComponent<ELEMENT>> ex
         attr("name",this.name);
         super.compose(composer);
     }
-    
+    */
 }

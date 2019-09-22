@@ -7,6 +7,11 @@ public class Badge extends StyleComponent<Badge>
     { 
         super("span","badge");
     }
-    
+    public Badge pill()
+    {
+        addClass("badge-pill");
+        return this;
+    }
+
     
 }

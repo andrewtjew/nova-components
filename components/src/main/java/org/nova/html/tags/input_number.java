@@ -1,6 +1,7 @@
 package org.nova.html.tags;
 
 import org.nova.html.elements.InputElement;
+import org.nova.html.enums.autocomplete;
 
 public class input_number extends InputElement<input_number>
 {
@@ -8,6 +9,18 @@ public class input_number extends InputElement<input_number>
     {
         super();
         attr("type","number");
+    }
+    public input_number autocomplete(autocomplete autocomplete) //text, search, url, tel, email, password, datepickers, range, and color.
+    {
+        return attr("autocomplete",autocomplete);
+    }
+    public input_number autocomplete(boolean autocomplete)
+    {
+        if (autocomplete)
+        {
+            attr("autocomplete");
+        }
+        return this;
     }
     public input_number max(double number)
     {

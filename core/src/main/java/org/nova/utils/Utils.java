@@ -106,6 +106,19 @@ public class Utils
         }
         return sb.toString();
     }
+    public static String combine(Enum<?>[] iterable,String seperator)
+    {
+        StringBuilder sb=new StringBuilder();
+        for (Enum<?> item:iterable)
+        {
+            if (sb.length()>0)
+            {
+                sb.append(seperator);
+            }
+            sb.append(item);
+        }
+        return sb.toString();
+    }
 
     public static String combine(long[] items,String seperator)
     {

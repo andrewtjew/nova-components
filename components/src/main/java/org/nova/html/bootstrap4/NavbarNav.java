@@ -1,18 +1,21 @@
 package org.nova.html.bootstrap4;
 
+import org.nova.html.elements.Element;
+import org.nova.html.tags.li;
+
 public class NavbarNav extends StyleComponent<NavbarNav>
 {
     public NavbarNav()
     {
         super("ul","nav navbar-nav");
     }
-/*
-    public NavbarNav add(Element element)
+    public NavbarNav addItem(Element element)
     {
-        returnAddInner(new li()).addClass("nav-item").addInner(element);
+        returnAddInner(new NavItem()).addInner(element);
         return this;
     }
 
+    /*
     public NavbarNav addLink(String label,String href,NavbarState state)
     {
         li li=returnAddInner(new li().addClass("nav-item"));

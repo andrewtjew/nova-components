@@ -18,6 +18,7 @@ public abstract class ToggleComponent<ELEMENT extends ToggleComponent<ELEMENT>> 
     public ELEMENT disabled()
     {
         addClass("disabled");
+        attr("disabled");
         return (ELEMENT)this;
     }
 
@@ -39,8 +40,16 @@ public abstract class ToggleComponent<ELEMENT extends ToggleComponent<ELEMENT>> 
         data("toggle","modal");
         data("target","#"+modal.id());
         return (ELEMENT)this;
-        
     }    
+
+    /*
+    public ELEMENT toggleDropdownMenu(DropdownMenu dropdownMenu)
+    {
+        data("toggle","dropdown");
+        addClass("dropdown-toggle");
+        return (ELEMENT)this;
+    } 
+    */   
 
     public ELEMENT toggleTabContent(TabContent tabContent)
     {

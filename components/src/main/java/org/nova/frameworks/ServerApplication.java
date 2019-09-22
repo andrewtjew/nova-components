@@ -8,7 +8,7 @@ import org.nova.concurrent.Synchronization;
 import org.nova.configuration.Configuration;
 import org.nova.html.TypeMappings;
 import org.nova.html.elements.HtmlElementWriter;
-import org.nova.html.remoting.HtmlResultWriter;
+import org.nova.html.remoting.HtmlRemotingWriter;
 import org.nova.html.templating.Template;
 import org.nova.html.widgets.MenuBar;
 import org.nova.http.server.JettyServerFactory;
@@ -122,7 +122,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
                 this.privateServer.addContentDecoders(new GzipContentDecoder());
                 this.privateServer.addContentEncoders(new GzipContentEncoder());
                 this.privateServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
-                this.privateServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter(),new HtmlResultWriter());
+                this.privateServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter(),new HtmlRemotingWriter());
             }
             else
             {
@@ -181,7 +181,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
                 this.publicServer.addContentDecoders(new GzipContentDecoder());
                 this.publicServer.addContentEncoders(new GzipContentEncoder());
                 this.publicServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
-                this.publicServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter(),new HtmlResultWriter());
+                this.publicServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter(),new HtmlRemotingWriter());
             }
             else
             {

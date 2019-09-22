@@ -15,8 +15,10 @@ public class DocumentResult extends Result
     final private ArrayList<ValResult> valResults;
     final private ArrayList<AddClassResult> addClassResults;
     final private ArrayList<RemoveClassResult> removeClassResults;
+    final private ArrayList<PropResult> propResults;
     private String script;
     private Object result;
+    private String location;
     
     public DocumentResult() throws Throwable
     {
@@ -27,6 +29,12 @@ public class DocumentResult extends Result
         this.addClassResults=new ArrayList<>();
         this.removeClassResults=new ArrayList<>();
         this.clearTimerCommands=new ArrayList<>();
+        this.propResults=new ArrayList<>();
+    }
+    
+    public void setLocation(String location)
+    {
+        this.location=location;
     }
     
     public DocumentResult setHtml(String id,String html)
@@ -51,7 +59,7 @@ public class DocumentResult extends Result
         this.appendResults.add(result);
         return this;
     }
-    public DocumentResult appendHtml(String id,Element element) throws Throwable
+    public DocumentResult appendElement(String id,Element element) throws Throwable
     {
         StringComposer composer=new StringComposer();
         composer.compose(element);
@@ -68,13 +76,14 @@ public class DocumentResult extends Result
     }
     public DocumentResult setVal(String id,Object val)
     {
+        String text=val!=null?val.toString():"";
         ValResult result=new ValResult();
         result.id=id;
-        result.val=val;
+        result.val=text;
         this.valResults.add(result);
         return this;
     }
-    public DocumentResult addClassResult(String id,String class_)
+    public DocumentResult addClass(String id,String class_)
     {
         AddClassResult result=new AddClassResult();
         result.id=id;
@@ -91,7 +100,18 @@ public class DocumentResult extends Result
         this.removeClassResults.add(result);
         return this;
     }
+    
+    public DocumentResult setProp(String id,String prop,Object value)
+    {
+        PropResult result=new PropResult();
+        result.id=id;
+        result.prop=prop;
+        result.value=value;
+        this.propResults.add(result);
+        return this;
+    }
 
+    
     public DocumentResult clearTimer(String timerName)
     {
         ClearTimerCommand result=new ClearTimerCommand();
@@ -138,11 +158,16 @@ public class DocumentResult extends Result
         {
             response.removeClassResults=this.removeClassResults.toArray(new RemoveClassResult[this.removeClassResults.size()]);
         }
+        if (this.propResults.size()>0)
+        {
+            response.propResults=this.propResults.toArray(new PropResult[this.propResults.size()]);
+        }
         if (this.clearTimerCommands.size()>0)
         {
             response.clearTimerCommands=this.clearTimerCommands.toArray(new ClearTimerCommand[this.clearTimerCommands.size()]);
         }
-        response.script=script;
+        response.script=this.script;
+        response.location=this.location; 
         if (this.result!=null)
         {
             response.result=ObjectMapper.writeObjectToString(this.result);

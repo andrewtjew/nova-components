@@ -1,11 +1,14 @@
 package org.nova.html.bootstrap4;
 
+import org.nova.html.elements.Composer;
+import org.nova.html.elements.Element;
+import org.nova.html.tags.div;
 import org.nova.html.tags.tbody;
 
 public class Table extends StyleComponent<Table>
 {
     private final tbody tbody;
-    
+    private boolean responsive=false;
     public Table(TableHeading heading)
     {
        super("table","table");
@@ -16,6 +19,11 @@ public class Table extends StyleComponent<Table>
        this.tbody=returnAddInner(new tbody());
     }
 
+    public Table addHeading(TableHeading heading)
+    {
+        addInner(heading);
+        return this;
+    }
     public Table()
     {
         this(null);
@@ -38,7 +46,7 @@ public class Table extends StyleComponent<Table>
     }
     public Table responsive()
     {
-        addClass("table-responsive");
+        this.responsive=true;
         return this;
     }
 
@@ -58,6 +66,33 @@ public class Table extends StyleComponent<Table>
         TableRow tableRow=new TableRow();
         addRow(tableRow);
         return tableRow;
+    }
+    public tbody tbody()
+    {
+        return this.tbody;
+    }
+    @Override
+    public void compose(Composer composer) throws Throwable
+    {
+        
+        if (this.responsive)
+        {
+            div group=new div().addClass("table-responsive");
+            group.addInner(new Element()
+            {
+                @Override
+                public void compose(Composer composer) throws Throwable
+                {
+                    composeThis(composer);
+                }
+            });
+            group.compose(composer);
+        }
+        else
+        {
+            super.compose(composer);
+        }
+        
     }
     
 }

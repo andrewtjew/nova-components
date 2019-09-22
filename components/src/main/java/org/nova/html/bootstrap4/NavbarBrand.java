@@ -11,7 +11,7 @@ public class NavbarBrand extends StyleComponent<NavbarBrand>
         attr("href",href);
         if (imageURL!=null)
         {
-            addInner(new img().src(imageURL).height(imageWidth).width(imageHeight));
+            addInner(new img().src(imageURL).width(imageWidth).height(imageHeight));
         }
         
     }

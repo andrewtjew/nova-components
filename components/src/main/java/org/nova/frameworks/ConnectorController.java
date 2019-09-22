@@ -8,7 +8,7 @@ import org.nebula.sqlserver.DatabaseUpdatePermissions;
 import org.nebula.sqlserver.DatabaseUpdater;
 import org.nova.annotations.Description;
 import org.nova.configuration.Configuration;
-import org.nova.html.DataTables.DataTableOld;
+import org.nova.html.DataTables.OperatorDataTable;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.tags.hr;
@@ -79,7 +79,7 @@ public class ConnectorController
         track(connector.getName(),connector);
     }
     
-    public Connector prepareConnector(Trace parent,String configurationNameFragment) throws Throwable
+    public Connector createConnector(Trace parent,String configurationNameFragment) throws Throwable
     {
         Configuration configuration=this.application.getConfiguration();
         DatabaseUpdatePermissions permisssions=configuration.getJSONObject("Application.Database.MigrationPermission."+configurationNameFragment,new DatabaseUpdatePermissions(),DatabaseUpdatePermissions.class);
@@ -101,7 +101,7 @@ public class ConnectorController
     public Element viewAll(@QueryParam("minimalResetDurationS") @DefaultValue("10.0") double minimalResetDurationS) throws Throwable
     {
         OperatorPage page=this.application.buildOperatorPage("View Connector Stats");
-        DataTableOld table=page.content().returnAddInner(new DataTableOld(page.head()));
+        OperatorDataTable table=page.content().returnAddInner(new OperatorDataTable(page.head()));
         table.lengthMenu(-1,40,60,100);
         TableHeader header=new TableHeader();
         header.add("Name");
@@ -216,7 +216,7 @@ public class ConnectorController
     public Element viewUsage(@DefaultValue("1.0") @QueryParam("minimalResetDurationS") double minimalResetDurationS) throws Throwable
     {
         OperatorPage page=this.application.buildOperatorPage("View Connector Pools");
-        DataTableOld table=page.content().returnAddInner(new DataTableOld(page.head()));
+        OperatorDataTable table=page.content().returnAddInner(new OperatorDataTable(page.head()));
         table.lengthMenu(-1,40,60,100);
         TableHeader header=new TableHeader();
         header.add("Name");

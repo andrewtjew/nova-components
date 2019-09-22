@@ -1,8 +1,8 @@
 package org.nova.services;
 import org.eclipse.jetty.http.HttpStatus;
 import org.nova.annotations.Description;
+import org.nova.concurrent.TimeBase;
 import org.nova.concurrent.TimerTask;
-import org.nova.concurrent.TimerTask.TimeBase;
 import org.nova.frameworks.ServerApplication;
 import org.nova.frameworks.ServerApplicationUtils;
 import org.nova.http.client.JSONClient;

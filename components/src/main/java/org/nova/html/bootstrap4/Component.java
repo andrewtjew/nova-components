@@ -2,7 +2,6 @@ package org.nova.html.bootstrap4;
 
 import org.nova.html.bootstrap4.classes.DeviceClass;
 import org.nova.html.bootstrap4.classes.Float_;
-import org.nova.html.bootstrap4.classes.Trigger;
 import org.nova.html.elements.GlobalEventTagElement;
 
 public abstract class Component<ELEMENT extends Component<ELEMENT>> extends GlobalEventTagElement<ELEMENT> 
@@ -52,6 +51,12 @@ public abstract class Component<ELEMENT extends Component<ELEMENT>> extends Glob
         }
         return (ELEMENT)this;
     }
+
+    public ELEMENT addClass(ClassBuilder classBuilder)
+    {
+        addClass(classBuilder.toString());
+        return (ELEMENT)this;
+    }
     
     public ELEMENT col(DeviceClass deviceClass,int columns)
     {
@@ -78,11 +83,13 @@ public abstract class Component<ELEMENT extends Component<ELEMENT>> extends Glob
     {
         return addClass("form-control");
     }
+    /*
     public ELEMENT popoverTrigger(Trigger value)
     {
         attr("data-trigger",value);
         return (ELEMENT)this;
     }
+    */
     public ELEMENT tooltip(String title)
     {
         attr("data-toggle","tooltip");

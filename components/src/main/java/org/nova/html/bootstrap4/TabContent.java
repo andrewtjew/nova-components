@@ -1,6 +1,6 @@
 package org.nova.html.bootstrap4;
 
-public class TabContent extends Component<TabContent>
+public class TabContent extends StyleComponent<TabContent>
 {
     public TabContent()
     {

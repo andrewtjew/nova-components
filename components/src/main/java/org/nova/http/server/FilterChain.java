@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.jetty.http.HttpStatus;
 import org.nova.http.server.annotations.ParamName;
+import org.nova.json.ObjectMapper;
 import org.nova.tracing.Trace;
 
 public class FilterChain
@@ -42,6 +43,17 @@ public class FilterChain
     		}
     		if (type==int.class)
     		{
+    		    if (value==null)
+    		    {
+    		        return 0;
+    		    }
+                if (value.length()==0)
+                {
+                    if (parameterInfo.getDefaultValue()!=null)
+                    {
+                        return parameterInfo.getDefaultValue();
+                    }
+                }
     			return Integer.parseInt(value);
     		}
             if (type==Integer.class)
@@ -60,7 +72,14 @@ public class FilterChain
     		{
                 if (value==null)
                 {
-                    return null;
+                    return 0L;
+                }
+                if (value.length()==0)
+                {
+                    if (parameterInfo.getDefaultValue()!=null)
+                    {
+                        return parameterInfo.getDefaultValue();
+                    }
                 }
     			return Long.parseLong(value);
     		}
@@ -78,6 +97,17 @@ public class FilterChain
             }
     		if (type==short.class)
     		{
+                if (value==null)
+                {
+                    return (short)0;
+                }
+                if (value.length()==0)
+                {
+                    if (parameterInfo.getDefaultValue()!=null)
+                    {
+                        return parameterInfo.getDefaultValue();
+                    }
+                }
     			return Short.parseShort(value);
     		}
             if (type==Short.class)
@@ -94,6 +124,17 @@ public class FilterChain
             }
     		if (type==float.class)
     		{
+                if (value==null)
+                {
+                    return 0.0f;
+                }
+                if (value.length()==0)
+                {
+                    if (parameterInfo.getDefaultValue()!=null)
+                    {
+                        return parameterInfo.getDefaultValue();
+                    }
+                }
     			return Float.parseFloat(value);
     		}
             if (type==Float.class)
@@ -110,6 +151,17 @@ public class FilterChain
             }
     		if (type==double.class)
     		{
+                if (value==null)
+                {
+                    return 0.0;
+                }
+                if (value.length()==0)
+                {
+                    if (parameterInfo.getDefaultValue()!=null)
+                    {
+                        return parameterInfo.getDefaultValue();
+                    }
+                }
     			return Double.parseDouble(value);
     		}
             if (type==Double.class)
@@ -126,6 +178,17 @@ public class FilterChain
             }
     		if (type==boolean.class)
     		{
+                if (value==null)
+                {
+                    return false;
+                }
+                if (value.length()==0)
+                {
+                    if (parameterInfo.getDefaultValue()!=null)
+                    {
+                        return parameterInfo.getDefaultValue();
+                    }
+                }
                 if ("on".equals(value))
                 {
                     return true;
@@ -172,12 +235,13 @@ public class FilterChain
                 }
                 return new BigDecimal(value);
             }
+            return ObjectMapper.readObject(value, type);
 	    }
 	    catch (Throwable t)
 	    {
             throw new Exception("Error parsing parameter "+parameterInfo.getName()+", value="+value,t);
 	    }
-        throw new Exception("Unable to parse parameter "+parameterInfo.getName()+", value="+value);
+//        throw new Exception("Unable to parse parameter "+parameterInfo.getName()+", value="+value);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -348,7 +412,7 @@ public class FilterChain
             {
                 ParameterInfo parameterInfo=parameterInfos[i];
                 if (parameterInfo.getParameterType().isPrimitive())
-                {
+                { 
                     if (parameters[i]==null)
                     {
                         sb.append(", missing "+parameterInfo.getName());
@@ -358,7 +422,7 @@ public class FilterChain
             Exception exception=new Exception(sb.toString(),e);
             exception.printStackTrace();
             throw exception;
-        }
+        } 
 		catch (IllegalAccessException e)
 		{
 			throw e;

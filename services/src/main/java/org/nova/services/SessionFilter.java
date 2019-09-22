@@ -28,11 +28,11 @@ public class SessionFilter extends Filter
         this.cookieTokenKey=cookieTokenKey;
         this.abnormalSessionHandlers=new HashMap<>();
         this.abnormalSessionHandlers.put("*/*", new DefaultAbnormalSessionRequestHandler());
-        for (AbnormalSessionRequestHandling responder:abnormalSessionHandlers)
+        for (AbnormalSessionRequestHandling handler:abnormalSessionHandlers)
         {
-            for (String mediaType:responder.getMediaTypes())
+            for (String mediaType:handler.getMediaTypes())
             {
-                this.abnormalSessionHandlers.put(mediaType, responder);
+                this.abnormalSessionHandlers.put(mediaType, handler);
                 
             }
         }

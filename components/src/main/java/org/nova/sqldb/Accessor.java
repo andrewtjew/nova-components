@@ -35,7 +35,7 @@ public class Accessor extends Resource
 		this.connector = connector;
 	}
 
-	public Transaction beginTransaction(String traceCategory) throws Exception
+	public Transaction beginTransaction(String traceCategory) throws Throwable
 	{
 		synchronized (this)
 		{

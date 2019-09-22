@@ -2,6 +2,7 @@ package org.nova.html.bootstrap4;
 
 import org.nova.html.enums.autocomplete;
 import org.nova.html.tags.input_number;
+import org.nova.html.tags.input_text;
 
 public class FormControlInputNumber extends FormControlInputComponent<FormControlInputNumber>
 {
@@ -69,6 +70,18 @@ public class FormControlInputNumber extends FormControlInputComponent<FormContro
     public FormControlInputNumber placeholder(String text) //text, search, url, tel, email, and password.
     {
         return attr("placeholder",text);
+    }
+    public FormControlInputNumber autocomplete(autocomplete autocomplete) //text, search, url, tel, email, password, datepickers, range, and color.
+    {
+        return attr("autocomplete",autocomplete);
+    }
+    public FormControlInputNumber autocomplete(boolean autocomplete)
+    {
+        if (autocomplete)
+        {
+            attr("autocomplete");
+        }
+        return this;
     }
 }
 

@@ -14,7 +14,7 @@ public class ModalClose extends Button
 
     public ModalClose()
     {
-        this(null);
+        this("X");
     }
     
 }

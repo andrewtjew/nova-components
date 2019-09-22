@@ -10,6 +10,7 @@ public enum Code
     PrintColumn,
     PrintLine,
     Print,
+    PrintMachineCode,
     PrintPageCounter,
     BeginFooter,
     EndFooter,
@@ -20,5 +21,10 @@ public enum Code
     NewPage,
     NewLines,
     SetNewLineSpacing,
+    SetCursor,
+    MoveCursor,
+    PrintParagraph,
+    EndPage,
+    DrawURLImage,
     
 }

@@ -6,7 +6,10 @@ public enum Flex
     grow("grow"), 
     row_reverse("row-reverse"), 
     column("column"), 
-    column_reverse("column-reverse"), 
+    column_reverse("column-reverse"),
+    nowrap("nowrap"),
+    wrap("wrap"),
+    wrap_reverse("wrap-reverse"),
     ;
     private String value;
 

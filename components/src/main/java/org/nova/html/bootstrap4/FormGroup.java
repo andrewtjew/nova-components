@@ -35,9 +35,20 @@ public class FormGroup extends Component<FormGroup>
     public FormGroup addLabelRow(String labelText,TagElement<?> element)
     {
 //        FormLabel label=returnAddInner(new FormLabel(this.deviceClass,this.labelSize)).addInner(labelText).text(TextAlign.right);
-        FormLabel label=returnAddInner(new FormLabel(this.deviceClass,this.labelSize)).addInner(labelText).text(TextAlign.right);
-        Item item=returnAddInner(new Item()).addInner(element).col(this.deviceClass,12-this.labelSize);
-        label.for_(item);
+        if (this.deviceClass!=null)
+        {
+            FormLabel label=returnAddInner(new FormLabel(this.deviceClass,this.labelSize)).addInner(labelText).text(TextAlign.right);
+            Item item=returnAddInner(new Item()).addInner(element).col(this.deviceClass,12-this.labelSize);
+            label.for_(item);
+        }
+        else
+        {
+            FormLabel label=returnAddInner(new FormLabel()).addInner(labelText).text(TextAlign.right);
+            Item item=returnAddInner(new Item()).addInner(element);
+            label.for_(item);
+            
+        }
+        
         return this;
     }
 

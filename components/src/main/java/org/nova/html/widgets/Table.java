@@ -98,7 +98,7 @@ public class Table extends Element
     {
         this.tbody.addInner(row);
     }
-    public void addRowInline(Object...objects)
+    public void addRow(Object...objects)
     {
         this.tbody.addInner(new TableRow().add(objects));
     }

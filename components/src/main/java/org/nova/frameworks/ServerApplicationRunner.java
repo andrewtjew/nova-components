@@ -31,7 +31,7 @@ public class ServerApplicationRunner //
         ServerApplication instantiate(CoreEnvironment coreEnvironment,HttpServer operatorServer) throws Throwable;
     }
 
-    public static void main(String[] args,ServerApplicationInstantiator instantiator)
+    public static void main(String[] args,ServerApplicationInstantiator instantiator) throws Throwable
     {
         new ServerApplicationRunner().run(args,instantiator);
     }
@@ -67,29 +67,19 @@ public class ServerApplicationRunner //
         logger.log(t);
     }
     
-    public void run(String[] args,String configurationFileKey,ServerApplicationInstantiator instantiator)
+    public void run(String[] args,String configurationFileKey,ServerApplicationInstantiator instantiator) throws Throwable
     {
         Configuration configuration=ConfigurationReader.read(args,configurationFileKey);
-        if (configuration==null)
-        {
-            System.err.println("Cannot locate configuration file.");
-            return;
-        }
         run(configuration,instantiator);
     }
-    public void run(String[] args,ServerApplicationInstantiator instantiator)
+    public void run(String[] args,ServerApplicationInstantiator instantiator) throws Throwable
     {
         run(args,null,instantiator);
     }
     
-    public void start(String[] args,String configurationFileKey,ServerApplicationInstantiator instantiator)
+    public void start(String[] args,String configurationFileKey,ServerApplicationInstantiator instantiator) throws Throwable
     {
         Configuration configuration=ConfigurationReader.read(args,configurationFileKey);
-        if (configuration==null)
-        {
-            System.err.println("Cannot locate configuration files.");
-            return;
-        }
         start(configuration,instantiator);
     }
 
@@ -155,7 +145,7 @@ public class ServerApplicationRunner //
         }
     } 
 
-    @GET
+    @GET 
     @Path("/operator/exception")
     public void startupException(Context context) throws Throwable
     {

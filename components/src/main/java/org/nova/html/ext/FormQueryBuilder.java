@@ -3,11 +3,16 @@ package org.nova.html.ext;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+import org.nova.html.elements.InputElement;
 import org.nova.html.elements.TagElement;
 import org.nova.html.tags.input_checkbox;
+import org.nova.html.tags.input_hidden;
+import org.nova.html.tags.input_number;
 import org.nova.html.tags.input_radio;
+import org.nova.html.tags.input_text;
 import org.nova.html.tags.script;
 import org.nova.html.tags.select;
+import org.nova.http.client.PathAndQuery;
 
 public class FormQueryBuilder
 {
@@ -48,14 +53,14 @@ public class FormQueryBuilder
     }
     */
     
-    public FormQueryBuilder addQuery(String name,String id,String value)
+    public FormQueryBuilder value(String name,String id,String value)
     {
         addName(name);
         this.sb.append("document.getElementById("+QUOTE+id+QUOTE+")."+value);
         return this;
     }
     
-    public FormQueryBuilder addValueQuery(String name,Object value) throws UnsupportedEncodingException
+    public FormQueryBuilder add(String name,Object value) throws UnsupportedEncodingException
     {
         if (value==null)
         {
@@ -71,44 +76,69 @@ public class FormQueryBuilder
         this.sb.append(QUOTE);
         return this;
     }
-//    public FormQueryBuilder addQuery(InputElement<?> element,String value)
-//    {
-//        return addQuery(element.name(),element.id(),"value");
-//    }
-//    
-    public FormQueryBuilder addQuery(input_checkbox element)
+    public FormQueryBuilder checked(InputElement<?> element)
     {
-        return addQuery(element.name(),element.id(),"checked");
+        return value(element.name(),element.id(),"checked");
     }
-    public FormQueryBuilder addCheckedQuery(String name,TagElement<?> element)
+    public FormQueryBuilder checked(input_checkbox element)
     {
-        return addQuery(name,element.id(),"checked");
+        return value(element.name(),element.id(),"checked");
     }
-    public FormQueryBuilder addQuery(String name,TagElement<?> element)
+    public FormQueryBuilder checked(input_radio element)
     {
-        return addQuery(name,element.id(),"value");
+        return value(element.name(),element.id(),"checked");
     }
-    public FormQueryBuilder addQuery(input_radio element)
+    public FormQueryBuilder value(InputElement<?> element)
     {
-        return addQuery(element.name(),element.id(),"checked");
+        return value(element.name(),element.id(),"value");
     }
-    public FormQueryBuilder addQuery(select element)
+    public FormQueryBuilder value(input_number element)
+    {
+        return value(element.name(),element.id(),"value");
+    }
+    public FormQueryBuilder value(input_text element)
+    {
+        return value(element.name(),element.id(),"value");
+    }
+    public FormQueryBuilder value(input_hidden element)
+    {
+        return value(element.name(),element.id(),"value");
+    }
+    public FormQueryBuilder value(String name,TagElement<?> element)
+    {
+        return value(name,element.id(),"value");
+    }
+    public FormQueryBuilder selected(select element)
     {
         String document="document.getElementById("+QUOTE+element.id()+QUOTE+")";
         addName(element.name());
         this.sb.append(document+".options["+document+".selectedIndex].value");
         return this;
     }
-    
+    public FormQueryBuilder selected(String name,TagElement<?> element)
+    {
+        String document="document.getElementById("+QUOTE+element.id()+QUOTE+")";
+        addName(name);
+        this.sb.append(document+".options["+document+".selectedIndex].value");
+        return this;
+    }
+
+    /*
     public String generateFormQuery(String path)
+    {
+        return 
+    }
+    */
+
+    public String generateFormQuery(PathAndQuery pathAndQuery)
     {
         if (this.sb.length()==0)
         {
             if (this.parent!=null)
             {
-                return this.parent.generateFormQuery(path);
+                return this.parent.generateFormQuery(pathAndQuery);
             }
-            return QUOTE+path+QUOTE;
+            return QUOTE+pathAndQuery.toString()+QUOTE;
         }
         if (this.parent!=null)
         {
@@ -116,13 +146,18 @@ public class FormQueryBuilder
             {
                 if (this.sb.length()==0)
                 {
-                    return this.parent.generateFormQuery(path);
+                    return this.parent.generateFormQuery(pathAndQuery);
                 }
-                return this.parent.generateFormQuery(path)+'+'+QUOTE+'&'+this.sb.toString();
+                return this.parent.generateFormQuery(pathAndQuery)+'+'+QUOTE+'&'+this.sb.toString();
             }
         }
-        return QUOTE+path+"?"+this.sb.toString();
+        if (pathAndQuery.containQueries())
+        {
+            return QUOTE+pathAndQuery.toString()+"&"+this.sb.toString();
+        }
+        return QUOTE+pathAndQuery.toString()+"?"+this.sb.toString();
     }
+
     
 //    public FormQueryBuilder onClickLocation(String path,GlobalEventTagElement<?> element)
 //    {
@@ -136,19 +171,19 @@ public class FormQueryBuilder
 //        return this;
 //    }
 
-    public String generateLocation(String path)
+    public String generateLocation(PathAndQuery pathAndQuery)
     {
-        return "window.location="+generateFormQuery(path);
+        return "window.location="+generateFormQuery(pathAndQuery);
     }
 
-    public String generateCall(String function,String path)
+    public String generateCall(String function,PathAndQuery pathAndQuery)
     {
-        return function+"("+generateFormQuery(path)+")";
+        return function+"("+generateFormQuery(pathAndQuery)+")";
     }
     
-    public script generateScript(String functionName,String path)
+    public script generateScript(String functionName,PathAndQuery pathAndQuery)
     {
-        String text="function "+functionName+"(){"+generateLocation(path)+";}";
+        String text="function "+functionName+"(){"+generateLocation(pathAndQuery)+";}";
         return new script().addInner(text);
     }
     

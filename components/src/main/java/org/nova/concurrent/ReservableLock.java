@@ -18,6 +18,11 @@ public class ReservableLock
         this.delayMs=delayMs;
         this.delayInstantMs=0;
     }
+    public ReservableLock(TraceManager traceManager)
+    {
+        this(traceManager, 0);
+    }
+    
     
     public boolean isOpen()
     {
@@ -37,7 +42,7 @@ public class ReservableLock
             return true;
         }        
     }
-    public LockReservation openReservation(Trace parent,String categoryOverride)
+    public LockReservedState openReservation(Trace parent,String categoryOverride)
     {
         if (categoryOverride==null)
         {
@@ -54,7 +59,7 @@ public class ReservableLock
                     open=false;
                 }
             }
-            LockReservation context=new LockReservation(this, open, trace);
+            LockReservedState context=new LockReservedState(this, open, trace);
             this.reserved=true;
             return context;
         }        
@@ -142,12 +147,15 @@ public class ReservableLock
         }
     }
     
-    public void unlock()
+    public Object unlock()
     {
+        Object object;
         synchronized(this)
         {
+            object=this.object;
             this.object=null;
         }
+        return object;
     }
     
 }

@@ -14,7 +14,16 @@ public class TableHeading extends StyleComponent<TableHeading>
         super("thead","table");
         this.tr=returnAddInner(new tr());
     }
-    
+    public TableHeading light()
+    {
+        addClass("thead-light");
+        return this;
+    }
+    public TableHeading dark()
+    {
+        addClass("thead-dark");
+        return this;
+    }
     public TableHeading add(Style style,Element element)
     {
         this.tr.addInner(new th().style(style).addInner(element));

@@ -116,8 +116,16 @@ public class PathAndQuery
         this.sb.append(this.separator).append(fragment);
         return this;
     }
+    public boolean containQueries()
+    {
+        return this.separator=='&';
+    }
 	public String toString()
 	{
 		return this.sb.toString();
+	}
+	public char getSeparator()
+	{
+	    return this.separator;
 	}
 }

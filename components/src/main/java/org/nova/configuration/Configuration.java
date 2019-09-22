@@ -135,7 +135,7 @@ public class Configuration
         }
         return Double.parseDouble(value);
     }
-    public Double getNulllableDoubleValue(String name,Double defaultValue)
+    public Double getNullableDoubleValue(String name,Double defaultValue)
     {
         String value=getValue(name,defaultValue);
         if (value==null)
@@ -241,10 +241,7 @@ public class Configuration
             throw new NumberFormatException("Overflow. value="+value);
         }
         return scaledNumber;
-        
     }
-    
-    
     
 	public long getLongValue(String name) throws Exception
 	{

@@ -6,11 +6,16 @@ public class TextContentWriter extends ContentWriter<String>
 {
 	final private String mediaType;
 	
-	public TextContentWriter(String mediaType)
-	{
-		this.mediaType=mediaType;
-	}
-	
+    public TextContentWriter(String mediaType)
+    {
+        this.mediaType=mediaType;
+    }
+    
+    public TextContentWriter()
+    {
+        this("text/plain");
+    }
+    
 	@Override
 	public String getMediaType()
 	{

@@ -41,5 +41,5 @@ public class DateTimeRangePickerOptions
     public String startDate;
     public String endDate;
     public DateTimeRangeLocale locale;
-    public DateTimeRange[] ranges;
+    public DateTimeLabelRange[] ranges;
 }

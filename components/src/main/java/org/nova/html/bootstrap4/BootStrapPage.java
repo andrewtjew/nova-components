@@ -27,7 +27,10 @@ public class BootStrapPage extends Element
     	html html=this.content.returnAddInner(new html().lang(lang));
     	
     	this.head=html.returnAddInner(new Head());
-    	this.head.title(title);
+    	if (title!=null)
+    	{
+    	    this.head.title(title);
+    	}
     	if (compatible!=null)
     	{
     	    this.head().addInner(new meta().http_equiv_content(http_equiv.X_UA_compatible,compatible));
@@ -36,11 +39,10 @@ public class BootStrapPage extends Element
     	this.head.addInner(new meta().charset(character_set.UTF_8));
         this.head.addInner(new link().rel(link_rel.stylesheet).href("https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"));
         
-//        this.head.add(new script().src("https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"));
         this.head.addInner(new script().src("https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"));
-      this.head.addInner(new script().src("https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"));
-//        head().add(new script().src("https://code.jquery.com/jquery-1.12.4.js"));
+        this.head.addInner(new script().src("https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"));
         this.head.addInner(new script().src("https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"));
+        this.head.addInner(new script().src("/resources/html/js/ie.js"));
     	this.body=html.returnAddInner(new body());
 	}
 
@@ -49,9 +51,13 @@ public class BootStrapPage extends Element
         this(title,lang,null);
     }  
     public BootStrapPage(String title)
-	{
-    	this(title,"en");
-	}
+    {
+        this(title,"en");
+    }
+    public BootStrapPage()
+    {
+        this(null);
+    }
     public Head head()
     {
     	return this.head;

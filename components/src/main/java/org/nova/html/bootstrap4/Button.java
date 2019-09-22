@@ -8,5 +8,11 @@ public class Button extends ButtonComponent<Button>
         super("button");
         attr("type","button");
     }
+    public Button(String label)
+    { 
+        super("button");
+        attr("type","button");
+        addInner(label);
+    }
 
 }

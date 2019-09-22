@@ -29,4 +29,10 @@ public class LinkButton extends ButtonComponent<LinkButton>
         return this;
     }
     */
+    
+    public LinkButton target(String target)
+    {
+        attr("target",target);
+        return this;
+    }
 }

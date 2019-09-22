@@ -373,10 +373,28 @@ public class HttpServer
 					}
 				}
 			}
-			catch (Throwable e)
+			catch (StatusException e)
 			{
-			    throw new Exception(requestHandlerWithParameters.requestHandler.getKey(),e);
+                if (e.headers != null)
+                {
+                    for (Header header : e.headers)
+                    {
+                        servletResponse.setHeader(header.getName(), header.getValue());
+                    }
+                }
+                if (e.cookies!=null)
+                {
+                    for (Cookie cookie:e.cookies)
+                    {
+                        servletResponse.addCookie(new javax.servlet.http.Cookie(cookie.getName(),cookie.getValue()));
+                    }
+                }
+                servletResponse.setStatus(e.statusCode);
 			}
+            catch (Throwable e)
+            {
+                throw new Exception(requestHandlerWithParameters.requestHandler.getKey(),e);
+            }
 			finally
 			{
 				if (decoderContext!=null)

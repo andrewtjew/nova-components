@@ -1,6 +1,6 @@
 package org.nova.frameworks;
 
-import org.nova.html.DataTables.DataTableOld;
+import org.nova.html.DataTables.OperatorDataTable;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.operator.MoreButton;
@@ -85,7 +85,7 @@ public class LatencyFilterController
         }
         {
             Panel3 panel=page.content().returnAddInner(new Panel3(page.head(),"Handler Latencies"));
-            DataTableOld table=panel.content().returnAddInner(new DataTableOld(page.head()));
+            OperatorDataTable table=panel.content().returnAddInner(new OperatorDataTable(page.head()));
             table.lengthMenu(-1,40,60,100);
             TableHeader header=new TableHeader();
             header.add("Method","Path","Count","Total Before Execute latencies (ms)","Total After Execute latencies (ms)","Enable","Before Execute Minimum Latency (ms)","Before Execute Maximum Latency (ms)","After Execute Minimum Latency (ms)","After Execute Maximum Latency (ms)","");

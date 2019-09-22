@@ -5,6 +5,7 @@ public enum TextAlign
     left("left"), 
     center("center"), 
     right("right"), 
+    justify("justify"), 
     ;
     
     private String value;

@@ -1,5 +1,9 @@
 package org.nova.html.bootstrap4.DataTables;
 
+import java.util.ArrayList;
+
+import org.nova.html.DataTables.ColumnDef;
+import org.nova.html.DataTables.DataTableColumnOrder;
 import org.nova.html.DataTables.DataTableOptions;
 import org.nova.html.bootstrap4.StyleComponent;
 import org.nova.html.bootstrap4.TableRow;
@@ -13,13 +17,14 @@ import org.nova.html.tags.tr;
 import org.nova.html.widgets.ObjectBuilder;
 import org.nova.html.widgets.TableFooter;
 import org.nova.html.widgets.TableHeader;
+import org.nova.utils.TypeUtils;
 
 //!!! Requires jquery
 
 public class DataTableBootstrap4 extends StyleComponent<DataTableBootstrap4>
 {
     final private tbody tbody;
-    final private DataTableOptions options;
+    private DataTableOptions options;
 
     private TableHeader header;
     private TableFooter footer;
@@ -54,13 +59,64 @@ public class DataTableBootstrap4 extends StyleComponent<DataTableBootstrap4>
             head.add(key,link);
         }
     }
-    public void setHeader(TableHeader header)
+    
+    public DataTableBootstrap4 bordered()
+    {
+        addClass("table-bordered");
+        return this;
+    }
+    
+    public DataTableBootstrap4 striped()
+    {
+        addClass("table-striped");
+        return this;
+    }
+    
+    public DataTableBootstrap4 setHeader(TableHeader header)
     {
         this.header=header;
+        return this;
     }
-    public void setHeader(Object...objects)
+    public DataTableBootstrap4 setHeader(Object...objects)
     {
         this.header=new TableHeader().add(objects);
+        return this;
+    }
+    public DataTableBootstrap4 setHeaderWithBlankColumnsNotOrderable(Object...objects)
+    {
+        if (this.options==null)
+        {
+            this.options=new DataTableOptions();
+        }
+        if (this.options.columnDefs==null)
+        {
+            ArrayList<Integer> list=new ArrayList<>();
+            for (int i=0;i<objects.length;i++)
+            {
+                Object object=objects[i];
+                if (object==null)
+                {
+                    list.add(i);
+                }
+                else if (object instanceof String)
+                {
+                    if (((String)object).length()==0)
+                    {
+                        list.add(i);
+                    }
+                }
+            }
+            if (list.size()>0)
+            {
+                ColumnDef columnDef=new ColumnDef(TypeUtils.intListToArray(list));
+                columnDef.orderable=false;
+                columnDef.searchable=false;
+                this.options.columnDefs=new ColumnDef[]{columnDef}; 
+            }
+        }
+        
+        this.header=new TableHeader().add(objects);
+        return this;
     }
     public TableRow returnAddRow()
     {
@@ -68,25 +124,30 @@ public class DataTableBootstrap4 extends StyleComponent<DataTableBootstrap4>
         this.tbody.addInner(row);
         return row;
     }
-    public void addRow(TableRow row)
+    public DataTableBootstrap4 addRow(TableRow row)
     {
         this.tbody.addInner(row);
+        return this;
     }
-    public void addRow(tr row)
+    public DataTableBootstrap4 addRow(tr row)
     {
         this.tbody.addInner(row);
+        return this;
     }
-    public void addRowInline(Object...objects)
+    public DataTableBootstrap4 addRow(Object...objects)
     {
         this.tbody.addInner(new TableRow().add(objects));
+        return this;
     }
-    public void setFooter(TableFooter footer)
+    public DataTableBootstrap4 setFooter(TableFooter footer)
     {
         this.footer=footer;
+        return this;
     }
-    public void setFooterInline(Object...objects)
+    public DataTableBootstrap4 setFooter(Object...objects)
     {
         this.footer=new TableFooter().add(objects);
+        return this;
     }
     
     public tbody tbody()

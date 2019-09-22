@@ -38,18 +38,6 @@ public class Param
 		{
 			return Types.VARCHAR;
 		}
-		else if ((type==Byte.class)||(type==byte.class))
-		{
-			return Types.TINYINT;
-		}
-		else if ((type==Short.class)||(type==short.class))
-		{
-			return Types.SMALLINT;
-		}
-		else if ((type==Integer.class)||(type==int.class))
-		{
-			return Types.INTEGER;
-		}
 		else if ((type==Long.class)||(type==long.class))
 		{
 			return Types.BIGINT;
@@ -62,10 +50,18 @@ public class Param
 		{
 			return Types.DOUBLE;
 		}
+        else if ((type==Integer.class)||(type==int.class))
+        {
+            return Types.INTEGER;
+        }
 		else if (type==byte[].class)
 		{
 			return Types.VARBINARY;
 		}
+        else if (type==java.sql.Timestamp.class)
+        {
+            return Types.TIMESTAMP;
+        }
 		else if (type==java.sql.Date.class)
 		{
 			return Types.DATE;
@@ -74,18 +70,26 @@ public class Param
 		{
 			return Types.TIME;
 		}
-		else if (type==java.sql.Timestamp.class)
-		{
-			return Types.TIMESTAMP;
-		}
+        else if ((type==boolean.class)||(type==Boolean.class))
+        {
+            return Types.BIT;
+        }
 		else if (type==BigInteger.class)
 		{
-			return Types.DECIMAL;
+			return Types.BIGINT;
 		}
 		else if (type==BigDecimal.class)
 		{
 			return Types.DECIMAL;
 		}
+        else if ((type==Byte.class)||(type==byte.class))
+        {
+            return Types.TINYINT;
+        }
+        else if ((type==Short.class)||(type==short.class))
+        {
+            return Types.SMALLINT;
+        }
 		throw new Exception("Incompatible type. Name of outType: "+type.getCanonicalName());
 	}
 	

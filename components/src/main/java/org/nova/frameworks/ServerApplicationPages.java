@@ -106,7 +106,7 @@ import org.nova.http.server.RequestHandlerNotFoundLogEntry;
 import org.nova.http.server.RequestLogEntry;
 import org.nova.http.server.Response;
 import org.nova.http.server.HtmlContentWriter;
-import org.nova.html.DataTables.DataTableOld;
+import org.nova.html.DataTables.OperatorDataTable;
 import org.nova.html.attributes.Color;
 import org.nova.html.attributes.Size;
 import org.nova.html.attributes.Style;
@@ -195,7 +195,7 @@ import com.google.common.base.Strings;
 @ContentWriters({HtmlContentWriter.class, HtmlElementWriter.class})
 public class ServerApplicationPages
 {
-    static public class OperatorTable extends DataTableOld
+    static public class OperatorTable extends OperatorDataTable
     {
         public OperatorTable(Head head) throws Throwable
         {
@@ -295,7 +295,7 @@ public class ServerApplicationPages
 
         menuBar.add("/operator/httpServer/status/private","Servers","Private","Status");
         menuBar.add("/operator/httpServer/performance/private","Servers","Private","Last Performance");
-        menuBar.add("/operator/httpServer/allPerformance/private","Servers","Public","All Performance");
+        menuBar.add("/operator/httpServer/allPerformance/private","Servers","Private","All Performance");
         menuBar.add("/operator/httpServer/lastRequests/private","Servers","Private","Last Requests");
         menuBar.add("/operator/httpServer/lastExceptionRequests/private","Servers","Private","Last Requests With Exceptions");
         menuBar.add("/operator/httpServer/lastNotFounds/private","Servers","Private","Last Not Founds (404s)");
@@ -304,7 +304,7 @@ public class ServerApplicationPages
         
         menuBar.add("/operator/httpServer/status/operator","Servers","Operator","Status");
         menuBar.add("/operator/httpServer/performance/operator","Servers","Operator","Last Performance");
-        menuBar.add("/operator/httpServer/allPerformance/operator","Servers","Public","All Performance");
+        menuBar.add("/operator/httpServer/allPerformance/operator","Servers","Operator","All Performance");
         menuBar.add("/operator/httpServer/lastRequests/operator","Servers","Operator","Last Requests");
         menuBar.add("/operator/httpServer/lastExceptionRequests/operator","Servers","Operator","Last Requests With Exceptions");
         menuBar.add("/operator/httpServer/lastNotFounds/operator","Servers","Operator","Last Not Founds (404s)");
@@ -329,7 +329,7 @@ public class ServerApplicationPages
     public Element configuration() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Configuration"); 
-        DataTableOld table=page.content().returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         
         table.setHeader("Name","Value","Source");
         for (ConfigurationItem item : this.serverApplication.getConfiguration().getConfigurationItemSnapshot())
@@ -429,7 +429,7 @@ public class ServerApplicationPages
         if (meters.countMeterAttributeValues.size()>0)
         {
             Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Count Meters"));
-            DataTableOld table=accordion.content().returnAddInner(new OperatorTable(head));
+            OperatorDataTable table=accordion.content().returnAddInner(new OperatorTable(head));
             table.setHeader("Path","Count");
             for (MeterAttributeValue av:meters.countMeterAttributeValues.values())
             {
@@ -443,7 +443,7 @@ public class ServerApplicationPages
         if (meters.levelMeterAttributeValues.size()>0)
         {
             Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Level Meters"));
-            DataTableOld table=accordion.content().returnAddInner(new OperatorTable(head));
+            OperatorDataTable table=accordion.content().returnAddInner(new OperatorTable(head));
             table.setHeader("Path","Level","Base","Min","Min Instant","Max","Max Instant");
             for (MeterAttributeValue av:meters.levelMeterAttributeValues.values())
             {
@@ -453,16 +453,16 @@ public class ServerApplicationPages
                 row.add(sample.getLevel());
                 row.add(sample.getBaseLevel());
                 row.add(sample.getMinLevel());
-                row.add(sample.getMinLevel()<sample.getBaseLevel()?Utils.millisToLocalDateTimeString(sample.getMinLevelInstantMs()):"");
+                row.add(sample.getMinLevel()<sample.getBaseLevel()?DateTimeUtils.toSystemDateTimeString(sample.getMinLevelInstantMs()):"");
                 row.add(sample.getMaxLevel());
-                row.add(sample.getMaxLevel()>sample.getBaseLevel()?Utils.millisToLocalDateTimeString(sample.getMaxLevelInstantMs()):"");
+                row.add(sample.getMaxLevel()>sample.getBaseLevel()?DateTimeUtils.toSystemDateTimeString(sample.getMaxLevelInstantMs()):"");
                 table.addRow(row);
             }
         }
         if (meters.rateMeterAttributeValues.size()>0)
         {
             Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Rate Meters"));
-            DataTableOld table=accordion.content().returnAddInner(new OperatorTable(head));
+            OperatorDataTable table=accordion.content().returnAddInner(new OperatorTable(head));
             table.setHeader("Path","Rate","Total","Samples");
             for (MeterAttributeValue av:meters.rateMeterAttributeValues.values())
             {
@@ -478,7 +478,7 @@ public class ServerApplicationPages
         if (meters.longValueMeterAttributeValues.size()>0)
         {
             Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Long Value Meters"));
-            DataTableOld table=accordion.content().returnAddInner(new OperatorTable(head));
+            OperatorDataTable table=accordion.content().returnAddInner(new OperatorTable(head));
             table.setHeader("Path","Value","Average","Deviation","Rate","Min","Max","Samples");
             for (MeterAttributeValue av:meters.longValueMeterAttributeValues.values())
             {
@@ -498,7 +498,7 @@ public class ServerApplicationPages
         if (meters.recentSourceEventMeterAttributeValues.size()>0)
         {
             Accordion accordion=element.returnAddInner(new Accordion(head, null, true,"Count Meters"));
-            DataTableOld table=accordion.content().returnAddInner(new OperatorTable(head));
+            OperatorDataTable table=accordion.content().returnAddInner(new OperatorTable(head));
             table.setHeader("Path","Most recent","Most recent instant","State 1","Instant 1","State 2","Instant 2","Count");
             for (MeterAttributeValue av:meters.recentSourceEventMeterAttributeValues.values())
             {
@@ -535,14 +535,14 @@ public class ServerApplicationPages
     public Element futures() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Tasks");
-        DataTableOld table=page.content().returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
 
         table.setHeader("Category","Number","Duration","Waiting","Executing","Completed");
         Progress<?>[] array = this.serverApplication.getMultiTaskScheduler().getProgressSnapshot();
         long now=System.currentTimeMillis();
         for (Progress<?> item : array)
         {
-            table.addRowInline(item.getTrace().getCategory(),item.getTrace().getNumber()
+            table.addRow(item.getTrace().getCategory(),item.getTrace().getNumber()
                     ,Utils.millisToNiceDurationString((now-item.getTrace().getCreatedMs())),item.getWaiting(),item.getExecuting(),item.getCompleted());
         }
         return page;
@@ -553,7 +553,7 @@ public class ServerApplicationPages
     public Element statusBoard() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Source Event Board");
-        DataTableOld table=page.content().returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         table.lengthMenu(-1,20,40,60);
 
         
@@ -606,7 +606,7 @@ public class ServerApplicationPages
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Log Files");
         form_post form=page.content().returnAddInner(new form_post()).action("/operator/logging/files/download");
-        DataTableOld table=new DataTableOld(page.head());
+        OperatorDataTable table=new OperatorDataTable(page.head());
         page.content().addInner(table);
         table.lengthMenu(20,30,40,-1);
         table.setHeader("Name","","","");
@@ -650,7 +650,7 @@ public class ServerApplicationPages
     public Element viewLogCategories(@QueryParam("samplingInterval") @DefaultValue("10") double minimalResetDurationS) throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Log Categories");
-        DataTableOld table=page.content().returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
 
         table.setHeader("Category","Active","Count","Rate","Log Failures","Last Failure","");
         Logger[] loggers=this.serverApplication.getCoreEnvironment().getLoggers();
@@ -734,7 +734,7 @@ public class ServerApplicationPages
             table.setHeader(header);
             TableRow row=new TableRow();
 //            row.addInner(new td().style("width:3em;").addInner(entry.getNumber()));
-            row.add(new td().style("width:12em;").addInner(Utils.millisToLocalDateTimeString(entry.getCreated())));
+            row.add(new td().style("width:12em;").addInner(DateTimeUtils.toSystemDateTimeString(entry.getCreated())));
             row.add(new td().style("width:5em;").addInner(entry.getLogLevel()));
             row.add(entry.getMessage());
             table.addRow(row);
@@ -749,7 +749,7 @@ public class ServerApplicationPages
                     tr.addInner(new td().style("width:12em;").addInner(item.getName()));
                     if (item.getValue()!=null)
                     {
-                        tr.addInner(new td().style("width:100%;").addInner(new textarea().style("width:100%;").readonly().addInner(HtmlUtils.escapeXmlBrackets(item.getValue()))));
+                        tr.addInner(new td().style("width:100%;").addInner(new textarea().style("width:100%;").readonly().addInner(HtmlUtils.toHtmlText(item.getValue()))));
                     }
                     else
                     {
@@ -777,7 +777,7 @@ public class ServerApplicationPages
     public Element timers() throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage("Timers");
-        DataTableOld table=page.content().returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         table.setHeader("Category"
                 ,new th_title("#", "Number")
                 ,"Created","Status","Due","Countdown","Duration"
@@ -795,11 +795,11 @@ public class ServerApplicationPages
         TimerTask[] timerTasks = this.serverApplication.getTimerScheduler().getTimerTaskSnapshot();
         for (TimerTask timerTask : timerTasks)
         {
-            table.addRowInline(timerTask.getCategory()
+            table.addRow(timerTask.getCategory()
                     ,timerTask.getNumber()
-                    ,Utils.millisToLocalDateTimeString(timerTask.getCreated())
+                    ,DateTimeUtils.toSystemDateTimeString(timerTask.getCreated())
                     ,timerTask.getExecutableStatus()
-                    ,Utils.millisToLocalDateTime(timerTask.getDue())
+                    ,DateTimeUtils.toSystemDateTimeString(timerTask.getDue())
                     ,Utils.millisToDurationString(timerTask.getDue() - now)
                     ,Utils.nanosToDurationString(timerTask.getTotalDuration())
                     ,timerTask.getShedulingMode()
@@ -822,7 +822,7 @@ public class ServerApplicationPages
         add(new TitleText(trace.getCategory(),80)).
         add(new TitleText(trace.getDetails(),80)).
         add(
-        Utils.millisToLocalDateTime(trace.getCreatedMs()),
+        DateTimeUtils.toSystemDateTimeString(trace.getCreatedMs()),
         formatNsToMs(trace.getActiveNs()),
         formatNsToMs(trace.getWaitNs()),
         formatNsToMs(trace.getDurationNs()),
@@ -1287,7 +1287,7 @@ public class ServerApplicationPages
         String title=excludeWaiting?"Current Non Waiting Trace Summary":"Current Trace Summary";
         OperatorPage page=this.serverApplication.buildOperatorPage(title);
         Trace[] traces = this.serverApplication.getTraceManager().getCurrentTraces();
-        DataTableOld table=page.content().returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         
         TableHeader header=new TableHeader();
         writeTraceRowHeading(header);
@@ -1344,7 +1344,7 @@ public class ServerApplicationPages
         String heading=excludeWaiting?"Current Non Waiting Trace Samples":"Current Trace Samples";
         OperatorPage page=this.serverApplication.buildOperatorPage(heading);
         CategorySample[] samples=this.serverApplication.getTraceManager().sampleCurrentTraceCategories(excludeWaiting);
-        DataTableOld table=page.content().returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
 
         TableHeader header=new TableHeader();
 //        writeTraceRowHeading(header,excludeWaiting);
@@ -1389,7 +1389,7 @@ public class ServerApplicationPages
     private Element showSamples(String title,CategorySample[] samples) throws Throwable
     {
         OperatorPage page=this.serverApplication.buildOperatorPage(title);
-        DataTableOld table=page.content().returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
 
         TableHeader header=new TableHeader();
         addTraceSampleColumns(header);
@@ -1522,7 +1522,7 @@ public class ServerApplicationPages
         form_post form=page.content().returnAddInner(new form_post()).action("/operator/tracing/secondaryCategories/set");
         fieldset fieldset=form.returnAddInner(new fieldset());
         fieldset.addInner(new legend().addInner(legendText));
-        DataTableOld table=fieldset.returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=fieldset.returnAddInner(new OperatorTable(page.head()));
 
         TableHeader header=new TableHeader();
         header.add("");
@@ -1583,7 +1583,7 @@ public class ServerApplicationPages
         form_post form=page.content().returnAddInner(new form_post()).action("/operator/tracing/watchList/set");
         fieldset fieldset=form.returnAddInner(new fieldset());
         fieldset.addInner(new legend().addInner(legendText));
-        DataTableOld table=fieldset.returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=fieldset.returnAddInner(new OperatorTable(page.head()));
 
         TableHeader header=new TableHeader();
         header.add("");
@@ -1785,7 +1785,7 @@ public class ServerApplicationPages
 
     private TitleText formatNsToMs(long ns,long instantMs)
     {
-        return new TitleText(Utils.millisToNiceDurationString(ns/1000000)+" on "+Utils.millisToLocalDateTimeString(instantMs),format_3(ns/1.0e6));        
+        return new TitleText(Utils.millisToNiceDurationString(ns/1000000)+" on "+DateTimeUtils.toSystemDateTimeString(instantMs),format_3(ns/1.0e6));        
     }
     private static TitleText formatNsToMs(long durationNs)
     {
@@ -2056,7 +2056,7 @@ public class ServerApplicationPages
         OperatorPage page=this.serverApplication.buildOperatorPage("Sample All Traces");
 
         form_post form=page.content().returnAddInner(new form_post()).action("/operator/tracing/all/reset");
-        DataTableOld table=form.returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=form.returnAddInner(new OperatorTable(page.head()));
         TableHeader header=new TableHeader();
         header.add("");
         addTraceSampleColumns(header);
@@ -2161,7 +2161,7 @@ public class ServerApplicationPages
         if (this.serverApplication.getTraceManager().isEnableLastTraceWatching())
         {
             CategorySample[] samples=this.serverApplication.getTraceManager().sampleLastWatchTraces();
-            DataTableOld table=page.content().returnAddInner(new OperatorTable(page.head()));
+            OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
 
             TableHeader header=new TableHeader();
             addTraceSampleColumns(header);
@@ -2202,7 +2202,7 @@ public class ServerApplicationPages
         if (this.serverApplication.getTraceManager().isEnableLastTraceWatching())
         {
             CategorySample[] samples=this.serverApplication.getTraceManager().sampleWatchCategories();
-            DataTableOld table=page.content().returnAddInner(new OperatorTable(page.head()));
+            OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
 
             TableHeader header=new TableHeader();
             addTraceSampleColumns(header);
@@ -2243,7 +2243,7 @@ public class ServerApplicationPages
         if (this.serverApplication.getTraceManager().isEnableLastTraceWatching())
         {
             CategorySample[] samples=this.serverApplication.getTraceManager().sampleAndResetWatchCategories();
-            DataTableOld table=page.content().returnAddInner(new OperatorTable(page.head()));
+            OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
 
             TableHeader header=new TableHeader();
             addTraceSampleColumns(header);
@@ -2282,7 +2282,7 @@ public class ServerApplicationPages
     private div formatNsToMsWithInstantMsAsDiv(long ns,long instantMs)
     {
         double ms=ns/1.0e6;
-        return new div().addInner(formatNsToMs(ns)).addInner(" ms on "+Utils.millisToLocalDateTimeString(instantMs));
+        return new div().addInner(formatNsToMs(ns)).addInner(" ms on "+DateTimeUtils.toSystemDateTimeString(instantMs));
     }
     
     private div divFormatNsToMs(double ns)
@@ -2592,7 +2592,7 @@ public class ServerApplicationPages
             page.content().addInner(new br());
             page.content().addInner(new hr());
         }
-        DataTableOld table=page.content().returnAddInner(new DataTableOld(page.head()));
+        OperatorDataTable table=page.content().returnAddInner(new OperatorDataTable(page.head()));
         table.lengthMenu(10,25,50,100,-1);
         table.setHeader("#","Traces");
         for (int i = traces.length - 1; i >= 0; i--)
@@ -2603,7 +2603,7 @@ public class ServerApplicationPages
             {
                 traceWidget.enableSecondaryButton();
             }
-            table.addRowInline(trace.getNumber(),traceWidget);
+            table.addRow(trace.getNumber(),traceWidget);
         }
     }
     
@@ -2663,11 +2663,11 @@ public class ServerApplicationPages
         RateSample sample=requestRateMeter.sample();
         WideTable infoTable=page.content().returnAddInner(new WideTable(page.head()));
         infoTable.setHeader("Request Rate","Total Requests");
-        infoTable.addRowInline(DOUBLE_FORMAT.format(sample.getRate()),sample.getSamples());
+        infoTable.addRow(DOUBLE_FORMAT.format(sample.getRate()),sample.getSamples());
         
         page.content().addInner(new p());
         Panel requestHandlerPanel=page.content().returnAddInner(new Panel2(page.head(),"RequestHandlers"));
-        DataTableOld table=requestHandlerPanel.content().returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=requestHandlerPanel.content().returnAddInner(new OperatorTable(page.head()));
         TableHeader header=new TableHeader();
         header.add("Method")
             .add(new th_title("Count","Number of requests in last sample"))
@@ -2731,11 +2731,11 @@ public class ServerApplicationPages
         RateSample sample=requestRateMeter.sample();
         WideTable infoTable=page.content().returnAddInner(new WideTable(page.head()));
         infoTable.setHeader("Request Rate","Total Requests");
-        infoTable.addRowInline(DOUBLE_FORMAT.format(sample.getRate()),sample.getSamples());
+        infoTable.addRow(DOUBLE_FORMAT.format(sample.getRate()),sample.getSamples());
         
         page.content().addInner(new p());
         Panel requestHandlerPanel=page.content().returnAddInner(new Panel2(page.head(),"RequestHandlers"));
-        DataTableOld table=requestHandlerPanel.content().returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=requestHandlerPanel.content().returnAddInner(new OperatorTable(page.head()));
         TableHeader header=new TableHeader();
         header.add("Method")
             .add(new th_title("Count","Count of total requests"))
@@ -3054,12 +3054,12 @@ public class ServerApplicationPages
 //      textAccodion.content().addInner(new textarea().readonly().style("width:100%;resize:none;").addInner(text).rows(rows));
         if (htmlResponse)
         {
-            text=HtmlUtils.escapeXmlBrackets(text);
+            text=HtmlUtils.toHtmlText(text);
         }
         textAccodion.content().addInner(new textarea().readonly().style("width:100%;resize:none;").addInner(text).rows(rows));
     }
     
-    private void writeRequest(DataTableOld dataTable,OperatorPage page,RequestLogEntry entry) throws Exception
+    private void writeRequest(OperatorDataTable dataTable,OperatorPage page,RequestLogEntry entry) throws Exception
     {
         Head head=page.head();
         String title;
@@ -3089,7 +3089,7 @@ public class ServerApplicationPages
     }    
     private Element writeRequestLogEntries(Head head, RequestLogEntry[] entries) throws Throwable
     {
-        DataTableOld dataTable=new DataTableOld(head);
+        OperatorDataTable dataTable=new OperatorDataTable(head);
         dataTable.setHeader("Number","Entry");
         dataTable.lengthMenu(-1,5,10,25);
         for (RequestLogEntry entry : entries)
@@ -3157,7 +3157,7 @@ public class ServerApplicationPages
         HttpServer httpServer=getHttpServer(server);
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
         OperatorPage page=buildServerOperatorPage("Server Status",server);
-        DataTableOld table=page.content().returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         TableHeader header=new TableHeader();
         header.add("Method","Path","200","300","400","500","");
         table.setHeader(header);
@@ -3438,7 +3438,7 @@ public class ServerApplicationPages
         HttpServer httpServer=getHttpServer(server);
         OperatorPage page=buildServerOperatorPage("Methods",server);
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
-        DataTableOld table=page.content().returnAddInner(new OperatorTable(page.head()));
+        OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         table.setHeader("Method","Path","Description","Filters","");
         for (RequestHandler requestHandler : requestHandlers)
         {
@@ -3947,7 +3947,8 @@ public class ServerApplicationPages
                                 returnType = (Class<?>) innerReturnType;
                             }
                         }
-                        roots.put(returnType.getCanonicalName(),returnType);
+                        String name=returnType.getCanonicalName();
+                        roots.put(name,returnType);
                         break;
                     }
                 }
@@ -4532,7 +4533,7 @@ public class ServerApplicationPages
             Panel3 resultPanel=new Panel3(null, "Result");
             Panel4 statusPanel=resultPanel.content().returnAddInner(new Panel4(null, "Performance and Status"));
             NameValueList list=statusPanel.content().returnAddInner(new NameValueList());
-            list.add("Time",Utils.millisToLocalDateTimeString(System.currentTimeMillis()));
+            list.add("Time",DateTimeUtils.toSystemDateTimeString(System.currentTimeMillis()));
             list.add("Duration", duration * 1000 + " ms");
             list.add("Status Code",statusCode);
             if (response!=null)
@@ -4630,9 +4631,10 @@ public class ServerApplicationPages
         OperatorPage page=this.serverApplication.buildOperatorPage("Main");
         long now = System.currentTimeMillis();
         page.content().returnAddInner(new NameValueList())
-        .add("Started",Utils.millisToLocalDateTimeString(this.serverApplication.getStartTime()))
-        .add("Current",Utils.millisToLocalDateTimeString(now))
-        .add("Uptime",Utils.millisToNiceDurationString(now - this.serverApplication.getStartTime()));
+        .add("Started",DateTimeUtils.toSystemDateTimeString(this.serverApplication.getStartTime()))
+        .add("Current",DateTimeUtils.toSystemDateTimeString(now))
+        .add("Uptime",Utils.millisToNiceDurationString(now - this.serverApplication.getStartTime()))
+        .add("Base Directory",this.serverApplication.getBaseDirectory());
      
         try
         {
@@ -4655,19 +4657,19 @@ public class ServerApplicationPages
 
     private void writeSize(Table table, String label, double value)
     {
-        table.addRowInline(label,DOUBLE_FORMAT.format(value),DOUBLE_FORMAT.format(value / 1024),DOUBLE_FORMAT.format(value / 1024 / 1024)
+        table.addRow(label,DOUBLE_FORMAT.format(value),DOUBLE_FORMAT.format(value / 1024),DOUBLE_FORMAT.format(value / 1024 / 1024)
                 ,DOUBLE_FORMAT.format(value / 1024 / 1024 / 1024));
     }
 
     private void write(Table table, String label, LevelMeter meter)
     {
         LevelSample sample=meter.sample();
-        table.addRowInline(label,sample.getLevel(),sample.getMaxLevel(),Utils.millisToLocalDateTime(sample.getMaxLevelInstantMs()));
+        table.addRow(label,sample.getLevel(),sample.getMaxLevel(),Utils.millisToLocalDateTime(sample.getMaxLevelInstantMs()));
     }
 
     private void write(Table table, String label, CountMeter meter)
     {
-        table.addRowInline(label,meter.getCount(),"","");
+        table.addRow(label,meter.getCount(),"","");
     }
 
     @GET
@@ -4721,9 +4723,9 @@ public class ServerApplicationPages
                 list.add("File delete failures",manager.getFileDeleteFailedMeter().getCount());
                 list.add("Number of files",info.getFileCount());
                 list.add("Oldest file name",info.getOldestFileName());
-                list.add("Oldest file date",Utils.millisToLocalDateTimeString(info.getOldestFileDate()));
+                list.add("Oldest file date",DateTimeUtils.toSystemDateTimeString(info.getOldestFileDate()));
                 list.add("Newest file name",info.getNewestFileName());
-                list.add("Newest file date",Utils.millisToLocalDateTimeString(info.getNewestFileDate()));
+                list.add("Newest file date",DateTimeUtils.toSystemDateTimeString(info.getNewestFileDate()));
 
                 panel.content().addInner(new p());
                 Panel usagePanel=panel.content().returnAddInner(new Panel3(page.head(), "Usage"));

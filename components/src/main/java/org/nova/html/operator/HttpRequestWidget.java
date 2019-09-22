@@ -105,7 +105,7 @@ public class HttpRequestWidget extends Element
         }
         if (htmlResponse)
         {
-            text=HtmlUtils.escapeXmlBrackets(text);
+            text=HtmlUtils.toHtmlText(text);
         }
         textAccodion.content().addInner(new textarea().readonly().style("width:100%;resize:none;").addInner(text).rows(rows));
     }

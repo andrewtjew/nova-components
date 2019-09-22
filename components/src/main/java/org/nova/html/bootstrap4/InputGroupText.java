@@ -1,6 +1,6 @@
 package org.nova.html.bootstrap4;
 
-public class InputGroupText extends Component<InputGroupText>
+public class InputGroupText extends StyleComponent<InputGroupText>
 {
     public InputGroupText(String text)
     {
@@ -9,6 +9,6 @@ public class InputGroupText extends Component<InputGroupText>
     }
     public InputGroupText()
     {
-        super("div","input-group-text");
+        super("span","input-group-text");
     }
 }

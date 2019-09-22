@@ -72,8 +72,12 @@ public class CoreEnvironmentApplicationRunner //
     
     public void run(String[] args,CoreEnvironmentApplicationInstantiator instantiator)
     {
-        Configuration configuration=ConfigurationReader.read(args,null);
-        if (configuration==null)
+        Configuration configuration=null;
+        try
+        {
+            configuration=ConfigurationReader.read(args,null);
+        }
+        catch (Throwable t)
         {
             System.err.println("Cannot locate configuration files.");
             return;

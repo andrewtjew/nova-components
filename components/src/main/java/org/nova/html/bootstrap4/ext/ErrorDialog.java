@@ -1,3 +1,4 @@
+/*
 package org.nova.html.bootstrap4.ext;
 
 import org.nova.html.bootstrap4.ModalCloseButton;
@@ -28,3 +29,4 @@ public class ErrorDialog extends ModalDocument
         this(null,title,message);
     }
 }
+*/

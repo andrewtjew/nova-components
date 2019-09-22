@@ -1,5 +1,6 @@
 package org.nova.utils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -180,6 +181,21 @@ public class TypeUtils
     {
         return bigEndianBytesToInt(bytes,0);
     }
+    public static void toBytesLittleEndian(int[] source,byte[] dest,int sourceOffset,int destOffset,int len) 
+    {
+        for (int i=sourceOffset;i<sourceOffset+len;i++)
+        {
+            destOffset=toBytesLittleEndian(source[i],dest,destOffset);
+        }
+    }
+    public static int toBytesLittleEndian(int value,byte[] dest,int index) 
+    {
+        dest[index++]=(byte)(value&0xFF);
+        dest[index++]=(byte)((value>>8)&0xFF);
+        dest[index++]=(byte)((value>>16)&0xFF);
+        dest[index++]=(byte)((value>>24)&0xFF);
+        return index;
+    }
     public static int bigEndianIntToBytes(int value,byte[] bytes,int index) 
     {
         bytes[index++]=(byte)((value>>24)&0xFF);
@@ -240,6 +256,30 @@ public class TypeUtils
         }
         return value;
     }
+    static public boolean isNullOrSpace(String text)
+    {
+        if (text==null)
+        {
+            return true;
+        }
+        if (text.trim().length()==0)
+        {
+            return true;
+        }
+        return false;
+    }
+    static public boolean isNullOrEmpty(String text)
+    {
+        if (text==null)
+        {
+            return true;
+        }
+        if (text.length()==0)
+        {
+            return true;
+        }
+        return false;
+    }
     
     public static long parseLong(String value,long defaultValue)
     {
@@ -248,6 +288,213 @@ public class TypeUtils
             return defaultValue;
         }
         return Long.parseLong(value);
+    }
+    
+  //enums are not included as they can be represented as ints, longs, shorts, strings, etc.
+    public static boolean isSingleRepresentationValueType(Class<?> type) 
+    {
+        if (type == boolean.class)
+        {
+            return true;
+        }
+        else if (type == Boolean.class)
+        {
+            return true;
+        }
+        else if (type == Integer.class)
+        {
+            return true;
+        }
+        else if (type == int.class)
+        {
+            return true;
+        }
+        else if (type == Short.class)
+        {
+            return true;
+        }
+        else if (type == short.class)
+        {
+            return true;
+        }
+        else if (type == Long.class)
+        {
+            return true;
+        }
+        else if (type == long.class)
+        {
+            return true;
+        }
+        else if (type == Float.class)
+        {
+            return true;
+        }
+        else if (type == float.class)
+        {
+            return true;
+        }
+        else if (type == Double.class)
+        {
+            return true;
+        }
+        else if (type == double.class)
+        {
+            return true;
+        }
+        else if (type == byte.class)
+        {
+            return true;
+        }
+        else if (type == Byte.class)
+        {
+            return true;
+        }
+        else if (type == char.class)
+        {
+            return true;
+        }
+        else if (type == Character.class)
+        {
+            return true;
+        }
+        else if (type == String.class)
+        {
+            return true;
+        }
+        else if (type == BigDecimal.class)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    //enums are not included as they can be represented as ints, longs, shorts, strings, etc.
+    public static boolean isValueType(Class<?> type) 
+    {
+        if (type == boolean.class)
+        {
+            return true;
+        }
+        else if (type == Boolean.class)
+        {
+            return true;
+        }
+        else if (type == Integer.class)
+        {
+            return true;
+        }
+        else if (type == int.class)
+        {
+            return true;
+        }
+        else if (type == Short.class)
+        {
+            return true;
+        }
+        else if (type == short.class)
+        {
+            return true;
+        }
+        else if (type == Long.class)
+        {
+            return true;
+        }
+        else if (type == long.class)
+        {
+            return true;
+        }
+        else if (type == Float.class)
+        {
+            return true;
+        }
+        else if (type == float.class)
+        {
+            return true;
+        }
+        else if (type == Double.class)
+        {
+            return true;
+        }
+        else if (type == double.class)
+        {
+            return true;
+        }
+        else if (type == byte.class)
+        {
+            return true;
+        }
+        else if (type == Byte.class)
+        {
+            return true;
+        }
+        else if (type == char.class)
+        {
+            return true;
+        }
+        else if (type == Character.class)
+        {
+            return true;
+        }
+        else if (type == String.class)
+        {
+            return true;
+        }
+        else if (type.isEnum())
+        {
+            return true;
+        }
+        else if (type == BigDecimal.class)
+        {
+            return true;
+        }
+        return false;
+    }
+    
+    static public String trimToMaxLength(String string,int maxLength)
+    {
+        if (string==null)
+        {
+            return string;
+        }
+        int length=string.length();
+        if (length>maxLength)
+        {
+            length=maxLength;
+        }
+        return string.substring(0, length);
+    }
+    static public String trim(String string)
+    {
+        if (string==null)
+        {
+            return string;
+        }
+        return string.trim();
+    }
+    
+    static public boolean equals(String a,String b)
+    {
+        if ((a==null)&&(b==null))
+        {
+            return true;
+        }
+        if ((a==null)||(b==null))
+        {
+            return false;
+        }
+        return a.equals(b);
+    }
+    static public boolean equalsIgnoreCase(String a,String b)
+    {
+        if ((a==null)&&(b==null))
+        {
+            return true;
+        }
+        if ((a==null)||(b==null))
+        {
+            return false;
+        }
+        return a.equalsIgnoreCase(b);
     }
 }
 

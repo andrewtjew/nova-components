@@ -2,13 +2,13 @@ package org.nova.concurrent;
 
 import org.nova.tracing.Trace;
 
-public class LockReservation implements AutoCloseable
+public class LockReservedState implements AutoCloseable
 {
     final private ReservableLock lock;
     final private boolean open;
     final private Trace trace;
 
-    LockReservation(ReservableLock lock,boolean open,Trace trace)
+    LockReservedState(ReservableLock lock,boolean open,Trace trace)
     {
         this.lock=lock;
         this.open=open;
@@ -19,7 +19,7 @@ public class LockReservation implements AutoCloseable
         return this.open;
     }
     
-    public void lock(Object object) throws Exception
+    public ReservableLockState lock(Object object) throws Exception
     {
         if (object==null)
         {
@@ -30,6 +30,7 @@ public class LockReservation implements AutoCloseable
             throw new Exception("no reservation");
         }
         this.lock.setLockObject(object);
+        return new ReservableLockState(this.lock);
     }
     @Override
     public void close() throws Exception

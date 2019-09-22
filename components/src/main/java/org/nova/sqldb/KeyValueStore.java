@@ -1,9 +1,10 @@
 package org.nova.sqldb;
 
+import org.nova.collections.ContentCache;
 import org.nova.json.ObjectMapper;
 import org.nova.tracing.Trace;
 
-public class KeyValueStore
+public class KeyValueStore extends ContentCache<String,String>
 {
     final private Connector connector;
     final private String tableName;
@@ -13,6 +14,7 @@ public class KeyValueStore
     final private int maxKeyLength;
     final private int maxValueLength;
     final private String nameSpace;
+    
     
     public KeyValueStore(Connector connector,String tableName,int maxKeyLength,int maxValueLength,String nameSpace)
     {
@@ -46,7 +48,7 @@ public class KeyValueStore
     
     public void write(Trace parent,String key,String value) throws Throwable
     {
-        try (Accessor accessor=this.connector.openAccessor(parent, "KeyValueStore"))
+        try (Accessor accessor=this.connector.openAccessor(parent))
         {
             write(parent,accessor,key,value);
         }
@@ -74,6 +76,7 @@ public class KeyValueStore
         {
             throw new Exception("fullKey="+fullKey); 
         }
+        put(parent,key,new ValueSize<String>(value));
     }    
 
     public void write(Trace parent,String key,Object value) throws Throwable
@@ -88,17 +91,9 @@ public class KeyValueStore
 
     public String read(Trace parent,String key) throws Throwable
     {
-        String fullKey=getFullKey(key);
-        try (Accessor accessor=this.connector.openAccessor(parent, "KeyValueStore.read"))
-        {
-            RowSet rowSet=accessor.executeQuery(parent, null, select,fullKey);
-            if (rowSet.size()==1)
-            {
-                return rowSet.getRow(0).getVARCHAR(0);
-            }
-            return null;
-        }
-    }    
+        return this.get(parent,key);
+    }
+    
     public String read(Trace parent,String key,String defaultValue) throws Throwable
     {
         String value=read(parent,key);
@@ -181,6 +176,18 @@ public class KeyValueStore
             return value; 
         }
         return defaultValue;
+    }
+    @Override
+    protected ValueSize<String> load(Trace parent, String key) throws Throwable
+    {
+        String fullKey=getFullKey(key);
+        Row row=SqlUtils.executeQueryOne(parent, this.connector, null, this.select, fullKey);
+        if (row==null)
+        {
+            return new ValueSize(null);
+        }
+        String value=row.getVARCHAR(0);
+        return new ValueSize(value);
     }    
 
 }

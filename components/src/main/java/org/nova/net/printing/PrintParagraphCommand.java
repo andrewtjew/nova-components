@@ -7,7 +7,7 @@ public class PrintParagraphCommand extends Command
     
     public PrintParagraphCommand(Object text,Justify justify)
     {
-        super(Code.PrintColumn);
+        super(Code.Print);
         if (text==null)
         {
             this.text=null;

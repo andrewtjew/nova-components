@@ -12,7 +12,7 @@ import org.nova.json.ObjectMapper;
 
 //!!! Requires jquery
 
-public class DataTableOld extends Table
+public class OperatorDataTable extends Table
 {
     static class Objects extends Element
     {
@@ -117,17 +117,17 @@ public class DataTableOld extends Table
     
     final private Objects objects;
     
-    public DataTableOld(Head head)
+    public OperatorDataTable(Head head)
     {
         this(head,"display");
     }
     
-    public DataTableOld(Head head,String class_)
+    public OperatorDataTable(Head head,String class_)
     {
         this(head,null,class_,"/resources/html/widgets/DataTable/datatables.min.css","/resources/html/widgets/DataTable/datatables.min.js");
     }
     
-    public DataTableOld(Head head,String id,String class_,String cssFilePath,String scriptFilePath)
+    public OperatorDataTable(Head head,String id,String class_,String cssFilePath,String scriptFilePath)
     {
         super(head,class_,cssFilePath);
         this.table().id(id);
@@ -137,7 +137,7 @@ public class DataTableOld extends Table
         script script=new script().src(scriptFilePath);
         if (head!=null)
         {
-            head.add(DataTableOld.class.getCanonicalName(),script);
+            head.add(OperatorDataTable.class.getCanonicalName(),script);
         }
         else
         {

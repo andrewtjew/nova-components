@@ -6,6 +6,7 @@ import org.nova.html.bootstrap4.ModalContent;
 import org.nova.html.bootstrap4.ModalDialog;
 import org.nova.html.bootstrap4.ModalFooter;
 import org.nova.html.bootstrap4.ModalHeader;
+import org.nova.html.bootstrap4.classes.DeviceClass;
 import org.nova.html.elements.Composer;
 
 public class ModalDocument extends Modal
@@ -18,6 +19,10 @@ public class ModalDocument extends Modal
     
     public ModalDocument(boolean centered)
     {
+        this(centered,null);
+    }
+    public ModalDocument(boolean centered,DeviceClass deviceClass)
+    {
         this.dialog=returnAddInner(new ModalDialog());
         
         this.content=this.dialog.returnAddInner(new ModalContent());
@@ -25,6 +30,14 @@ public class ModalDocument extends Modal
         {
             this.dialog.centered();
         }
+        if (deviceClass!=null)
+        {
+            this.dialog.deviceClass(deviceClass);
+        }
+    }
+    public ModalDocument(DeviceClass deviceClass)
+    {
+        this(false,deviceClass);
     }
     
     public ModalDocument()

@@ -134,7 +134,7 @@ public class FileUtils
         byte[] hashBytes = sha256.digest();
         return TypeUtils.bigEndianByteArrayToHexString(hashBytes);
     }
-
+ 
     public static String computeHashSHA256(String file) throws Throwable
     {
         return computeHashSHA256(new File(file),4096);

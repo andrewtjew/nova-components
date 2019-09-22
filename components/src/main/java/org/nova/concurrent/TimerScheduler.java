@@ -193,7 +193,7 @@ public class TimerScheduler
 		}
 	}
 
-	public TimerTask schedule(String traceCategory,TimerTask.TimeBase timeBase,long offset, long period, TimerRunnable executable) throws Exception
+	public TimerTask schedule(String traceCategory,TimeBase timeBase,long offset, long period, TimerRunnable executable) throws Exception
 	{
 	    TimerTask timerTask = new TimerTask(this.number.getAndIncrement(),traceCategory, this, timeBase, offset, period,executable);
 	    

@@ -2,12 +2,16 @@ package org.nova.html.ext;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.nova.html.elements.Element;
 import org.nova.html.elements.FormElement;
+import org.nova.html.elements.InputElement;
 import org.nova.html.elements.StringComposer;
+import org.nova.html.elements.TagElement;
 import org.nova.http.client.PathAndQuery;
 import org.nova.http.server.Context;
 import org.nova.json.ObjectMapper;
@@ -98,7 +102,7 @@ public class HtmlUtils
         return confirmAndExecuteOnServer(title, text, executeUrl,null);
     }
     
-    public static List<String> getCheckedNames(Context context,String prefix)
+    public static List<String> getSelectionNames(Context context,String prefix)
     {
         ArrayList<String> names=new ArrayList<>();
         if (context==null)
@@ -127,7 +131,7 @@ public class HtmlUtils
         return names;
     }
 
-    public static boolean isChecked(Context context,String value)
+    public static boolean isSelected(Context context,String value)
     {
         if (context==null)
         {
@@ -153,14 +157,14 @@ public class HtmlUtils
         return context.getHttpServletRequest().getParameterMap().containsKey(name);
     }
 
-    public static List<Long> getLongCheckedNames(Context context,String prefix)
+    public static List<Long> getSelectionLongList(Context context,String prefix)
     {
         ArrayList<Long> longs=new ArrayList<>();
         if (context==null)
         {
-            return longs;
+            return null;
         }
-        for (String name:getCheckedNames(context, prefix))
+        for (String name:getSelectionNames(context, prefix))
         {
             try
             {
@@ -171,6 +175,41 @@ public class HtmlUtils
             }
         }
         return longs;
+    }
+
+    public static Map<Long,Long> getSelectionLongLongMap(Context context,String prefix)
+    {
+        if (context==null)
+        {
+            return null;
+        }
+        HashMap<Long,Long> map=new HashMap<>();
+        for (Entry<String, String[]> entry:context.getHttpServletRequest().getParameterMap().entrySet())
+        {
+            String[] values=entry.getValue();
+            if (values.length==1)
+            {
+                String name=null;
+                if (prefix==null)
+                {
+                    name=entry.getKey();
+                }
+                else
+                {
+                    String key=entry.getKey();
+                    if (key.startsWith(prefix))
+                    {
+                        name=key.substring(prefix.length());
+                    }
+                }
+                if (name!=null)
+                {
+                    map.put(Long.parseLong(name), Long.parseLong(values[0]));
+                }
+                
+            }
+        }
+        return map;
     }
     
     public static String toStringParameter(String string)
@@ -185,6 +224,30 @@ public class HtmlUtils
                     sb.append("&#34;");
                     break;
                     
+                case '\'':
+                    sb.append("\\'");
+                    break;
+                    
+                case '\\':
+                    sb.append("\\\\");
+                    break;
+                    
+                    
+                default:
+                    sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+    
+    public static String toReturnStringParameter(String string)
+    {
+        StringBuilder sb=new StringBuilder();
+        for (int i=0;i<string.length();i++)
+        {
+            char c=string.charAt(i);
+            switch (c)
+            {
                 case '\'':
                     sb.append("\\'");
                     break;
@@ -258,13 +321,72 @@ public class HtmlUtils
         sb.append(");");
         return sb.toString();
     }
+    
+    public static String delayCallFunction(long delay,String function,Object...parameters)
+    {
+        String call=callFunction(function, parameters);
+        return "setTimeout(function(){"+call+"},"+delay+");";
+    }
+        
 
-    public static String escapeXmlBrackets(String xmlText)
+    public static String returnFunction(String function,Object...parameters)
+    {
+        StringBuilder sb=new StringBuilder(function+"(");
+        boolean commaNeeded=false;
+        for (Object parameter:parameters)
+        {
+            if (commaNeeded==false)
+            {
+                commaNeeded=true;
+            }
+            else
+            {
+                sb.append(',');
+            }
+            if (parameter==null)
+            {
+                sb.append("null");
+            }
+            else 
+            {
+                Class<?> type=parameter.getClass();
+                if (type==String.class)
+                {
+                    sb.append("'"+toReturnStringParameter(parameter.toString())+"'");
+                }
+                else if ((type==byte.class)
+                        ||(type==short.class)
+                        ||(type==int.class)
+                        ||(type==long.class)
+                        ||(type==float.class)
+                        ||(type==double.class)
+                        ||(type==BigDecimal.class)
+                        ||(type==Byte.class)
+                        ||(type==Short.class)
+                        ||(type==Integer.class)
+                        ||(type==Long.class)
+                        ||(type==Float.class)
+                        ||(type==Double.class)
+                        )
+                {
+                    sb.append(parameter);
+                }
+                else
+                {
+                    sb.append("'"+parameter.toString()+"'");
+                }
+            }
+        }
+        sb.append(");");
+        return sb.toString();
+    }
+
+    public static String toHtmlText(String text)
     {
         StringBuilder sb=new StringBuilder();
-        for (int i=0;i<xmlText.length();i++)
+        for (int i=0;i<text.length();i++)
         {
-            char c=xmlText.charAt(i);
+            char c=text.charAt(i);
             if (c=='<')
             {
                 sb.append("&lt;");
@@ -283,7 +405,7 @@ public class HtmlUtils
             }
             else if (c=='\'')
             {
-                sb.append("&apos;");
+                sb.append("&#39;");
             }
             else 
             {
@@ -292,4 +414,29 @@ public class HtmlUtils
         }
         return sb.toString();
     }
+    
+    public static String copyToClipboardFunction(TagElement<?> element)
+    {
+        return "var copyText=getElementById('"+element.id()+"');copyText.select();document.execCommand('Copy');";
+    }
+    public static String scollIntoView(String id)
+    {
+        return "getElementById('"+id+"').scrollIntoView({'behavior':'smooth','block':'start'});";
+//        return "alert('hello');$('htlm,body').animate({'scrollTop':$('#"+id+"').offset().top}, 2000);alert('world');";
+        
+    }
+
+    public static void onclickToggleDisable(InputElement<?> source,TagElement<?> target)
+    {
+        source.onclick("document.getElementById('"+target.id()+"').disabled=this.checked;");
+    }
+    
+    /*
+    public static String disableSubmitFunction()
+    {
+        return "return !(window.event && window.event.keyCode == 13);";
+    }
+    */
+    
+    
 }

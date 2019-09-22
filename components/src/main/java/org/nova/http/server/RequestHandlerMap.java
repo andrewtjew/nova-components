@@ -627,10 +627,12 @@ class RequestHandlerMap
 			}
 			else if (queryParam != null)
 			{
+			    /*
 				if (isSimpleParameterType(parameterType) == false)
 				{
 					throw new Exception("Only simple types allowed for parameter. Site=" + method.getName());
 				}
+				*/
 				parameterInfos.add(new ParameterInfo(ParameterSource.QUERY, queryParam, queryParam.value(), parameterIndex, parameterType,
 						getDefaultValue(method, defaultValue, parameterType)));
 			}

@@ -1,5 +1,7 @@
 package org.nova.html.elements;
 
+import org.nova.html.ext.HtmlUtils;
+
 public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElement<ELEMENT>
 {
     private String id;

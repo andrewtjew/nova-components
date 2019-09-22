@@ -77,7 +77,14 @@ public class ConfigurationReader
                 {
                     file=this.fileName.substring(0, index+1)+file;
                 } 
-                read(file,this.configuration);
+                try
+                {
+                    read(file,this.configuration);
+                }
+                catch (Throwable t)
+                {
+                    
+                }
             }
             else if (character=='%') //optional include
             {
@@ -136,96 +143,25 @@ public class ConfigurationReader
 		reader.read();
 	}
 	
-    public static Configuration read(String fileName) 
+    public static Configuration read(String fileName) throws Throwable 
 	{
-        try
-        {
-            Configuration configuration=new Configuration();
-    		ConfigurationReader reader=new ConfigurationReader(fileName, configuration);
-    		reader.read();
-    		return configuration;
-        }
-        catch (Throwable t)
-        {
-            t.printStackTrace(System.err);
-            return null;
-        }
+        Configuration configuration=new Configuration();
+		ConfigurationReader reader=new ConfigurationReader(fileName, configuration);
+		reader.read();
+		return configuration;
 	}
 
-    public static Configuration read(String args[],String configurationFileKey)
+    public static Configuration read(String args[],String configurationFileKey) throws Throwable
     {
-        try
+        if (configurationFileKey==null)
         {
-            if (configurationFileKey==null)
-            {
-                configurationFileKey="config";
-            }
-            Configuration configuration=new Configuration();
-            configuration.addArgs(args);
-            String fileName=configuration.getValue(configurationFileKey);
-            read(fileName,configuration);
-            configuration.addArgs(args);
-            return configuration;
+            configurationFileKey="config";
         }
-        catch (Throwable t)
-        {
-            t.printStackTrace(System.err);
-            return null;
-        }
+        Configuration configuration=new Configuration();
+        configuration.addArgs(args);
+        String fileName=configuration.getValue(configurationFileKey);
+        read(fileName,configuration);
+        configuration.addArgs(args);
+        return configuration;
     }
-	
-//    public static Configuration search(String[] args)
-//    {
-//        ArrayList<String> candidates=new ArrayList<>();
-//        for (String arg:args)
-//        {
-//            String[] parts=Utils.split(arg, '=');
-//            if ((parts.length==2)&&("config".equals(parts[0])))
-//            {
-//                candidates.add(parts[1]);
-//            }
-//        }
-//        candidates.add("./resources/dev.cnf");
-//        candidates.add("./resources/integration.cnf");
-//        candidates.add("./resources/test.cnf");
-//        candidates.add("./resources/stage.cnf");
-//        candidates.add("./resources/production.cnf");
-//
-//        return search(args,candidates.toArray(new String[candidates.size()]));
-//    }
-//    
-//    
-//	private static Configuration search(String[] args,String[] candidates)
-//	{
-//        for (int i=0;i<candidates.length;i++)
-//        {
-//            //So we are OK with Windows or Linux
-//            candidates[i]=candidates[i].replace("/", File.separator).replace("\\", File.separator);
-//        }
-//
-//        for (String candidate:candidates)
-//        {
-//            try
-//            {
-//                File file=new File(candidate);
-//                String path=file.getCanonicalPath();
-//                System.out.print("Trying to use "+path+"...");
-//                if (file.exists()==false)
-//                {
-//                    System.out.println("does not exist");
-//                    continue;
-//                }
-//                Configuration configuration=read(path);
-//                configuration.addArgs(args);
-//                System.out.println("OK");
-//                return configuration;
-//            }
-//            catch (Throwable t)
-//            {
-//               t.printStackTrace(System.err);
-//            }
-//        }
-//        System.out.print("No suitable configuration file found");
-//        return null;
-//    }
 }

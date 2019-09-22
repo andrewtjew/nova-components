@@ -165,8 +165,27 @@ public class HttpClientFactory
         SSLContextBuilder contextBuilder=new SSLContextBuilder().
                 loadKeyMaterial(clientCertficateStore,clientCertficateStorePassword.toCharArray()).  
                 loadTrustMaterial(serverCertificateStore,null);
+
+        
         HostnameVerifier verifier=clusterName!=null?new ClusterNameVerifier(clusterName):STRICT_HOSTNAME_VERIFIER;
         SSLConnectionSocketFactory connectionSocketFactory=new SSLConnectionSocketFactory(contextBuilder.build(),new String[]{tls},null,verifier);
+
+        RequestConfig config=buildRequestConfig(configuration);
+        HttpClients.custom().setDefaultRequestConfig(config);
+        HttpClientConnectionManager connectionManager=buildConnectionManager(configuration,connectionSocketFactory);
+        
+        return HttpClients.custom().setConnectionManager(connectionManager).setDefaultRequestConfig(config).setSSLSocketFactory(connectionSocketFactory).build();
+    }
+    static public HttpClient createSSLClient(HttpClientConfiguration configuration,String tls) throws Throwable
+    {
+        SSLContextBuilder contextBuilder=new SSLContextBuilder();
+        HostnameVerifier verifier=STRICT_HOSTNAME_VERIFIER;
+        SSLConnectionSocketFactory connectionSocketFactory=new SSLConnectionSocketFactory(contextBuilder.build());
+
+        if (configuration==null)
+        {
+            configuration=new HttpClientConfiguration();
+        }
 
         RequestConfig config=buildRequestConfig(configuration);
         HttpClients.custom().setDefaultRequestConfig(config);

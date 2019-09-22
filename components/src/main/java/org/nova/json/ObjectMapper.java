@@ -57,19 +57,84 @@ public class ObjectMapper
     {
         void write(WriteState writeState,Object object) throws Throwable
         {
-            writeState.begin('{');
-            boolean needComma = false;
-            FieldWriter[] fieldWriters = getFieldWriters(object.getClass());
-            for (FieldWriter fieldWriter:fieldWriters)
+            Class<?> type=object.getClass();
+            Writer writer=null;
+            if (type.isPrimitive())
             {
-                Object fieldObject = fieldWriter.field.get(object);
-                if (fieldObject!=null)
-                {
-                    fieldWriter.write(writeState, needComma, fieldObject);
-                    needComma=true;
-                }
+                writer=new PrimitiveWriter();
             }
-            writeState.end('}');
+            else if (type == String.class)
+            {
+                writer=new StringWriter();
+            }
+            else if (type.isArray())
+            {
+                writer=getArrayWriter(type.getComponentType());
+            }
+            else if (type.isEnum())
+            {
+                writer=new EnumWriter();
+            }
+            else if (type == Boolean.class)
+            {
+                writer=new PrimitiveWriter();
+            }
+            else if (type == Integer.class)
+            {
+                writer=new PrimitiveWriter();
+            }
+            else if (type == Long.class)
+            {
+                writer=new PrimitiveWriter();
+            }
+            else if (type == Float.class)
+            {
+                writer=new PrimitiveWriter();
+            }
+            else if (type == Double.class)
+            {
+                writer=new PrimitiveWriter();
+            }
+            else if (type == Byte.class)
+            {
+                writer=new PrimitiveWriter();
+            }
+            else if (type == Character.class)
+            {
+                writer=new PrimitiveWriter();
+            }
+            else if (type == Short.class)
+            {
+                writer=new PrimitiveWriter();
+            }
+            else if (type == java.lang.Enum.class)
+            {
+                writer=new EnumWriter();
+            }
+            else if (type == BigDecimal.class)
+            {
+                writer=new PrimitiveWriter();
+            }
+            if (writer!=null)
+            {
+                writer.write(writeState, object);
+            }
+            else
+            {
+                writeState.begin('{');
+                boolean needComma = false;
+                FieldWriter[] fieldWriters = getFieldWriters(object.getClass());
+                for (FieldWriter fieldWriter:fieldWriters)
+                {
+                    Object fieldObject = fieldWriter.field.get(object);
+                    if (fieldObject!=null)
+                    {
+                        fieldWriter.write(writeState, needComma, fieldObject);
+                        needComma=true;
+                    }
+                }
+                writeState.end('}');
+            }
         }
     }
     static class booleanArrayWriter extends  Writer
@@ -548,9 +613,12 @@ public class ObjectMapper
     {
         try (PrintStream printStream=new PrintStream(outputStream))
         {
-            WriteState writeState=new WriteState(indent, endOfLine, printStream);
-            Writer writer=getWriter(object.getClass());
-            writer.write(writeState, object);
+            if (object!=null)
+            {
+                WriteState writeState=new WriteState(indent, endOfLine, printStream);
+                Writer writer=getWriter(object.getClass());
+                writer.write(writeState, object);
+            }
         }
     }
     
@@ -709,11 +777,11 @@ public class ObjectMapper
                                 {
                                     c=(char)(c*16+digit-'0');
                                 }
-                                else if ((digit>='A')&&(digit<='E'))
+                                else if ((digit>='A')&&(digit<='F'))
                                 {
                                     c=(char)(c*16+digit-'A'+10);
                                 }
-                                else if ((digit>='a')&&(digit<='e'))
+                                else if ((digit>='a')&&(digit<='f'))
                                 {
                                     c=(char)(c*16+digit-'a'+10);
                                 }
@@ -1335,6 +1403,10 @@ public class ObjectMapper
         Object read(Scanner parser,Class<?> type,boolean ignoreUnknownFields) throws Throwable
         {
             String value=parser.getString();
+            if (value==null)
+            {
+                return null;
+            }
             return Enum.valueOf((Class<Enum>) type, value);
         }
     }
@@ -1396,7 +1468,7 @@ public class ObjectMapper
             }
             if (c!='{')
             {
-                throw new Exception("elements or null expected: "+parser.getError());
+                throw new Exception("Elements or null expected: "+parser.getError()+". Error character="+c);
             }
             ClassReader reader=getFieldReaders(type);
             Object object=reader.newInstance();
@@ -1418,7 +1490,7 @@ public class ObjectMapper
                         }
                         else
                         {
-                            throw new Exception(name+" not in type:"+parser.getError());
+                            throw new Exception('"'+name+"\" not in type:"+parser.getError());
                         }
                     }
                     else

@@ -8,10 +8,10 @@ import org.nova.html.bootstrap4.TabPane;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 
-public class TabDocument extends Element
+public class TabDocument extends TabContent
 {
     final private Nav nav;
-    final private TabContent tabContent;
+//    final private TabContent tabContent;
     
     
     public TabDocument(boolean fill)
@@ -22,13 +22,13 @@ public class TabDocument extends Element
             this.nav.fill();
         }
 //        this.nav.attr("role","tablist");
-        this.tabContent=new TabContent();
+        //this.tabContent=new TabContent();
     }
     
-    public TabPane add(String label,boolean show,boolean active,boolean disabled)
+    public TabPane returnTabPane(String label,boolean show,boolean active,boolean disabled)
     {
         NavItem navItem=this.nav.returnAddInner(new NavItem());
-        TabPane tabPane=this.tabContent.returnAddInner(new TabPane()).fade();
+        TabPane tabPane=returnAddInner(new TabPane()).fade();
         NavLink navLink=navItem.returnAddInner(new NavLink()).toggleTabPane(tabPane).addInner(label);
         if (active)
         {
@@ -46,9 +46,9 @@ public class TabDocument extends Element
         return tabPane;
     }
     
-    public TabPane add(String label,boolean activeAndShow)
+    public TabPane returnTabPane(String label,boolean activeAndShow)
     {
-        return add(label,activeAndShow,activeAndShow,false);
+        return returnTabPane(label,activeAndShow,activeAndShow,false);
     }
 
     public TabDocument add(NavLink navLink,TabPane tabPane)
@@ -56,7 +56,7 @@ public class TabDocument extends Element
         NavItem navItem=this.nav.returnAddInner(new NavItem());
         navItem.addInner(navLink);
         navLink.toggleTabPane(tabPane);
-        this.tabContent.addInner(tabPane);
+        addInner(tabPane);
         return this;
     }
     
@@ -65,7 +65,7 @@ public class TabDocument extends Element
     public void compose(Composer composer) throws Throwable
     {
         this.nav.compose(composer);
-        this.tabContent.compose(composer);
+        super.compose(composer);
     }
     
 }

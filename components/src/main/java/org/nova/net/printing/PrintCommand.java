@@ -24,5 +24,9 @@ public class PrintCommand extends Command
     {
         this(text, align, null);
     }
+    public PrintCommand(Object text)
+    {
+        this(text, null, null);
+    }
     
 }

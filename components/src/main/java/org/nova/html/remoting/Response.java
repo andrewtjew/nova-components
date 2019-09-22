@@ -8,7 +8,9 @@ public class Response
     public ValResult[] valResults;
     public RemoveClassResult[] removeClassResults;
     public AddClassResult[] addClassResults;
+    public PropResult[] propResults;
     public ClearTimerCommand[] clearTimerCommands;
     public String script;
     public String result;
+    public String location;
 }

@@ -12,8 +12,8 @@ import org.nova.html.widgets.ObjectBuilder;
 public class DateTimeRangePicker extends StyleComponent<DateTimeRangePicker>
 {
     private final String name;
-    final private DateTimeRangePickerOptions options; 
-    final private DateTimeRangePickerEvents events;
+    private DateTimeRangePickerOptions options; 
+    private DateTimeRangePickerEvents events;
     
     public DateTimeRangePicker(Head head,String name,String value,int size,DateTimeRangePickerOptions options,DateTimeRangePickerEvents events,String cssFilePath)
     {
@@ -57,9 +57,17 @@ public class DateTimeRangePicker extends StyleComponent<DateTimeRangePicker>
     {
         return this.options;
     }
+    public void setOptions(DateTimeRangePickerOptions options)
+    {
+        this.options=options;
+    }
     public DateTimeRangePickerEvents getEvents()
     {
         return this.events;
+    }
+    public void setEvents(DateTimeRangePickerEvents events)
+    {
+        this.events=events;
     }
     private String buildEvent(String event,String function)
     {
@@ -101,7 +109,7 @@ public class DateTimeRangePicker extends StyleComponent<DateTimeRangePicker>
             if (this.options.ranges!=null)
             {
                 ob.begin("ranges");
-                for (DateTimeRange range:this.options.ranges)
+                for (DateTimeLabelRange range:this.options.ranges)
                 {
                     ob.addRawString(range.label, "[\""+range.from+"\",\""+range.to+"\"]");
                 }

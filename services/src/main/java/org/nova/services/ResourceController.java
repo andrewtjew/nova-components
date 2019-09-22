@@ -27,14 +27,17 @@ import org.nova.tracing.Trace;
 public class ResourceController
 {
     public final ServerApplication serverApplication;
-    private int cacheMaxAge = 300;
+    private int cacheControlMaxAge = 300;
     private String cacheControlValue = "public";
+    private final boolean cacheControl;
+    
     public final static boolean TEST=true;
 
     public ResourceController(ServerApplication serverApplication) throws Throwable
     {
-        this.cacheMaxAge = serverApplication.getConfiguration().getIntegerValue("ResourceController.cache.maxAgeS", 3600*24);
-        this.cacheControlValue = serverApplication.getConfiguration().getValue("ResourceController.cache.controlValue", "public");
+        this.cacheControl= serverApplication.getConfiguration().getBooleanValue("ResourceController.cacheControl", true);
+        this.cacheControlMaxAge = serverApplication.getConfiguration().getIntegerValue("ResourceController.cacheControl.maxAgeS", 3600*24);
+        this.cacheControlValue = serverApplication.getConfiguration().getValue("ResourceController.cacheControl.controlValue", "public");
         this.serverApplication = serverApplication;
     }
 
@@ -74,7 +77,10 @@ public class ResourceController
                 response.setContentType(contentType);
             }
 //            response.setContentLength(bytes.length);
-            response.setHeader("Cache-Control",(this.cacheControlValue == null || this.cacheControlValue.length() == 0) ? "max-age=" + this.cacheMaxAge : this.cacheControlValue + ",max-age=" + this.cacheMaxAge);
+            if (this.cacheControl)
+            {
+                response.setHeader("Cache-Control",(this.cacheControlValue == null || this.cacheControlValue.length() == 0) ? "max-age=" + this.cacheControlMaxAge : this.cacheControlValue + ",max-age=" + this.cacheControlMaxAge);
+            }
             response.setStatus(HttpStatus.OK_200);
             response.getOutputStream().write(bytes);
         }

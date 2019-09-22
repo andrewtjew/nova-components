@@ -17,23 +17,10 @@ public class CSharpClassWriter
 {
     public String write(String host, String namespace, Collection<Class<?>> types, int columns, InteropTarget target) 
     {
-        HashMap<String, Class<?>> roots = new HashMap<>();
-        for (Class<?> type : types)
-        {
-            if (type.isArray())
-            {
-                type = type.getComponentType();
-            }
-            roots.put(type.getCanonicalName(), type);
-        }
         HashMap<String, Class<?>> dependents = new HashMap<>();
         for (Class<?> type : types)
         {
-            if (type.isArray())
-            {
-                type = type.getComponentType();
-            }
-            discoverDependents(roots, dependents, type);
+            discoverDependents(dependents, type);
         }
         StringBuilder sb = new StringBuilder();
 
@@ -44,15 +31,8 @@ public class CSharpClassWriter
         }
         sb.append("namespace " + namespace);
         sb.append("\r\n{\r\n");
-        writeIndent(sb, 1).append("// --- Request and Response Classes ---\r\n\r\n");
-        roots.keySet().stream().sorted().forEach(key ->
-        {
-            write(sb, roots.get(key), 1, columns, target);
-            sb.append("\r\n");
-        });
         if (dependents.size() > 0)
         {
-            writeIndent(sb, 1).append("// --- Depending Classes --------------\r\n\r\n");
             dependents.keySet().stream().sorted().forEach(key ->
             {
                 write(sb, dependents.get(key), 1, columns, target);
@@ -63,6 +43,60 @@ public class CSharpClassWriter
         return sb.toString();
     }
 
+    private void discoverDependents(HashMap<String, Class<?>> dependents, Class<?> type)
+    {
+        this.level++;
+        try
+        {
+            while (type.isArray())
+            {
+                type = type.getComponentType();
+                
+            }
+            if (TypeUtils.isSingleRepresentationValueType(type))
+            {
+                return;
+            }
+            if (dependents.containsKey(type.getCanonicalName()))
+            {
+                return;
+            }
+            dependents.put(type.getCanonicalName(), type);
+            if (type.isEnum())
+            {
+                return;
+            }
+            for (Field field : type.getDeclaredFields())
+            {
+                int modifiers = field.getModifiers();
+                if (Modifier.isTransient(modifiers))
+                {
+                    continue;
+                }
+                if (Modifier.isStatic(modifiers))
+                {
+                    continue;
+                }
+                Class<?> fieldType = field.getType();
+                if (fieldType==Object.class)
+                {
+                    dependents.remove(type.getCanonicalName());
+                    return;
+                }
+                discoverDependents(dependents, fieldType);
+            }
+            Class<?> superClass=type.getSuperclass();
+            if ((superClass!=null)&&(superClass!=Object.class))
+            {
+                discoverDependents(dependents, superClass);
+            }
+        }
+        finally
+        {
+            this.level--;
+        }
+    }
+    
     private List<String> breakIntoLines(String text, int desiredLength)
     {
         ArrayList<String> lines = new ArrayList<>();
@@ -229,6 +263,7 @@ public class CSharpClassWriter
                 }
                 catch (NoSuchFieldException e)
                 {
+                    writeComments(sb, indentLevel + 1, "// ***No such field***", columns);
                     //should not happen.
                 }
                 catch (SecurityException e)
@@ -290,7 +325,26 @@ public class CSharpClassWriter
                 {
                     writeIndent(sb, indentLevel + 1).append("[DataMember]\r\n");
                 }
-                if (fieldType.isEnum())
+                if (fieldType.isArray()&&fieldType.getComponentType().isEnum())
+                {
+                    String typeName=fieldType.getSimpleName();
+                    String fieldName=field.getName();
+                    writeIndent(sb, indentLevel + 1).append("public string[]");
+                    sb.append(' ').append(field.getName()).append(";\r\n\r\n");
+                    writeIndent(sb, indentLevel + 1).append("public "+typeName+" Get"+fieldName+"(int index)\r\n");
+                    writeIndent(sb, indentLevel + 1).append("{\r\n");
+                    writeIndent(sb, indentLevel + 2).append("return ("+typeName+")System.Enum.Parse(typeof("+typeName+"),this."+fieldName+"[index]);\r\n");
+                    writeIndent(sb, indentLevel + 1).append("}\r\n");
+                    writeIndent(sb, indentLevel + 1).append("public void Set"+fieldName+"(int index,"+typeName+" "+fieldName+")\r\n");
+                    writeIndent(sb, indentLevel + 1).append("{\r\n");
+                    writeIndent(sb, indentLevel + 2).append("this."+fieldName+"[index]="+fieldName+".ToString();\r\n");
+                    writeIndent(sb, indentLevel + 1).append("}\r\n");
+                    writeIndent(sb, indentLevel + 1).append("public int "+fieldName+"Length()\r\n");
+                    writeIndent(sb, indentLevel + 1).append("{\r\n");
+                    writeIndent(sb, indentLevel + 2).append("return this."+fieldName+".Length;\r\n");
+                    writeIndent(sb, indentLevel + 1).append("}\r\n");
+                }
+                else if (fieldType.isEnum())
                 {
                     String typeName=fieldType.getSimpleName();
                     String fieldName=field.getName();
@@ -317,138 +371,6 @@ public class CSharpClassWriter
         }
     }
 
-    private void discoverDependents(HashMap<String, Class<?>> roots, HashMap<String, Class<?>> dependents, Class<?> type)
-    {
-        this.level++;
-        if (this.level==50)
-        {
-            for (String key:roots.keySet())
-            {
-                System.out.println("Root2="+key);
-            }
-            throw new RuntimeException();
-        }
-        if (this.level>47)
-        {
-//            System.out.println(type.getName());
-            System.out.println(type.getCanonicalName());
-        }
-        try
-        {
-            if (roots.containsKey(type.getCanonicalName()) == false)
-            {
-                if (dependents.containsKey(type.getCanonicalName()))
-                {
-                    return;
-                }
-                dependents.put(type.getCanonicalName(), type);
-            }
-            for (Field field : type.getDeclaredFields())
-            {
-                int modifiers = field.getModifiers();
-                if (Modifier.isTransient(modifiers))
-                {
-                    continue;
-                }
-                if (Modifier.isStatic(modifiers))
-                {
-                    continue;
-                }
-                Class<?> fieldType = field.getType();
-                while (fieldType.isArray())
-                {
-                    fieldType = fieldType.getComponentType();
-                    
-                }
-                if (fieldType == boolean.class)
-                {
-                    continue;
-                }
-                else if (fieldType == Boolean.class)
-                {
-                    continue;
-                }
-                else if (fieldType == Integer.class)
-                {
-                    continue;
-                }
-                else if (fieldType == int.class)
-                {
-                    continue;
-                }
-                else if (fieldType == Short.class)
-                {
-                    continue;
-                }
-                else if (fieldType == short.class)
-                {
-                    continue;
-                }
-                else if (fieldType == Long.class)
-                {
-                    continue;
-                }
-                else if (fieldType == long.class)
-                {
-                    continue;
-                }
-                else if (fieldType == Float.class)
-                {
-                    continue;
-                }
-                else if (fieldType == float.class)
-                {
-                    continue;
-                }
-                else if (fieldType == Double.class)
-                {
-                    continue;
-                }
-                else if (fieldType == double.class)
-                {
-                    continue;
-                }
-                else if (fieldType == byte.class)
-                {
-                    continue;
-                }
-                else if (fieldType == Byte.class)
-                {
-                    continue;
-                }
-                else if (fieldType == char.class)
-                {
-                    continue;
-                }
-                else if (fieldType == Character.class)
-                {
-                    continue;
-                }
-                else if (fieldType == String.class)
-                {
-                    continue;
-                }
-                else if (fieldType == BigDecimal.class)
-                {
-                    continue;
-                }
-                if (type.isArray())
-                {
-                    fieldType = fieldType.getComponentType();
-                }
-                discoverDependents(roots, dependents, fieldType);
-            }
-            Class<?> superClass=type.getSuperclass();
-            if ((superClass!=null)&&(superClass!=Object.class))
-            {
-                discoverDependents(roots, dependents, superClass);
-            }
-        }
-        finally
-        {
-            this.level--;
-        }
-    }
 
     int level=0;
     

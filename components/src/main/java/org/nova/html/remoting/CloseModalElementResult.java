@@ -46,6 +46,7 @@ public class CloseModalElementResult extends Result
         return this.sb.toString();
     }
     
+    /*
     public static String generateGetMethod(String path,FormQueryBuilder formQueryBuilder)
     {
         return "$.get({url:"+formQueryBuilder.generateFormQuery(path)+",success:function(script){eval(script);}});";
@@ -91,6 +92,6 @@ public class CloseModalElementResult extends Result
     {
         onClickOpenAndPost(element,path,formQueryBuilder,modal.id());
     }
-
+    */
     
 }

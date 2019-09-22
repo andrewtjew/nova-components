@@ -2,6 +2,16 @@ package org.nova.html.DataTables;
 
 public class DataTableOptions
 {
+    static public class Paginate
+    {
+        public String previous;
+        public String next;
+    }
+    static public class Language
+    {
+        public Paginate paginate;
+    }
+    
     public void lengthMenu(Object...lengths)
     {
         Object[] labels=new Object[lengths.length];
@@ -44,6 +54,27 @@ public class DataTableOptions
             this.lengthMenu=lengths;
         }
     }
+    public void order(DataTableColumnOrder...orders)
+    {
+        Object[][] objects=new Object[orders.length][];
+        for (int i=0;i<orders.length;i++)
+        {
+            DataTableColumnOrder order=orders[i];
+        
+            objects[i]=new Object[]{order.column,order};
+        }
+        this.order=objects;
+    }
+    /*
+    public void  column(Column...columns)
+    {
+        this.columns=columns;
+    }
+    public void  columnDefs(Column...columns)
+    {
+        this.columns=columns;
+    }
+    */
     
     
     public Boolean autoWidth;
@@ -64,7 +95,7 @@ public class DataTableOptions
     public Integer displayStart;
     public Object dom;
     public Object lengthMenu;
-//    public Order order;
+    public  Object order;
     public Boolean orderCellsTop;
     public Boolean orderClasses;
 //    public orderFixedSince;
@@ -78,9 +109,12 @@ public class DataTableOptions
 //    public search
     //public searchCols
     public Integer searchDelay;
+    public Column[] columns;
+    public Column[] columnDefs;
     public Integer stateDuration;
 //    public stripeClasses
     
     public Integer tabIndex;
+    public Language language;
     
 }
