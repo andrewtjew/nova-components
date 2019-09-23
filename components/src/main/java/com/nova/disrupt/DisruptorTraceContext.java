@@ -129,7 +129,10 @@ public class DisruptorTraceContext implements AutoCloseable
         finally
         {
             this.trace.close(throwable);
-            this.logger.log(trace,this.logMessage,Logger.toArray(this.logItems));
+            if (this.logger!=null)
+            {
+                this.logger.log(trace,this.logMessage,Logger.toArray(this.logItems));
+            }
             this.trace=null;
         }
     }

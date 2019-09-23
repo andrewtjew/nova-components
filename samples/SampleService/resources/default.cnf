@@ -1,0 +1,3 @@
+HttpServer.public.https=true
+HttpServer.operator.port=20001
+
