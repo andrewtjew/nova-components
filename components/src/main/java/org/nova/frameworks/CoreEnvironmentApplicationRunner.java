@@ -5,6 +5,7 @@ import org.nova.configuration.ConfigurationReader;
 import org.nova.logging.Level;
 import org.nova.logging.Logger;
 import org.nova.tracing.Trace;
+import org.nova.utils.FileUtils;
 
 
 public class CoreEnvironmentApplicationRunner //
@@ -75,7 +76,7 @@ public class CoreEnvironmentApplicationRunner //
         Configuration configuration=null;
         try
         {
-            configuration=ConfigurationReader.read(args,null);
+            configuration=ConfigurationReader.read(args,"config",FileUtils.toNativePath("./resources/application.cnf"));
         }
         catch (Throwable t)
         {

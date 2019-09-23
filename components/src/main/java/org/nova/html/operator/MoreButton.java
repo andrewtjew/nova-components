@@ -7,6 +7,6 @@ public class MoreButton extends LinkButton
 {
     public MoreButton(Head head,String href)
     {
-        super(head,href,"&#9654;","More...");
+        super(head,href,"&#8230;","More...");
     }
 }

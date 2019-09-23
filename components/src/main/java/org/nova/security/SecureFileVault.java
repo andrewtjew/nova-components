@@ -178,7 +178,7 @@ public class SecureFileVault extends Vault
             else
             {
                 printUnsecureVaultWarning(System.err);
-                String unsecureVaultFile=configuration.getValue("Environment.Vault.unsecureVaultFile");
+                String unsecureVaultFile=configuration.getValue("Environment.Vault.unsecureVaultFile",FileUtils.toNativePath("./resources/UnSecureVault.cnf"));
                 return new UnsecureFileVault(unsecureVaultFile);
             }
 	    }

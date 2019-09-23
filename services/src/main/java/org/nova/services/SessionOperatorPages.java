@@ -34,7 +34,7 @@ import org.nova.utils.Utils;
 @ContentDecoders(GzipContentDecoder.class)
 @ContentEncoders(GzipContentEncoder.class)
 @ContentReaders({JSONContentReader.class,JSONPatchContentReader.class})
-@ContentWriters({JSONContentWriter.class,AjaxQueryResultWriter.class,HtmlElementWriter.class})
+@ContentWriters({JSONContentWriter.class,HtmlElementWriter.class})
 public class SessionOperatorPages<SESSION extends Session>
 {
     final private SessionManager<SESSION> sessionManager;

@@ -21,6 +21,7 @@ import org.nova.logging.Level;
 import org.nova.logging.Logger;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
+import org.nova.utils.FileUtils;
 import org.nova.utils.Utils;
 
 
@@ -67,19 +68,19 @@ public class ServerApplicationRunner //
         logger.log(t);
     }
     
-    public void run(String[] args,String configurationFileKey,ServerApplicationInstantiator instantiator) throws Throwable
+    public void run(String[] args,String configurationFileKey,String defaultConfigurationFileName,ServerApplicationInstantiator instantiator) throws Throwable
     {
-        Configuration configuration=ConfigurationReader.read(args,configurationFileKey);
+        Configuration configuration=ConfigurationReader.read(args,configurationFileKey,defaultConfigurationFileName);
         run(configuration,instantiator);
     }
     public void run(String[] args,ServerApplicationInstantiator instantiator) throws Throwable
     {
-        run(args,null,instantiator);
+        run(args,"config",FileUtils.toNativePath("./resources/application.cnf"),instantiator);
     }
     
-    public void start(String[] args,String configurationFileKey,ServerApplicationInstantiator instantiator) throws Throwable
+    public void start(String[] args,String configurationFileKey,String defaultConfigurationFileName,ServerApplicationInstantiator instantiator) throws Throwable
     {
-        Configuration configuration=ConfigurationReader.read(args,configurationFileKey);
+        Configuration configuration=ConfigurationReader.read(args,configurationFileKey,defaultConfigurationFileName);
         start(configuration,instantiator);
     }
 

@@ -151,17 +151,18 @@ public class ConfigurationReader
 		return configuration;
 	}
 
-    public static Configuration read(String args[],String configurationFileKey) throws Throwable
+    public static Configuration read(String args[],String configurationFileKey,String defaultConfigurationFileName) throws Throwable
     {
-        if (configurationFileKey==null)
-        {
-            configurationFileKey="config";
-        }
         Configuration configuration=new Configuration();
         configuration.addArgs(args);
-        String fileName=configuration.getValue(configurationFileKey);
+        String fileName=configuration.getValue(configurationFileKey,null);
+        if (fileName==null)
+        {
+            fileName=defaultConfigurationFileName;
+        }
         read(fileName,configuration);
         configuration.addArgs(args);
         return configuration;
     }
+
 }
