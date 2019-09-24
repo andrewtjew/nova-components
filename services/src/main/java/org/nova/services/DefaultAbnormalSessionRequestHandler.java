@@ -22,7 +22,7 @@ public class DefaultAbnormalSessionRequestHandler implements AbnormalSessionRequ
     public Response<?> handleAccessDeniedRequest(Trace parent,SessionFilter sessionFilter,Session session, Context context)
     {
         HttpServletResponse response=context.getHttpServletResponse();
-        response.setStatus(HttpStatus.CONFLICT_409);
+        response.setStatus(HttpStatus.FORBIDDEN_403);
         return null;
     }
 

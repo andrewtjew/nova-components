@@ -3,7 +3,10 @@ package org.nova.services;
 
 import org.nova.frameworks.CoreEnvironment;
 import org.nova.frameworks.ServerApplication;
+import org.nova.http.server.Context;
 import org.nova.http.server.HttpServer;
+import org.nova.http.server.Response;
+import org.nova.tracing.Trace;
 import org.nova.utils.Utils;
 
 public abstract class SessionServerApplication<SESSION extends Session> extends ServerApplication
@@ -14,18 +17,18 @@ public abstract class SessionServerApplication<SESSION extends Session> extends 
 
     public SessionServerApplication(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer) throws Throwable
     {
+    	this(name,coreEnvironment,operatorServer,new DefaultAbnormalSessionRequestHandler());
+    }
+
+    public SessionServerApplication(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer,AbnormalSessionRequestHandling...sessionRejectResponders) throws Throwable
+    {
         super(name,coreEnvironment,operatorServer);
         long lockTimeoutMs=this.getConfiguration().getLongValue("SessionServerApplication.session.lockTimeout", 10*1000);
         long timeoutMs=this.getConfiguration().getLongValue("SessionServerApplication.session.timeout", 30*60*1000);
         int generations=this.getConfiguration().getIntegerValue("SessionServerApplication.session.timeoutGenerations", 10);
         this.sessionManager=new SessionManager<SESSION>(this.getTraceManager(),this.getLogger("SessionService"),this.getTimerScheduler(), lockTimeoutMs,timeoutMs, generations);
         this.tokenGenerator=new TokenGenerator();
-        
-    }
 
-    public SessionServerApplication(String name,CoreEnvironment coreEnvironment,HttpServer operatorServer,AbnormalSessionRequestHandling...sessionRejectResponders) throws Throwable
-    {
-        this(name,coreEnvironment,operatorServer);
         String directoryServiceEndPoint=this.getConfiguration().getValue("SessionServerApplication.directoryServiceEndPoint", "http://"+Utils.getLocalHostName()+":"+this.getPublicServer().getPorts()[0]);
         String headerTokenKey=this.getConfiguration().getValue("SessionServerApplication.tokenKey.header", "X-Token");
         String queryTokenKey=this.getConfiguration().getValue("SessionServerApplication.tokenKey.query", "token");

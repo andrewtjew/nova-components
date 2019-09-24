@@ -56,19 +56,19 @@ public class SessionFilter extends Filter
             contentType="*/*";
         }
 
-        AbnormalSessionRequestHandling responder=this.abnormalSessionHandlers.get(contentType);
-        if (responder!=null)
+        AbnormalSessionRequestHandling abnormal=this.abnormalSessionHandlers.get(contentType);
+        if (abnormal!=null)
         {
-            return responder;
+            return abnormal;
         }
         int index=contentType.indexOf('/');
         if (index>0)
         {
             contentType=contentType.substring(0, index)+"*";
-            responder=this.abnormalSessionHandlers.get(contentType);
-            if (responder!=null)
+            abnormal=this.abnormalSessionHandlers.get(contentType);
+            if (abnormal!=null)
             {
-                return responder;
+                return abnormal;
             }
         }
         return this.abnormalSessionHandlers.get("*/*");

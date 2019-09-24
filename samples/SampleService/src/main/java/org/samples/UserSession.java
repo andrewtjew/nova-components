@@ -1,18 +1,24 @@
 package org.samples;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import org.nova.core.NameObject;
 import org.nova.http.server.Context;
 import org.nova.services.AccessSession;
 import org.nova.services.Session;
+import org.nova.services.WebAccessSession;
 import org.nova.tracing.Trace;
 
 
-public class UserSession extends AccessSession<Service>
+public class UserSession extends WebAccessSession<Service>
 {
     public UserSession(Service service,String token,String user)
     {
-        super(token, user);
+        super(token, user,OffsetDateTime.now(),null);
+    }
+    public UserSession(Service service,String token,String user,OffsetDateTime offsetDateTime,String language)
+    {
+        super(token, user,offsetDateTime,language);
     }
 
     @Override
