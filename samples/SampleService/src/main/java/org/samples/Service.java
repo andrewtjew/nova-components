@@ -22,8 +22,6 @@ public class Service extends SessionServerApplication<UserSession>
     
     public void onStart(Trace parent) throws Throwable
     {
-    	this.getPublicServer().registerHandlers(new OpenController(this));
-    	this.getPublicServer().registerHandlers(new SessionController(this));
     }
     
 }

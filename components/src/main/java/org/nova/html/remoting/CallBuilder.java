@@ -44,6 +44,10 @@ public class CallBuilder
     {
         return "org.nova.html.remoting.post('"+pathAndQuery.toString()+"')";
     }
+    public String generatePost(PathAndQuery pathAndQuery,String bracket)
+    {
+        return "org.nova.html.remoting.post("+bracket+pathAndQuery.toString()+bracket+")";
+    }
 //--
     /*
     public String generateScheduleGet(String path,FormQueryBuilder formQueryBuilder,String timerName,int intervalMs)

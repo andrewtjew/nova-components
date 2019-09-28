@@ -1102,7 +1102,16 @@ public class ObjectMapper
             {
                 end=this.text.length()-1;
             }
-            String message="position="+this.position+", text="+text.substring(start, this.position)+"^"+this.text.substring(this.position, end);
+            String message;
+            if (this.position<end)
+            {
+                message="position="+this.position+", text="+text.substring(start, this.position)+"^"+this.text.substring(this.position, end);
+            }
+            else
+            {
+                message="position="+this.position+", text="+text.substring(start, this.position)+"^";
+            }
+            
             return message.replace("\n", "\\n").replace("\r","\\r");
         }
         

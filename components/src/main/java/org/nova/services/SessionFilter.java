@@ -42,6 +42,14 @@ public class SessionFilter extends Filter
     {
         this(sessionManager,tokenKey,tokenKey,tokenKey,abnormalSessionHandlers);
     }
+    public void setAbnormalSessionHandler(AbnormalSessionRequestHandling handler)
+    {
+        for (String mediaType:handler.getMediaTypes())
+        {
+            this.abnormalSessionHandlers.put(mediaType, handler);
+            
+        }
+    }
 
     public void setDebugSession(Session session)
     {

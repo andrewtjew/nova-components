@@ -29,6 +29,11 @@ public class Table extends StyleComponent<Table>
         this(null);
     }
 
+    public Table w_auto()
+    {
+        addClass("w-auto");
+        return this;
+    }
     public Table hover()
     {
         addClass("table-hover");

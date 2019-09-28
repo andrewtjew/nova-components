@@ -1,5 +1,6 @@
 package org.nova.html.bootstrap4;
 
+import org.nova.annotations.Description;
 import org.nova.html.bootstrap4.classes.Placement;
 import org.nova.html.bootstrap4.classes.Trigger;
 import org.nova.html.elements.Element;
@@ -22,8 +23,8 @@ public class Popover
     
     static class Delay
     {
-        public int show;
-        public int hide;
+        public Integer show;
+        public Integer hide;
     }
     
     public Popover()
@@ -43,15 +44,21 @@ public class Popover
         return this;
     }
 
-    public Popover content(Element element) throws Throwable
+    public Popover content(Element element,boolean html) throws Throwable
     {
         StringComposer composer=new StringComposer();
         element.compose(composer);
         this.content=composer.getStringBuilder().toString();
-        this.html=true;
+        this.html=html;
         return this;
     }
+    public Popover content(Element element) throws Throwable
+    {
+        return content(element,true);
+    }
     
+    
+    @Description("Order is important. Use (hover,focus) and not (focus,hover) to allow buttons on the popover to be clicked.")
     public Popover trigger(Trigger...triggers) throws Exception
     {
         if (triggers.length>1)
@@ -74,7 +81,7 @@ public class Popover
         return this;
     }
     
-    public Popover delay(int show,int hide)
+    public Popover delay(Integer show,Integer hide)
     {
         Delay delay=new Delay();
         delay.show=show;
@@ -87,12 +94,23 @@ public class Popover
         {
             throw new RuntimeException(e);
         }
+        this.delay=this.delay.replace("\"", "&quot;");
+        return this;
+    }
+    
+    public Popover container(String container)
+    {
+        this.container=container;
         return this;
     }
     
     public void attachTo(TagElement<?> element)
     {
         element.attr("data-toggle","popover");
+        if (container!=null)
+        {
+            element.attr("data-container",this.container);
+        }
         if (this.title!=null)
         {
             element.attr("title",this.title);

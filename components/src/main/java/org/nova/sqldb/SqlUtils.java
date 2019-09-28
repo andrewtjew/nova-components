@@ -693,6 +693,10 @@ public class SqlUtils
         }
         return rowSet.getRow(0);
     }
+    public static RowSet executeQuery(Trace parent, Accessor accessor,String traceCategoryOverride, String sql, Object... parameters) throws Throwable
+    {
+        return accessor.executeQuery(parent, traceCategoryOverride, parameters, sql);
+    }
     public static Long executeQueryOneBIGINT(Trace parent, Connector connector,String traceCategoryOverride, String columnName,String sql, Object... parameters) throws Throwable
     {
         try (Accessor accessor=connector.openAccessor(parent))
