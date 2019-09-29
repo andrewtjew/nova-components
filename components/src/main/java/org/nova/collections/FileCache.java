@@ -76,4 +76,13 @@ public class FileCache extends ContentCache<String,byte[]>
         throw new Exception("Invalid file: "+filePath);
 	}
 	
+	public String getSharedDirectory()
+	{
+		return this.sharedDirectory;
+	}
+	
+	public String getLocalDirectory()
+	{
+		return this.localDirectory;
+	}
 }

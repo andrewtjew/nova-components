@@ -135,6 +135,10 @@ public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> ex
     {
         return addClass("flex",flex);
     }
+    public ELEMENT flex(Flex flex,int value)
+    {
+        return addClass("flex",flex,value);
+    }
 
     public ELEMENT flex(DeviceClass deviceClass,Flex flex)
     {
@@ -307,11 +311,6 @@ public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> ex
         return addClass("d",deviceClass,display);
         
     }
-    public ELEMENT d_block()
-    {
-        return addClass("d-block");
-        
-    }
     
     public ELEMENT w(int value)
     {
@@ -325,6 +324,10 @@ public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> ex
     public ELEMENT h(int value)
     {
         return addClass("h",value);
+    }
+    public ELEMENT h_auto()
+    {
+        return addClass("h","auto");
     }
     public ELEMENT mh(int value)
     {

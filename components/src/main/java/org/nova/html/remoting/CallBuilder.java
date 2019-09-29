@@ -1,6 +1,7 @@
 package org.nova.html.remoting;
 
 import org.nova.html.elements.Element;
+import org.nova.html.elements.QuotationMark;
 import org.nova.html.elements.TagElement;
 import org.nova.html.ext.FormQueryBuilder;
 import org.nova.html.ext.Head;
@@ -9,12 +10,26 @@ import org.nova.http.client.PathAndQuery;
 
 public class CallBuilder
 {
-    public CallBuilder(Head head)
+    public CallBuilder(QuotationMark mark,Head head)
     {
         head.add("_"+this.hashCode(), new script().src("/resources/html/js/remoting.js"));
+        this.mark=mark;
     }
+    public CallBuilder(Head head)
+    {
+    	this(QuotationMark.SINGLE,head);
+    }
+    
+    final private QuotationMark mark;
+    
+    public CallBuilder(QuotationMark mark)
+    {
+    	this.mark=mark;
+    }
+    
     public CallBuilder()
     {
+    	this(QuotationMark.SINGLE);
     }
 
     /*
@@ -38,15 +53,11 @@ public class CallBuilder
     
     public String generateGet(PathAndQuery pathAndQuery)
     {
-        return "org.nova.html.remoting.get('"+pathAndQuery.toString()+"')";
+        return "org.nova.html.remoting.get("+this.mark+pathAndQuery.toString()+this.mark+")";
     }
     public String generatePost(PathAndQuery pathAndQuery)
     {
-        return "org.nova.html.remoting.post('"+pathAndQuery.toString()+"')";
-    }
-    public String generatePost(PathAndQuery pathAndQuery,String bracket)
-    {
-        return "org.nova.html.remoting.post("+bracket+pathAndQuery.toString()+bracket+")";
+        return "org.nova.html.remoting.post("+this.mark+pathAndQuery.toString()+this.mark+")";
     }
 //--
     /*

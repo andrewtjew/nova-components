@@ -146,6 +146,14 @@ public class GlobalEventTagElement<ELEMENT extends TagElement<ELEMENT>> extends 
     {
         return attr("onmouseover",script);
     }
+    public ELEMENT onmouseenter(String script)
+    {
+        return attr("onmouseenter",script);
+    }
+    public ELEMENT onmouseleave(String script)
+    {
+        return attr("onmouseleave",script);
+    }
     public ELEMENT onmouseup(String script)
     {
         return attr("onmouseup",script);

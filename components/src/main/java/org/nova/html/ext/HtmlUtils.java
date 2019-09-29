@@ -414,6 +414,27 @@ public class HtmlUtils
         }
         return sb.toString();
     }
+    public static String escapeQuotes(String text)
+    {
+        StringBuilder sb=new StringBuilder();
+        for (int i=0;i<text.length();i++)
+        {
+            char c=text.charAt(i);
+            if (c=='"')
+            {
+                sb.append("&quot;");
+            }
+            else if (c=='\'')
+            {
+                sb.append("&#39;");
+            }
+            else 
+            {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
     
     public static String copyToClipboardFunction(TagElement<?> element)
     {

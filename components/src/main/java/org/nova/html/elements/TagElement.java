@@ -64,14 +64,14 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
     @SuppressWarnings("unchecked")
     public ELEMENT attr(String name,Object value)
     {
-        return attr(name,value,'"');
+        return attr(name,value,QuotationMark.DOUBLE);
     }
     @SuppressWarnings("unchecked")
-    public ELEMENT attr(String name,Object value,char bracketChar)
+    public ELEMENT attr(String name,Object value,QuotationMark quotationMark)
     {
         if (value!=null)
         {
-            sb.append(' ').append(name).append("=").append(bracketChar).append(value).append(bracketChar);
+            this.sb.append(' ').append(name).append("=").append(quotationMark.toString()).append(value).append(quotationMark.toString());
         }
         return (ELEMENT) this;
     }

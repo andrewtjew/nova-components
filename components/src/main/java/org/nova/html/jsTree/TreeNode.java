@@ -2,6 +2,7 @@ package org.nova.html.jsTree;
 
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
+import org.nova.html.elements.QuotationMark;
 import org.nova.html.ext.Text;
 import org.nova.html.tags.li;
 import org.nova.html.tags.ul;
@@ -94,7 +95,7 @@ public class TreeNode extends Element
     {
         li li=new li().id(this.id);
         String jsonText=ObjectMapper.writeObjectToString(this.attributes);
-        li.attr("data-jstree",jsonText,'\'');
+        li.attr("data-jstree",jsonText,QuotationMark.SINGLE);
         li.addInner(element);
         li.addInner(this.ul);
         composer.compose(li);

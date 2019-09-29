@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import org.nova.html.elements.InputElement;
+import org.nova.html.elements.QuotationMark;
 import org.nova.html.elements.TagElement;
 import org.nova.html.tags.input_checkbox;
 import org.nova.html.tags.input_hidden;
@@ -17,18 +18,28 @@ import org.nova.http.client.PathAndQuery;
 public class FormQueryBuilder
 {
 //    final static String QUOTE="&#34;";
-    final private static String QUOTE="'";
+    final private String QUOTE;
     final private FormQueryBuilder parent;
     final private StringBuilder sb=new StringBuilder();
     
-    public FormQueryBuilder()
+    public FormQueryBuilder(QuotationMark mark)
     {
-        this.parent=null;
+    	this(mark,null);
     }
 
-    public FormQueryBuilder(FormQueryBuilder parent)
+    public FormQueryBuilder()
+    {
+        this(QuotationMark.SINGLE);
+    }
+
+    public FormQueryBuilder(QuotationMark mark,FormQueryBuilder parent)
     {
         this.parent=parent;
+        this.QUOTE=mark.toString();
+    }
+    public FormQueryBuilder(FormQueryBuilder parent)
+    {
+    	this(QuotationMark.SINGLE,parent);
     }
     
     private void addName(String name)
