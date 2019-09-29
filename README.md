@@ -5,3 +5,6 @@ Nova is an opinionated service java framework. It's main goals are:
 * Minimize development effort. Workflow integration in Java and IDE. A single developer should be able to develop a service using mostly Java, for example the bootstrap component allow the developer to generate dynamic Bootstrap web pages using java code. Deployment to cloud services can be done within the IDE.
 * Low operational cost. Nova should not require additional monitoring and operational tools to be licensed and run.
 
+## Status
+Documentation not provided yet. 
+
