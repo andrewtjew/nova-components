@@ -193,6 +193,8 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
         //File cache
         FileCacheConfiguration fileCacheConfiguration=configuration.getNamespaceObject("FileCache", FileCacheConfiguration.class);
 		this.fileCache=new FileCache(fileCacheConfiguration);
+		configuration.add("Classes.FileCache.sharedDirectory", this.fileCache.getSharedDirectory());
+		configuration.add("Classes.FileCache.localDirectory", this.fileCache.getLocalDirectory());
 		
         this.getOperatorVariableManager().register("HttpServer.operator", this.operatorServer);
         if (this.privateServer!=null)

@@ -6,7 +6,6 @@ import org.nova.html.ext.Text;
 
 public class InnerElement<ELEMENT extends InnerElement<ELEMENT>> extends Element
 {
-    protected Element inner=null;
     protected ArrayList<Element> inners=null; 
 
     @SuppressWarnings("unchecked")
@@ -16,24 +15,17 @@ public class InnerElement<ELEMENT extends InnerElement<ELEMENT>> extends Element
         {
             return (ELEMENT)this;
         }
-        if (this.inner==null)
-        {
-            this.inner=element;
-            return (ELEMENT)this;
-        }
         if (this.inners==null)
         {
             this.inners=new ArrayList<>(); 
-            this.inners.add(this.inner);
         }
         this.inners.add(element);
         return (ELEMENT)this;
     }
     public ELEMENT setInner(Element element)
     {
-        this.inners=null;
-        this.inner=element;
-        return (ELEMENT)this;
+        this.inners=new ArrayList<>();
+        return addInner(element);
     }
     public ELEMENT addInners(Element...elements)
     {
@@ -70,10 +62,6 @@ public class InnerElement<ELEMENT extends InnerElement<ELEMENT>> extends Element
             {
                 inner.compose(builder);
             }
-        }
-        else if (inner!=null)
-        {
-            inner.compose(builder);
         }
     }
 }

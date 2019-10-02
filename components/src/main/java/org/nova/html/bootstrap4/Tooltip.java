@@ -4,6 +4,7 @@ import org.nova.html.bootstrap4.classes.Placement;
 import org.nova.html.bootstrap4.classes.Trigger;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
+import org.nova.html.elements.QuotationMark;
 import org.nova.html.elements.StringComposer;
 import org.nova.html.elements.TagElement;
 import org.nova.html.tags.script;
@@ -89,7 +90,7 @@ public class Tooltip
         }
         if (this.content!=null)
         {
-            element.attr("data-content",this.content,'\'');
+            element.attr("data-content",this.content,QuotationMark.SINGLE);
         }
         if (this.html)
         {

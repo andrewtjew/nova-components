@@ -427,11 +427,6 @@ public class ClassBuilder
         return addClass("d",deviceClass,display);
         
     }
-    public ClassBuilder d_block()
-    {
-        return addClass("d-block");
-        
-    }
     
     public ClassBuilder w(int value)
     {
