@@ -76,18 +76,4 @@ public class InnerElement<ELEMENT extends InnerElement<ELEMENT>> extends Element
             inner.compose(builder);
         }
     }
-    @Override
-    public String toString()
-    {
-        try
-        {
-            StringComposer composer=new StringComposer();
-            compose(composer);
-            return composer.getStringBuilder().toString();
-        }
-        catch(Throwable t)
-        {
-            throw new RuntimeException(t);
-        }
-   }
 }

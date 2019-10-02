@@ -35,6 +35,16 @@ public class CallBuilder
     {
         return "org.nova.html.remoting.post("+formQueryBuilder.generateFormQuery(pathAndQuery)+")";
     }
+    /*
+    public String generateOneGet(PathAndQuery pathAndQuery,FormQueryBuilder formQueryBuilder)
+    {
+        return "org.nova.html.remoting.get("+formQueryBuilder.generateFormQuery(pathAndQuery)+")";
+    }
+    public String generateOnePost(PathAndQuery pathAndQuery,FormQueryBuilder formQueryBuilder)
+    {
+        return "(function(){this.disabled=true;org.nova.html.remoting.post("+formQueryBuilder.generateFormQuery(pathAndQuery)+";)();";
+    }
+    */
     
     public String generateGet(PathAndQuery pathAndQuery)
     {

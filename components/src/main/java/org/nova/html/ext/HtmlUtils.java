@@ -18,88 +18,31 @@ import org.nova.json.ObjectMapper;
 
 public class HtmlUtils
 {
-    public static String passwordPeekScript(String id)
+    public static String js_peekPassword(String id)
     {
         return "var x = document.getElementById('"+id+"');if (x.type === 'password') {x.type = 'text';} else {x.type = 'password';}";
     }
-    public static String passwordPeekScript(String id,String toggle,String show,String hide)
+    public static String js_peekPassword(String id,String toggleElementId,String toggleShowText,String toggleHideText)
     {
-        return "var x = document.getElementById('"+id+"');var t=document.getElementById('"+toggle+"');if (x.type === 'password') {x.type = 'text';t.innerHTML='"+hide+"';} else {x.type = 'password';t.innerHTML='"+show+"';}";
-    }
-    /*
-    public static String autoId(GlobalTagElement<?> element)
-    {
-        String id=generateId(element);
-        element.id(id);
-        return id;
-    }
-    public static String generateId(Element element)
-    {
-        return "_"+element.hashCode();
-    }
-    */
-    
-    public static String toHtmlText(Element element) throws Throwable
-    {
-        StringComposer composer=new StringComposer();
-        composer.compose(element);
-        return composer.getStringBuilder().toString();
+        return "var x = document.getElementById('"+id+"');var t=document.getElementById('"+toggleElementId+"');if (x.type === 'password') {x.type = 'text';t.innerHTML='"+toggleHideText+"';} else {x.type = 'password';t.innerHTML='"+toggleShowText+"';}";
     }
     
-    public static String location(PathAndQuery builder)
+    public static String js_location(PathAndQuery builder)
     {
         return "window.location='"+builder.toString()+"'";
     }
-    public static String location(String url)
+    public static String js_location(String url)
     {
         return "window.location='"+url+"'";
+    }
+    public static String js_disableElementAfterCall(String code)
+    {
+        return "(function(){this.disabled=true;"+code+";})();";
     }
     public static String confirmPOST(String title,String text,PathAndQuery post,Object content,PathAndQuery success) throws Throwable
     {
         String data=content==null?null:ObjectMapper.writeObjectToString(content);
-        return callFunction("confirmPOST",title,text,post.toString(),data,success.toString());
-    }
-    public static String confirmAndExecuteOnServer(String title,String text,String executeUrl,Object content) throws Throwable
-    {
-        String data=content==null?null:ObjectMapper.writeObjectToString(content);
-        StringBuilder sb=new StringBuilder("confirmAndExecuteOnServer(");
-        if (title==null)
-        {
-            sb.append("null");
-        }
-        else
-        {
-            sb.append('\'').append(title).append('\'');
-        }
-        if (text==null)
-        {
-            sb.append(",null");
-        }
-        else
-        {
-            sb.append(",'").append(text).append('\'');
-        }
-        if (executeUrl==null)
-        {
-            sb.append(",null");
-        }
-        else
-        {
-            sb.append(",'").append(executeUrl).append('\'');
-        }
-        if (data==null)
-        {
-            sb.append(",null);");
-        }
-        else
-        {
-            sb.append(",\'").append(data).append("');");
-        }
-        return sb.toString();
-    }
-    public static String confirmAndExecuteOnServer(String title,String text,String executeUrl) throws Throwable
-    {
-        return confirmAndExecuteOnServer(title, text, executeUrl,null);
+        return js_call("confirmPOST",title,text,post.toString(),data,success.toString());
     }
     
     public static List<String> getSelectionNames(Context context,String prefix)
@@ -265,12 +208,19 @@ public class HtmlUtils
     }
     
     
-    public static String callSubmit(FormElement<?> form)
+    public static String js_submit(FormElement<?> form)
     {
         return "document.getElementById('"+form.id()+"').submit();";
     }
     
-    public static String callFunction(String function,Object...parameters)
+    public static String js_callWithDelay(long delay,String function,Object...parameters)
+    {
+        String call=js_call(function, parameters);
+        return "setTimeout(function(){"+call+"},"+delay+");";
+    }
+        
+
+    public static String js_call(String function,Object...parameters)
     {
         StringBuilder sb=new StringBuilder(function+"(");
         boolean commaNeeded=false;
@@ -322,13 +272,6 @@ public class HtmlUtils
         return sb.toString();
     }
     
-    public static String delayCallFunction(long delay,String function,Object...parameters)
-    {
-        String call=callFunction(function, parameters);
-        return "setTimeout(function(){"+call+"},"+delay+");";
-    }
-        
-
     public static String returnFunction(String function,Object...parameters)
     {
         StringBuilder sb=new StringBuilder(function+"(");
@@ -415,23 +358,23 @@ public class HtmlUtils
         return sb.toString();
     }
     
-    public static String copyToClipboardFunction(TagElement<?> element)
+    public static String js_copyToClipboard(TagElement<?> element)
     {
         return "var copyText=getElementById('"+element.id()+"');copyText.select();document.execCommand('Copy');";
     }
-    public static String scollIntoView(String id)
+    public static String js_scollIntoView(String id)
     {
         return "getElementById('"+id+"').scrollIntoView({'behavior':'smooth','block':'start'});";
 //        return "alert('hello');$('htlm,body').animate({'scrollTop':$('#"+id+"').offset().top}, 2000);alert('world');";
         
     }
 
+    /*
     public static void onclickToggleDisable(InputElement<?> source,TagElement<?> target)
     {
         source.onclick("document.getElementById('"+target.id()+"').disabled=this.checked;");
     }
     
-    /*
     public static String disableSubmitFunction()
     {
         return "return !(window.event && window.event.keyCode == 13);";

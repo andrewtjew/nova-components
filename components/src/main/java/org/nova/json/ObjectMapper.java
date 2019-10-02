@@ -1760,8 +1760,13 @@ public class ObjectMapper
                     }
                     if (fieldReaders.containsKey(field.getName()) == false)
                     {
+                        Class<?> fieldType=field.getType();
+                        if (fieldType.isInterface())
+                        {
+                            continue;
+                        }
                         field.setAccessible(true);
-                        Reader reader=getReader(field.getType());
+                        Reader reader=getReader(fieldType);
                         fieldReaders.put(field.getName(), new FieldReader(field,reader));
                     }
                 }

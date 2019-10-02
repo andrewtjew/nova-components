@@ -668,7 +668,7 @@ public class ServerApplicationPages
                     div.addInner(new button_button()
                             .addInner("Disable")
                             .onclick(HtmlUtils
-                            .location(new PathAndQuery("/operator/logging/category/status")
+                            .js_location(new PathAndQuery("/operator/logging/category/status")
                                 .addQuery("active", false)
                                 .addQuery("category", sourceQueueLogger.getCategory())
                             )));
@@ -678,7 +678,7 @@ public class ServerApplicationPages
                     div.addInner(new button_button()
                             .addInner("Enable")
                             .onclick(HtmlUtils
-                            .location(new PathAndQuery("/operator/logging/category/status")
+                            .js_location(new PathAndQuery("/operator/logging/category/status")
                                 .addQuery("active", true)
                                 .addQuery("category", sourceQueueLogger.getCategory())
                             )));
@@ -4012,7 +4012,7 @@ public class ServerApplicationPages
         
         panel.addRightInHeader(button);
         panel.content().addInner(textarea);
-        result.put("result", HtmlUtils.toHtmlText(panel));
+        result.put("result", panel.toString());
         return result;
     }
 
@@ -4524,7 +4524,7 @@ public class ServerApplicationPages
                 AjaxQueryResult result = new AjaxQueryResult();
                 Panel3 panel=new Panel3(null, "Not implemented");
                 panel.content().addInner("Method=" + method);
-                result.put("result",HtmlUtils.toHtmlText(panel));
+                result.put("result",panel.toString());
                 return result;
                 
                 
@@ -4558,7 +4558,7 @@ public class ServerApplicationPages
                     area.addInner(text);
                 }
             }
-            result.put("result", HtmlUtils.toHtmlText(resultPanel));
+            result.put("result", resultPanel.toString());
             return result;
         }
         catch (Throwable t)
@@ -4570,7 +4570,7 @@ public class ServerApplicationPages
             area.readonly().style("width:100%;").rows(Utils.occurs(text, "\r")+1);
             area.addInner(text);
             
-            result.put("result", HtmlUtils.toHtmlText(panel));
+            result.put("result", panel.toString());
             return result;
             
         }
