@@ -185,6 +185,44 @@ public class Style
         sb.append("display:"+value.toString()+";");
         return this;
     }
+    public Style flex_growth(int value)
+    {
+        sb.append("flex-growth:"+value+";");
+        return this;
+    }
+    public Style flex_shrink(int value)
+    {
+        sb.append("flex-shrink:"+value+";");
+        return this;
+    }
+    public Style flex_basis(Size value)
+    {
+        sb.append("flex-basis:"+value.toString()+";");
+        return this;
+    }
+    public Style flex_basis(flex_basis value)
+    {
+        sb.append("flex-basis:"+value.toString()+";");
+        return this;
+    }
+    /*
+    public Style flex_flow(flex_direction direction,flex_wrap wrap)
+    {
+        sb.append("flex-flow:"+direction.toString()+" "+wrap.toString()+";");
+        return this;
+    }
+    */
+    public Style flex_direction(flex_direction value)
+    {
+        sb.append("flex-direction:"+value.toString()+";");
+        return this;
+    }
+    public Style flex_wrap(flex_wrap value)
+    {
+        sb.append("flex-wrap:"+value.toString()+";");
+        return this;
+    }
+    
     public Style position(position value)
     {
         sb.append("position:"+value+";");
@@ -215,6 +253,11 @@ public class Style
         sb.append("text-align:"+value+";");
         return this;
     }
+    public Style text_align_last(text_align value)
+    {
+        sb.append("text-align-last:"+value+";");
+        return this;
+    }
     public Style list_style(list_style value)
     {
         sb.append("list-style:"+value+";");
@@ -243,6 +286,21 @@ public class Style
     public Style font_size(Size value)
     {
         sb.append("font-size:"+value+";");
+        return this;
+    }
+    public Style overflow(overflow value)
+    {
+        sb.append("overflow:"+value+";");
+        return this;
+    }
+    public Style overflow_x(overflow value)
+    {
+        sb.append("overflow-x:"+value+";");
+        return this;
+    }
+    public Style overflow_y(overflow value)
+    {
+        sb.append("overflow-y:"+value+";");
         return this;
     }
     

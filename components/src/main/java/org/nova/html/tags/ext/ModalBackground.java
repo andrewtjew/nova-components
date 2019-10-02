@@ -5,6 +5,7 @@ import org.nova.html.attributes.Color;
 import org.nova.html.attributes.Size;
 import org.nova.html.attributes.Style;
 import org.nova.html.attributes.display;
+import org.nova.html.attributes.overflow;
 import org.nova.html.attributes.position;
 import org.nova.html.attributes.unit;
 import org.nova.html.elements.GlobalEventTagElement;
@@ -27,6 +28,7 @@ public class ModalBackground extends GlobalEventTagElement<div>
            		.top(new Size(0,unit.px))
         		.width(new Size(100,unit.percent))
            		.height(new Size(100,unit.percent))
+           		.overflow(overflow.auto)
            		.background_color(color);
         if (show)
         {
