@@ -1,7 +1,7 @@
 package org.nova.html.bootstrap4;
 
-import org.nova.html.deprecated.Content;
 import org.nova.html.elements.Composer;
+import org.nova.html.ext.Content;
 import org.nova.html.tags.a;
 import org.nova.html.tags.div;
 import org.nova.html.tags.li;

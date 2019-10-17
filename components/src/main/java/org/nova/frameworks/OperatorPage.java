@@ -1,7 +1,7 @@
 package org.nova.frameworks;
 
-import org.nova.html.deprecated.Content;
 import org.nova.html.enums.link_rel;
+import org.nova.html.ext.Content;
 import org.nova.html.ext.DocType;
 import org.nova.html.ext.Head;
 import org.nova.html.operator.MenuBar;

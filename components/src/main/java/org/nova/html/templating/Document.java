@@ -2,9 +2,9 @@ package org.nova.html.templating;
 
 import java.util.HashMap;
 
-import org.nova.html.deprecated.Content;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
+import org.nova.html.ext.Content;
 
 public class Document extends Element
 {

@@ -1,6 +1,6 @@
 package org.nova.html.tags.ext;
 import org.nova.html.tags.html;
-import org.nova.html.deprecated.Content;
+import org.nova.html.ext.Content;
 import org.nova.html.ext.DocType;
 import org.nova.html.ext.Head;
 import org.nova.html.tags.body;

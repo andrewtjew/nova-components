@@ -1,12 +1,12 @@
 package org.nova.html.bootstrap4;
 
-import org.nova.html.deprecated.Content;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.enums.character_set;
 import org.nova.html.enums.http_equiv;
 import org.nova.html.enums.link_rel;
 import org.nova.html.enums.name;
+import org.nova.html.ext.Content;
 import org.nova.html.ext.DocType;
 import org.nova.html.ext.Head;
 import org.nova.html.tags.body;

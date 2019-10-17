@@ -1,6 +1,7 @@
 package org.nova.html.deprecated;
 
 import org.nova.html.enums.link_rel;
+import org.nova.html.ext.Content;
 import org.nova.html.ext.Head;
 import org.nova.html.tags.button_button;
 import org.nova.html.tags.div;
