@@ -1,7 +1,6 @@
 package org.nova.html.operator;
 
 import org.nova.html.ext.Head;
-import org.nova.html.widgets.Panel;
 
 public class Panel5 extends Panel
 {

@@ -1,5 +1,6 @@
 package org.nova.html.bootstrap4;
 
+import org.nova.html.bootstrap4.classes.StyleColor;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.td;
 
@@ -40,5 +41,11 @@ public class TableRow extends StyleComponent<TableRow>
         }
         return this;
         
+    }
+    
+    public TableRow table_color(StyleColor value)
+    {
+        addClass("table",value);
+        return this;
     }
 }

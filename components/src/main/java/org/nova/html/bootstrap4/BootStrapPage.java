@@ -1,5 +1,6 @@
 package org.nova.html.bootstrap4;
 
+import org.nova.html.deprecated.Content;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.enums.character_set;
@@ -13,7 +14,6 @@ import org.nova.html.tags.html;
 import org.nova.html.tags.link;
 import org.nova.html.tags.meta;
 import org.nova.html.tags.script;
-import org.nova.html.widgets.Content;
 
 public class BootStrapPage extends Element
 {

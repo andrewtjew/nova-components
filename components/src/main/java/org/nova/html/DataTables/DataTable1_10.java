@@ -1,5 +1,9 @@
 package org.nova.html.DataTables;
 
+import org.nova.html.deprecated.ObjectBuilder;
+import org.nova.html.deprecated.TableFooter;
+import org.nova.html.deprecated.TableHeader;
+import org.nova.html.deprecated.TableRow;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.enums.link_rel;
@@ -8,10 +12,6 @@ import org.nova.html.tags.link;
 import org.nova.html.tags.script;
 import org.nova.html.tags.tbody;
 import org.nova.html.tags.tr;
-import org.nova.html.widgets.ObjectBuilder;
-import org.nova.html.widgets.TableFooter;
-import org.nova.html.widgets.TableHeader;
-import org.nova.html.widgets.TableRow;
 
 //!!! Requires jquery
 

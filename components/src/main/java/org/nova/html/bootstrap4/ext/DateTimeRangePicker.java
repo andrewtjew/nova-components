@@ -1,12 +1,12 @@
 package org.nova.html.bootstrap4.ext;
 
 import org.nova.html.bootstrap4.StyleComponent;
+import org.nova.html.deprecated.ObjectBuilder;
 import org.nova.html.elements.Composer;
 import org.nova.html.enums.link_rel;
 import org.nova.html.ext.Head;
 import org.nova.html.tags.link;
 import org.nova.html.tags.script;
-import org.nova.html.widgets.ObjectBuilder;
 
 //From http://www.daterangepicker.com/
 public class DateTimeRangePicker extends StyleComponent<DateTimeRangePicker>

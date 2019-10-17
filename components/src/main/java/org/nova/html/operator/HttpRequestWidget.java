@@ -1,5 +1,10 @@
 package org.nova.html.operator;
 
+import org.nova.html.deprecated.Accordion;
+import org.nova.html.deprecated.NameValueList;
+import org.nova.html.deprecated.Table;
+import org.nova.html.deprecated.TableHeader;
+import org.nova.html.deprecated.TableRow;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
@@ -8,12 +13,6 @@ import org.nova.html.ext.HtmlUtils;
 import org.nova.html.tags.p;
 import org.nova.html.tags.textarea;
 import org.nova.html.tags.ext.th_title;
-import org.nova.html.widgets.NameValueList;
-import org.nova.html.widgets.Panel2;
-import org.nova.html.widgets.Table;
-import org.nova.html.widgets.TableHeader;
-import org.nova.html.widgets.TableRow;
-import org.nova.html.widgets.w3c.Accordion;
 import org.nova.http.server.RequestLogEntry;
 import org.nova.tracing.Trace;
 import org.nova.utils.Utils;

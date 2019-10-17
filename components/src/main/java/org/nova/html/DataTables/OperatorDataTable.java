@@ -3,11 +3,11 @@ package org.nova.html.DataTables;
 import java.util.ArrayList;
 
 import org.nova.core.NameObject;
+import org.nova.html.deprecated.Table;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.ext.Head;
 import org.nova.html.tags.script;
-import org.nova.html.widgets.Table;
 import org.nova.json.ObjectMapper;
 
 //!!! Requires jquery

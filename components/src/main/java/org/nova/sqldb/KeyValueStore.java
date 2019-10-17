@@ -4,6 +4,7 @@ import org.nova.collections.ContentCache;
 import org.nova.json.ObjectMapper;
 import org.nova.tracing.Trace;
 
+
 public class KeyValueStore extends ContentCache<String,String>
 {
     final private Connector connector;
@@ -181,13 +182,21 @@ public class KeyValueStore extends ContentCache<String,String>
     protected ValueSize<String> load(Trace parent, String key) throws Throwable
     {
         String fullKey=getFullKey(key);
-        Row row=SqlUtils.executeQueryOne(parent, this.connector, null, this.select, fullKey);
-        if (row==null)
+        try (Accessor accessor=this.connector.openAccessor(parent))
         {
-            return new ValueSize(null);
+            
+            RowSet rowSet=accessor.executeQuery(parent, null, this.select, fullKey);
+            if (rowSet.size()==0)
+            {
+                return new ValueSize<String>(null);
+            }
+            if (rowSet.size()!=1)
+            {
+                throw new Exception("Key cannot have multiple values. size="+rowSet.size());
+            }
+            String value=rowSet.getRow(0).getVARCHAR(0);
+            return new ValueSize<String>(value);
         }
-        String value=row.getVARCHAR(0);
-        return new ValueSize(value);
     }    
 
 }

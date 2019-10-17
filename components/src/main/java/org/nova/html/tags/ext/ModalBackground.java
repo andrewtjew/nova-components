@@ -1,6 +1,5 @@
 package org.nova.html.tags.ext;
 import org.nova.html.tags.html;
-import org.nova.html.widgets.Content;
 import org.nova.html.attributes.Color;
 import org.nova.html.attributes.Size;
 import org.nova.html.attributes.Style;
@@ -8,6 +7,7 @@ import org.nova.html.attributes.display;
 import org.nova.html.attributes.overflow;
 import org.nova.html.attributes.position;
 import org.nova.html.attributes.unit;
+import org.nova.html.deprecated.Content;
 import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.elements.QuotationMark;
 import org.nova.html.ext.DocType;

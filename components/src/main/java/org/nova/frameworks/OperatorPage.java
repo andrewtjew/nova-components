@@ -1,8 +1,10 @@
 package org.nova.frameworks;
 
+import org.nova.html.deprecated.Content;
 import org.nova.html.enums.link_rel;
 import org.nova.html.ext.DocType;
 import org.nova.html.ext.Head;
+import org.nova.html.operator.MenuBar;
 import org.nova.html.tags.body;
 import org.nova.html.tags.div;
 import org.nova.html.tags.head;
@@ -14,8 +16,6 @@ import org.nova.html.tags.style;
 import org.nova.html.templating.Document;
 import org.nova.html.templating.InsertMarker;
 import org.nova.html.templating.Template;
-import org.nova.html.widgets.Content;
-import org.nova.html.widgets.MenuBar;
 
 public class OperatorPage extends Document
 {

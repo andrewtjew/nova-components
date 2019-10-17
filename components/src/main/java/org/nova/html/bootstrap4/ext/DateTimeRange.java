@@ -35,29 +35,30 @@ public class DateTimeRange
         this.to=range.substring(index+divider.length());
     }
     
-    public String to()
+    public String toDateTime()
     {
         return this.to;
     }
-    public String from()
+    public String fromDateTime()
     {
         return this.from;
     }
 
-    public long toAsEpochMilli()
+    public long toDateTimeToEpochMillis()
     {
-        return toEpochMilli(this.to);
+        return toEpochMillis(this.to);
     }
-    public long fromAsEpochMilli()
+    public long fromDateTimeToEpochMillis()
     {
-        return toEpochMilli(this.from);
+        return toEpochMillis(this.from);
     }
-    private long toEpochMilli(String dateTime)
+    private long toEpochMillis(String dateTime)
     {
         LocalDateTime ldt=LocalDateTime.parse(dateTime, this.formatter);
         if (this.timeZone!=null)
         {
-            OffsetDateTime odt=OffsetDateTime.of(ldt,ZoneOffset.of(this.timeZone.getID()));
+            ZoneOffset zo=ZoneOffset.ofTotalSeconds(this.timeZone.getOffset(System.currentTimeMillis())/1000);
+            OffsetDateTime odt=OffsetDateTime.of(ldt, zo);
             odt.toInstant().toEpochMilli();
         }
         return ldt.toInstant(ZoneOffset.UTC).toEpochMilli();

@@ -1,20 +1,20 @@
 package org.nova.frameworks;
 
 import org.nova.html.DataTables.OperatorDataTable;
+import org.nova.html.deprecated.LinkButton;
+import org.nova.html.deprecated.NameValueList;
+import org.nova.html.deprecated.TableHeader;
+import org.nova.html.deprecated.TableRow;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.operator.MoreButton;
+import org.nova.html.operator.Panel3;
 import org.nova.html.tags.form_post;
 import org.nova.html.tags.input_checkbox;
 import org.nova.html.tags.input_hidden;
 import org.nova.html.tags.input_number;
 import org.nova.html.tags.input_submit;
 import org.nova.html.tags.p;
-import org.nova.html.widgets.LinkButton;
-import org.nova.html.widgets.NameValueList;
-import org.nova.html.widgets.Panel3;
-import org.nova.html.widgets.TableHeader;
-import org.nova.html.widgets.TableRow;
 import org.nova.http.client.PathAndQuery;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;

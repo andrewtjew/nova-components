@@ -1,9 +1,9 @@
 package org.nova.html.operator;
 
+import org.nova.html.deprecated.RemoveButton;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.ext.Head;
-import org.nova.html.widgets.RemoveButton;
 
 public class RemoveAndDetailButtons extends Element
 {

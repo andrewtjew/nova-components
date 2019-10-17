@@ -1,5 +1,6 @@
 package org.nova.html.bootstrap4;
 
+import org.nova.html.deprecated.Content;
 import org.nova.html.elements.Composer;
 import org.nova.html.tags.a;
 import org.nova.html.tags.div;
@@ -7,7 +8,6 @@ import org.nova.html.tags.li;
 import org.nova.html.tags.script;
 import org.nova.html.tags.span;
 import org.nova.html.tags.ul;
-import org.nova.html.widgets.Content;
 
 public class Carousel extends StyleComponent<Carousel>
 {

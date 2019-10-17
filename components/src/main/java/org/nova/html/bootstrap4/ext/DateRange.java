@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
 
 import org.nova.html.tags.form;
+import org.nova.html.tags.time;
 
 public class DateRange
 {
@@ -19,9 +20,13 @@ public class DateRange
     final private String from;
     final private String to;
     final private TimeZone timeZone;
-    static final String divider=" - ";
+    final private String divider;
     
     public DateRange(String range,TimeZone timeZone,DateTimeFormatter formatter) throws Throwable
+    {
+        this(range,timeZone,formatter," - ");
+    }
+    public DateRange(String range,TimeZone timeZone,DateTimeFormatter formatter,String divider) throws Throwable
     {
         this.formatter=formatter;
         this.timeZone=timeZone;
@@ -32,26 +37,27 @@ public class DateRange
         }
         this.from=range.substring(0,index);
         this.to=range.substring(index+divider.length());
+        this.divider=divider;
     }
     
-    public String to()
+    public String toDate()
     {
         return this.to;
     }
-    public String from()
+    public String fromDate()
     {
         return this.from;
     }
 
-    public long toAsEpochMilli()
+    public long toDateToEpochMillis()
     {
-        return toEpochMilli(this.to,0);
+        return toEpochMillis(this.to,0);
     }
-    public long fromAsEpochMilli()
+    public long fromDateToEpochMillis()
     {
-        return toEpochMilli(this.from,0);
+        return toEpochMillis(this.from,0);
     }
-    private long toEpochMilli(String date,long days)
+    private long toEpochMillis(String date,long days)
     {
         LocalDate ld=LocalDate.parse(date, this.formatter);
         LocalDateTime ldt=LocalDateTime.of(ld,LocalTime.MIN);
@@ -67,7 +73,7 @@ public class DateRange
     }
     public long dateAfterToEpochMilli(long days)
     {
-        return toEpochMilli(to,days);
+        return toEpochMillis(this.to,days);
     }
     
     public String range()

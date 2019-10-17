@@ -1,9 +1,9 @@
 package org.nova.html.operator;
 
+import org.nova.html.deprecated.Table;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.td;
 import org.nova.html.tags.tr;
-import org.nova.html.widgets.Table;
 
 
 public class TwoColumnTable extends Table
