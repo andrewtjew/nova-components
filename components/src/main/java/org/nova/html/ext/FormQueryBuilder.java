@@ -141,13 +141,13 @@ public class FormQueryBuilder
     }
     */
 
-    public String generateFormQuery(PathAndQuery pathAndQuery)
+    public String js_query(PathAndQuery pathAndQuery)
     {
         if (this.sb.length()==0)
         {
             if (this.parent!=null)
             {
-                return this.parent.generateFormQuery(pathAndQuery);
+                return this.parent.js_query(pathAndQuery);
             }
             return QUOTE+pathAndQuery.toString()+QUOTE;
         }
@@ -157,9 +157,9 @@ public class FormQueryBuilder
             {
                 if (this.sb.length()==0)
                 {
-                    return this.parent.generateFormQuery(pathAndQuery);
+                    return this.parent.js_query(pathAndQuery);
                 }
-                return this.parent.generateFormQuery(pathAndQuery)+'+'+QUOTE+'&'+this.sb.toString();
+                return this.parent.js_query(pathAndQuery)+'+'+QUOTE+'&'+this.sb.toString();
             }
         }
         if (pathAndQuery.containQueries())
@@ -182,19 +182,19 @@ public class FormQueryBuilder
 //        return this;
 //    }
 
-    public String generateLocation(PathAndQuery pathAndQuery)
+    public String js_location(PathAndQuery pathAndQuery)
     {
-        return "window.location="+generateFormQuery(pathAndQuery);
+        return "window.location="+js_query(pathAndQuery);
     }
 
-    public String generateCall(String function,PathAndQuery pathAndQuery)
+    public String js_call(String function,PathAndQuery pathAndQuery)
     {
-        return function+"("+generateFormQuery(pathAndQuery)+")";
+        return function+"("+js_query(pathAndQuery)+")";
     }
     
     public script generateScript(String functionName,PathAndQuery pathAndQuery)
     {
-        String text="function "+functionName+"(){"+generateLocation(pathAndQuery)+";}";
+        String text="function "+functionName+"(){"+js_location(pathAndQuery)+";}";
         return new script().addInner(text);
     }
     

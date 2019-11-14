@@ -6,7 +6,7 @@ import org.nova.collections.FileCache;
 import org.nova.collections.FileCacheConfiguration;
 import org.nova.concurrent.Synchronization;
 import org.nova.configuration.Configuration;
-import org.nova.html.TypeMappings;
+import org.nova.html.ExtionsionToTypeMappings;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.operator.MenuBar;
 import org.nova.html.remoting.HtmlRemotingWriter;
@@ -36,7 +36,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
 	final private OperatorVariableManager operatorVariableManager;
 	final private FileCache fileCache;
 	final private String baseDirectory;
-	final private TypeMappings typeMappings;
+	final private ExtionsionToTypeMappings typeMappings;
 	final private DisruptorManager disruptorManager;
 	private long startTime;
 	final private MenuBar menuBar;
@@ -67,7 +67,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
         this.localHostName=configuration.getValue("ServerApplication.localHostNameOverride",Utils.getLocalHostName());
         
         this.operatorVariableManager=new OperatorVariableManager();
-		this.typeMappings=TypeMappings.DefaultTypeMappings();
+		this.typeMappings=ExtionsionToTypeMappings.fromDefault();
 		
         int operatorPort=this.operatorServer.getPorts()[0];
  
@@ -207,7 +207,8 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
         }
 
         this.menuBar=new MenuBar();
-        this.operatorServer.registerHandlers(new ServerApplicationPages(this));
+        String namespace=configuration.getValue("ServerApplication.APIDefinitionNamespace","");
+        this.operatorServer.registerHandlers(new ServerApplicationPages(this,namespace));
         
         //Build template and start operator server so we can monitor the rest of the startup.
         this.template=OperatorPage.buildTemplate(this.menuBar,this.getName(),this.hostName); 
@@ -251,32 +252,31 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
 	static enum Status
 	{
 	    RUNNING,
-	    STOPPING,
 	    STOPPED,
 	}
 	
 	final private Object runLock=new Object();
 	private Status status;
 	
-	public void join(Trace parent)
-	{
-        synchronized (runLock)
-        {
-            Synchronization.waitForNoThrow(parent,this.runLock, ()->{return this.status!=Status.RUNNING;});
-            this.status=Status.STOPPED;
-            this.runLock.notify();
-        }
-	}
 	
-	public void stop()
+	public void stop() throws Throwable
 	{
 	    synchronized(this.runLock)
         {
-	        this.status=Status.STOPPING;
+            this.onStop();
+	        this.status=Status.STOPPED;
 	        this.runLock.notify();
-	        Synchronization.waitForNoThrow(this.runLock, ()->{return this.status==Status.STOPPING;});
         }
 	}
+	
+	public void waitForStop()
+	{
+        synchronized(this.runLock)
+        {
+            Synchronization.waitForNoThrow(this.runLock, ()->{return this.status==Status.STOPPED;});
+        }
+	}
+	
 
 	public DisruptorManager getDisruptorManager()
 	{
@@ -287,6 +287,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
     {
     }
     public abstract void onStart(Trace parent) throws Throwable;
+    public abstract void onStop() throws Throwable;
 
     public void postStart(Trace trace) throws Throwable
     {
@@ -321,7 +322,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
 		return this.fileCache;
 	}
 
-	public TypeMappings getContentTypeMappings()
+	public ExtionsionToTypeMappings getContentTypeMappings()
 	{
 		return this.typeMappings;
 	}

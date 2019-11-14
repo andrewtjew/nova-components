@@ -74,7 +74,7 @@ public class RemotingEditBox extends StyleComponent<RemotingEditBox>
 		query.value(inputElement);
 		query.add("_valueElementId",valueElement.id());
 		pathAndQuery.addQuery("_valueElementId",valueElement.id());
-		String js_submit=new CallBuilder(mark).generatePost(pathAndQuery,query)+";"+js_close;
+		String js_submit=new CallBuilder(mark).js_post(pathAndQuery,query)+";"+js_close;
 		acceptButton.onclick(js_submit);
 		inputGroup.addInner(acceptButton);
 		

@@ -19,4 +19,7 @@ public abstract class Element
         }
    }
 
+    static public String HREF_LOCAL_DIRECTORY=null;
+    
+    
 }

@@ -1,24 +1,31 @@
 package org.nova.frameworks;
 
 import org.nova.logging.LogUtils;
+import org.nova.logging.Logger;
 import org.nova.logging.SourceQueueLogger;
-import org.nova.metrics.SourceEventEventBoard;
+import org.nova.metrics.SourceEventBoard;
 import org.nova.tracing.TraceManager;
 
 public class MinimalApplication
 {
 	final protected TraceManager traceManager;
-	final private SourceQueueLogger logger;
-	final private SourceEventEventBoard statusBoard;
+	final private Logger logger;
+	final private SourceEventBoard statusBoard;
 	
 	public MinimalApplication() throws Throwable
 	{
 		this.logger=LogUtils.createConsoleLogger();
 		this.traceManager=new TraceManager(this.logger);
-		this.statusBoard=new SourceEventEventBoard();
+		this.statusBoard=new SourceEventBoard();
 	}
+    public MinimalApplication(Logger logger) throws Throwable
+    {
+        this.logger=logger;
+        this.traceManager=new TraceManager(this.logger);
+        this.statusBoard=new SourceEventBoard();
+    }
 	
-	public SourceEventEventBoard getStatusBoard()
+	public SourceEventBoard getStatusBoard()
 	{
 	    return this.statusBoard;
 	}
@@ -27,7 +34,7 @@ public class MinimalApplication
 		return traceManager;
 	}
 
-	public SourceQueueLogger getLogger()
+	public Logger getLogger()
 	{
 		return this.logger;
 	}

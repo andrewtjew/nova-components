@@ -162,6 +162,54 @@ public class Scanner
         }
         return new Lexeme(Token.ERROR, "Premature end of string.", this.source.endAndGetSnippet(0));
     }
+    public Lexeme produceCommaSeparatedValue() throws Throwable
+    {
+        StringBuilder sb = new StringBuilder();
+        char first=this.source.next();
+        if (first!=0)
+        {
+            if (first==',')
+            {
+                return new Lexeme(Token.STRING, "", this.source.endAndGetSnippet(1));
+            }
+            if (first=='"')
+            {
+                for (char c=this.source.next();c!=0;c=this.source.next())
+                {
+                    if (c == '"')
+                    {
+                        char cc=this.source.next();
+                        if (cc==',')
+                        {
+                            return new Lexeme(Token.STRING, sb.toString(), this.source.endAndGetSnippet(1));
+                        }
+                        if (cc=='"')
+                        {
+                            sb.append(c);
+                        }
+                    }
+                    else if (c == '\n')
+                    {
+                        return new Lexeme(Token.ERROR, "Invalid newline character in string.", this.source.endAndGetSnippet(1));
+                    }
+                    sb.append(c);
+                }
+            }
+            else
+            {
+                sb.append(first);
+                for (char c=this.source.next();c!=0;c=this.source.next())
+                {
+                    if ((c==',')||(c=='\n')||(c=='\r'))
+                    {
+                        return new Lexeme(Token.STRING, sb.toString(), this.source.endAndGetSnippet(1));
+                    }
+                    sb.append(c);
+                }
+            }
+        }
+        return new Lexeme(Token.ERROR, "Premature end of string.", this.source.endAndGetSnippet(0));
+    }
 
     public Lexeme produceJavaSuffixNumber(boolean fraction) throws Throwable
     {
@@ -281,6 +329,19 @@ public class Scanner
         return new Lexeme(Token.ERROR, "Invalid punctuator",snippet);
     }
     
+    //Faster than expectPunctuator in case we are not interested 
+    public Lexeme skipPunctuator(char punctuator) throws Throwable
+    {
+        char c=skipWhiteSpaceAndBegin();
+        if (c==punctuator)
+        {
+            this.source.end(0);
+            return null;
+        }
+        Snippet snippet=this.source.endAndGetSnippet(0);
+        return new Lexeme(Token.ERROR, "Invalid punctuator",snippet);
+    }
+    
     public Lexeme produceJavaIdentifier() throws Throwable
     {
         for (char c=this.source.next();c!=0;c=this.source.next())
@@ -359,6 +420,21 @@ public class Scanner
                 else if (c == '"')
                 {
                     inString = false;
+                    /*
+                    for (;;)
+                    {
+                        c = this.source.next();
+                        if ((c==0)||(c==',')||(c==':')||(c=='}')||(c==']'))
+                        {
+                            break;
+                        }
+                        System.out.print(c);
+                        if (Character.isWhitespace(c)==false)
+                        {
+                            return new Lexeme(Token.ERROR, "Invalid text after string.", this.source.endAndGetSnippet(1));
+                        }
+                    }
+                    */
                 }
             }
             else if (inStringEscape)

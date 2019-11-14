@@ -1,6 +1,7 @@
 
 package org.nova.html.tags;
 
+import org.nova.html.elements.Element;
 import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.enums.crossorigin;
 import org.nova.html.enums.character_set;
@@ -50,6 +51,11 @@ public class script extends GlobalEventTagElement<script>
     }
     public script src(String URL)
     {
+        if (Element.HREF_LOCAL_DIRECTORY!=null)
+        {
+            URL=URL.replace("http:/", Element.HREF_LOCAL_DIRECTORY);
+            URL=URL.replace("https:/", Element.HREF_LOCAL_DIRECTORY);
+        }
         return attr("src",URL);
     }
     public script type(String media_type)

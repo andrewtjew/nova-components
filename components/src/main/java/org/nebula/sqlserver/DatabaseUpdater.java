@@ -8,7 +8,7 @@ import org.nova.json.ObjectMapper;
 import org.nova.logging.Item;
 import org.nova.logging.Level;
 import org.nova.logging.Logger;
-import org.nova.metrics.SourceEventEventBoard;
+import org.nova.metrics.SourceEventBoard;
 import org.nova.sqldb.Accessor;
 import org.nova.sqldb.Connector;
 import org.nova.sqldb.Row;
@@ -28,7 +28,7 @@ public class DatabaseUpdater
     final private DatabaseUpdateActions executed;
     final private DatabaseUpdatePermissions permissions;
     final private Logger logger;
-    final private SourceEventEventBoard statusBoard;
+    final private SourceEventBoard statusBoard;
 
     public DatabaseUpdater(CoreEnvironment coreEnvironment,DatabaseUpdatePermissions permissions)
     {

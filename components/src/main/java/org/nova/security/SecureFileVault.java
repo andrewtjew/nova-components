@@ -179,7 +179,15 @@ public class SecureFileVault extends Vault
             {
                 printUnsecureVaultWarning(System.err);
                 String unsecureVaultFile=configuration.getValue("Environment.Vault.unsecureVaultFile",FileUtils.toNativePath("./resources/UnSecureVault.cnf"));
-                return new UnsecureFileVault(unsecureVaultFile);
+                try
+                {
+                    return new UnsecureFileVault(unsecureVaultFile);
+                }
+                catch (Throwable t)
+                {
+                    System.out.println("Vault is empty.");
+                    return new UnsecureFileVault();
+                }
             }
 	    }
 	    finally

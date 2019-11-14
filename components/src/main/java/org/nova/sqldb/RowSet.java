@@ -12,7 +12,7 @@ public class RowSet
 	final String[] columnNames;
 	final private Row[] rows;
 	final HashMap<String,Integer> mappings; 
-	RowSet(String[] columnNames,List<Object[]> list)
+	public RowSet(String[] columnNames,List<Object[]> list)
 	{
 		this.columnNames=columnNames;
 		this.mappings=new HashMap<>();

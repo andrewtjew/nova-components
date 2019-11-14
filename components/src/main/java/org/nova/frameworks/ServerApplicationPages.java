@@ -61,13 +61,13 @@ import org.nova.html.tags.textarea;
 import org.nova.html.tags.th;
 import org.nova.html.tags.tr;
 import org.nova.html.tags.ext.BasicPage;
-import org.nova.html.tags.ext.input_hidden_name_value;
+import org.nova.html.tags.ext.InputHidden;
 import org.nova.html.tags.ext.th_title;
 import org.nova.http.Header;
 import org.nova.http.client.HttpClientConfiguration;
 import org.nova.http.client.HttpClientFactory;
+import org.nova.http.client.JSONClient;
 import org.nova.http.client.PathAndQuery;
-import org.nova.http.client.TextClient;
 import org.nova.http.client.TextResponse;
 import org.nova.http.server.CSharpClassWriter;
 import org.nova.http.server.ContentDecoder;
@@ -225,8 +225,9 @@ public class ServerApplicationPages
     @OperatorVariable(description = "cache control value returned to client other than max-age (e.g.: no-transform, public)")
     private String cacheControlValue = "public";
 
-    public ServerApplicationPages(ServerApplication serverApplication) throws Throwable
+    public ServerApplicationPages(ServerApplication serverApplication,String namespace) throws Throwable
     {
+        this.namespace=namespace;
         this.rateSamplingDuration = serverApplication.getConfiguration().getDoubleValue("ServerOperatorPages.meters.rateSamplingDuration", 10);
         this.cacheMaxAge = serverApplication.getConfiguration().getIntegerValue("ServerOperatorPages.cache.maxAgeS", 300);
         this.cacheControlValue = serverApplication.getConfiguration().getValue("ServerOperatorPages.cache.controlValue", "public");
@@ -943,7 +944,7 @@ public class ServerApplicationPages
 
             Panel3 samplePanel=page.content().returnAddInner(new Panel3(page.head(),"Profile"));
             form_post form=samplePanel.content().returnAddInner(new form_post());
-            form.addInner(new input_hidden_name_value("number",number));
+            form.addInner(new InputHidden("number",number));
             form.action("/operator/tracing/sample");
             
             SelectOptions options=new SelectOptions("threadPriorityLevel");
@@ -3909,6 +3910,7 @@ public class ServerApplicationPages
 
     private String generateClassDefinitions(String server,String namespace,int columns,InteropTarget target) throws Exception
     {
+        this.namespace=namespace;
         HttpServer httpServer=getHttpServer(server);
         HashMap<String,Class<?>> roots=new HashMap<>();
         for (RequestHandler requestHandler:httpServer.getRequestHandlers())
@@ -3959,6 +3961,7 @@ public class ServerApplicationPages
         return classWriter.write(source,namespace, roots.values(),columns,target);
     }
     
+    private String namespace;
 
     @GET
     @Path("/operator/httpServer/classDefinitions/{server}")
@@ -3979,7 +3982,7 @@ public class ServerApplicationPages
         }
         list.add("Code",options);
         list.add("Columns", new input_number().name("columns").id("columns").min(40).style("width:396px;").value(80));
-        list.add("Namespace", new input_text().name("namespace").id("namespace").style("width:100%"));
+        list.add("Namespace", new input_text().name("namespace").id("namespace").style("width:100%").value(this.namespace));
         list.add("",new input_submit().value("Download").style("width:400px;"));
         AjaxButton button = new AjaxButton("button", "Preview", "/operator/httpServer/classDefinitions/preview/"+server);
         list.add("",button);
@@ -4448,7 +4451,7 @@ public class ServerApplicationPages
             }
 
             HttpClientEndPoint httpClientEndPoint=getExecuteClient(httpServer,context);
-            TextClient textClient = new TextClient(this.serverApplication.getTraceManager(), this.serverApplication.getLogger(), httpClientEndPoint.endPoint,httpClientEndPoint.httpClient);
+            JSONClient client = new JSONClient(this.serverApplication.getTraceManager(), this.serverApplication.getLogger(), httpClientEndPoint.endPoint,httpClientEndPoint.httpClient);
             int statusCode;
             TextResponse response=null;
             double duration = 0;
@@ -4468,7 +4471,7 @@ public class ServerApplicationPages
                 }
                 try (Trace trace = new Trace(this.serverApplication.getTraceManager(), parent, "Execute"))
                 {
-                    response = textClient.post(trace, null, pathAndQuery.toString(), contentText, headers.toArray(new Header[headers.size()]));
+                    response = client.postText(trace, null, pathAndQuery.toString(), contentText, headers.toArray(new Header[headers.size()]));
                     statusCode=response.getStatusCode();
                     duration = trace.getDurationS();
                 }
@@ -4478,7 +4481,7 @@ public class ServerApplicationPages
                 String browser=request.getParameter("browser");
                 try (Trace trace = new Trace(this.serverApplication.getTraceManager(), parent, "Execute"))
                 {
-                    response = textClient.get(trace, null, pathAndQuery.toString(), headers.toArray(new Header[headers.size()]));
+                    response = client.getText(trace, null, pathAndQuery.toString(), headers.toArray(new Header[headers.size()]));
                     statusCode=response.getStatusCode();
                     duration = trace.getDurationS();
                 }
@@ -4493,7 +4496,7 @@ public class ServerApplicationPages
                 }
                 try (Trace trace = new Trace(this.serverApplication.getTraceManager(), parent, "Execute"))
                 {
-                    statusCode=textClient.put(trace, null, pathAndQuery.toString(), contentText, headers.toArray(new Header[headers.size()]));
+                    statusCode=client.put(trace, null, pathAndQuery.toString(), contentText, headers.toArray(new Header[headers.size()]));
                     duration = trace.getDurationS();
                 }
             }
@@ -4507,7 +4510,7 @@ public class ServerApplicationPages
                 }
                 try (Trace trace = new Trace(this.serverApplication.getTraceManager(), parent, "Execute"))
                 {
-                    statusCode=textClient.patch(trace, null, pathAndQuery.toString(), contentText, headers.toArray(new Header[headers.size()]));
+                    statusCode=client.patch(trace, null, pathAndQuery.toString(), contentText, headers.toArray(new Header[headers.size()]));
                     duration = trace.getDurationS();
                 }
             }
@@ -4515,7 +4518,7 @@ public class ServerApplicationPages
             {
                 try (Trace trace = new Trace(this.serverApplication.getTraceManager(), parent, "Execute"))
                 {
-                    statusCode=textClient.delete(trace, null, pathAndQuery.toString(), headers.toArray(new Header[headers.size()]));
+                    statusCode=client.delete(trace, null, pathAndQuery.toString(), headers.toArray(new Header[headers.size()]));
                     duration = trace.getDurationS();
                 }
             }

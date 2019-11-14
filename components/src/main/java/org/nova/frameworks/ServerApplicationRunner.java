@@ -137,13 +137,10 @@ public class ServerApplicationRunner //
         return serverApplication;
     }
     
-    public void run(Configuration configuration,ServerApplicationInstantiator instantiator)
+    public void run(Configuration configuration,ServerApplicationInstantiator instantiator) throws Throwable
     {
         ServerApplication serverApplication=start(configuration,instantiator);
-        try (Trace trace=new Trace(serverApplication.getTraceManager(),"run"))
-        {
-            serverApplication.join(trace);
-        }
+        serverApplication.waitForStop();
     } 
 
     @GET 

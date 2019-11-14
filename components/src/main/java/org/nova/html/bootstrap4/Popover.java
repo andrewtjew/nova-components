@@ -76,14 +76,10 @@ public class Popover
 
     public Popover content(Element element,boolean html) throws Throwable
     {
-    	/*
         StringComposer composer=new StringComposer();
         element.compose(composer);
-        this.content=composer.getStringBuilder().toString();
-        this.html=html;
-        */
-        String content=element.toString();
-
+        String content=composer.getStringBuilder().toString();
+        content=element.toString();
         this.parent.attr("data-content",content,QuotationMark.SINGLE);
         if (html)
         {
@@ -126,7 +122,8 @@ public class Popover
         delay.hide=hide;
         try
         {
-            this.parent.attr("data-delay",delay,QuotationMark.SINGLE);
+            String text=ObjectMapper.writeObjectToString(delay);
+            this.parent.attr("data-delay",text,QuotationMark.SINGLE);
         }
         catch (Throwable e)
         {

@@ -1,5 +1,14 @@
 package org.nova.html.bootstrap4;
 
+import org.nova.html.bootstrap4.classes.DeviceClass;
+import org.nova.html.bootstrap4.classes.Display;
+import org.nova.html.bootstrap4.classes.Edge;
+import org.nova.html.bootstrap4.classes.Flex;
+import org.nova.html.bootstrap4.classes.Float_;
+import org.nova.html.bootstrap4.classes.Font;
+import org.nova.html.bootstrap4.classes.Position;
+import org.nova.html.bootstrap4.classes.Rounded;
+import org.nova.html.bootstrap4.classes.StyleColor;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.InputElement;
 import org.nova.html.elements.TagElement;
@@ -19,72 +28,254 @@ public abstract class InputComponent<ELEMENT extends InputComponent<ELEMENT>> ex
         attr("type",type);
     }
 
+    public ELEMENT addClass(Object class_,Object...fragments)
+    {
+        if (fragments!=null)
+        {
+            if (class_!=null)
+            {
+                StringBuilder sb=new StringBuilder(class_.toString());
+                for (Object fragment:fragments)
+                {
+                    if (fragment!=null)
+                    {
+                        sb.append('-').append(fragment);
+                    }
+                }
+                addClass(sb.toString());
+            }
+        }
+        return (ELEMENT)this;
+    }
+
+    public ELEMENT addClass(ClassBuilder classBuilder)
+    {
+        addClass(classBuilder.toString());
+        return (ELEMENT)this;
+    }
+
     /*
-    public ELEMENT autofocus()
+    public ELEMENT bg(StyleColor value)
     {
-        return attr("autofocus");
+        return addClass("bg",value);
     }
-    public ELEMENT autofocus(boolean autofocus)
+    public ELEMENT bg_gradient(StyleColor value)
     {
-        if (autofocus)
-        {
-            return attr("autofocus");
-        }
-        return (ELEMENT)this;
+        return addClass("bg","gradient",value);
     }
-    public ELEMENT disabled()
+    public ELEMENT text(StyleColor value)
     {
-        return attr("disabled");
+        return addClass("text",value);
     }
-    public ELEMENT disabled(boolean disabled)
+    public ELEMENT font(Font value)
     {
-        if (disabled)
-        {
-            return attr("disabled");
-        }
-        return (ELEMENT)this;
+        return addClass("font",value);
     }
-    public ELEMENT form(String form_id)
+    public ELEMENT lead()
     {
-        return attr("form",form_id);
+        return addClass("lead");
     }
-    public ELEMENT form(TagElement<?> element)
+    public ELEMENT small()
     {
-        return attr("form",element.id());
+        return addClass("small");
     }
-    
-    public ELEMENT readonly()
+    public ELEMENT float_(Float_ value)
     {
-        return attr("readonly");
+        return addClass("float",value);
     }
-    public ELEMENT readonly(boolean readonly)
+    public ELEMENT offset(int offset)
     {
-        if (readonly)
-        {
-            attr("readonly");
-        }
-        return (ELEMENT)this;
+        return addClass("offset",offset);
     }
-    public ELEMENT name(String name)
+    public ELEMENT display(int size)
     {
-        this.name=name;
-        return (ELEMENT)this;
+        return addClass("display",size);
     }
-    public String name()
+    public ELEMENT rounded()
     {
-        if (this.name==null)
-        {
-            this.name="_"+this.hashCode();
-            return this.name;
-        }
-        return this.name;
+        return addClass("rounded");
     }
-    
-    @Override
-    public void compose(Composer composer) throws Throwable
+    public ELEMENT rounded(int value)
     {
-        attr("name",this.name);
-        super.compose(composer);
+        return addClass("rounded",value);
+    }
+    public ELEMENT rounded(Rounded value)
+    {
+        return addClass("rounded",value);
+    }
+    public ELEMENT border(Edge value)
+    {
+        return addClass("border",value);
+    }
+    public ELEMENT border(Edge value,int size)
+    {
+        return addClass("border",value,size);
+    }
+    public ELEMENT border()
+    {
+        return addClass("border");
+    }
+    public ELEMENT border(StyleColor color)
+    {
+        return addClass("border",color);
+    }
+    public ELEMENT flex(DeviceClass deviceClass,Flex flex)
+    {
+        return addClass("flex",deviceClass,flex);
+    }
+
+    public ELEMENT order(int value)
+    {
+        return addClass("order",value);
     }
     */
+    public ELEMENT mr(DeviceClass deviceClass,int value)
+    {
+        return addClass("mr",deviceClass,value);
+    }
+    public ELEMENT mr(int value)
+    {
+        return addClass("mr",value);
+    }
+    public ELEMENT ml(int value)
+    {
+        return addClass("ml",value);
+    }
+    public ELEMENT mt(int value)
+    {
+        return addClass("mt",value);
+    }
+    public ELEMENT mb(int value)
+    {
+        return addClass("mb",value);
+    }
+    public ELEMENT mx(int value)
+    {
+        return addClass("mx",value);
+    }
+    public ELEMENT my(int value)
+    {
+        return addClass("my",value);
+    }
+    public ELEMENT m(int value)
+    {
+        return addClass("m",value);
+    }
+    public ELEMENT mr_auto()
+    {
+        return addClass("mr","auto");
+    }
+    public ELEMENT ml_auto()
+    {
+        return addClass("ml","auto");
+    }
+    public ELEMENT mt_auto()
+    {
+        return addClass("mt","auto");
+    }
+    public ELEMENT mb_auto()
+    {
+        return addClass("mb","auto");
+    }
+    public ELEMENT mx_auto()
+    {
+        return addClass("mx","auto");
+    }
+    public ELEMENT my_auto()
+    {
+        return addClass("my","auto");
+    }
+
+    /*
+    public ELEMENT pr(int value)
+    {
+        return addClass("pr",value);
+    }
+    public ELEMENT pl(int value)
+    {
+        return addClass("pl",value);
+    }
+    public ELEMENT pt(int value)
+    {
+        return addClass("pt",value);
+    }
+    public ELEMENT pb(int value)
+    {
+        return addClass("pb",value);
+    }
+    public ELEMENT px(int value)
+    {
+        return addClass("px",value);
+    }
+    public ELEMENT py(int value)
+    {
+        return addClass("py",value);
+    }
+    public ELEMENT p(int value)
+    {
+        return addClass("p",value);
+    }
+    public ELEMENT pr_auto()
+    {
+        return addClass("pr","auto");
+    }
+    public ELEMENT pl_auto()
+    {
+        return addClass("pl","auto");
+    }
+    public ELEMENT pt_auto()
+    {
+        return addClass("pt","auto");
+    }
+    public ELEMENT pb_auto()
+    {
+        return addClass("pb","auto");
+    }
+    public ELEMENT px_auto()
+    {
+        return addClass("px","auto");
+    }
+    public ELEMENT py_auto()
+    {
+        return addClass("py","auto");
+    }
+    */
+
+    public ELEMENT d(Display display)
+    {
+        return addClass("d",display);
+        
+    }
+    public ELEMENT d(DeviceClass deviceClass,Display display)
+    {
+        return addClass("d",deviceClass,display);
+    }
+    
+    public ELEMENT w(int value)
+    {
+        return addClass("w",value);
+    }
+    public ELEMENT mw(int value)
+    {
+        return addClass("mw",value);
+    }
+    
+    public ELEMENT h(int value)
+    {
+        return addClass("h",value);
+    }
+    public ELEMENT h_auto()
+    {
+        return addClass("h","auto");
+    }
+    public ELEMENT mh(int value)
+    {
+        return addClass("mh",value);
+    }
+    
+    public ELEMENT position(Position value)
+    {
+        return addClass("position",value);
+        
+    }
 }

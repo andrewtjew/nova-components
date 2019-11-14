@@ -83,7 +83,8 @@ public class ConfigurationReader
                 }
                 catch (Throwable t)
                 {
-                    
+                    int line=new LineAndColumn(text,lexeme.getSnippet().getTargetAbsolutePosition()).getLine()+1;
+                    throw new Exception("File Error: "+lexeme.getValue()+"("+this.fileName+":"+line+")",t);
                 }
             }
             else if (character=='%') //optional include
@@ -130,7 +131,14 @@ public class ConfigurationReader
                     lexeme=scanner.produceTerminatedTextAndSkipTerminator('\r','\n',';');
                 }
                 int line=new LineAndColumn(text,lexeme.getSnippet().getTargetAbsolutePosition()).getLine()+1;
-    			this.configuration.add(new ConfigurationItem(name, lexeme.getValue().trim(), ConfigurationSource.FILE,fileName+"("+line+")", description));
+                if (lexeme.isError()==false)
+                {
+                    this.configuration.add(new ConfigurationItem(name, lexeme.getValue().trim(), ConfigurationSource.FILE,fileName+"("+line+")", description));
+                }
+                else
+                {
+                    throw new Exception(lexeme.getValue()+"("+this.fileName+":"+line+")");
+                }
     			description=null;
 			}
 		}
@@ -146,8 +154,15 @@ public class ConfigurationReader
     public static Configuration read(String fileName) throws Throwable 
 	{
         Configuration configuration=new Configuration();
-		ConfigurationReader reader=new ConfigurationReader(fileName, configuration);
-		reader.read();
+        try
+        {
+    		ConfigurationReader reader=new ConfigurationReader(fileName, configuration);
+    		reader.read();
+        }
+        catch (Throwable t)
+        {
+            System.out.println("No config file: "+fileName);
+        }
 		return configuration;
 	}
 

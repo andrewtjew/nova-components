@@ -5,17 +5,17 @@ import java.util.Map;
 
 import org.nova.metrics.RecentSourceEventMeter;
 
-public class SourceEventEventBoard
+public class SourceEventBoard
 {
     final private HashMap<String,RecentSourceEventMeter> map;
     final private int bufferSize;
     
-    public SourceEventEventBoard(int bufferSize)
+    public SourceEventBoard(int bufferSize)
     {
         this.map=new HashMap<>();
         this.bufferSize=bufferSize;
     }
-    public SourceEventEventBoard()
+    public SourceEventBoard()
     {
         this(3);
     }

@@ -52,5 +52,37 @@ public class NameValueList extends StyleComponent<NameValueList>
         
         return this;
     }
+    public NameValueList add(Integer topSpacing,Integer bottomSpacing,Object name, Object value)
+    {
+        Item item=returnAddInner(new Item());
+        item.d_flex().justify_content(Justify.start);
+        item.addInner(new Item().mr(2).text(TextAlign.right).addInner(new b().addInner(name)).style(new Style().width(this.width)));
+        item.addInner(new Item().addInner(value));
+        if (topSpacing!=null)
+        {
+            item.mt(topSpacing);
+        }
+        if (bottomSpacing!=null)
+        {
+            item.mb(bottomSpacing);
+        }
+        return this;
+    }
+    public NameValueList add(Integer topSpacing,Integer bottomSpacing,Object name, Element element)
+    {
+        Item item=returnAddInner(new Item());
+        item.d_flex().justify_content(Justify.start);
+        item.addInner(new Item().mr(2).text(TextAlign.right).addInner(new b().addInner(name)).style(new Style().width(this.width)));
+        item.addInner(element);
+        if (topSpacing!=null)
+        {
+            item.mt(topSpacing);
+        }
+        if (bottomSpacing!=null)
+        {
+            item.mb(bottomSpacing);
+        }
+        return this;
+    }
 
 }

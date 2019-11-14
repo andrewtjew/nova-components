@@ -26,7 +26,7 @@ import com.amazonaws.util.IOUtils;
 import com.nova.disrupt.Disruptor;
 import com.nova.disrupt.DisruptorTraceContext;
 
-public class Client
+public class AntaresClient
 {
     final private TraceManager traceManager;
     final private Logger logger;
@@ -39,7 +39,7 @@ public class Client
     final private long idleConnectionTimeoutMs;
     private long lastRequestInstantMs;
     
-    public Client(TraceManager traceManager,Logger logger,TimerScheduler scheduler,long idleConnectionTimeoutMs,long reconnectWaitMs,Disruptor disruptor,String endPoint,HttpClient client,Header...headers) throws Throwable
+    public AntaresClient(TraceManager traceManager,Logger logger,TimerScheduler scheduler,long idleConnectionTimeoutMs,long reconnectWaitMs,Disruptor disruptor,String endPoint,HttpClient client,Header...headers) throws Throwable
     {
         this.idleConnectionTimeoutMs=idleConnectionTimeoutMs;
         this.lastRequestInstantMs=System.currentTimeMillis();
@@ -77,11 +77,11 @@ public class Client
 //        HttpClientUtils.closeQuietly(this.client);
     }
 	
-    public Client(TraceManager traceManager,Logger logger,String endPoint,HttpClient client) throws Throwable
+    public AntaresClient(TraceManager traceManager,Logger logger,String endPoint,HttpClient client) throws Throwable
     {
         this(traceManager,logger,null,0,0,null,endPoint,client);
     }
-    public Client(TraceManager traceManager,Logger logger,String endPoint) throws Throwable
+    public AntaresClient(TraceManager traceManager,Logger logger,String endPoint) throws Throwable
     {
         this(traceManager,logger,endPoint,HttpClientFactory.createClient());
     }
@@ -296,53 +296,5 @@ public class Client
         }
 	}
     
-    public PostContext openPost(MultiTaskScheduler scheduler,Trace parent,String traceCategoryOverride,String pathAndQuery,String contentType,String acceptContentType,Header...headers) throws Throwable
-    {
-        DisruptorTraceContext context=createContext(parent, traceCategoryOverride,pathAndQuery);
-        try
-        {
-            try 
-            {
-                HttpPost post=new HttpPost(this.endPoint+pathAndQuery);
-                context.addLogItem(new Item("endPoint",this.endPoint));
-                context.addLogItem(new Item("pathAndQuery",pathAndQuery));
-                if (this.headers!=null)
-                {
-                    for (Header header:this.headers)
-                    {
-                        post.setHeader(header.getName(),header.getValue());
-                    }
-                }
-                for (Header header:headers)
-                {
-                    post.setHeader(header.getName(),header.getValue());
-                }
-                if (acceptContentType!=null)
-                {
-                    post.setHeader("Accept",acceptContentType);
-                }
-                if (contentType!=null)
-                {
-                    post.setHeader("Content-Type",contentType);
-                }
-                
-                logHeaders(context,post.getAllHeaders());
-                PostContext postContext=new PostContext(parent,traceCategoryOverride!=null?traceCategoryOverride:pathAndQuery,this.client,scheduler,post,context);
-                context=null;
-                return postContext;
-            }
-            catch (Throwable t)
-            {
-                throw context.handleThrowable(t);
-            }
-        }
-        finally
-        {
-            if (context!=null)
-            {
-                context.close();
-            }
-        }
-    }
     
 }

@@ -17,8 +17,8 @@ import org.nova.html.tags.time;
 public class DateRange
 {
     final private DateTimeFormatter formatter;
-    final private String from;
-    final private String to;
+    final private String start;
+    final private String end;
     final private TimeZone timeZone;
     final private String divider;
     
@@ -35,27 +35,27 @@ public class DateRange
         {
             throw new Exception("Invalid format: "+range);
         }
-        this.from=range.substring(0,index);
-        this.to=range.substring(index+divider.length());
+        this.start=range.substring(0,index);
+        this.end=range.substring(index+divider.length());
         this.divider=divider;
     }
     
-    public String toDate()
+    public String end()
     {
-        return this.to;
+        return this.end;
     }
-    public String fromDate()
+    public String start()
     {
-        return this.from;
+        return this.start;
     }
 
-    public long toDateToEpochMillis()
+    public long endEpochMillis()
     {
-        return toEpochMillis(this.to,0);
+        return toEpochMillis(this.end,0);
     }
-    public long fromDateToEpochMillis()
+    public long startEpochMillis()
     {
-        return toEpochMillis(this.from,0);
+        return toEpochMillis(this.start,0);
     }
     private long toEpochMillis(String date,long days)
     {
@@ -66,19 +66,19 @@ public class DateRange
         {
             ZoneOffset zo=ZoneOffset.ofTotalSeconds(this.timeZone.getOffset(System.currentTimeMillis())/1000);
             OffsetDateTime odt=OffsetDateTime.of(ldt,zo);
-            odt.toInstant().toEpochMilli();
+            return odt.toInstant().toEpochMilli();
 
         }
         return ldt.toInstant(ZoneOffset.UTC).toEpochMilli();
     }
-    public long dateAfterToEpochMilli(long days)
+    public long dateAfterEndEpochMillis(long days)
     {
-        return toEpochMillis(this.to,days);
+        return toEpochMillis(this.end,days);
     }
     
     public String range()
     {
-        return this.from+divider+this.to;
+        return this.start+divider+this.end;
         
     }
 }

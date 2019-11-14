@@ -45,6 +45,31 @@ public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> ex
         this.outline=true;
         return (ELEMENT)this;
     }
+    public ELEMENT col(DeviceClass deviceClass,int columns)
+    {
+        return addClass("col",deviceClass,columns);
+    }
+    public ELEMENT col(DeviceClass deviceClass)
+    {
+    //    this.deviceClass=deviceClass;
+        return addClass("col",deviceClass);
+    }
+    public ELEMENT col(int columns)
+    {
+        return addClass("col",columns);
+    }
+    public ELEMENT col()
+    {
+        return addClass("col");
+    }
+    public ELEMENT float_(DeviceClass deviceClass,Float_ value)
+    {
+        return addClass("float",deviceClass,value);
+    }
+    public ELEMENT form_control()
+    {
+        return addClass("form-control");
+    }
     
     protected StyleColor color()
     {

@@ -63,6 +63,14 @@ public class FormControlInputNumber extends FormControlInputComponent<FormContro
     {
         return attr("value",value);
     }
+    public FormControlInputNumber value(Integer value)
+    {
+        return attr("value",value);
+    }
+    public FormControlInputNumber value(int value)
+    {
+        return attr("value",value);
+    }
     public FormControlInputNumber size(int number) //text, search, tel, url, email, and password.
     {
         return attr("size",number);

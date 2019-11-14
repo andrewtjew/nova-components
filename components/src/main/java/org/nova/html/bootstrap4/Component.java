@@ -58,44 +58,6 @@ public abstract class Component<ELEMENT extends Component<ELEMENT>> extends Glob
         return (ELEMENT)this;
     }
     
-    public ELEMENT col(DeviceClass deviceClass,int columns)
-    {
-        return addClass("col",deviceClass,columns);
-    }
-    public ELEMENT col(DeviceClass deviceClass)
-    {
-    //    this.deviceClass=deviceClass;
-        return addClass("col",deviceClass);
-    }
-    public ELEMENT col(int columns)
-    {
-        return addClass("col",columns);
-    }
-    public ELEMENT col()
-    {
-        return addClass("col");
-    }
-    public ELEMENT float_(DeviceClass deviceClass,Float_ value)
-    {
-        return addClass("float",deviceClass,value);
-    }
-    public ELEMENT form_control()
-    {
-        return addClass("form-control");
-    }
-    /*
-    public ELEMENT popoverTrigger(Trigger value)
-    {
-        attr("data-trigger",value);
-        return (ELEMENT)this;
-    }
-    */
-    public ELEMENT tooltip(String title)
-    {
-        attr("data-toggle","tooltip");
-        title(title);
-        return (ELEMENT)this;
-    }
     public ELEMENT deviceClass(DeviceClass deviceClass)
     {
         return addClass(this.getComponentClass(),deviceClass);

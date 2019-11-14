@@ -53,7 +53,7 @@ public class NameValueContainer extends Container
 
     private void addName(Row row, Object name)
     {
-        row.returnAddInner(new Col(this.deviceClass, this.nameSize)).pt(1).text(StyleColor.dark).text(TextAlign.right).font(Font.weight_bold).addInner(name);
+        row.returnAddInner(new Col(this.deviceClass, this.nameSize)).pt(1).text(TextAlign.right).font(Font.weight_bold).addInner(name);
 
     }
 

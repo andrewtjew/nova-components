@@ -2,11 +2,11 @@ package org.nova.html;
 
 import java.util.HashMap;
 
-public class TypeMappings
+public class ExtionsionToTypeMappings
 {
-    public static TypeMappings DefaultTypeMappings()
+    public static ExtionsionToTypeMappings fromDefault()
     {
-        TypeMappings mappings=new TypeMappings();
+        ExtionsionToTypeMappings mappings=new ExtionsionToTypeMappings();
         mappings.addMappings("text/plain", "txt","text");
         mappings.addMappings("text/javascript", "js");
         mappings.addMappings("text/css", "css");
@@ -20,7 +20,7 @@ public class TypeMappings
     
     final private HashMap<String,String> typeMappings;
 
-	public TypeMappings()
+	public ExtionsionToTypeMappings()
 	{
 		this.typeMappings=new HashMap<>();
 	}

@@ -23,5 +23,8 @@ public class Service extends SessionServerApplication<UserSession>
     public void onStart(Trace parent) throws Throwable
     {
     }
+    public void onStop()
+    {
+    }
     
 }

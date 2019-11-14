@@ -42,13 +42,13 @@ public class CallBuilder
         return "org.nova.html.remoting.post("+formQueryBuilder.generateFormQuery(path)+")";
     }
     */
-    public String generateGet(PathAndQuery pathAndQuery,FormQueryBuilder formQueryBuilder)
+    public String js_get(PathAndQuery pathAndQuery,FormQueryBuilder formQueryBuilder)
     {
-        return "org.nova.html.remoting.get("+formQueryBuilder.generateFormQuery(pathAndQuery)+")";
+        return "org.nova.html.remoting.get("+formQueryBuilder.js_query(pathAndQuery)+")";
     }
-    public String generatePost(PathAndQuery pathAndQuery,FormQueryBuilder formQueryBuilder)
+    public String js_post(PathAndQuery pathAndQuery,FormQueryBuilder formQueryBuilder)
     {
-        return "org.nova.html.remoting.post("+formQueryBuilder.generateFormQuery(pathAndQuery)+")";
+        return "org.nova.html.remoting.post("+formQueryBuilder.js_query(pathAndQuery)+")";
     }
     /*
     public String generateOneGet(PathAndQuery pathAndQuery,FormQueryBuilder formQueryBuilder)
@@ -61,11 +61,11 @@ public class CallBuilder
     }
     */
     
-    public String generateGet(PathAndQuery pathAndQuery)
+    public String js_get(PathAndQuery pathAndQuery)
     {
         return "org.nova.html.remoting.get("+this.mark+pathAndQuery.toString()+this.mark+")";
     }
-    public String generatePost(PathAndQuery pathAndQuery)
+    public String js_post(PathAndQuery pathAndQuery)
     {
         return "org.nova.html.remoting.post("+this.mark+pathAndQuery.toString()+this.mark+")";
     }
@@ -80,20 +80,20 @@ public class CallBuilder
         return "org.nova.html.remoting.schedulePost("+formQueryBuilder.generateFormQuery(path)+",'"+timerName+"',"+intervalMs+")";
     }
     */
-    public String generateScheduleGet(PathAndQuery pathAndQuery,FormQueryBuilder formQueryBuilder,String timerName,int intervalMs)
+    public String js_scheduleGet(PathAndQuery pathAndQuery,FormQueryBuilder formQueryBuilder,String timerName,int intervalMs)
     {
-        return "org.nova.html.remoting.scheduleGet("+formQueryBuilder.generateFormQuery(pathAndQuery)+",'"+timerName+"',"+intervalMs+")";
+        return "org.nova.html.remoting.scheduleGet("+formQueryBuilder.js_query(pathAndQuery)+",'"+timerName+"',"+intervalMs+")";
     }
-    public String generateSchedulePost(PathAndQuery pathAndQuery,FormQueryBuilder formQueryBuilder,String timerName,int intervalMs)
+    public String js_schedulePost(PathAndQuery pathAndQuery,FormQueryBuilder formQueryBuilder,String timerName,int intervalMs)
     {
-        return "org.nova.html.remoting.schedulePost("+formQueryBuilder.generateFormQuery(pathAndQuery)+",'"+timerName+"',"+intervalMs+")";
+        return "org.nova.html.remoting.schedulePost("+formQueryBuilder.js_query(pathAndQuery)+",'"+timerName+"',"+intervalMs+")";
     }
     
-    public String generateScheduleGet(PathAndQuery pathAndQuery,String timerName,int intervalMs)
+    public String js_scheduleGet(PathAndQuery pathAndQuery,String timerName,int intervalMs)
     {
         return "org.nova.html.remoting.scheduleGet('"+pathAndQuery.toString()+"','"+timerName+"',"+intervalMs+")";
     }
-    public String generateSchedulePost(PathAndQuery pathAndQuery,String timerName,int intervalMs)
+    public String js_schedulePost(PathAndQuery pathAndQuery,String timerName,int intervalMs)
     {
         return "org.nova.html.remoting.schedulePost('"+pathAndQuery.toString()+"','"+timerName+"',"+intervalMs+")";
     }

@@ -26,6 +26,11 @@ public class UnsecureFileVault extends Vault
 		}
 	}
 
+	public UnsecureFileVault() throws Exception
+    {
+        this.map=new HashMap<>();
+    }
+
 	public String get(String key) throws Exception 
 	{
 		return this.map.get(key);

@@ -8,12 +8,14 @@ import org.nova.html.attributes.Size;
 import org.nova.html.attributes.Style;
 import org.nova.html.attributes.border_style;
 import org.nova.html.attributes.unit;
+import org.nova.html.bootstrap4.Item;
+import org.nova.html.bootstrap4.StyleComponent;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.ext.Text;
 import org.nova.html.tags.div;
 
-public class NameValueList extends div
+public class NameValueList extends StyleComponent<NameValueList>
 {
     final private ArrayList<NameValue<Element>> list;
     private int longest;
@@ -22,6 +24,7 @@ public class NameValueList extends div
     
     public NameValueList(Size leftWidth,boolean frame)
     {
+        super("div",null);
         style("display:block;");
         this.list=new ArrayList<>();
         this.longest=0;
@@ -100,11 +103,9 @@ public class NameValueList extends div
                        (
                            new Style()
                            .width(size)
-                           .border_right(new Size(1,unit.px),border_style.solid,Color.rgb(176, 176, 176))
-                           .margin_right(new Size(4,unit.px))
-                           .padding_right(new Size(4,unit.px))
-                           .padding_top(new Size(0,unit.px))
-                           .padding(new Size(0.2,unit.em),new Size(4,unit.px),new Size(0.1,unit.em),new Size(0,unit.px))
+                           .border_right(new Size(0.1,unit.em),border_style.solid,Color.rgb(176, 176, 176))
+                           .margin_right(new Size(0.25,unit.em))
+                           .padding(new Size(0.6,unit.em),new Size(0.2,unit.em),new Size(0.2,unit.em),new Size(0,unit.em))
                        )
                        .addInner(label));
            }
@@ -114,10 +115,8 @@ public class NameValueList extends div
                        (
                            new Style()
                            .width(size)
-                           .margin_right(new Size(4,unit.px))
-                           .padding_right(new Size(4,unit.px))
-                           .padding_top(new Size(0,unit.px))
-                           .padding(new Size(0.2,unit.em),new Size(4,unit.px),new Size(0.1,unit.em),new Size(0,unit.px))
+                           .margin_right(new Size(0.25,unit.em))
+                           .padding(new Size(0.6,unit.em),new Size(0.2,unit.em),new Size(0.2,unit.em),new Size(0,unit.em))
                        )
                        .addInner(label));
            }

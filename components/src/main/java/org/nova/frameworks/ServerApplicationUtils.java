@@ -4,7 +4,6 @@ import org.apache.http.client.HttpClient;
 import org.nova.http.client.HttpClientConfiguration;
 import org.nova.http.client.HttpClientFactory;
 import org.nova.http.client.JSONClient;
-import org.nova.http.client.TextClient;
 
 public class ServerApplicationUtils
 {
@@ -44,7 +43,7 @@ public class ServerApplicationUtils
         
         return new JSONClient(application.getTraceManager(),application.getLogger(),application.getTimerScheduler(),configuration.idleConnectionTimeoutMs,configuration.reconnectWaitMs,configuration.endPoint,client);
     }
-    public static TextClient createTextClient(ServerApplication application,String configurationName) throws Throwable
+    public static JSONClient createClient(ServerApplication application,String configurationName) throws Throwable
     {
         HttpClientEndPointConfiguration configuration=application.getConfiguration().getJSONObject(configurationName, null, HttpClientEndPointConfiguration.class);
         if (configuration==null)
@@ -64,6 +63,6 @@ public class ServerApplicationUtils
         }
 
         
-        return new TextClient(application.getTraceManager(),application.getLogger(),configuration.endPoint,client);
+        return new JSONClient(application.getTraceManager(),application.getLogger(),configuration.endPoint,client);
     }
 }

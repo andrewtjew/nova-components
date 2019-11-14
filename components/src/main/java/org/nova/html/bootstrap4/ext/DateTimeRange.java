@@ -17,8 +17,8 @@ import org.nova.html.tags.time;
 public class DateTimeRange
 {
     final private DateTimeFormatter formatter;
-    final private String from;
-    final private String to;
+    final private String start;
+    final private String end;
     final private TimeZone timeZone;
     static final String divider=" - ";
     
@@ -31,26 +31,26 @@ public class DateTimeRange
         {
             throw new Exception("Invalid format: "+range);
         }
-        this.from=range.substring(0,index);
-        this.to=range.substring(index+divider.length());
+        this.start=range.substring(0,index);
+        this.end=range.substring(index+divider.length());
     }
     
-    public String toDateTime()
+    public String end()
     {
-        return this.to;
+        return this.end;
     }
-    public String fromDateTime()
+    public String start()
     {
-        return this.from;
+        return this.start;
     }
 
-    public long toDateTimeToEpochMillis()
+    public long endEpochMillis()
     {
-        return toEpochMillis(this.to);
+        return toEpochMillis(this.end);
     }
-    public long fromDateTimeToEpochMillis()
+    public long startEpochMillis()
     {
-        return toEpochMillis(this.from);
+        return toEpochMillis(this.start);
     }
     private long toEpochMillis(String dateTime)
     {
@@ -59,13 +59,13 @@ public class DateTimeRange
         {
             ZoneOffset zo=ZoneOffset.ofTotalSeconds(this.timeZone.getOffset(System.currentTimeMillis())/1000);
             OffsetDateTime odt=OffsetDateTime.of(ldt, zo);
-            odt.toInstant().toEpochMilli();
+            return odt.toInstant().toEpochMilli();
         }
         return ldt.toInstant(ZoneOffset.UTC).toEpochMilli();
     }
     public String range()
     {
-        return this.from+divider+this.to;
+        return this.start+divider+this.end;
         
     }
 }

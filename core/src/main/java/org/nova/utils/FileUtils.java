@@ -57,6 +57,31 @@ public class FileUtils
         }
     }
 
+    public static byte[] readBytes(InputStream stream, int bufferSize) throws IOException
+    {
+        int count = 0;
+        byte[] buffer = new byte[bufferSize];
+        byte[] streamBuffer = new byte[bufferSize];
+        for (int bytesRead = stream.read(buffer); bytesRead > 0; bytesRead = stream.read(buffer))
+        {
+            if (bytesRead + count > streamBuffer.length)
+            {
+                byte[] newStringBuffer = new byte[streamBuffer.length * 2];
+                System.arraycopy(streamBuffer, 0, newStringBuffer, 0, count);
+                streamBuffer = newStringBuffer;
+            }
+            System.arraycopy(buffer, 0, streamBuffer, count, bytesRead);
+            count += bytesRead;
+        }
+        if (count==streamBuffer.length)
+        {
+            return streamBuffer;
+        }
+        byte[] bytes=new byte[count];
+        System.arraycopy(streamBuffer, 0, bytes, 0, count);
+        return bytes;
+    }
+
     public static String readString(InputStream stream, int bufferSize, Charset charset) throws IOException
     {
         int count = 0;
@@ -116,6 +141,20 @@ public class FileUtils
         try (OutputStream stream = new FileOutputStream(file))
         {
             stream.write(text.getBytes(encoding));
+        }
+    }
+
+    public static void writeBinaryFile(String fileName, byte[] bytes, int offset,int lengtht) throws Exception
+    {
+        File file = new File(fileName);
+        if (file.isDirectory() == true)
+        {
+            throw new Exception("File is a directory. Filename=" + fileName);
+        }
+
+        try (OutputStream stream = new FileOutputStream(file))
+        {
+            stream.write(bytes,offset,lengtht);
         }
     }
 

@@ -51,10 +51,17 @@ public class FileCache extends ContentCache<String,byte[]>
         }
     }
     	
+	final private boolean TEST_PRINT=false;
+	
 	@Override
 	protected ValueSize<byte[]> load(Trace trace, String filePath) throws Throwable
 	{
-        File file=new File(FileUtils.toNativePath(this.localDirectory+File.separator+filePath));
+	    String fullPath=this.localDirectory+File.separator+filePath;
+	    if (TEST_PRINT)
+	    {
+	        System.out.println("FileCache.local:"+fullPath);
+	    }
+        File file=new File(FileUtils.toNativePath(fullPath));
         if (file.getCanonicalPath().startsWith(this.localDirectory))
         {
             byte[] bytes=readFile(file);
@@ -63,7 +70,12 @@ public class FileCache extends ContentCache<String,byte[]>
                 return new ValueSize<byte[]>(bytes,bytes.length);
             }
         }
-        file=new File(FileUtils.toNativePath(this.sharedDirectory+File.separator+filePath));
+        fullPath=this.sharedDirectory+File.separator+filePath;
+        file=new File(FileUtils.toNativePath(fullPath));
+        if (TEST_PRINT)
+        {
+            System.out.println("FileCache.shared:"+fullPath);
+        }
         if (file.getCanonicalPath().startsWith(this.sharedDirectory))
         {
             byte[] bytes=readFile(file);

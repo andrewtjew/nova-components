@@ -8,7 +8,7 @@ import org.nova.logging.LogDirectoryManager;
 import org.nova.logging.LogEntry;
 import org.nova.logging.Logger;
 import org.nova.metrics.MeterStore;
-import org.nova.metrics.SourceEventEventBoard;
+import org.nova.metrics.SourceEventBoard;
 import org.nova.tracing.Trace;
 import org.nova.tracing.TraceManager;
 
@@ -67,7 +67,7 @@ public abstract class CoreEnvironmentApplication
     {
         return this.coreEnvironment;
     }
-    public SourceEventEventBoard getSourceEventBoard()
+    public SourceEventBoard getSourceEventBoard()
     {
         return this.coreEnvironment.getSourceEventBoard();
     }
@@ -75,5 +75,9 @@ public abstract class CoreEnvironmentApplication
     {
         return this.name;
     }
-    abstract public void join(Trace parent) throws Throwable;
+    
+//    public void stop() throws Throwable
+//    {
+//        this.coreEnvironment.stop();
+//    }
 }

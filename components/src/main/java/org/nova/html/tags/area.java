@@ -1,5 +1,6 @@
 package org.nova.html.tags;
 
+import org.nova.html.elements.Element;
 import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.enums.area_rel;
 import org.nova.html.enums.area_shape;
@@ -28,6 +29,11 @@ public class area extends GlobalEventTagElement<area>
     }
     public area href(String URL)
     {
+        if (Element.HREF_LOCAL_DIRECTORY!=null)
+        {
+            URL=URL.replace("http:/", Element.HREF_LOCAL_DIRECTORY);
+            URL=URL.replace("https:/", Element.HREF_LOCAL_DIRECTORY);
+        }
         return attr("href",URL);
     }
     public area hreflang(String language_code)

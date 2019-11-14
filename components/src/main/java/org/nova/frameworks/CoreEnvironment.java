@@ -17,7 +17,7 @@ import org.nova.logging.Logger;
 import org.nova.logging.SimpleFileWriter;
 import org.nova.logging.SourceQueueLogger;
 import org.nova.metrics.MeterStore;
-import org.nova.metrics.SourceEventEventBoard;
+import org.nova.metrics.SourceEventBoard;
 import org.nova.security.SecureFileVault;
 import org.nova.security.Vault;
 import org.nova.tracing.TraceManager;
@@ -35,7 +35,7 @@ public class CoreEnvironment
 	final private LogDirectoryManager logDirectoryManager;
 	final private int logCategoryBufferSize;
     final private Vault vault;
-    final public static SourceEventEventBoard SOURCE_EVENT_BOARD=new SourceEventEventBoard();
+    final public static SourceEventBoard SOURCE_EVENT_BOARD=new SourceEventBoard();
 	
 	public CoreEnvironment(Configuration configuration) throws Throwable
 	{
@@ -83,7 +83,7 @@ public class CoreEnvironment
 		return meterStore;
 	}
 	
-	public SourceEventEventBoard getSourceEventBoard()
+	public SourceEventBoard getSourceEventBoard()
 	{
 	    return this.SOURCE_EVENT_BOARD;
 	}
