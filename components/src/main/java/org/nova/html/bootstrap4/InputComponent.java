@@ -28,6 +28,11 @@ public abstract class InputComponent<ELEMENT extends InputComponent<ELEMENT>> ex
         attr("type",type);
     }
 
+    public ELEMENT form_control()
+    {
+        return addClass("form-control");
+    }
+
     public ELEMENT addClass(Object class_,Object...fragments)
     {
         if (fragments!=null)

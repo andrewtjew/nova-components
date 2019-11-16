@@ -4,17 +4,17 @@ import org.nova.html.enums.autocomplete;
 import org.nova.html.tags.input_checkbox;
 import org.nova.html.tags.input_radio;
 
-public class FormControlInputRadio extends FormControlInputComponent<FormControlInputRadio>
+public class InputCheckbox extends InputComponent<InputCheckbox>
 {
-    public FormControlInputRadio()
+    public InputCheckbox()
     {
-        super("radio");
+        super("input","checkbox");
     }
-    public FormControlInputRadio checked() //checkbox or radio
+    public InputCheckbox checked() //checkbox or radio
     {
         return attr("checked");
     }
-    public FormControlInputRadio checked(boolean checked)
+    public InputCheckbox checked(boolean checked)
     {
         if (checked)
         {
@@ -22,11 +22,11 @@ public class FormControlInputRadio extends FormControlInputComponent<FormControl
         }
         return this;
     }
-    public FormControlInputRadio value(String text) //button, reset, submit, text, password, hidden, checkbox, radio, image
+    public InputCheckbox value(String text) //button, reset, submit, text, password, hidden, checkbox, radio, image
     {
         return attr("value",text);
     }
-    public FormControlInputRadio value(Object value)
+    public InputCheckbox value(Object value)
     {
         if (value==null)
         {

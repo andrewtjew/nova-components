@@ -8,6 +8,21 @@ public abstract class ButtonComponent<ELEMENT extends ButtonComponent<ELEMENT>> 
     {
         super(tag,"btn");
     }
+    @SuppressWarnings("unchecked")
+    public ELEMENT active()
+    {
+        addClass("active");
+        return (ELEMENT)this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public ELEMENT disabled()
+    {
+        addClass("disabled");
+        attr("disabled");
+        return (ELEMENT)this;
+    }
+
 
     @SuppressWarnings("unchecked")
     public ELEMENT size(Size value)

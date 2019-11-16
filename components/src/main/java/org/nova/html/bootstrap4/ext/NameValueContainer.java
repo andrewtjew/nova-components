@@ -1,25 +1,14 @@
 package org.nova.html.bootstrap4.ext;
 
-import org.nova.html.attributes.Style;
-import org.nova.html.attributes.text_align;
 import org.nova.html.bootstrap4.Col;
-import org.nova.html.bootstrap4.Component;
 import org.nova.html.bootstrap4.Container;
-import org.nova.html.bootstrap4.FormGroup;
-import org.nova.html.bootstrap4.FormLabel;
-import org.nova.html.bootstrap4.Item;
 import org.nova.html.bootstrap4.Row;
-import org.nova.html.bootstrap4.Table;
-import org.nova.html.bootstrap4.TableRow;
 import org.nova.html.bootstrap4.classes.DeviceClass;
 import org.nova.html.bootstrap4.classes.Edge;
-import org.nova.html.bootstrap4.classes.Float_;
 import org.nova.html.bootstrap4.classes.Font;
 import org.nova.html.bootstrap4.classes.StyleColor;
 import org.nova.html.bootstrap4.classes.TextAlign;
 import org.nova.html.elements.Element;
-import org.nova.html.tags.hr;
-import org.nova.html.tags.td;
 
 public class NameValueContainer extends Container
 {

@@ -4,18 +4,18 @@ import org.nova.html.enums.autocomplete;
 import org.nova.html.tags.input_email;
 import org.nova.html.tags.select;
 
-public class FormControlSelect extends InputComponent<FormControlSelect>
+public class Select extends InputComponent<Select>
 {
-    public FormControlSelect()
+    public Select()
     {
         super("select","form-control",null);
     }
     
-    public FormControlSelect multiple()
+    public Select multiple()
     {
         return attr("multiple");
     }
-    public FormControlSelect multiple(boolean multiple)
+    public Select multiple(boolean multiple)
     {
         if (multiple)
         {
@@ -23,11 +23,11 @@ public class FormControlSelect extends InputComponent<FormControlSelect>
         }
         return this;
     }
-    public FormControlSelect required()
+    public Select required()
     {
         return attr("required");
     }
-    public FormControlSelect required(boolean required)
+    public Select required(boolean required)
     {
         if (required)
         {

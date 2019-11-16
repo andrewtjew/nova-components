@@ -1,8 +1,5 @@
-package org.nova.html.tags.ext;
+package org.nova.html.ext;
 import org.nova.html.tags.html;
-import org.nova.html.ext.Content;
-import org.nova.html.ext.DocType;
-import org.nova.html.ext.Head;
 import org.nova.html.tags.body;
 
 public class BasicPage extends Content

@@ -1,34 +1,23 @@
 package org.nova.html.bootstrap4.ext;
 
 import org.nova.html.attributes.Size;
-import org.nova.html.attributes.Style;
-import org.nova.html.attributes.display;
-import org.nova.html.attributes.unit;
 import org.nova.html.bootstrap4.Button;
-import org.nova.html.bootstrap4.FormControlInputText;
 import org.nova.html.bootstrap4.Item;
 import org.nova.html.bootstrap4.Popover;
-import org.nova.html.bootstrap4.StyleComponent;
 import org.nova.html.bootstrap4.TipOption;
-import org.nova.html.bootstrap4.classes.Flex;
-import org.nova.html.bootstrap4.classes.Justify;
 import org.nova.html.bootstrap4.classes.Placement;
 import org.nova.html.bootstrap4.classes.StyleColor;
-import org.nova.html.bootstrap4.classes.TextStyle;
-import org.nova.html.bootstrap4.classes.Trigger;
-import org.nova.html.elements.Element;
 import org.nova.html.elements.GlobalEventTagElement;
-import org.nova.html.elements.GlobalTagElement;
 import org.nova.html.elements.InputElement;
 import org.nova.html.elements.QuotationMark;
 import org.nova.html.elements.TagElement;
 import org.nova.html.ext.FormQueryBuilder;
-import org.nova.html.ext.Head;
 import org.nova.html.ext.HtmlUtils;
 import org.nova.html.remoting.CallBuilder;
 import org.nova.html.tags.script;
 import org.nova.html.ext.ModalBackground;
 import org.nova.http.client.PathAndQuery;
+
 
 public class RemotingInputPopover extends Popover    
 {

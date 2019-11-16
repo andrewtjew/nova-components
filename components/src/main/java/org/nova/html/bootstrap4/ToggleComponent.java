@@ -7,21 +7,6 @@ public abstract class ToggleComponent<ELEMENT extends ToggleComponent<ELEMENT>> 
         super(tag, componentClass);
     }
 
-    @SuppressWarnings("unchecked")
-    public ELEMENT active()
-    {
-        addClass("active");
-        return (ELEMENT)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public ELEMENT disabled()
-    {
-        addClass("disabled");
-        attr("disabled");
-        return (ELEMENT)this;
-    }
-
     public ELEMENT toggleCollapse(NavbarCollapse target)
     {
         data("toggle","collapse");
