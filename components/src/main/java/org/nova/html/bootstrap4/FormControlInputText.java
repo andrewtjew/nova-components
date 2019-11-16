@@ -38,6 +38,10 @@ public class FormControlInputText extends FormControlInputComponent<FormControlI
     {
         return attr("placeholder",text);
     }
+    public FormControlInputText list(String id)
+    {
+        return attr("list",id);
+    }
     
     public FormControlInputText size(int number) //text, search, tel, url, email, and password.
     {

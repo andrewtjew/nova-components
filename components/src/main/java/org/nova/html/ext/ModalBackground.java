@@ -1,4 +1,4 @@
-package org.nova.html.tags.ext;
+package org.nova.html.ext;
 import org.nova.html.tags.html;
 import org.nova.html.attributes.Color;
 import org.nova.html.attributes.Size;
@@ -9,7 +9,6 @@ import org.nova.html.attributes.position;
 import org.nova.html.attributes.unit;
 import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.elements.QuotationMark;
-import org.nova.html.ext.Content;
 import org.nova.html.ext.DocType;
 import org.nova.html.ext.Head;
 import org.nova.html.tags.body;
@@ -41,9 +40,13 @@ public class ModalBackground extends GlobalEventTagElement<div>
         this.style(style);
         this.z_index=z_index;
     }
+    public ModalBackground(Color color)
+    {
+    	this(1,color,false);
+    }
     public ModalBackground()
     {
-    	this(1,Color.rgba(0, 0, 0, 0.0f),false);
+    	this(Color.rgba(0, 0, 0, 0.0f));
     }
     public String js_show(QuotationMark mark)
     {
@@ -55,7 +58,7 @@ public class ModalBackground extends GlobalEventTagElement<div>
     }
     public String js_show()
     {
-    	return js_show(QuotationMark.APOS);
+    	return js_show(QuotationMark.SINGLE);
     }
     public String js_hide(QuotationMark mark)
     {

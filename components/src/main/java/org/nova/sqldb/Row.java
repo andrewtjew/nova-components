@@ -1,6 +1,7 @@
 package org.nova.sqldb;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -57,6 +58,14 @@ public class Row
 	{
 		return getDECIMAL(this.mappings.get(columnName));
 	}
+    public BigInteger getBigInteger(int columnIndex)
+    {
+        return (BigInteger)this.data[columnIndex];
+    }
+    public BigInteger getBigInteger(String columnName)
+    {
+        return getBigInteger(this.mappings.get(columnName));
+    }
 	public short getTINYINT(int columnIndex)
 	{
 		return (short)this.data[columnIndex];

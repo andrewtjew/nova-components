@@ -22,6 +22,12 @@ public abstract class ToggleComponent<ELEMENT extends ToggleComponent<ELEMENT>> 
         return (ELEMENT)this;
     }
 
+    public ELEMENT toggleCollapse(NavbarCollapse target)
+    {
+        data("toggle","collapse");
+        data("target","#"+target.id());
+        return (ELEMENT)this;
+    }
     public ELEMENT toggleCollapse(Collapse collapse)
     {
         data("toggle","collapse");

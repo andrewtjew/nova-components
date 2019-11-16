@@ -7,4 +7,5 @@ public class NavbarCollapse extends StyleComponent<NavbarCollapse>
         super("div","collapse navbar-collapse");
     }
     
+    
 }

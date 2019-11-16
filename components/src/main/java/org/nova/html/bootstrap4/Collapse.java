@@ -16,15 +16,15 @@ public class Collapse extends StyleComponent<Collapse>
         return this;
     }
 
-    public Collapse linkDataParent(String value)
+    public Collapse linkDataParent(String parent)
     {
-        attr("data-parent",value);
+        attr("data-parent",parent);
         return this;
     }
 
-    public Collapse linkDataParent(TagElement<?> element)
+    public Collapse linkDataParent(TagElement<?> parent)
     {
-        attr("data-parent","#"+element.id());
+        attr("data-parent","#"+parent.id());
         return this;
     }
 

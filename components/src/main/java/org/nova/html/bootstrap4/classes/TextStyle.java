@@ -5,6 +5,7 @@ public enum TextStyle
     justify("justify"), 
     monopace("monospace"), 
     nowrap("nowrap"), 
+    truncate("truncate"), 
     lowercase("lowercase"), 
     uppercase("uppercase"), 
     capitalize("capitalize"), 

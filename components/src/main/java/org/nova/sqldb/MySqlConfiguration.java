@@ -19,11 +19,15 @@ public class MySqlConfiguration
 	{
 		this(host,3306,schema,10,10000,1000000);
 	}
+    public MySqlConfiguration(String schema)
+    {
+        this("localhost",schema);
+    }
 	
-	String host;
-	int port;
+	String host="localhost";
+	int port=3306;
 	String schema;
-	int poolSize;
-	long connectionKeepAlive;
-	long maximumRecentlyUsedCount;
+	int poolSize=2;
+	long connectionKeepAlive=10000;
+	long maximumRecentlyUsedCount=1000000;
 }

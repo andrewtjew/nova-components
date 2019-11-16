@@ -8,6 +8,7 @@ import org.nova.html.bootstrap4.ModalFooter;
 import org.nova.html.bootstrap4.ModalHeader;
 import org.nova.html.bootstrap4.classes.DeviceClass;
 import org.nova.html.elements.Composer;
+import org.nova.html.remoting.ModalOption;
 
 public class ModalDocument extends Modal
 {
@@ -90,6 +91,10 @@ public class ModalDocument extends Modal
             this.content.addInner(this.footer);
         }
         super.compose(composer);
+    }
+    public String js_option(ModalOption option)
+    {
+        return "$('#"+id()+"').modal('"+option+"');";
     }
     
 }

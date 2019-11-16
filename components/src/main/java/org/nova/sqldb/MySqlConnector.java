@@ -26,7 +26,8 @@ public class MySqlConnector extends Connector
 	
     private String buildConnectionString()
     {
-        return "jdbc:mysql://"+this.host+":"+this.port+"/"+this.schema+"?rewriteBatchedStatements=true";
+//        return "jdbc:mysql://"+this.host+":"+this.port+"/"+this.schema+"?rewriteBatchedStatements=true";
+        return "jdbc:mysql://"+this.host+":"+this.port+"/"+this.schema+"?autoReconnect=true&useSSL=false";
     }
     
     private static Vault buildUnsecuredVault(String password)
@@ -55,7 +56,6 @@ public class MySqlConnector extends Connector
 	public MySqlConnector(TraceManager traceManager,Logger logger,Disruptor disruptor,String user,String passwordKey,Vault vault,boolean connect,MySqlConfiguration configuration) throws Throwable 
 	{
 		super(traceManager,logger,disruptor,configuration.maximumRecentlyUsedCount);
-		Class.forName("com.mysql.jdbc.Driver");
 		this.user=user;
 		this.schema=configuration.schema;
 		this.port=configuration.port;
@@ -89,7 +89,11 @@ public class MySqlConnector extends Connector
 	@Override
 	protected Connection createConnection() throws Throwable
 	{
-		Connection connection=DriverManager.getConnection(this.buildConnectionString(),user,this.passwordVault.get(this.passwordKey));
+	    String password=this.passwordVault.get(this.passwordKey);
+	    String connectionString=this.buildConnectionString();
+	    //"jdbc:mysql://localhost:3306/YourDBName";
+        Class.forName("com.mysql.jdbc.Driver");
+		Connection connection=DriverManager.getConnection(connectionString,user,password);
 		this.openConnectionSuccesses.increment();
 		return connection;
 	}

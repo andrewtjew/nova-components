@@ -15,146 +15,19 @@ import org.nova.html.tags.script;
 import org.nova.json.ObjectMapper;
 import org.nova.utils.Utils;
 
-public class Popover
+public class Popover extends TipComponent<Popover> 
 {
-    final private TagElement<?> parent;
-    
-    static class Delay
+    public Popover(TagElement<?> toggler)
     {
-        public Integer show;
-        public Integer hide;
+    	super(toggler,"popover");
     }
     
-    public enum PopoverOption
-    {
-    	show,
-    	hide,
-    	toggle,
-    	dispose,
-    	enable,
-    	disable,
-    	toggleEnabled,
-    	update,
-    }
-    
-    public Popover(TagElement<?> parent)
-    {
-    	this.parent=parent;
-        this.parent.attr("data-toggle","popover");
-    }
-    
-    public Popover title(String title)
-    {
-        this.parent.attr("title",title);
-        return this;
-    }
-    
-    public Popover template(String template)
-    {
-        this.parent.attr("data-template",template,QuotationMark.SINGLE);
-    	return this;
-    }
-    public Popover animation()
-    {
-    	return animation(true);
-    }
-
-    public Popover animation(boolean animation)
-    {
-    	if (animation)
-    	{
-    		this.parent.attr("data-animation",animation);
-    	}
-        return this;
-    }
-
-    public Popover content(String content)
-    {
-        this.parent.attr("data-content",content,QuotationMark.SINGLE);
-        return this;
-    }
-
-    public Popover content(Element element,boolean html) throws Throwable
-    {
-        StringComposer composer=new StringComposer();
-        element.compose(composer);
-        String content=composer.getStringBuilder().toString();
-        content=element.toString();
-        this.parent.attr("data-content",content,QuotationMark.SINGLE);
-        if (html)
-        {
-        	this.parent.attr("data-html",true);
-        }
-        return this;
-    }
-    public Popover content(Element element) throws Throwable
-    {
-        return content(element,true);
-    }
-
-    @Description("Order is important. Use (hover,focus) and not (focus,hover) to allow buttons on the popover to be clicked.")
-    public Popover trigger(Trigger...triggers) throws Exception
-    {
-        if (triggers.length>1)
-        {
-            for (Trigger trigger:triggers)
-            {
-                if (trigger==Trigger.manual)
-                {
-                    throw new Exception("manual cannot be combined.");
-                }
-            }
-        }
-        this.parent.attr("data-trigger",Utils.combine(triggers, " "));
-        return this;
-    }
-    
-    public Popover placement(Placement placement)
-    {
-        this.parent.attr("data-placement",placement);
-        return this;
-    }
-    
-    public Popover delay(Integer show,Integer hide)
-    {
-        Delay delay=new Delay();
-        delay.show=show;
-        delay.hide=hide;
-        try
-        {
-            String text=ObjectMapper.writeObjectToString(delay);
-            this.parent.attr("data-delay",text,QuotationMark.SINGLE);
-        }
-        catch (Throwable e)
-        {
-            throw new RuntimeException(e);
-        }
-        return this;
-    }
-    
-    public Popover container(String container)
-    {
-        this.parent.attr("data-container",container);
-        return this;
-    }
-    
-    public Popover offset(int offsetX,int offsetY)
-    {
-        this.parent.attr("data-offset",offsetX+" "+offsetY);
-    	return this;
-    }
-    public Popover boundar(Boundary boundary)
-    {
-    	this.parent.attr("data-boundary",boundary);
-    	return this;
-    }
-    
-    public String js_popover(PopoverOption option,QuotationMark mark)
+    public String js_popover(TipOption option,QuotationMark mark)
     {
 //    	return "document.getElementById("+mark+this.parent.id()+mark+").popover("+mark+option+mark+")";
-    	return "$("+mark+"#"+this.parent.id()+mark+").popover("+mark+option+mark+")";
+    	return "$("+mark+"#"+this.toggler.id()+mark+").popover("+mark+option+mark+")";
     }
-    public String js_popover(PopoverOption option)
+    public String js_popover(TipOption option)
     {
     	return js_popover(option, QuotationMark.APOS);
     }

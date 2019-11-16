@@ -7,26 +7,9 @@ public class NavItem extends StyleComponent<NavItem>
         super("li","nav-item");
     }
     
-    /*
-    public NavItem(String label,String href)
+    public NavItem dropdown()
     {
-        this();
-        addInner(new PageLink(label,href));
+        addClass("dropdown");
+        return this;
     }
-    public NavItem(String label,String href,boolean active,boolean disabled)
-    {
-        this();
-        NavLink link=returnAddInner(new NavLink(label,href));
-        if (active)
-        {
-            link.active();
-        }
-        if (disabled)
-        {
-            link.disabled();
-        }
-    }
-    */
-    
-    
 }
