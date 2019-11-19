@@ -1,3 +1,24 @@
+/*******************************************************************************
+ * Copyright (C) 2017-2019 Kat Fung Tjew
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ******************************************************************************/
 package org.nova.html.deprecated;
 
 import java.util.ArrayList;
@@ -7,6 +28,7 @@ import org.nova.html.attributes.Color;
 import org.nova.html.attributes.Size;
 import org.nova.html.attributes.Style;
 import org.nova.html.attributes.border_style;
+import org.nova.html.attributes.text_align;
 import org.nova.html.attributes.unit;
 import org.nova.html.bootstrap4.Item;
 import org.nova.html.bootstrap4.StyleComponent;
@@ -68,6 +90,20 @@ public class NameValueList extends StyleComponent<NameValueList>
     {
        int width=(int)(this.longest*0.7f+1);
        Size size=this.leftWidth!=null?this.leftWidth:new Size(width,unit.em);
+
+       Style style=new Style()
+       .width(size)
+       .border_right(new Size(0.1,unit.em),border_style.solid,Color.rgb(176, 176, 176))
+       .margin_right(new Size(0.25,unit.em))
+       .padding(new Size(0.6,unit.em),new Size(0.2,unit.em),new Size(0.2,unit.em),new Size(0,unit.em));
+
+       Style valueStyle=new Style()
+       .text_align(text_align.left)
+       .width(new Size(100,unit.percent))
+//       .border_right(new Size(0.1,unit.em),border_style.solid,Color.rgb(176, 176, 176))
+       .margin_right(new Size(0.25,unit.em))
+       .padding(new Size(0.6,unit.em),new Size(0.2,unit.em),new Size(0.2,unit.em),new Size(0,unit.em));
+
        for (int i=0;i<this.list.size();i++)
        {
            NameValue<Element> item=this.list.get(i);
@@ -120,7 +156,7 @@ public class NameValueList extends StyleComponent<NameValueList>
                        )
                        .addInner(label));
            }
-           line.addInner(new div().style("width:100%;text-align:left;padding-top:0.2em;padding-bottom:0.1em;").addInner(item.getValue()));
+           line.addInner(new div().style(valueStyle).addInner(item.getValue()));
        }
        super.compose(builder);
     }
