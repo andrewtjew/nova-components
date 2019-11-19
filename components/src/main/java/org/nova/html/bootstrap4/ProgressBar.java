@@ -5,11 +5,12 @@ public class ProgressBar extends StyleComponent<ProgressBar>
     public ProgressBar()
     {
         super("div","progress-bar");
+        attr("role","progressbar");
     }
     
-    public ProgressBar setWidth(int percentage)
+    public ProgressBar width(int percentage)
     {
-        attr("width",percentage+"%");
+        attr("style","width:"+percentage+"%");
         return this;
     }
     

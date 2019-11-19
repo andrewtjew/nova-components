@@ -81,6 +81,7 @@ public class ResourceController
             {
                 response.setHeader("Cache-Control",(this.cacheControlValue == null || this.cacheControlValue.length() == 0) ? "max-age=" + this.cacheControlMaxAge : this.cacheControlValue + ",max-age=" + this.cacheControlMaxAge);
             }
+            
             response.setStatus(HttpStatus.OK_200);
             response.getOutputStream().write(bytes);
         }

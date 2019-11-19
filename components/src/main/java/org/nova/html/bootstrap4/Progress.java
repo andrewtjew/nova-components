@@ -7,9 +7,9 @@ public class Progress extends StyleComponent<Progress>
         super("div","progress");
     }
     
-    public Progress setProgress(int widthPercentage)
+    public Progress width(int widthPercentage)
     {
-        addInner(new ProgressBar().setWidth(widthPercentage));
+        addInner(new ProgressBar().width(widthPercentage));
         return this;
     }
     
