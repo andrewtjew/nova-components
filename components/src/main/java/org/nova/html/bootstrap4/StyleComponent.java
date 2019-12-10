@@ -42,7 +42,7 @@ import org.nova.html.elements.Composer;
 
 public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> extends Component<ELEMENT> 
 {
-    private StyleColor color;
+    private String color;
     private boolean outline;
     
     public StyleComponent(String tag,String componentClass)
@@ -55,6 +55,11 @@ public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> ex
     }
     @SuppressWarnings("unchecked")
     public ELEMENT color(StyleColor value)
+    {
+        this.color=value.toString();
+        return (ELEMENT)this;
+    }
+    public ELEMENT color(String value)
     {
         this.color=value;
         return (ELEMENT)this;
@@ -91,12 +96,13 @@ public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> ex
     {
         return addClass("form-control");
     }
-    
+
+/*
     protected StyleColor color()
     {
         return this.color;
     }
-
+*/
     public ELEMENT bg(StyleColor value)
     {
         return addClass("bg",value);
@@ -171,8 +177,14 @@ public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> ex
     }
     public ELEMENT border(StyleColor color)
     {
-        addClass("border");
+//        addClass("border");
         return addClass("border",color);
+    }
+    public ELEMENT border(String color)
+    {
+//        addClass("border");
+        return addClass("border",color);
+//        return (ELEMENT)this;
     }
     public ELEMENT clearfix()
     {
@@ -192,21 +204,25 @@ public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> ex
         return addClass("flex",deviceClass,flex);
     }
 
+    @Deprecated
     public ELEMENT d_flex()
     {
         return addClass("d-flex");
     }
 
+    @Deprecated
     public ELEMENT d_inline_flex()
     {
         return addClass("d-inline-flex");
     }
 
+    @Deprecated
     public ELEMENT d_flex(DeviceClass deviceClass)
     {
         return addClass("d",deviceClass,"flex");
     }
 
+    @Deprecated
     public ELEMENT d_inline_flex(DeviceClass deviceClass)
     {
         return addClass("d",deviceClass,"inline-flex");

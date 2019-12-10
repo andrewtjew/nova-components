@@ -41,6 +41,7 @@ public class LinkDropdown extends ButtonComponent<LinkDropdown>
     {
         super("a");
         this.usehref=href!=null;
+        attr("role","button");
         attr("href",href);
         addInner(label);
         this.menu=new Item();

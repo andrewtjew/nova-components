@@ -21,6 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4.classes;
 
+@Deprecated
 public enum NavbarState
 {
     active, 

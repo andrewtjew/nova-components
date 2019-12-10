@@ -21,12 +21,23 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import javax.swing.plaf.basic.BasicBorders.ToggleButtonBorder;
+
 public class NavbarCollapse extends StyleComponent<NavbarCollapse>
 {
-    public NavbarCollapse()
+    public NavbarCollapse(ButtonComponent<?> togglerButton,String id)
     {
         super("div","collapse navbar-collapse");
+        togglerButton.data("toggle","collapse");
+        togglerButton.addClass("navbar-toggler");
+        if (id!=null)
+        {
+            id(id);
+        }
+        togglerButton.data("target","#"+id());
     }
-    
-    
+    public NavbarCollapse(ButtonComponent<?> togglerButton)
+    {
+        this(togglerButton,null);
+    }
 }

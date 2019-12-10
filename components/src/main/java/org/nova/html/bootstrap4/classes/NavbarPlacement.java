@@ -19,32 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.bootstrap4;
+package org.nova.html.bootstrap4.classes;
 
-import org.nova.html.elements.GlobalTagElement;
-import org.nova.html.tags.span;
-
-public class NavbarTogglerButton extends ButtonComponent<NavbarTogglerButton>
+public enum NavbarPlacement
 {
-    public NavbarTogglerButton()
+    fixed_top("fixed-top"), 
+    fixed_bottom("fixed-bottom"), 
+    sticky_top("sticky-top"), 
+    ;
+    
+    private String value;
+
+    NavbarPlacement(String value)
     {
-        this(true);
-    }
-    public NavbarTogglerButton(boolean togglerIcon)
-    {
-        super("button");
-        if (togglerIcon)
-        {
-            addInner(new span().addClass("navbar-toggler-icon"));
-        }
+        this.value = value;
     }
 
-    @Deprecated
-    public NavbarTogglerButton toggleCollapse(NavbarCollapse collapse)
+    public String toString()
     {
-        data("toggle","collapse");
-        data("target","#"+collapse.id());
-        return this;
-    }
-   
-}
+        return this.value;
+    }}

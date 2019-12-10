@@ -156,6 +156,10 @@ abstract public class ContentCache<KEY,VALUE>
 
 	public VALUE put(Trace parent,KEY key,ValueSize<VALUE> valueSize) throws Throwable
     {
+	    if (valueSize==null)
+	    {
+	        throw new Exception("No value for key:"+key);
+	    }
         synchronized(this)
         {
             Node<KEY,VALUE> node=new Node<KEY,VALUE>(key,valueSize.value,valueSize.size);

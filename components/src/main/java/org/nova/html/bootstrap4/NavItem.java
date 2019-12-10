@@ -33,4 +33,10 @@ public class NavItem extends StyleComponent<NavItem>
         addClass("dropdown");
         return this;
     }
+
+    public NavItem active()
+    {
+        addClass("active");
+        return this;
+    }
 }
