@@ -31,6 +31,8 @@ public enum Flex
     nowrap("nowrap"),
     wrap("wrap"),
     wrap_reverse("wrap-reverse"),
+    fill("fill"),
+    shrink("shrink"),
     ;
     private String value;
 

@@ -21,30 +21,19 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
-import org.nova.html.elements.GlobalTagElement;
-import org.nova.html.tags.span;
+import org.nova.html.bootstrap4.classes.DeviceClass;
+import org.nova.html.elements.TagElement;
 
-public class NavbarTogglerButton extends ButtonComponent<NavbarTogglerButton>
+public class Form extends StyleComponent<Form>
 {
-    public NavbarTogglerButton()
+    public Form()
     {
-        this(true);
+        super("form",null);
     }
-    public NavbarTogglerButton(boolean togglerIcon)
+    
+    public Form inline()
     {
-        super("button");
-        if (togglerIcon)
-        {
-            addInner(new span().addClass("navbar-toggler-icon"));
-        }
-    }
-
-    @Deprecated
-    public NavbarTogglerButton toggleCollapse(NavbarCollapse collapse)
-    {
-        data("toggle","collapse");
-        data("target","#"+collapse.id());
+        addClass("form-inline");
         return this;
     }
-   
 }

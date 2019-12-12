@@ -21,8 +21,6 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
-import javax.swing.plaf.basic.BasicBorders.ToggleButtonBorder;
-
 import org.nova.html.elements.Composer;
 
 public class NavbarCollapse extends StyleComponent<NavbarCollapse>
