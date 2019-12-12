@@ -23,6 +23,7 @@ package org.nova.html.bootstrap4;
 
 import org.nova.html.bootstrap4.classes.DeviceClass;
 import org.nova.html.bootstrap4.classes.Fixed;
+import org.nova.html.bootstrap4.classes.NavbarPlacement;
 
 public class Navbar extends StyleComponent<Navbar>
 {
@@ -31,16 +32,17 @@ public class Navbar extends StyleComponent<Navbar>
         super("nav","navbar");
     }
     
-    public Navbar fixed(Fixed value)
-    {
-        addClass("fixed",value);
-        return this;
-    }
-    
     public Navbar expand(DeviceClass deviceClass)
     {
         addClass("navbar-expand",deviceClass);
         return this;
     }
+    
+    public Navbar placement(NavbarPlacement placement)
+    {
+        addClass(placement);
+        return this;
+    }
+    
     
 }

@@ -40,6 +40,7 @@ public class JettyServerFactory
         Server server = new Server(threadPool);
         HttpConfiguration config = new HttpConfiguration();
         config.setOutputBufferSize(65536);
+//        config.setOutputBufferSize(8192);
         ServerConnector connector = new ServerConnector(server,new HttpConnectionFactory(config));
         connector.setIdleTimeout(30*60*1000);
         connector.setPort(port);

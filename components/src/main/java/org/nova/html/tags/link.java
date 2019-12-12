@@ -45,8 +45,11 @@ public class link extends GlobalEventTagElement<link>
     {
         if (Element.HREF_LOCAL_DIRECTORY!=null)
         {
-            URL=URL.replace("http:/", Element.HREF_LOCAL_DIRECTORY);
-            URL=URL.replace("https:/", Element.HREF_LOCAL_DIRECTORY);
+            if (URL!=null)
+            {
+                URL=URL.replace("http:/", Element.HREF_LOCAL_DIRECTORY);
+                URL=URL.replace("https:/", Element.HREF_LOCAL_DIRECTORY);
+            }
         }
         return attr("href",URL);
     }

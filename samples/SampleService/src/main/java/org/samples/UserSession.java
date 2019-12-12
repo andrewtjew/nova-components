@@ -1,6 +1,7 @@
 package org.samples;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import org.nova.core.NameObject;
 import org.nova.http.server.Context;
@@ -14,11 +15,11 @@ public class UserSession extends WebAccessSession<Service>
 {
     public UserSession(Service service,String token,String user)
     {
-        super(token, user,OffsetDateTime.now(),null);
+        super(token, null, user,OffsetDateTime.now().getOffset(),null);
     }
-    public UserSession(Service service,String token,String user,OffsetDateTime offsetDateTime,String language)
+    public UserSession(Service service,String token,String user,ZoneOffset zoneOffset,String language)
     {
-        super(token, user,offsetDateTime,language);
+        super(token, null, user,zoneOffset,language);
     }
 
     @Override

@@ -34,6 +34,7 @@ public enum StyleColor
     light("light"), 
     dark("dark"), 
     white("white"), 
+    transparent("transparent")
     ;
     private String value;
 

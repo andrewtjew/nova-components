@@ -40,7 +40,7 @@ public abstract class ButtonComponent<ELEMENT extends ButtonComponent<ELEMENT>> 
     public ELEMENT disabled()
     {
         addClass("disabled");
-        attr("disabled");
+        attr("disabled","disabled");
         return (ELEMENT)this;
     }
 

@@ -106,8 +106,8 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
             }
             if (ports>0)
             {
-                int threads=configuration.getIntegerValue("HttpServer.private.threads",10);
-                HttpServerConfiguration publicServerConfiguration=getConfiguration().getNamespaceObject("HttpServer.private", HttpServerConfiguration.class);
+                int threads=configuration.getIntegerValue("HttpServer.private.threads",20);
+                HttpServerConfiguration privateServerConfiguration=getConfiguration().getNamespaceObject("HttpServer.private", HttpServerConfiguration.class);
                 
                 int httpsPort=configuration.getIntegerValue("HttpServer.private.https.port",-1);
                 int httpPort=configuration.getIntegerValue("HttpServer.private.http.port",-1);
@@ -138,7 +138,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
                     }
                     servers[portIndex]=JettyServerFactory.createServer(threads, httpPort);
                 }
-                this.privateServer=new HttpServer(this.getTraceManager(), this.getLogger("HttpServer"),isTest(),publicServerConfiguration, servers);
+                this.privateServer=new HttpServer(this.getTraceManager(), this.getLogger("HttpServer"),isTest(),privateServerConfiguration, servers);
                 
                 this.privateServer.addContentDecoders(new GzipContentDecoder());
                 this.privateServer.addContentEncoders(new GzipContentEncoder());
@@ -173,6 +173,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
     
                 Server[] servers=new Server[ports];
                 int portIndex=0;
+                
                 if (https)
                 {
                     if (httpsPort<0)

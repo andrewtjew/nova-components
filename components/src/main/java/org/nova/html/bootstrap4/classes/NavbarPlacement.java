@@ -19,19 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.bootstrap4;
+package org.nova.html.bootstrap4.classes;
 
-public class Progress extends StyleComponent<Progress>
+public enum NavbarPlacement
 {
-    public Progress()
-    {
-        super("div","progress");
-    }
+    fixed_top("fixed-top"), 
+    fixed_bottom("fixed-bottom"), 
+    sticky_top("sticky-top"), 
+    ;
     
-    public Progress width(int widthPercentage)
+    private String value;
+
+    NavbarPlacement(String value)
     {
-        addInner(new ProgressBar().width(widthPercentage));
-        return this;
+        this.value = value;
     }
-    
-}
+
+    public String toString()
+    {
+        return this.value;
+    }}

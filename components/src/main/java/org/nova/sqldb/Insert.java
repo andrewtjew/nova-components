@@ -32,6 +32,11 @@ public class Insert
 	final private String table;
 	private String categoryOverride;
 	
+	public static Insert table(String table)
+	{
+	    return new Insert(table);
+	}
+	
 	public Insert(String table)
 	{
 		this.columns=new StringBuilder();

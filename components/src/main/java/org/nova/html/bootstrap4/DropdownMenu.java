@@ -23,18 +23,40 @@ package org.nova.html.bootstrap4;
 
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
+import org.nova.html.tags.a;
 import org.nova.html.tags.div;
 
 public class DropdownMenu extends StyleComponent<DropdownMenu>
 {
-    public DropdownMenu()
+    public DropdownMenu(StyleComponent<?> button,boolean split)
     {
         super("div", "dropdown-menu");
+        button.addClass("dropdown-toggle");
+        if (split)
+        {
+            button.addClass("dropdown-toggle-split");
+        }
+        button.data("toggle","dropdown");
+        
+    }
+    public DropdownMenu(StyleComponent<?> button)
+    {
+        this(button,false);
     }
     
     public DropdownMenu right()
     {
         addClass("dropdown-menu-right");
+        return this;
+    }
+    public DropdownMenu addItem(String label,String URL)
+    {
+        returnAddInner(new a()).addClass("dropdown-item").href(URL).addInner(label);
+        return this;
+    }
+    public DropdownMenu addDivider()
+    {
+        returnAddInner(new div()).addClass("dropdown-divider");
         return this;
     }
 }

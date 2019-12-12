@@ -22,27 +22,34 @@
 package org.nova.services;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 import org.nova.frameworks.ServerApplication;
 
 public abstract class WebAccessSession<SERVICE extends ServerApplication> extends AccessSession<SERVICE> 
 {
-	final private OffsetDateTime offsetDateTime;
+	final private ZoneOffset zoneOffset;
 	final private String language;
-	public WebAccessSession(String token, String user,OffsetDateTime offset,String language) 
+	final private Long userId;
+	
+	public WebAccessSession(String token, Long userId,String user,ZoneOffset zoneOffset,String language) 
 	{
 		super(token, user);
 		this.language=language;
-		this.offsetDateTime=offset;
+		this.zoneOffset=zoneOffset;
+		this.userId=userId;
 	}
-	public OffsetDateTime getOffsetDateTime() 
+	public ZoneOffset getOffsetDateTime() 
 	{
-		return offsetDateTime;
+		return zoneOffset;
 	}
 	public String getLanguage() 
 	{
 		return language;
 	}
 	
-
+	public Long getUserId()
+	{
+	    return userId;
+	}
 }

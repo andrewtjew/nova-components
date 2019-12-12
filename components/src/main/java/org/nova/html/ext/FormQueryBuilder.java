@@ -23,6 +23,9 @@ package org.nova.html.ext;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 import org.nova.html.elements.InputElement;
 import org.nova.html.elements.QuotationMark;
@@ -42,6 +45,7 @@ public class FormQueryBuilder
     final private String QUOTE;
     final private FormQueryBuilder parent;
     final private StringBuilder sb=new StringBuilder();
+    private HashMap<String,ArrayList<String>> radios=null;
     
     public FormQueryBuilder(QuotationMark mark)
     {
@@ -116,9 +120,21 @@ public class FormQueryBuilder
     {
         return value(element.name(),element.id(),"checked");
     }
-    public FormQueryBuilder checked(input_radio element)
+    public FormQueryBuilder radio(InputElement<?> element)
     {
-        return value(element.name(),element.id(),"checked");
+        String name=element.name();
+        if (this.radios==null)
+        {
+            this.radios=new HashMap<>();
+        }
+        ArrayList<String> list=this.radios.get(name);
+        if (list==null)
+        {
+            list=new ArrayList<>();
+            this.radios.put(name, list);
+        }
+        list.add(element.id());
+        return this;
     }
     public FormQueryBuilder value(InputElement<?> element)
     {
@@ -162,8 +178,36 @@ public class FormQueryBuilder
     }
     */
 
+    void addRadioValue(int index,ArrayList<String> ids)
+    {
+        String id=ids.get(index);
+        String element="document.getElementById("+QUOTE+id+QUOTE+")";
+        if (index==ids.size()-1)
+        {
+            this.sb.append(element+".checked?"+element+".value:5");
+        }
+        else
+        {
+            this.sb.append(element+".checked?"+element+".value:(");
+            addRadioValue(index+1, ids);
+            this.sb.append(")");
+        }
+    }
+    
     public String js_query(PathAndQuery pathAndQuery)
     {
+        if (this.radios!=null)
+        {
+            for (Entry<String, ArrayList<String>> entry:this.radios.entrySet())
+            {
+                addName(entry.getKey());
+                this.sb.append('(');
+                addRadioValue(0,entry.getValue());
+                this.sb.append(')');
+
+            }
+            this.radios=null;
+        }
         if (this.sb.length()==0)
         {
             if (this.parent!=null)

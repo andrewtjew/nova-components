@@ -36,17 +36,15 @@ abstract public class ContentCache<KEY,VALUE>
 	static class Node<KEY,VALUE>
 	{
 		final KEY key;
-		final VALUE value;
-		final long size; 
+		final ValueSize<VALUE> valueSize;
 		Node<KEY,VALUE> previous;
 		Node<KEY,VALUE> next;
 		
         long accessed;
         long created;
-		public Node(KEY key,VALUE value,long size)
+		public Node(KEY key,ValueSize<VALUE> valueSize)
 		{
-			this.size=size;
-			this.value=value;
+			this.valueSize=valueSize;
 			this.key=key;
 			this.created=this.accessed=System.currentTimeMillis();
 		}
@@ -111,39 +109,59 @@ abstract public class ContentCache<KEY,VALUE>
 	}
 	public VALUE get(Trace parent,KEY key) throws Throwable
 	{
-		synchronized(this.nodeMap)
-		{
-			Node<KEY,VALUE> node=this.nodeMap.get(key);
-			if (node!=null)
-			{
-				long now=System.currentTimeMillis();
-				if ((this.maxAgeMs>0)&&(now-node.created<this.maxAgeMs))
-				{
-    				if (node.previous!=null)
-    				{
-    					node.previous.next=node.next;
-    					node.previous=null;
-    					if (node.next!=null)
-    					{
-    						node.next.previous=node.previous;
-    					}
-    					else
-    					{
-    						this.last=node.previous;
-    					}
-    					node.next=this.first;
-    					this.first=node;
-    				}
-    				node.accessed=now;
-    				this.hits.increment();
-    				return node.value;
-				}
-				remove(key);
-			}
-		}
-		this.misses.increment();
+	    ValueSize<VALUE> valueSize=getFromCache(parent, key);
+	    if (valueSize!=null)
+	    {
+	        return valueSize.value;
+	    }
 		return fill(parent,key);
 	}
+
+    public VALUE getValueFromCache(Trace parent,KEY key) throws Throwable
+    {
+        ValueSize<VALUE> valueSize=getFromCache(parent, key);
+        if (valueSize!=null)
+        {
+            return valueSize.value;
+        }
+        return null;
+    }
+
+	public ValueSize<VALUE> getFromCache(Trace parent,KEY key) throws Throwable
+    {
+        synchronized(this.nodeMap)
+        {
+            Node<KEY,VALUE> node=this.nodeMap.get(key);
+            if (node!=null)
+            {
+                long now=System.currentTimeMillis();
+                if ((this.maxAgeMs>0)&&(now-node.created<this.maxAgeMs))
+                {
+                    if (node.previous!=null)
+                    {
+                        node.previous.next=node.next;
+                        node.previous=null;
+                        if (node.next!=null)
+                        {
+                            node.next.previous=node.previous;
+                        }
+                        else
+                        {
+                            this.last=node.previous;
+                        }
+                        node.next=this.first;
+                        this.first=node;
+                    }
+                    node.accessed=now;
+                    this.hits.increment();
+                    return node.valueSize;
+                }
+                remove(key);
+            }
+        }
+        this.misses.increment();
+        return null;
+    }
 
 	public VALUE fill(Trace parent,KEY key) throws Throwable
 	{
@@ -153,20 +171,28 @@ abstract public class ContentCache<KEY,VALUE>
 			return put(parent,key,valueSize);
 		}
 	}
-
+    public VALUE put(Trace parent,KEY key,VALUE value) throws Throwable
+    {
+        return put(parent,key,new ValueSize<VALUE>(value,0));
+    }
+    
 	public VALUE put(Trace parent,KEY key,ValueSize<VALUE> valueSize) throws Throwable
     {
+	    if (valueSize==null)
+	    {
+	        throw new Exception("No value for key:"+key);
+	    }
         synchronized(this)
         {
-            Node<KEY,VALUE> node=new Node<KEY,VALUE>(key,valueSize.value,valueSize.size);
+            Node<KEY,VALUE> node=new Node<KEY,VALUE>(key,valueSize);
             synchronized(this.nodeMap)
             {
                 if (this.contentCapacity>0)
                 {
-                    while (this.totalContentSize+node.size>this.contentCapacity)
+                    while (this.totalContentSize+node.valueSize.size>this.contentCapacity)
                     {
                         this.nodeMap.remove(this.last.key);
-                        this.totalContentSize-=this.last.size;
+                        this.totalContentSize-=this.last.valueSize.size;
                         this.sizeEvicts.increment();
                         this.last=last.previous;
                         if (this.last!=null)
@@ -183,7 +209,7 @@ abstract public class ContentCache<KEY,VALUE>
                 if ((this.capacity>0)&&(this.nodeMap.size()==this.capacity))
                 {
                     this.nodeMap.remove(this.last.key);
-                    this.totalContentSize-=this.last.size;
+                    this.totalContentSize-=this.last.valueSize.size;
                     this.last=last.previous;
                     if (this.last!=null)
                     {
@@ -195,7 +221,7 @@ abstract public class ContentCache<KEY,VALUE>
                     }
                 }
                 this.nodeMap.put(key, node);
-                this.totalContentSize+=node.size;
+                this.totalContentSize+=node.valueSize.size;
                 node.next=this.first;
                 this.first=node;
                 if (this.last==null)
@@ -216,7 +242,7 @@ abstract public class ContentCache<KEY,VALUE>
 			{
 				return null;
 			}
-			this.totalContentSize-=node.size;
+			this.totalContentSize-=node.valueSize.size;
 			if (node.previous==null)
 			{
 				this.first=node.next;
@@ -233,7 +259,7 @@ abstract public class ContentCache<KEY,VALUE>
 			{
 				node.next.previous=node.previous;
 			}
-			return node.value;
+			return node.valueSize.value;
 		}
 	}
 	

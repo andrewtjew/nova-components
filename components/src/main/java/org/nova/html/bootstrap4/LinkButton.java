@@ -29,6 +29,11 @@ public class LinkButton extends ButtonComponent<LinkButton>
         attr("href",href);
         attr("role","button");
     }
+    public LinkButton()
+    {
+        super("a");
+        attr("role","button");
+    }
     /*
     public LinkButton toggle(Collapse collapse)
     {
@@ -54,6 +59,11 @@ public class LinkButton extends ButtonComponent<LinkButton>
     public LinkButton target(String target)
     {
         attr("target",target);
+        return this;
+    }
+    public LinkButton href(String href)
+    {
+        attr("href",href);
         return this;
     }
 }

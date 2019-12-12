@@ -78,6 +78,7 @@ public class ServerApplicationRunner //
     
     private void showNotice(Logger logger,String message)
     {
+        System.out.println();
         System.out.println(message);
         logger.log(Level.NOTICE, message);
     }

@@ -95,6 +95,10 @@ public class ModalDocument extends Modal
         }
         return this.body;
     }
+    public ModalContent modalContent()
+    {
+        return this.content;
+    }
     
     @Override
     public void compose(Composer composer) throws Throwable

@@ -79,8 +79,6 @@ public abstract class InputComponent<ELEMENT extends InputComponent<ELEMENT>> ex
         addClass(classBuilder.toString());
         return (ELEMENT)this;
     }
-
-    /*
     public ELEMENT bg(StyleColor value)
     {
         return addClass("bg",value);
@@ -97,6 +95,7 @@ public abstract class InputComponent<ELEMENT extends InputComponent<ELEMENT>> ex
     {
         return addClass("font",value);
     }
+    /*
     public ELEMENT lead()
     {
         return addClass("lead");
@@ -212,7 +211,6 @@ public abstract class InputComponent<ELEMENT extends InputComponent<ELEMENT>> ex
         return addClass("my","auto");
     }
 
-    /*
     public ELEMENT pr(int value)
     {
         return addClass("pr",value);
@@ -265,7 +263,6 @@ public abstract class InputComponent<ELEMENT extends InputComponent<ELEMENT>> ex
     {
         return addClass("py","auto");
     }
-    */
 
     public ELEMENT d(Display display)
     {
