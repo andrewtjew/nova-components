@@ -188,21 +188,14 @@ public class DataTableBootstrap4 extends StyleComponent<DataTableBootstrap4>
     public void compose(Composer composer) throws Throwable
     {
         StringBuilder sb=new StringBuilder();
-        //sb.append("$(document).ready(function(){$('#").append(id()).append("').DataTable(");
-
-        String function="f_"+id();
-        sb.append("$(document).ready("+function+");function "+function+"(){$('#").append(id()).append("').DataTable(");
+      sb.append("$(document).ready(function(){$('#").append(id()).append("').DataTable(");
                 
-        boolean commaNeeded=false;
-//        sb.append('{');
-    //    if (this.options==null)
         {
             ObjectBuilder ob=new ObjectBuilder();
             ob.add(this.options);
             sb.append(ob.toString());
         }
-//        sb.append(");});");
-        sb.append(");}");
+        sb.append(");});");
 
         this.addInner(this.header);
         this.addInner(this.tbody);
