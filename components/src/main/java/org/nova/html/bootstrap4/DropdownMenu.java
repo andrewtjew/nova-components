@@ -94,7 +94,12 @@ public class DropdownMenu extends StyleComponent<DropdownMenu>
     }
     public DropdownMenu boundary_window()
     {
-        button.attr("data-boundary","#main");
+        button.attr("data-boundary","window");
+        return this;
+    }
+    public DropdownMenu boundary_viewport()
+    {
+        button.attr("data-boundary","viewport");
         return this;
     }
     public DropdownMenu boundary(TagElement<?> element)
@@ -113,4 +118,5 @@ public class DropdownMenu extends StyleComponent<DropdownMenu>
     {
         return "$('#"+id()+"').dropdown();";
     }
+    
 }

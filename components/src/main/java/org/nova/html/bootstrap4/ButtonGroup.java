@@ -40,4 +40,23 @@ public class ButtonGroup extends StyleComponent<ButtonGroup>
         addClass(drop);
         return this;
     }
+    public ButtonGroup dropright()
+    {
+        addClass("dropright");
+        return this;
+    }
+    
+    public ButtonGroup dropup()
+    {
+        addClass("dropup");
+        return this;
+    }
+    
+    public ButtonGroup dropleft()
+    {
+        addClass("dropleft");
+        return this;
+    }
+    
+    
 }

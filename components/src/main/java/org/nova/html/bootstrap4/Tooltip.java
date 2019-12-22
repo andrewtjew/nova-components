@@ -52,7 +52,7 @@ public class Tooltip extends TipComponent<Tooltip>
     	return js_tooltip(option, QuotationMark.APOS);
     }
     
-    public static script js_ready()
+    public static script script_ready()
     {
         return new script().addInner("$(document).ready(function(){$('[data-toggle=\"tooltip\"]').tooltip();});");
     }
