@@ -90,4 +90,8 @@ public class CustomCheckBoxControl extends StyleComponent<CustomControl>
     {
         return this.customCheckBox;
     }
+    public CustomLabel label()
+    {
+        return this.customLabel;
+    }
 }

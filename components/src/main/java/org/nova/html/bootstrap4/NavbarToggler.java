@@ -24,6 +24,7 @@ package org.nova.html.bootstrap4;
 import org.nova.html.elements.GlobalTagElement;
 import org.nova.html.tags.span;
 
+@Deprecated
 public class NavbarToggler extends StyleComponent<NavbarToggler>
 {
     public NavbarToggler()

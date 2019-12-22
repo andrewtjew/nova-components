@@ -24,13 +24,13 @@ package org.nova.html.bootstrap4;
 import org.nova.html.elements.GlobalTagElement;
 import org.nova.html.tags.span;
 
-public class NavbarTogglerButton extends ButtonComponent<NavbarTogglerButton>
+public class ToggleNavbarButton extends ButtonComponent<ToggleNavbarButton>
 {
-    public NavbarTogglerButton()
+    public ToggleNavbarButton()
     {
         this(true);
     }
-    public NavbarTogglerButton(boolean togglerIcon)
+    public ToggleNavbarButton(boolean togglerIcon)
     {
         super("button");
         if (togglerIcon)
@@ -39,12 +39,12 @@ public class NavbarTogglerButton extends ButtonComponent<NavbarTogglerButton>
         }
     }
 
-    @Deprecated
-    public NavbarTogglerButton toggleCollapse(NavbarCollapse collapse)
-    {
-        data("toggle","collapse");
-        data("target","#"+collapse.id());
-        return this;
-    }
+//    @Deprecated
+//    public ToggleNavbarButton toggleCollapse(NavbarCollapse collapse)
+//    {
+//        data("toggle","collapse");
+//        data("target","#"+collapse.id());
+//        return this;
+//    }
    
 }
