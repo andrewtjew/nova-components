@@ -21,6 +21,9 @@
  ******************************************************************************/
 package org.nova.html.remoting;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import org.nova.html.elements.Element;
 import org.nova.html.elements.QuotationMark;
 import org.nova.html.elements.TagElement;
@@ -28,6 +31,8 @@ import org.nova.html.ext.FormQueryBuilder;
 import org.nova.html.ext.Head;
 import org.nova.html.tags.script;
 import org.nova.http.client.PathAndQuery;
+
+import com.amazonaws.services.simplesystemsmanagement.model.Patch;
 
 public class CallBuilder
 {
@@ -120,4 +125,23 @@ public class CallBuilder
     }
 
 
+    public static String js_post(String pathAndQueryTemplate,Object...values) throws Throwable
+    {
+        StringBuilder sb=new StringBuilder();
+        int begin=0;
+        for (Object value:values)
+        {
+            int end=pathAndQueryTemplate.indexOf('*',begin);
+            if (end>begin)
+            {
+                sb.append(pathAndQueryTemplate.substring(begin, end));
+                if (value!=null)
+                {
+                    sb.append(URLEncoder.encode(value.toString(), "UTF-8"));
+                }
+                begin=end+1;
+            }
+        }
+        return "org.nova.html.remoting.post('"+sb.toString()+"')";
+    }
 }

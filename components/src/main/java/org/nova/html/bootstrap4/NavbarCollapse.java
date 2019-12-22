@@ -25,8 +25,6 @@ import org.nova.html.elements.Composer;
 
 public class NavbarCollapse extends StyleComponent<NavbarCollapse>
 {
-    public final ButtonComponent toggleButton;
-
     public NavbarCollapse(ButtonComponent<?> toggleButton)
     {
         super("div","collapse navbar-collapse");
@@ -34,20 +32,11 @@ public class NavbarCollapse extends StyleComponent<NavbarCollapse>
         {
             toggleButton.data("toggle","collapse");
             toggleButton.addClass("navbar-toggler");
+            toggleButton.data("target","#"+id());
         }
-        this.toggleButton=toggleButton;
     }
     public NavbarCollapse()
     {
         this(null);
-    }
-    @Override
-    public void compose(Composer composer) throws Throwable
-    {
-        if (this.toggleButton!=null)
-        {
-            this.toggleButton.data("target","#"+id());
-        }
-        super.compose(composer);
     }
 }

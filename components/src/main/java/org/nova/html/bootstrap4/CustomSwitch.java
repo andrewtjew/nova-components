@@ -21,28 +21,37 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
-import org.nova.html.tags.label;
-import org.nova.html.tags.small;
+import org.nova.html.tags.input_radio;
 
-public class FormCheck extends StyleComponent<FormCheck>
+public class CustomSwitch extends InputComponent<CustomSwitch>
 {
-    public FormCheck()
+    public CustomSwitch()
     {
-        super("div","form-check");
+        super("custom-control-input","checkbox");
     }
-    
-    public FormCheck inline()
+    public CustomSwitch checked() //checkbox or radio
     {
-        this.addClass("form-check-inline");
+        return attr("checked");
+    }
+    public CustomSwitch checked(boolean checked)
+    {
+        if (checked)
+        {
+            attr("checked");
+        }
         return this;
     }
-
-    public FormCheck add(String labelText,FormCheckbox element)
+    public CustomSwitch value(String text) //button, reset, submit, text, password, hidden, checkbox, radio, image
     {
-        returnAddInner(element);
-        label label=returnAddInner(new label()).addInner(labelText);
-        label.for_(element);
-        return this;
+        return attr("value",text);
+    }
+    public CustomSwitch value(Object value)
+    {
+        if (value==null)
+        {
+            return this;
+        }
+        return attr("value",value.toString());
     }
     
 }

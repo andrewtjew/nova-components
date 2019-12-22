@@ -22,18 +22,32 @@
 package org.nova.html.bootstrap4;
 
 import org.nova.html.bootstrap4.classes.DeviceClass;
+import org.nova.html.elements.FormElement;
 import org.nova.html.elements.TagElement;
+import org.nova.html.enums.method;
+import org.nova.html.tags.script;
 
-public class Form extends StyleComponent<Form>
+public class Form extends FormElement<Form>
 {
     public Form()
     {
-        super("form",null);
     }
     
+    public Form(method method)
+    {
+        attr("method",method);    
+    }
     public Form inline()
     {
         addClass("form-inline");
         return this;
     }
+
+    public static script js_needsValidation()
+    {
+        script script=new script();
+        script.addInner("(function(){'use strict';window.addEventListener('load', function(){var forms = document.getElementsByClassName('needs-validation');var validation = Array.prototype.filter.call(forms, function(form){form.addEventListener('submit', function(event){if (form.checkValidity()===false){event.preventDefault();event.stopPropagation();}form.classList.add('was-validated');},false);});}, false);})();");
+        return script;
+    }
+    
 }

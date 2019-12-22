@@ -53,6 +53,10 @@ public abstract class InputComponent<ELEMENT extends InputComponent<ELEMENT>> ex
     {
         return addClass("form-control");
     }
+    public ELEMENT form_check_input()
+    {
+        return addClass("form-check-input");
+    }
 
     public ELEMENT addClass(Object class_,Object...fragments)
     {

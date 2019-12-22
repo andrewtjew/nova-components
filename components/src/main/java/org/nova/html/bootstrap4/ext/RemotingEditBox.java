@@ -72,7 +72,7 @@ public class RemotingEditBox extends StyleComponent<RemotingEditBox>
 		pop.template(template);
 //		pop.container("#"+valueElement.id());
 		
-		pop.container("#"+this.id());
+		pop.container(this);
 		String showVariable=this.id()+"_show";
 		
 		

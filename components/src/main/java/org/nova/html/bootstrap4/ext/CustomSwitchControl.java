@@ -25,24 +25,21 @@ import org.nova.html.bootstrap4.CustomCheckBox;
 import org.nova.html.bootstrap4.CustomControl;
 import org.nova.html.bootstrap4.CustomLabel;
 import org.nova.html.bootstrap4.CustomRadio;
+import org.nova.html.bootstrap4.CustomSwitch;
 import org.nova.html.bootstrap4.StyleComponent;
 
-public class CustomCheckBoxControl extends StyleComponent<CustomControl>
+public class CustomSwitchControl extends StyleComponent<CustomSwitchControl>
 {
-    private CustomCheckBox customCheckBox;
+    private CustomSwitch customSwitch;
     private CustomLabel customLabel;
 
-    public CustomCheckBoxControl(String label,String name,Object value)
+    public CustomSwitchControl(String label,String name)
     {
         super("div", "custom-control");
-        addClass("custom-checkbox");
-        this.customCheckBox = returnAddInner(new CustomCheckBox()).name(name);
-        if (value!=null)
-        {
-            this.customCheckBox.value(value);
-        }
-        this.customCheckBox.id();
-        this.customLabel=returnAddInner(new CustomLabel()).for_(customCheckBox);
+        addClass("custom-switch");
+        this.customSwitch = returnAddInner(new CustomSwitch()).name(name);
+        this.customSwitch.id();
+        this.customLabel=returnAddInner(new CustomLabel()).for_(customSwitch);
         if (label!=null)
         {
             this.customLabel.addInner(label);
@@ -51,26 +48,26 @@ public class CustomCheckBoxControl extends StyleComponent<CustomControl>
         {
             this.customLabel.addInner("&#x200B;");
         }
+    }
+    public CustomSwitchControl(String name)
+    {
+        this(null,name);
     }
 
-    public CustomCheckBoxControl(String label,String name,String id,Object value)
+    public CustomSwitchControl(String label,String name,String id)
     {
         super("div", "custom-control");
         addClass("custom-checkbox");
-        this.customCheckBox = returnAddInner(new CustomCheckBox()).name(name);
-        if (value!=null)
-        {
-            this.customCheckBox.value(value);
-        }
+        this.customSwitch = returnAddInner(new CustomSwitch()).name(name);
         if (id!=null)
         {
-            this.customCheckBox.id(id);
+            this.customSwitch.id(id);
         }
         else
         {
-            this.customCheckBox.id();
+            this.customSwitch.id();
         }
-        this.customLabel=returnAddInner(new CustomLabel()).for_(customCheckBox);
+        this.customLabel=returnAddInner(new CustomLabel()).for_(customSwitch);
         if (label!=null)
         {
             this.customLabel.addInner(label);
@@ -81,13 +78,10 @@ public class CustomCheckBoxControl extends StyleComponent<CustomControl>
         }
     }
     
-    public CustomCheckBoxControl(String label,String name)
+    
+    public CustomSwitch customSwitch()
     {
-        this(label,name,null);
+        return this.customSwitch;
     }
     
-    public CustomCheckBox customCheckBox()
-    {
-        return this.customCheckBox;
-    }
 }

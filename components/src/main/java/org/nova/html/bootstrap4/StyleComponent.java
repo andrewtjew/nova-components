@@ -177,12 +177,12 @@ public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> ex
     }
     public ELEMENT border(StyleColor color)
     {
-//        addClass("border");
+        addClass("border");
         return addClass("border",color);
     }
     public ELEMENT border(String color)
     {
-//        addClass("border");
+        addClass("border");
         return addClass("border",color);
 //        return (ELEMENT)this;
     }
@@ -407,6 +407,7 @@ public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> ex
     {
         return addClass("justify-content",value);
     }
+    @Deprecated
     public ELEMENT popover(String title,String content)
     {
         attr("data-toggle","popover");
@@ -414,24 +415,26 @@ public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> ex
         attr("data-content",content);
         return (ELEMENT)this;
     }
+    @Deprecated
     public ELEMENT popover(String content)
     {
         attr("data-toggle","popover");
         attr("data-content",content);
         return (ELEMENT)this;
     }
+    @Deprecated
     public ELEMENT placement(Placement placement)
     {
         attr("data-placement",placement);
         return (ELEMENT)this;
     }
+    @Deprecated
     public ELEMENT tooltip(String title)
     {
         attr("data-toggle","tooltip");
         title(title);
         return (ELEMENT)this;
     }
-    
     
     
     

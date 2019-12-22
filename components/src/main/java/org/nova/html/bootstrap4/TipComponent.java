@@ -27,6 +27,7 @@ import org.nova.html.bootstrap4.classes.Placement;
 import org.nova.html.bootstrap4.classes.Trigger;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
+import org.nova.html.elements.GlobalTagElement;
 import org.nova.html.elements.InnerElement;
 import org.nova.html.elements.QuotationMark;
 import org.nova.html.elements.StringComposer;
@@ -130,6 +131,7 @@ public class TipComponent<TIP extends TipComponent<TIP>>
         return (TIP)this;
     }
     
+    @SuppressWarnings("unchecked")
     public TIP delay(Integer show,Integer hide)
     {
         Delay delay=new Delay();
@@ -149,6 +151,12 @@ public class TipComponent<TIP extends TipComponent<TIP>>
     public TIP container(String container)
     {
         this.toggler.attr("data-container",container);
+        return (TIP)this;
+    }
+    
+    public TIP container(GlobalTagElement<?> element)
+    {
+        this.toggler.attr("data-container","#"+element.id());
         return (TIP)this;
     }
     

@@ -57,7 +57,7 @@ public class CustomRadioControl extends StyleComponent<CustomControl>
         this.customLabel.for_(customRadio);
     }
     
-    public CustomRadio radio()
+    public CustomRadio customRadio()
     {
         return this.customRadio;
     }

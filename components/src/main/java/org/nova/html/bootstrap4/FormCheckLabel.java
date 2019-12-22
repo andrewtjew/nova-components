@@ -21,28 +21,27 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
-import org.nova.html.tags.label;
-import org.nova.html.tags.small;
+import org.nova.html.bootstrap4.classes.DeviceClass;
+import org.nova.html.elements.TagElement;
 
-public class FormCheck extends StyleComponent<FormCheck>
+public class FormCheckLabel extends StyleComponent<FormCheckLabel>
 {
-    public FormCheck()
+    public FormCheckLabel()
     {
-        super("div","form-check");
+        super("label","form-check-label");
     }
-    
-    public FormCheck inline()
+    public FormCheckLabel(DeviceClass deviceClass,int size)
     {
-        this.addClass("form-check-inline");
-        return this;
+        super("label","col-form-label");
+        col(deviceClass,size);
     }
-
-    public FormCheck add(String labelText,FormCheckbox element)
+    public FormCheckLabel for_(String element_id)
     {
-        returnAddInner(element);
-        label label=returnAddInner(new label()).addInner(labelText);
-        label.for_(element);
-        return this;
+        return attr("for",element_id);
+    }
+    public FormCheckLabel for_(TagElement<?> element)
+    {
+        return attr("for",element.id());
     }
     
 }

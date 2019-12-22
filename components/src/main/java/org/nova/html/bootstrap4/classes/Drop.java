@@ -19,30 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.bootstrap4;
+package org.nova.html.bootstrap4.classes;
 
-import org.nova.html.tags.label;
-import org.nova.html.tags.small;
-
-public class FormCheck extends StyleComponent<FormCheck>
+public enum Drop
 {
-    public FormCheck()
-    {
-        super("div","form-check");
-    }
+    left("dropleft"), 
+    right("dropright"), 
+    bottom("dropbottom"), 
+    top("droptop"),
+    ;
     
-    public FormCheck inline()
+    private String value;
+
+    Drop(String value)
     {
-        this.addClass("form-check-inline");
-        return this;
+        this.value = value;
     }
 
-    public FormCheck add(String labelText,FormCheckbox element)
+    public String toString()
     {
-        returnAddInner(element);
-        label label=returnAddInner(new label()).addInner(labelText);
-        label.for_(element);
-        return this;
+        return this.value;
     }
-    
 }

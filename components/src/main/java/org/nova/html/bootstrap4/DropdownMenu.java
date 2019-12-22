@@ -23,25 +23,22 @@ package org.nova.html.bootstrap4;
 
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
+import org.nova.html.elements.GlobalTagElement;
+import org.nova.html.elements.InnerElement;
+import org.nova.html.elements.TagElement;
 import org.nova.html.tags.a;
 import org.nova.html.tags.div;
 
 public class DropdownMenu extends StyleComponent<DropdownMenu>
 {
-    public DropdownMenu(StyleComponent<?> button,boolean split)
+    public final StyleComponent<?> button;
+    
+    public DropdownMenu(StyleComponent<?> button)
     {
         super("div", "dropdown-menu");
         button.addClass("dropdown-toggle");
-        if (split)
-        {
-            button.addClass("dropdown-toggle-split");
-        }
         button.data("toggle","dropdown");
-        
-    }
-    public DropdownMenu(StyleComponent<?> button)
-    {
-        this(button,false);
+        this.button=button;
     }
     
     public DropdownMenu right()
@@ -58,5 +55,62 @@ public class DropdownMenu extends StyleComponent<DropdownMenu>
     {
         returnAddInner(new div()).addClass("dropdown-divider");
         return this;
+    }
+
+    public DropdownMenu reference_toggle()
+    {
+        this.button.attr("data-reference","toggle");
+        return this;
+    }
+ 
+    public DropdownMenu reference_parent()
+    {
+        this.button.attr("data-reference","parent");
+        return this;
+    }
+ 
+    public DropdownMenu reference(GlobalTagElement<?> element)
+    {
+        this.button.attr("data-reference","#"+element.id());
+        return this;
+    }
+ 
+    public DropdownMenu reference_toggle(StyleComponent<?> button)
+    {
+        button.attr("data-reference","toggle");
+        return this;
+    }
+ 
+    public DropdownMenu reference_parent(StyleComponent<?> button)
+    {
+        button.attr("data-reference","parent");
+        return this;
+    }
+
+    public DropdownMenu flip(boolean value)
+    {
+        button.attr("data-flip",value);
+        return this;
+    }
+    public DropdownMenu boundary_window()
+    {
+        button.attr("data-boundary","#main");
+        return this;
+    }
+    public DropdownMenu boundary(TagElement<?> element)
+    {
+        button.attr("data-boundary","#"+element.id());
+        return this;
+    }
+ 
+    public DropdownMenu reference(StyleComponent<?> button,GlobalTagElement<?> element)
+    {
+        button.attr("data-reference","#"+element.id());
+        return this;
+    }
+ 
+    public String js_dropdown_toggle()
+    {
+        return "$('#"+id()+"').dropdown();";
     }
 }

@@ -29,7 +29,6 @@ import org.nova.tracing.Trace;
 public class KeyValueStore extends ContentCache<String,String>
 {
     final private Connector connector;
-    final private String tableName;
     final private String insert;
     final private String select;
     final private String update;
@@ -41,7 +40,6 @@ public class KeyValueStore extends ContentCache<String,String>
     public KeyValueStore(Connector connector,String tableName,int maxKeyLength,int maxValueLength,String nameSpace)
     {
         this.connector=connector;
-        this.tableName=tableName;
         this.insert="INSERT INTO "+tableName+" (k,v) VALUES (?,?)";
         this.select="SELECT v FROM "+tableName+" WHERE k=?";
         this.update="UPDATE "+tableName+" SET v=? WHERE k=?";

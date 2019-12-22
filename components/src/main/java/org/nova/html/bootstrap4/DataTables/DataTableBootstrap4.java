@@ -209,6 +209,7 @@ public class DataTableBootstrap4 extends StyleComponent<DataTableBootstrap4>
         this.addInner(this.footer);
 
         
+        super.compose(composer);
 
         if (sb.length()>0)
         {
@@ -216,7 +217,6 @@ public class DataTableBootstrap4 extends StyleComponent<DataTableBootstrap4>
             composer.getStringBuilder().append(script.toString());
         }
         //this.compose(composer);
-        super.compose(composer);
     }
 
     

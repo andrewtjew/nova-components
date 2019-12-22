@@ -29,11 +29,11 @@ public class NavItem extends StyleComponent<NavItem>
     }
     
     
-//    public NavItem dropdown()
-//    {
-//        addClass("dropdown");
-//        return this;
-//    }
+    public NavItem dropdown()
+    {
+        addClass("dropdown");
+        return this;
+    }
 
     public NavItem active()
     {

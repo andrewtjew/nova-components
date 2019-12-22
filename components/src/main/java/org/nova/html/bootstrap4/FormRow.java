@@ -21,27 +21,27 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.bootstrap4.classes.DeviceClass;
+import org.nova.html.bootstrap4.classes.TextAlign;
+import org.nova.html.elements.TagElement;
 import org.nova.html.tags.label;
 import org.nova.html.tags.small;
 
-public class FormCheck extends StyleComponent<FormCheck>
+public class FormRow extends StyleComponent<FormRow>
 {
-    public FormCheck()
+    public FormRow()
     {
-        super("div","form-check");
-    }
-    
-    public FormCheck inline()
-    {
-        this.addClass("form-check-inline");
-        return this;
+        super("div","form-row");
     }
 
-    public FormCheck add(String labelText,FormCheckbox element)
+    public FormRow row()
     {
-        returnAddInner(element);
-        label label=returnAddInner(new label()).addInner(labelText);
-        label.for_(element);
+        this.addClass("row");
+        return this;
+    }
+    public FormRow custom_control()
+    {
+        addClass("custom-control");
         return this;
     }
     

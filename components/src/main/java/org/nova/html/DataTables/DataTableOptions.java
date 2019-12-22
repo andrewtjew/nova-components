@@ -110,6 +110,7 @@ public class DataTableOptions
     public Boolean searching;
     public Boolean serverSide;
     public Boolean stateSave;
+    public Boolean responsive;
 
     public Object deferLoading;
     public Boolean destroy;

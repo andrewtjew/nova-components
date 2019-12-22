@@ -21,28 +21,43 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
-import org.nova.html.tags.label;
-import org.nova.html.tags.small;
+import org.nova.html.enums.autocomplete;
+import org.nova.html.tags.input_checkbox;
 
-public class FormCheck extends StyleComponent<FormCheck>
+public class FormCheckbox extends InputComponent<FormCheckbox>
 {
-    public FormCheck()
+    public FormCheckbox()
     {
-        super("div","form-check");
+        super("form-check-input","checkbox");
+        
     }
-    
-    public FormCheck inline()
+    public FormCheckbox checked() //checkbox or radio
     {
-        this.addClass("form-check-inline");
+        return attr("checked");
+    }
+    public FormCheckbox checked(boolean checked)
+    {
+        if (checked)
+        {
+            attr("checked");
+        }
         return this;
     }
-
-    public FormCheck add(String labelText,FormCheckbox element)
+    public FormCheckbox required()  //text, search, url, tel, email, password, date pickers, number, checkbox, radio, and file.
     {
-        returnAddInner(element);
-        label label=returnAddInner(new label()).addInner(labelText);
-        label.for_(element);
+        return attr("required");
+    }
+    public FormCheckbox required(boolean required)
+    {
+        if (required)
+        {
+            attr("required");
+        }
         return this;
     }
-    
+    public FormCheckbox value(Object text) //button, reset, submit, text, password, hidden, checkbox, radio, image
+    {
+        return attr("value",text);
+    }
 }
+

@@ -21,25 +21,23 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.bootstrap4.classes.Drop;
 
-public class ButtonGroup extends Component<ButtonGroup>
+public class ButtonGroup extends StyleComponent<ButtonGroup>
 {
     public ButtonGroup()
     { 
         super("div","btn-group");
-        attr("type","button");
     }
     
-    public ButtonGroup toggleButtons()
-    {
-        attr("data-toggle","buttons");
-        addClass("btn-group-toggle");
-        return this;
-    }
     public ButtonGroup vertical()
     {
         addClass("btn-group-vertical");
         return this;
     }
-    
+    public ButtonGroup drop(Drop drop)
+    {
+        addClass(drop);
+        return this;
+    }
 }
