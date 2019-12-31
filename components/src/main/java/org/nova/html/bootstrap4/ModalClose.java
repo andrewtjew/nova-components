@@ -31,11 +31,12 @@ public class ModalClose extends Button
         {
             addInner(text);
         }
+      
     }
 
     public ModalClose()
     {
-        this("X");
+        this("&#x2715;");
     }
     
 }

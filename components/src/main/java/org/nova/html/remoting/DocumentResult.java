@@ -50,7 +50,7 @@ public class DocumentResult extends Result
         this.addClassResults=new ArrayList<>();
         this.removeClassResults=new ArrayList<>();
         this.clearTimerCommands=new ArrayList<>();
-        this.propResults=new ArrayList<>();
+        this.propResults=new ArrayList<PropResult>();
     }
     
     public void setLocation(String location)
