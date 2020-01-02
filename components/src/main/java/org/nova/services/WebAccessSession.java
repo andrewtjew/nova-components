@@ -39,7 +39,7 @@ public abstract class WebAccessSession<SERVICE extends ServerApplication> extend
 		this.zoneOffset=zoneOffset;
 		this.userId=userId;
 	}
-	public ZoneOffset getOffsetDateTime() 
+	public ZoneOffset getZoneOffset() 
 	{
 		return zoneOffset;
 	}
