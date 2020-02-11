@@ -289,17 +289,29 @@ public class TypeUtils
         }
         return false;
     }
+    static public boolean isSpace(String text)
+    {
+        if (text==null)
+        {
+            return false;
+        }
+        return text.trim().length()==0;
+    }
     static public boolean isNullOrEmpty(String text)
     {
         if (text==null)
         {
             return true;
         }
-        if (text.length()==0)
+        return text.length()==0;
+    }
+    static public boolean isEmpty(String text)
+    {
+        if (text==null)
         {
-            return true;
+            return false;
         }
-        return false;
+        return text.length()==0;
     }
     
     public static long parseLong(String value,long defaultValue)

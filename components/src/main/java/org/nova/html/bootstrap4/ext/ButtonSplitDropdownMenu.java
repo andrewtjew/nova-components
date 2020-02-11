@@ -7,13 +7,13 @@ import org.nova.html.bootstrap4.DropdownMenu;
 import org.nova.html.bootstrap4.ToggleDropdownButton;
 import org.nova.html.bootstrap4.classes.StyleColor;
 
-public class ButtonSplitDowndownMenu extends ButtonGroup
+public class ButtonSplitDropdownMenu extends ButtonGroup
 {
     final private Button button;
     final private ToggleDropdownButton toggler;
     final private DropdownMenu menu;
     
-    public ButtonSplitDowndownMenu(boolean buttonDropDown)
+    public ButtonSplitDropdownMenu(boolean buttonDropDown)
     {
         addClass("dropdown");
         this.button=returnAddInner(new Button());
@@ -43,7 +43,7 @@ public class ButtonSplitDowndownMenu extends ButtonGroup
         return menu;
     }
     
-    public ButtonSplitDowndownMenu color(StyleColor color)
+    public ButtonSplitDropdownMenu color(StyleColor color)
     {
         this.button().color(color);
         this.toggler().color(color);

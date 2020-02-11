@@ -31,14 +31,17 @@ import org.nova.html.tags.div;
 
 public class DropdownMenu extends StyleComponent<DropdownMenu>
 {
-    public final StyleComponent<?> button;
+    public StyleComponent<?> button;
     
     public DropdownMenu(StyleComponent<?> button)
     {
         super("div", "dropdown-menu");
-        button.addClass("dropdown-toggle");
-        button.data("toggle","dropdown");
-        this.button=button;
+        if (button!=null)
+        {
+            button.addClass("dropdown-toggle");
+            button.data("toggle","dropdown");
+            this.button=button;
+        }
     }
     
     public DropdownMenu right()
@@ -99,7 +102,10 @@ public class DropdownMenu extends StyleComponent<DropdownMenu>
     }
     public DropdownMenu boundary_viewport()
     {
-        button.attr("data-boundary","viewport");
+        if (button!=null)
+        {
+            button.attr("data-boundary","viewport");
+        }
         return this;
     }
     public DropdownMenu boundary(TagElement<?> element)
