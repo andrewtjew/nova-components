@@ -27,6 +27,6 @@
 **/target/*
 **/logs/*
 BuildLog.htm
-
+**/.settings/*
 
 /target/
