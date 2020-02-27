@@ -37,6 +37,7 @@ public class DocumentResult extends Result
     final private ArrayList<AddClassResult> addClassResults;
     final private ArrayList<RemoveClassResult> removeClassResults;
     final private ArrayList<PropResult> propResults;
+    private String startScript;
     private String script;
     private Object result;
     private String location;
@@ -145,6 +146,10 @@ public class DocumentResult extends Result
     {
         this.script=script;
     }
+    public void setStartScript(String script)
+    {
+        this.startScript=script;
+    }
 
     public void setResult(Object result)
     {
@@ -187,6 +192,7 @@ public class DocumentResult extends Result
         {
             response.clearTimerCommands=this.clearTimerCommands.toArray(new ClearTimerCommand[this.clearTimerCommands.size()]);
         }
+        response.startScript=this.startScript;
         response.script=this.script;
         response.location=this.location; 
         if (this.result!=null)

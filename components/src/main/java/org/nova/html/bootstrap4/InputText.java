@@ -21,6 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.elements.TagElement;
 import org.nova.html.enums.autocomplete;
 
 public class InputText extends InputComponent<InputText>
@@ -62,6 +63,10 @@ public class InputText extends InputComponent<InputText>
     public InputText list(String id)
     {
         return attr("list",id);
+    }
+    public InputText list(TagElement element)
+    {
+        return attr("list",element.id());
     }
     
     public InputText size(int number) //text, search, tel, url, email, and password.

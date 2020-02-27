@@ -31,16 +31,16 @@ import org.nova.html.tags.div;
 
 public class DropdownMenu extends StyleComponent<DropdownMenu>
 {
-    public StyleComponent<?> button;
+    public StyleComponent<?> toggler;
     
-    public DropdownMenu(StyleComponent<?> button)
+    public DropdownMenu(StyleComponent<?> toggler)
     {
         super("div", "dropdown-menu");
-        if (button!=null)
+        if (toggler!=null)
         {
-            button.addClass("dropdown-toggle");
-            button.data("toggle","dropdown");
-            this.button=button;
+            toggler.addClass("dropdown-toggle");
+            toggler.data("toggle","dropdown");
+            this.toggler=toggler;
         }
     }
     
@@ -62,19 +62,19 @@ public class DropdownMenu extends StyleComponent<DropdownMenu>
 
     public DropdownMenu reference_toggle()
     {
-        this.button.attr("data-reference","toggle");
+        this.toggler.attr("data-reference","toggle");
         return this;
     }
  
     public DropdownMenu reference_parent()
     {
-        this.button.attr("data-reference","parent");
+        this.toggler.attr("data-reference","parent");
         return this;
     }
  
     public DropdownMenu reference(GlobalTagElement<?> element)
     {
-        this.button.attr("data-reference","#"+element.id());
+        this.toggler.attr("data-reference","#"+element.id());
         return this;
     }
  
@@ -92,25 +92,25 @@ public class DropdownMenu extends StyleComponent<DropdownMenu>
 
     public DropdownMenu flip(boolean value)
     {
-        button.attr("data-flip",value);
+        toggler.attr("data-flip",value);
         return this;
     }
     public DropdownMenu boundary_window()
     {
-        button.attr("data-boundary","window");
+        toggler.attr("data-boundary","window");
         return this;
     }
     public DropdownMenu boundary_viewport()
     {
-        if (button!=null)
+        if (toggler!=null)
         {
-            button.attr("data-boundary","viewport");
+            toggler.attr("data-boundary","viewport");
         }
         return this;
     }
     public DropdownMenu boundary(TagElement<?> element)
     {
-        button.attr("data-boundary","#"+element.id());
+        toggler.attr("data-boundary","#"+element.id());
         return this;
     }
  

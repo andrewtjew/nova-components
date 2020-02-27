@@ -63,7 +63,7 @@ public class ModalBackground extends GlobalEventTagElement<div>
     }
     public ModalBackground(Color color)
     {
-    	this(1,color,false);
+    	this(99,color,false);
     }
     public ModalBackground()
     {

@@ -170,6 +170,13 @@ public class FormQueryBuilder
         this.sb.append(document+".options["+document+".selectedIndex].value");
         return this;
     }
+    public FormQueryBuilder selected(InputElement<?> element)
+    {
+        String document="document.getElementById("+QUOTE+element.id()+QUOTE+")";
+        addName(element.name());
+        this.sb.append(document+".options["+document+".selectedIndex].value");
+        return this;
+    }
 
     /*
     public String generateFormQuery(String path)

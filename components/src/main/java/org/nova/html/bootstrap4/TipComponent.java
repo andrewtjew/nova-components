@@ -108,20 +108,26 @@ public class TipComponent<TIP extends TipComponent<TIP>>
         return content(element,true);
     }
 
-    @Description("Order is important. Use (hover,focus) and not (focus,hover) to allow buttons on the popover to be clicked.")
-    public TIP trigger(Trigger...triggers) throws Exception
+//    @Description("Order is important. Use (hover,focus) and not (focus,hover) to allow buttons on the popover to be clicked.")
+//    public TIP trigger(Trigger...triggers) throws Exception
+//    {
+//        if (triggers.length>1)
+//        {
+//            for (Trigger trigger:triggers)
+//            {
+//                if (trigger==Trigger.manual)
+//                {
+//                    throw new Exception("manual cannot be combined.");
+//                }
+//            }
+//        }
+//        this.toggler.attr("data-trigger",Utils.combine(triggers, " "));
+//        return (TIP)this;
+//    }
+
+    public TIP trigger(Trigger trigger) throws Exception
     {
-        if (triggers.length>1)
-        {
-            for (Trigger trigger:triggers)
-            {
-                if (trigger==Trigger.manual)
-                {
-                    throw new Exception("manual cannot be combined.");
-                }
-            }
-        }
-        this.toggler.attr("data-trigger",Utils.combine(triggers, " "));
+        this.toggler.attr("data-trigger",trigger.toString());
         return (TIP)this;
     }
     
@@ -162,7 +168,7 @@ public class TipComponent<TIP extends TipComponent<TIP>>
     
     public TIP offset(int offsetX,int offsetY)
     {
-        this.toggler.attr("data-offset",offsetX+" "+offsetY);
+        this.toggler.attr("data-offset",offsetX+"px "+offsetY+"px");
         return (TIP)this;
     }
     public TIP boundary(Boundary boundary)

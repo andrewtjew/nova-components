@@ -31,6 +31,7 @@ public class Response
     public AddClassResult[] addClassResults;
     public PropResult[] propResults;
     public ClearTimerCommand[] clearTimerCommands;
+    public String startScript;
     public String script;
     public String result;
     public String location;

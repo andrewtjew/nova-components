@@ -1,0 +1,140 @@
+{
+  "program": {
+    "fileInfos": {
+      "c:/users/andrew/appdata/roaming/npm/node_modules/typescript/lib/lib.d.ts": {
+        "version": "49ff9798f592c8b7e628fd881401e68810c1b3589ecd7a41b32b3c287374cde0",
+        "signature": "49ff9798f592c8b7e628fd881401e68810c1b3589ecd7a41b32b3c287374cde0"
+      },
+      "c:/users/andrew/appdata/roaming/npm/node_modules/typescript/lib/lib.es5.d.ts": {
+        "version": "fc43680ad3a1a4ec8c7b8d908af1ec9ddff87845346de5f02c735c9171fa98ea",
+        "signature": "fc43680ad3a1a4ec8c7b8d908af1ec9ddff87845346de5f02c735c9171fa98ea"
+      },
+      "c:/users/andrew/appdata/roaming/npm/node_modules/typescript/lib/lib.dom.d.ts": {
+        "version": "d93de5e8a7275cb9d47481410e13b3b1debb997e216490954b5d106e37e086de",
+        "signature": "d93de5e8a7275cb9d47481410e13b3b1debb997e216490954b5d106e37e086de"
+      },
+      "c:/users/andrew/appdata/roaming/npm/node_modules/typescript/lib/lib.webworker.importscripts.d.ts": {
+        "version": "fe4e59403e34c7ff747abe4ff6abbc7718229556d7c1a5b93473fb53156c913b",
+        "signature": "fe4e59403e34c7ff747abe4ff6abbc7718229556d7c1a5b93473fb53156c913b"
+      },
+      "c:/users/andrew/appdata/roaming/npm/node_modules/typescript/lib/lib.scripthost.d.ts": {
+        "version": "b9faa17292f17d2ad75e34fac77dd63a6403af1dba02d39cd0cbb9ffdf3de8b9",
+        "signature": "b9faa17292f17d2ad75e34fac77dd63a6403af1dba02d39cd0cbb9ffdf3de8b9"
+      },
+      "../ie.ts": {
+        "version": "383b17d2c861da5dd26bdf06d6776150e1dd7601ad3a240a22724b16834fcb12",
+        "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "../remoting.ts": {
+        "version": "d82b47361036df07e2de246e9e8363596eaad025fd8b01f566f6d1cb173a0735",
+        "signature": "6978ca6f420e6ccc588800f686e3b4f551977446cd3dc96b151515d78fa8e9d0"
+      },
+      "../js/ie.d.ts": {
+        "version": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "../js/remoting.d.ts": {
+        "version": "6978ca6f420e6ccc588800f686e3b4f551977446cd3dc96b151515d78fa8e9d0",
+        "signature": "6978ca6f420e6ccc588800f686e3b4f551977446cd3dc96b151515d78fa8e9d0"
+      },
+      "../node_modules/@types/jquery/jquerystatic.d.ts": {
+        "version": "7148626ed3e6bfd75fbe790683299e924e0ce6397bf2d042ad69fe59c4b60ac0",
+        "signature": "7148626ed3e6bfd75fbe790683299e924e0ce6397bf2d042ad69fe59c4b60ac0"
+      },
+      "../node_modules/@types/jquery/jquery.d.ts": {
+        "version": "da31c7608337a2852eddef809bf94137bb7d1405e79bf16a288bb5810d40b766",
+        "signature": "da31c7608337a2852eddef809bf94137bb7d1405e79bf16a288bb5810d40b766"
+      },
+      "../node_modules/@types/jquery/misc.d.ts": {
+        "version": "6193bf6116b82705612cf5448ff2ef8fb575f617ffa72af2f4add53ab912874f",
+        "signature": "6193bf6116b82705612cf5448ff2ef8fb575f617ffa72af2f4add53ab912874f"
+      },
+      "../node_modules/@types/jquery/legacy.d.ts": {
+        "version": "4822e06155a37bc8f3a471b1a9453ff33da7f23ebcaaadab7cca3f9bd53e7bf8",
+        "signature": "4822e06155a37bc8f3a471b1a9453ff33da7f23ebcaaadab7cca3f9bd53e7bf8"
+      },
+      "../node_modules/@types/sizzle/index.d.ts": {
+        "version": "094c14e6d63377a644d76b4a4ed2a50bd5e9cabe67e19e3b86c4a4504952d8b2",
+        "signature": "094c14e6d63377a644d76b4a4ed2a50bd5e9cabe67e19e3b86c4a4504952d8b2"
+      },
+      "../node_modules/@types/jquery/index.d.ts": {
+        "version": "9ba90892e9fb565cd510d66a9197d88a58b1b1a438faac3ddd41b3a5fb42b3fd",
+        "signature": "9ba90892e9fb565cd510d66a9197d88a58b1b1a438faac3ddd41b3a5fb42b3fd"
+      },
+      "../node_modules/popper.js/index.d.ts": {
+        "version": "c345ffd88ca40639be48129ee661b6098f09274e69d83f7ce8ab8777b00c20be",
+        "signature": "c345ffd88ca40639be48129ee661b6098f09274e69d83f7ce8ab8777b00c20be"
+      },
+      "../node_modules/@types/bootstrap/index.d.ts": {
+        "version": "f810751bb4f72f739bcdae0473a21227429fe3a6935c538cc88981557bffc88a",
+        "signature": "f810751bb4f72f739bcdae0473a21227429fe3a6935c538cc88981557bffc88a"
+      },
+      "../node_modules/@types/jqueryui/index.d.ts": {
+        "version": "9cd525040bcce083b9ff98547ab07381d19b19b15ab506d38df38417140afd57",
+        "signature": "9cd525040bcce083b9ff98547ab07381d19b19b15ab506d38df38417140afd57"
+      }
+    },
+    "options": {
+      "composite": true,
+      "declaration": true,
+      "target": 1,
+      "tsBuildInfoFile": "./info",
+      "removeComments": true,
+      "project": "../tsconfig.json",
+      "configFilePath": "../tsconfig.json"
+    },
+    "referencedMap": {
+      "../node_modules/@types/jquery/index.d.ts": [
+        "../node_modules/@types/jquery/jquerystatic.d.ts",
+        "../node_modules/@types/jquery/jquery.d.ts",
+        "../node_modules/@types/jquery/misc.d.ts",
+        "../node_modules/@types/jquery/legacy.d.ts",
+        "../node_modules/@types/sizzle/index.d.ts"
+      ],
+      "../node_modules/@types/bootstrap/index.d.ts": [
+        "../node_modules/popper.js/index.d.ts",
+        "../node_modules/@types/jquery/index.d.ts"
+      ],
+      "../node_modules/@types/jqueryui/index.d.ts": [
+        "../node_modules/@types/jquery/index.d.ts"
+      ]
+    },
+    "exportedModulesMap": {
+      "../node_modules/@types/jquery/index.d.ts": [
+        "../node_modules/@types/jquery/jquerystatic.d.ts",
+        "../node_modules/@types/jquery/jquery.d.ts",
+        "../node_modules/@types/jquery/misc.d.ts",
+        "../node_modules/@types/jquery/legacy.d.ts",
+        "../node_modules/@types/sizzle/index.d.ts"
+      ],
+      "../node_modules/@types/bootstrap/index.d.ts": [
+        "../node_modules/popper.js/index.d.ts",
+        "../node_modules/@types/jquery/index.d.ts"
+      ],
+      "../node_modules/@types/jqueryui/index.d.ts": [
+        "../node_modules/@types/jquery/index.d.ts"
+      ]
+    },
+    "semanticDiagnosticsPerFile": [
+      "c:/users/andrew/appdata/roaming/npm/node_modules/typescript/lib/lib.d.ts",
+      "c:/users/andrew/appdata/roaming/npm/node_modules/typescript/lib/lib.es5.d.ts",
+      "c:/users/andrew/appdata/roaming/npm/node_modules/typescript/lib/lib.dom.d.ts",
+      "c:/users/andrew/appdata/roaming/npm/node_modules/typescript/lib/lib.webworker.importscripts.d.ts",
+      "c:/users/andrew/appdata/roaming/npm/node_modules/typescript/lib/lib.scripthost.d.ts",
+      "../ie.ts",
+      "../js/ie.d.ts",
+      "../js/remoting.d.ts",
+      "../node_modules/@types/jquery/jquerystatic.d.ts",
+      "../node_modules/@types/jquery/jquery.d.ts",
+      "../node_modules/@types/jquery/misc.d.ts",
+      "../node_modules/@types/jquery/legacy.d.ts",
+      "../node_modules/@types/sizzle/index.d.ts",
+      "../node_modules/@types/jquery/index.d.ts",
+      "../node_modules/popper.js/index.d.ts",
+      "../node_modules/@types/bootstrap/index.d.ts",
+      "../node_modules/@types/jqueryui/index.d.ts",
+      "../remoting.ts"
+    ]
+  },
+  "version": "3.7.2"
+}

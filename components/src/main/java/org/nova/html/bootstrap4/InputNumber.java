@@ -21,6 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.elements.TagElement;
 import org.nova.html.enums.autocomplete;
 
 public class InputNumber extends InputComponent<InputNumber>
@@ -110,5 +111,14 @@ public class InputNumber extends InputComponent<InputNumber>
         }
         return this;
     }
+    public InputNumber list(String id)
+    {
+        return attr("list",id);
+    }
+    public InputNumber list(TagElement element)
+    {
+        return attr("list",element.id());
+    }
+
 }
 

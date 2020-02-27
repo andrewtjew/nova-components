@@ -21,6 +21,7 @@
  ******************************************************************************/
 package org.nova.html.ext;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,14 +32,23 @@ import java.util.Map.Entry;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.FormElement;
 import org.nova.html.elements.InputElement;
+import org.nova.html.elements.QuotationMark;
 import org.nova.html.elements.StringComposer;
 import org.nova.html.elements.TagElement;
+import org.nova.html.tags.script;
 import org.nova.http.client.PathAndQuery;
 import org.nova.http.server.Context;
 import org.nova.json.ObjectMapper;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+
 public class HtmlUtils
 {
+    //Fixes IE
+    public static script ie() 
+    {
+        return new script().addInner("Object.keys = function (obj) {var keys = [];for (var i in obj) {if (obj.hasOwnProperty(i)) {keys.push(i);}}return keys;};");
+    }
     public static String js_peekPassword(String id)
     {
         return "var x = document.getElementById('"+id+"');if (x.type === 'password') {x.type = 'text';} else {x.type = 'password';}";
@@ -176,6 +186,42 @@ public class HtmlUtils
         return map;
     }
     
+    public static String escape(String string)
+    {
+        StringBuilder sb=new StringBuilder();
+        for (int i=0;i<string.length();i++)
+        {
+            char c=string.charAt(i);
+            switch (c)
+            {
+                case '"':
+                    sb.append("&quot;");
+                    break;
+
+                case '\'':
+                    sb.append("&#39;");
+                    break;
+                    
+                case '&':
+                    sb.append("&amp;");
+                    break;
+                    
+                case '<':
+                    sb.append("&lt;");
+                    break;
+
+                case '>':
+                    sb.append("&gt;");
+                    break;
+                    
+                    
+                default:
+                    sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+    
     public static String toStringParameter(String string)
     {
         StringBuilder sb=new StringBuilder();
@@ -240,8 +286,12 @@ public class HtmlUtils
         return "setTimeout(function(){"+call+"},"+delay+");";
     }
         
-
     public static String js_call(String function,Object...parameters)
+    {
+        return js_call(QuotationMark.SINGLE,function,parameters);
+    }
+    
+    public static String js_call(QuotationMark mark,String function,Object...parameters)
     {
         StringBuilder sb=new StringBuilder(function+"(");
         boolean commaNeeded=false;
@@ -262,9 +312,30 @@ public class HtmlUtils
             else 
             {
                 Class<?> type=parameter.getClass();
+                boolean isArray=type.isArray();
+                if (isArray)
+                {
+                    type=type.getComponentType();
+                }
                 if (type==String.class)
                 {
-                    sb.append("'"+toStringParameter(parameter.toString())+"'");
+                    if (isArray)
+                    {
+                        sb.append('[');
+                        for (int i=0;i<Array.getLength(parameter);i++)
+                        {
+                            if (i>0)
+                            {
+                                sb.append(',');
+                            }
+                            sb.append(mark.toString()+toStringParameter(Array.get(parameter, i).toString())+mark.toString());
+                        }
+                        sb.append(']');
+                    }
+                    else
+                    {
+                        sb.append(mark.toString()+toStringParameter(parameter.toString())+mark.toString());
+                    }
                 }
                 else if ((type==byte.class)
                         ||(type==short.class)
@@ -281,11 +352,43 @@ public class HtmlUtils
                         ||(type==Double.class)
                         )
                 {
-                    sb.append(parameter);
+                    if (isArray)
+                    {
+                        sb.append('[');
+                        for (int i=0;i<Array.getLength(parameter);i++)
+                        {
+                            if (i>0)
+                            {
+                                sb.append(',');
+                            }
+                            sb.append(Array.get(parameter, i));
+                        }
+                        sb.append(']');
+                    }
+                    else
+                    {
+                        sb.append(parameter);
+                    }
                 }
                 else
                 {
-                    sb.append("'"+parameter.toString()+"'");
+                    if (isArray)
+                    {
+                        sb.append('[');
+                        for (int i=0;i<Array.getLength(parameter);i++)
+                        {
+                            if (i>0)
+                            {
+                                sb.append(',');
+                            }
+                            sb.append(mark.toString()+Array.get(parameter, i).toString()+mark.toString());
+                        }
+                        sb.append(']');
+                    }
+                    else
+                    {
+                        sb.append(mark.toString()+parameter.toString()+mark.toString());
+                    }
                 }
             }
         }

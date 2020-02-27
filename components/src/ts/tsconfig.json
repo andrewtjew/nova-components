@@ -1,7 +1,9 @@
 {
-    "compilerOptions": {
+    "compilerOptions": 
+    {
+      "declaration": true,
       "target": "es5",
-      "outDir":"/wd/mira/resources/client/html/js",
+      "outDir":"/wd/resources/client/html/js",
       "removeComments":true
     }
   }

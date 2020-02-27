@@ -23,12 +23,13 @@ package org.nova.http.client;
 
 import java.net.URLEncoder;
 
+import org.nova.html.elements.QuotationMark;
 import org.nova.json.ObjectMapper;
 
 public class PathAndQuery
 {
 	private StringBuilder sb;
-	private char separator='?'; 
+	private char separator='?';
     public PathAndQuery(String path)
     {
         this.sb=new StringBuilder(path);

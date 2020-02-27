@@ -22,6 +22,7 @@
 package org.nova.html.tags;
 
 import org.nova.html.elements.InputElement;
+import org.nova.html.elements.TagElement;
 import org.nova.html.enums.autocomplete;
 
 public class input_number extends InputElement<input_number>
@@ -104,5 +105,12 @@ public class input_number extends InputElement<input_number>
     {
         return attr("placeholder",text);
     }
-    
+    public input_number list(String id)
+    {
+        return attr("list",id);
+    }
+    public input_number list(TagElement element)
+    {
+        return attr("list",element.id());
+    }
 }

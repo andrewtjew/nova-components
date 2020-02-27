@@ -4,34 +4,28 @@ import org.nova.html.bootstrap4.Button;
 import org.nova.html.bootstrap4.ButtonDropdown;
 import org.nova.html.bootstrap4.ButtonGroup;
 import org.nova.html.bootstrap4.DropdownMenu;
+import org.nova.html.bootstrap4.Item;
 import org.nova.html.bootstrap4.ToggleDropdownButton;
 import org.nova.html.bootstrap4.classes.StyleColor;
 
-public class ButtonSplitDropdownMenu extends ButtonGroup
+public class ItemSplitDropdownMenu extends ButtonGroup
 {
-    final private Button button;
+    final private Item item;
     final private ToggleDropdownButton toggler;
     final private DropdownMenu menu;
     
-    public ButtonSplitDropdownMenu()
+    public ItemSplitDropdownMenu()
     {
         addClass("dropdown");
-        this.button=returnAddInner(new Button());
+        this.item=returnAddInner(new Item());
         this.toggler=returnAddInner(new ToggleDropdownButton());
         this.menu=returnAddInner(new DropdownMenu(this.toggler()));
     }
     
-    public ButtonSplitDropdownMenu buttonToggles()
-    {
-        this.button().onclick(this.menu.js_dropdown_toggle());
-        button.data("toggle","dropdown");
-//        this.menu.reference_parent(this.button);
-        return this;
-    }
 
-    public Button button()
+    public Item item()
     {
-        return button;
+        return item;
     }
 
     public ToggleDropdownButton toggler()
@@ -44,9 +38,9 @@ public class ButtonSplitDropdownMenu extends ButtonGroup
         return menu;
     }
     
-    public ButtonSplitDropdownMenu color(StyleColor color)
+    public ItemSplitDropdownMenu color(StyleColor color)
     {
-        this.button().color(color);
+        this.item().bg(color);
         this.toggler().color(color);
         return this;
     }
