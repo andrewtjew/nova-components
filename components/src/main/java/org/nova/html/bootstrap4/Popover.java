@@ -50,7 +50,7 @@ public class Popover extends TipComponent<Popover>
     }
     public String js_popover(TipOption option)
     {
-    	return js_popover(option, QuotationMark.APOS);
+    	return js_popover(option, QuotationMark.SINGLE);
     }
     
     public static script js_ready()

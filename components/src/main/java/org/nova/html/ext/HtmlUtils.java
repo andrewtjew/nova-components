@@ -58,10 +58,15 @@ public class HtmlUtils
         return "var x = document.getElementById('"+id+"');var t=document.getElementById('"+toggleElementId+"');if (x.type === 'password') {x.type = 'text';t.innerHTML='"+toggleHideText+"';} else {x.type = 'password';t.innerHTML='"+toggleShowText+"';}";
     }
     
-    public static String js_location(PathAndQuery builder)
+    public static String js_location(PathAndQuery pathAndQuery)
     {
-        return "window.location='"+builder.toString()+"'";
+        return js_location(QuotationMark.QOUT,pathAndQuery);
     }
+    public static String js_location(QuotationMark mark,PathAndQuery pathAndQuery)
+    {
+        return "window.location="+mark+pathAndQuery.toString()+mark;
+    }
+
     public static String js_location(String url)
     {
         return "window.location='"+url+"'";

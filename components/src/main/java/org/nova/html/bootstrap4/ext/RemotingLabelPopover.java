@@ -32,6 +32,7 @@ import org.nova.html.bootstrap4.StyleComponent;
 import org.nova.html.bootstrap4.TipOption;
 import org.nova.html.bootstrap4.classes.Align;
 import org.nova.html.bootstrap4.classes.AlignSelf;
+import org.nova.html.bootstrap4.classes.Boundary;
 import org.nova.html.bootstrap4.classes.Flex;
 import org.nova.html.bootstrap4.classes.Justify;
 import org.nova.html.bootstrap4.classes.Placement;
@@ -57,8 +58,7 @@ public class RemotingLabelPopover extends Popover
 	public RemotingLabelPopover(TagElement<?> toggler,ModalBackground background,String js_onAccept,String label,GlobalEventTagElement<?> acceptButton,GlobalEventTagElement<?> dismissButton,Placement placement) throws Throwable
 	{
 		super(toggler);
-		RemotingLabelPopover container=this;//.returnAddInner(new Item());
-		QuotationMark mark=QuotationMark.APOS;
+		QuotationMark mark=QuotationMark.SINGLE;
 
 		String template;
 
@@ -72,9 +72,15 @@ public class RemotingLabelPopover extends Popover
 		Item inputGroup=new Item().d_flex();
 		inputGroup.addInner(new Item().mr(2).align_self(AlignSelf.center).addInner(label));
 
-		String js_close=js_popover(TipOption.hide)+";"+background.js_hide()+";";
+		String js_close=js_popover(TipOption.hide,QuotationMark.APOS);
+		if (background!=null)
+	    {
+		    js_close+=";"+background.js_hide()+";";
+            String script="$('#"+toggler.id()+"').on('show.bs.popover',function(){"+background.js_show()+";});";
+            toggler.addInner(new script().addInner(script));
+	    }
 		FormQueryBuilder query=new FormQueryBuilder(mark);
-		String js_submit=js_onAccept+";"+js_close;
+		String js_submit=js_close+";"+js_onAccept+";";
 		acceptButton.onclick(js_submit);
 		inputGroup.addInner(acceptButton);
 		
@@ -83,11 +89,10 @@ public class RemotingLabelPopover extends Popover
 		inputGroup.addInner(dismissButton);
 
 		content(inputGroup);
+		this.boundary(Boundary.viewport);
 		//trigger(Trigger.manual);
 		placement(placement);
 		
-		String script="$('#"+toggler.id()+"').on('show.bs.popover',function(){"+background.js_show()+";});";
-		toggler.addInner(new script().addInner(script));
 		
 	}
 	public RemotingLabelPopover(TagElement<?> toggler,ModalBackground background,String js_onAccept,String label,Placement placement) throws Throwable
@@ -98,8 +103,17 @@ public class RemotingLabelPopover extends Popover
 				,placement
 				);
 	}
+    public RemotingLabelPopover(TagElement<?> toggler,String js_onAccept,String label,Placement placement) throws Throwable
+    {
+        this(toggler,null,js_onAccept,label
+                ,new Button().ml(1).color(StyleColor.success).addInner("&#x2713;")
+                ,new Button().ml(1).color(StyleColor.secondary).addInner("&#x1f5d9;")
+                ,placement
+                );
+    }
 	public RemotingLabelPopover(TagElement<?> toggler,ModalBackground background,String js_onAccept,String label) throws Throwable
 	{
 		this(toggler,background,js_onAccept,label,Placement.right);
 	}
+
 }

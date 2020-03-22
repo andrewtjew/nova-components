@@ -28,9 +28,15 @@ public abstract class Element
     @Override
     public String toString()
     {
+        throw new RuntimeException();
+        
+    }
+    
+    
+    public String getHtml(Composer composer)
+    {
         try
         {
-            StringComposer composer=new StringComposer();
             compose(composer);
             return composer.getStringBuilder().toString();
         }
@@ -38,6 +44,14 @@ public abstract class Element
         {
             throw new RuntimeException(t);
         }
+   }
+    public String getHtml()
+    {
+        return getHtml(QuotationMark.DOUBLE);
+   }
+    public String getHtml(QuotationMark quotationMark)
+    {
+        return getHtml(new StringComposer(quotationMark));
    }
 
     static public String HREF_LOCAL_DIRECTORY=null;

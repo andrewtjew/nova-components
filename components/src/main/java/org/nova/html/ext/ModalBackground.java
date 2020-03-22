@@ -87,6 +87,6 @@ public class ModalBackground extends GlobalEventTagElement<div>
     }
     public String js_hide()
     {
-    	return js_hide(QuotationMark.APOS);
+    	return js_hide(QuotationMark.SINGLE);
     }
 }

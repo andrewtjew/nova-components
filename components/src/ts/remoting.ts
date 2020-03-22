@@ -118,6 +118,7 @@ namespace org.nova.html.remoting
         $.ajax(
             {url:pathAndQuery,
             type:type,
+            async:false,
             dataType:"json",
             data:data,
             cache: false,

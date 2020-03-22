@@ -24,8 +24,11 @@ package org.nova.html.remoting;
 import java.util.ArrayList;
 
 import org.nova.html.elements.Element;
+import org.nova.html.elements.QuotationMark;
 import org.nova.html.elements.StringComposer;
 import org.nova.json.ObjectMapper;
+
+import com.amazonaws.services.mturk.model.QualificationStatus;
 
 public class DocumentResult extends Result
 {
@@ -41,9 +44,11 @@ public class DocumentResult extends Result
     private String script;
     private Object result;
     private String location;
+    final private QuotationMark quotationMark;
     
-    public DocumentResult() throws Throwable
+    public DocumentResult(QuotationMark quotationMark) throws Throwable
     {
+        this.quotationMark=quotationMark;
         this.htmlResults=new ArrayList<>();
         this.appendResults=new ArrayList<>();
         this.modalResults=new ArrayList<>();
@@ -53,10 +58,19 @@ public class DocumentResult extends Result
         this.clearTimerCommands=new ArrayList<>();
         this.propResults=new ArrayList<PropResult>();
     }
+    public DocumentResult() throws Throwable
+    {
+        this(QuotationMark.DOUBLE);
+    }
     
     public void setLocation(String location)
     {
         this.location=location;
+    }
+    
+    public QuotationMark getQuotationMark()
+    {
+        return this.quotationMark;
     }
     
     public DocumentResult setHtml(String id,String html)
@@ -69,9 +83,9 @@ public class DocumentResult extends Result
     }
     public DocumentResult setHtml(String id,Element element) throws Throwable
     {
-        StringComposer composer=new StringComposer();
-        composer.compose(element);
-        return setHtml(id,composer.getStringBuilder().toString());
+        StringComposer composer=new StringComposer(this.quotationMark);
+        String html=element.getHtml(composer);
+        return setHtml(id,html);
     }
     public DocumentResult appendHtml(String id,String html)
     {
@@ -83,9 +97,8 @@ public class DocumentResult extends Result
     }
     public DocumentResult appendElement(String id,Element element) throws Throwable
     {
-        StringComposer composer=new StringComposer();
-        composer.compose(element);
-        return appendHtml(id,composer.getStringBuilder().toString());
+        StringComposer composer=new StringComposer(this.quotationMark);
+        return appendHtml(id,element.getHtml(composer));
     }
     
     public DocumentResult setModalOption(String id,ModalOption option)

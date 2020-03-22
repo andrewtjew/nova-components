@@ -125,7 +125,7 @@ public class CallBuilder
     }
 
 
-    public static String js_post(String pathAndQueryTemplate,Object...values) throws Throwable
+    public static String js_post(QuotationMark mark,String pathAndQueryTemplate,Object...values) throws Throwable
     {
         StringBuilder sb=new StringBuilder();
         int begin=0;
@@ -142,6 +142,10 @@ public class CallBuilder
                 begin=end+1;
             }
         }
-        return "org.nova.html.remoting.post('"+sb.toString()+"')";
+        return "org.nova.html.remoting.post("+mark+sb.toString()+mark+")";
+    }
+    public static String js_post(String pathAndQueryTemplate,Object...values) throws Throwable
+    {
+        return js_post(QuotationMark.APOS,pathAndQueryTemplate,values);
     }
 }

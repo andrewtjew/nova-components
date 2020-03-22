@@ -46,7 +46,7 @@ public class RemotingInputPopover extends Popover
 	{
 		super(toggler);
 		RemotingInputPopover container=this;//.returnAddInner(new Item());
-		QuotationMark mark=QuotationMark.APOS;
+		QuotationMark mark=QuotationMark.SINGLE;
 
 		String template;
 

@@ -27,8 +27,8 @@ public enum QuotationMark
     DOUBLE("\""), 
     APOS("&apos;"), 
     QOUT("&quot;"), 
-    ESC_QOUT("\\\""), 
-    ESC_APOS("\\\'") 
+    ESC_DOUBLE("\\\""), 
+    ESC_SINGLE("\\\'") 
     ;
     private String value;
 

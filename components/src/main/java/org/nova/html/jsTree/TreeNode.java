@@ -116,7 +116,8 @@ public class TreeNode extends Element
     {
         li li=new li().id(this.id);
         String jsonText=ObjectMapper.writeObjectToString(this.attributes);
-        li.attr("data-jstree",jsonText,QuotationMark.SINGLE);
+//        li.attr("data-jstree",jsonText,QuotationMark.SINGLE);
+        li.attr("data-jstree",jsonText);
         li.addInner(element);
         li.addInner(this.ul);
         composer.compose(li);
