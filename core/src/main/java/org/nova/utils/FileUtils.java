@@ -178,6 +178,10 @@ public class FileUtils
             stream.write(bytes,offset,lengtht);
         }
     }
+    public static void writeBinaryFile(String fileName, byte[] bytes) throws Exception
+    {
+        writeBinaryFile(fileName, bytes, 0,bytes.length);
+    }
 
     public static String computeHashSHA256(File file, int buffer) throws Throwable
     {

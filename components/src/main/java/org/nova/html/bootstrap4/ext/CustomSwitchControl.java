@@ -83,5 +83,9 @@ public class CustomSwitchControl extends StyleComponent<CustomSwitchControl>
     {
         return this.customSwitch;
     }
+    public CustomLabel customLabel()
+    {
+        return this.customLabel;
+    }
     
 }
