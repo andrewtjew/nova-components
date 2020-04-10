@@ -21,11 +21,13 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.elements.InputType;
+
 public class CustomRange extends InputComponent<CustomRange>
 {
     public CustomRange()
     {
-        super("custom-range","range");
+        super(InputType.range,"custom-range");
     }
 }
 

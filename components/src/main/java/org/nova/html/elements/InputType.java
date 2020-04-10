@@ -21,12 +21,40 @@
  ******************************************************************************/
 package org.nova.html.elements;
 
-/*
-public interface Inner<ELEMENT>
+public enum InputType
 {
-    public ELEMENT addInner(Element element);
-    public ELEMENT setInner(Element element);
-    public ELEMENT addInners(Element...elements);
-    public ELEMENT addInner(Object object);
+    textarea("textarea"),
+    checkbox("checkbox"),
+    radio("radio"),
+    select("select"),
+    button("button"),
+    color("color"),
+    date("date"),
+    datetime_local("datetime-local"),
+    email("email"),
+    file("file"),
+    hidden("hidden"),
+    image("image"),
+    month("month"),
+    number("number"),
+    password("password"),
+    range("range"),
+    reset("reset"),
+    search("search"),
+    submit("submit"),
+    tel("tel"),
+    text("text"),
+    time("time"),
+    url("url"),
+    week("week"),
+    ;
+    private String value;
+    InputType(String value)
+    {
+        this.value=value;
+    }
+    public String toString()
+    {
+        return this.value;
+    }
 }
-*/

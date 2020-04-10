@@ -21,12 +21,13 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.elements.InputType;
+
 public class CustomCheckBox extends InputComponent<CustomCheckBox>
 {
-
     public CustomCheckBox()
     {
-        super("custom-control-input","checkbox");
+        super(InputType.checkbox,"custom-control-input");
     }
     public CustomCheckBox checked()
     {

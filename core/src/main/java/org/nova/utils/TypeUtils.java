@@ -51,7 +51,7 @@ public class TypeUtils
     {
         return (value==null)?nullReplacementValue:value;
     }
-    static public long replaceNull(Long value,long nullReplacementValue)
+    static public long replaceIfNull(Long value,long nullReplacementValue)
     {
         return (value==null)?nullReplacementValue:value;
     }
@@ -62,6 +62,25 @@ public class TypeUtils
     static public double replaceIfNull(Double value,double nullReplacementValue)
     {
         return (value==null)?nullReplacementValue:value;
+    }
+
+    
+    
+    static public int replaceNullWithZero(Integer value)
+    {
+        return (value==null)?0:value;
+    }
+    static public long replaceNullWithZero(Long value)
+    {
+        return (value==null)?0L:value;
+    }
+    static public float replaceNullWithZero(Float value)
+    {
+        return (value==null)?0.0f:value;
+    }
+    static public double replaceNullWithZero(Double value)
+    {
+        return (value==null)?0.0:value;
     }
     
     static public List<Integer> intArrayToList(int[] values)

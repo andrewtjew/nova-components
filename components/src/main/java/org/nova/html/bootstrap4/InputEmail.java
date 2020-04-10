@@ -21,6 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.elements.InputType;
 import org.nova.html.enums.autocomplete;
 import org.nova.html.tags.input_email;
 
@@ -28,7 +29,7 @@ public class InputEmail extends InputComponent<InputEmail>
 {
     public InputEmail()
     {
-        super("input","email");
+        super(InputType.email,"input");
     }
     public InputEmail autocomplete(autocomplete autocomplete) //text, search, url, tel, email, password, datepickers, range, and color.
     {

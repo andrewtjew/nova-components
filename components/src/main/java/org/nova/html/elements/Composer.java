@@ -21,10 +21,22 @@
  ******************************************************************************/
 package org.nova.html.elements;
 
+import com.amazonaws.services.mturk.model.QualificationStatus;
 
 public abstract class Composer
 {
+    final private QuotationMark quotationMark;
     public abstract StringBuilder getStringBuilder();
+
+    
+    public Composer(QuotationMark quotationMark)
+    {
+        this.quotationMark=quotationMark;
+    }
+    public QuotationMark getQuotationMark()
+    {
+        return this.quotationMark;
+    }
     public void compose(Element element) throws Throwable
     {
         if (element!=null)

@@ -31,9 +31,10 @@ public class SubmitButton extends ButtonComponent<SubmitButton>
     
     public SubmitButton(String label)
     {
-        super("input");
+        super("button");
         attr("type","submit");
-        attr("value",label);
+//        attr("value",label);
+        addInner(label);
         
     }
     
@@ -52,5 +53,9 @@ public class SubmitButton extends ButtonComponent<SubmitButton>
     {
         attr("form",element.id());
         return this;
+    }
+    public SubmitButton value(Object value)
+    {
+        return attr("value",value);
     }
 }

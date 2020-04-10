@@ -139,7 +139,7 @@ public class FileUtils
 
     public static void writeTextFile(String fileName, String text, Charset charset) throws Exception
     {
-        File file = new File(fileName);
+        File file = new File(FileUtils.toNativePath(fileName));
         if (file.isDirectory() == true)
         {
             throw new Exception("File is a directory. Filename=" + fileName);
@@ -153,7 +153,7 @@ public class FileUtils
 
     public static void writeTextFile(String fileName, String text, String encoding) throws Exception
     {
-        File file = new File(fileName);
+        File file = new File(FileUtils.toNativePath(fileName));
         if (file.isDirectory() == true)
         {
             throw new Exception("File is a directory. Filename=" + fileName);
@@ -167,7 +167,7 @@ public class FileUtils
 
     public static void writeBinaryFile(String fileName, byte[] bytes, int offset,int lengtht) throws Exception
     {
-        File file = new File(fileName);
+        File file = new File(FileUtils.toNativePath(fileName));
         if (file.isDirectory() == true)
         {
             throw new Exception("File is a directory. Filename=" + fileName);
@@ -177,6 +177,10 @@ public class FileUtils
         {
             stream.write(bytes,offset,lengtht);
         }
+    }
+    public static void writeBinaryFile(String fileName, byte[] bytes) throws Exception
+    {
+        writeBinaryFile(fileName,bytes,0,bytes.length);
     }
 
     public static String computeHashSHA256(File file, int buffer) throws Throwable

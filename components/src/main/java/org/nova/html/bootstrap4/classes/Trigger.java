@@ -28,6 +28,10 @@ public enum Trigger
     hover("hover"), 
     focus("focus"), 
     manual("manual"), 
+    click_hover("click hover"), 
+    click_focus("click focus"), 
+    hover_focus("hover focus"), 
+    click_hover_focus("click hover focus"), 
     ;
     
     private String value;

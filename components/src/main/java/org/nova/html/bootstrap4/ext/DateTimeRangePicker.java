@@ -158,7 +158,7 @@ public class DateTimeRangePicker extends StyleComponent<DateTimeRangePicker>
         if (sb.length()>0)
         {
             script script=new script().addInner(sb.toString());
-            composer.getStringBuilder().append(script.toString());
+            composer.getStringBuilder().append(script.getHtml());
         }
     }
 

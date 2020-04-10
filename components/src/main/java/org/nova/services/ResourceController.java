@@ -20,11 +20,17 @@
  * SOFTWARE.
  ******************************************************************************/
 package org.nova.services;
+import java.io.File;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.http.HttpStatus;
 import org.nova.annotations.Description;
 import org.nova.frameworks.ServerApplication;
+import org.nova.html.elements.Element;
+import org.nova.http.client.BinaryResponse;
+import org.nova.http.client.HttpClientFactory;
+import org.nova.http.client.JSONClient;
 import org.nova.http.server.Context;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
@@ -39,6 +45,7 @@ import org.nova.http.server.annotations.Path;
 import org.nova.http.server.annotations.PathParam;
 import org.nova.test.Testing;
 import org.nova.tracing.Trace;
+import org.nova.utils.FileUtils;
 
 @Description("Handlers for server operator pages")
 @ContentDecoders(GzipContentDecoder.class)
@@ -71,6 +78,20 @@ public class ResourceController
         trace.setDetails(file);
         try
         {
+            String external=null;
+            if (Element.HREF_LOCAL_DIRECTORY!=null)
+            {
+                int colon=file.indexOf(":");
+                if (colon>0)
+                {
+                    int slash=file.lastIndexOf('/',colon);
+                    external=file.substring(slash+1);
+                    String root=file.substring(0,slash+1);
+                    file=root+external.substring(colon-slash+2);
+                    
+                }
+            }
+            
             HttpServletResponse response = context.getHttpServletResponse();
             context.setCaptured(true);
             byte[] bytes;
@@ -84,6 +105,31 @@ public class ResourceController
             }
             catch (Throwable t)
             {
+                if (external!=null)
+                {
+                    int colon=external.indexOf(':');
+                    int firstSlash=external.indexOf('/',colon+3);
+//                    int secondSlash=external.indexOf('/',firstSlash);
+//                    int lastSlash=external.lastIndexOf('/');
+                    
+                    //String protocol=external.substring(0,colon);
+                    //String path=external.substring(colon+2,lastSlash);
+                    //String fileExt=external.substring(lastSlash);
+                    String endPoint=external.substring(0,firstSlash);
+                    String pathAndQuery=external.substring(firstSlash);
+                    
+                    JSONClient client=new JSONClient(this.serverApplication.getTraceManager(),this.serverApplication.getLogger(),endPoint);
+                    BinaryResponse binaryResponse=client.getBinary(parent, null, pathAndQuery);
+                    
+                    
+                    String fileName=this.serverApplication.getFileCache().getLocalDirectory()+"/"+file;
+                    String dirs=FileUtils.toNativePath(fileName.substring(0,fileName.lastIndexOf('/')));
+                    new File(dirs).mkdirs();
+                    bytes=binaryResponse.get();
+                    FileUtils.writeBinaryFile(fileName, bytes);
+                    
+                    
+                }
                 trace.close(t);
                 if (TEST)
                 {

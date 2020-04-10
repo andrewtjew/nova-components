@@ -21,13 +21,14 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.elements.InputType;
 import org.nova.html.tags.input_radio;
 
 public class CustomRadio extends InputComponent<CustomRadio>
 {
     public CustomRadio()
     {
-        super("custom-control-input","radio");
+        super(InputType.radio,"custom-control-input");
     }
     public CustomRadio checked() //checkbox or radio
     {

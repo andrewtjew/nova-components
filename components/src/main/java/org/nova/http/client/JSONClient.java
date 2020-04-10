@@ -115,9 +115,23 @@ public class JSONClient
     {
         this(traceManager,logger,null,0,0,endPoint,client);
     }
+    
+    static private HttpClient selectClient(String endPoint) throws Throwable
+    {
+        if (endPoint.startsWith("http://"))
+        {
+            return HttpClientFactory.createClient();
+        }
+        if (endPoint.startsWith("https://"))
+        {
+            return HttpClientFactory.createSSLClient();
+        }
+        throw new Exception();
+    }
+    
     public JSONClient(TraceManager traceManager,Logger logger,String endPoint) throws Throwable
     {
-        this(traceManager,logger,endPoint,HttpClientFactory.createClient());
+        this(traceManager,logger,endPoint,selectClient(endPoint));
     }
     public void setHeader(Header header)
     {

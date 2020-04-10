@@ -45,7 +45,7 @@ public class FormQueryBuilder
     final private String QUOTE;
     final private FormQueryBuilder parent;
     final private StringBuilder sb=new StringBuilder();
-    private HashMap<String,ArrayList<String>> radios=null;
+    private HashMap<String,ArrayList<String>> radios;
     
     public FormQueryBuilder(QuotationMark mark)
     {

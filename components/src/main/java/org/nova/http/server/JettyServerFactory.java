@@ -68,17 +68,18 @@ public class JettyServerFactory
         Server server = new Server(threadPool);
         config.addCustomizer(new SecureRequestCustomizer());
         SslContextFactory sslContextFactory = new SslContextFactory();
-        if (serverCertificateKeyPassword!=null)
+        if ((serverCertificateKeyPassword!=null)&&(serverCertificateKeyStorePath!=null))
         {
             sslContextFactory.setKeyStorePath(FileUtils.toNativePath(serverCertificateKeyStorePath));
             sslContextFactory.setKeyStorePassword(serverCertificateKeyPassword);
         }
-        if (clientCertificatePassword!=null)
+        if ((clientCertificatePassword!=null)&&(clientCertificateKeyStorePath!=null))
         {
             sslContextFactory.setNeedClientAuth(true);
             sslContextFactory.setTrustStorePath(FileUtils.toNativePath(clientCertificateKeyStorePath));
             sslContextFactory.setTrustStorePassword(clientCertificatePassword);
         }
+
         
         sslContextFactory.setKeyManagerPassword(keyManagerPassword);
   //      sslContextFactory.setTrustAll(true);

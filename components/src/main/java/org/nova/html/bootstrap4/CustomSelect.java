@@ -22,12 +22,13 @@
 package org.nova.html.bootstrap4;
 
 import org.nova.html.bootstrap4.classes.DeviceClass;
+import org.nova.html.elements.InputType;
 
 public class CustomSelect extends InputComponent<CustomSelect>
 {
     public CustomSelect()
     {
-        super("select","custom-select",null);
+        super("select",InputType.select,"custom-select");
     }
     public CustomSelect(DeviceClass deviceClass)
     {

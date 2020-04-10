@@ -49,36 +49,13 @@ public class DataTableBootstrap4 extends StyleComponent<DataTableBootstrap4>
 
     private TableHeader header;
     private TableFooter footer;
-
-    public DataTableBootstrap4(Head head,DataTableOptions options)
-    {
-        this(head,options,"https://cdn.datatables.net/v/bs4/dt-1.10.18/datatables.min.css","https://cdn.datatables.net/v/bs4/dt-1.10.18/datatables.min.js");
-    }
-
-    public DataTableBootstrap4(Head head)
-    {
-        this(head,null);
-    }
-
-    public DataTableBootstrap4(DataTableOptions options)
-    {
-        this(null,options);
-    }
     
-    public DataTableBootstrap4(Head head,DataTableOptions options,String cssFilePath,String scriptFilePath)
+    public DataTableBootstrap4(DataTableOptions options)
     {
         super("table","table");
         this.tbody=new tbody();
         this.options=options;
 
-        if (head!=null)
-        {
-            String key=DataTableBootstrap4.class.getCanonicalName();
-            script script=new script().src(scriptFilePath);
-            head.add(key,script);
-            link link=new link().rel(link_rel.stylesheet).type("text/css").href(cssFilePath);
-            head.add(key,link);
-        }
     }
     
     public DataTableBootstrap4 bordered()
@@ -90,6 +67,12 @@ public class DataTableBootstrap4 extends StyleComponent<DataTableBootstrap4>
     public DataTableBootstrap4 striped()
     {
         addClass("table-striped");
+        return this;
+    }
+    
+    public DataTableBootstrap4 responsive()
+    {
+        addClass("dt-responsive");
         return this;
     }
     
@@ -206,7 +189,7 @@ public class DataTableBootstrap4 extends StyleComponent<DataTableBootstrap4>
         if (sb.length()>0)
         {
             script script=new script().addInner(sb.toString());
-            composer.getStringBuilder().append(script.toString());
+            composer.getStringBuilder().append(script.getHtml());
         }
         //this.compose(composer);
         super.compose(composer);

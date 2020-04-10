@@ -27,6 +27,7 @@ import org.nova.html.bootstrap4.classes.Placement;
 import org.nova.html.bootstrap4.classes.Trigger;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
+import org.nova.html.elements.GlobalTagElement;
 import org.nova.html.elements.InnerElement;
 import org.nova.html.elements.QuotationMark;
 import org.nova.html.elements.StringComposer;
@@ -62,7 +63,8 @@ public class TipComponent<TIP extends TipComponent<TIP>>
     
     public TIP template(String template)
     {
-        this.toggler.attr("data-template",template,QuotationMark.SINGLE);
+//        this.toggler.attr("data-template",template,QuotationMark.SINGLE);
+        this.toggler.attr("data-template",template);
         return (TIP)this;
     }
     public TIP animation()
@@ -81,17 +83,18 @@ public class TipComponent<TIP extends TipComponent<TIP>>
 
     public TIP content(String content)
     {
-        this.toggler.attr("data-content",content,QuotationMark.SINGLE);
+        this.toggler.attr("data-content",content);
+//        this.toggler.attr("data-content",content,QuotationMark.SINGLE);
         return (TIP)this;
     }
 
-    public TIP content(Element element,boolean html) throws Throwable
+    public TIP content(QuotationMark quotationMark,Element element,boolean html) throws Throwable
     {
         if (html)
         {
             this.toggler.attr("data-html",true);
         }
-        String content=element.toString();
+        String content=element.getHtml(new StringComposer(quotationMark));
 //        StringComposer composer=new StringComposer();
 //        composer.compose(element);
 //        String content2=composer.getStringBuilder().toString();
@@ -99,28 +102,35 @@ public class TipComponent<TIP extends TipComponent<TIP>>
 //        content=HtmlUtils.toHtmlText(content);
 //<button type=\"button\" class=\"btn ml-1 btn-primary\" class=\"btn ml-1 btn-primary btn-primary\">&#x2713;</button><button type=\"button\" class=\"btn ml-1 btn-secondary\" class=\"btn ml-1 btn-secondary btn-secondary\">&#x1f5d9;</button>
 //      content=HtmlUtils.toHtmlText(content);
-        this.toggler.attr("data-content",content,QuotationMark.SINGLE);
+//        this.toggler.attr("data-content",content,QuotationMark.SINGLE);
+        this.toggler.attr("data-content",content);
         return (TIP)this;
     }
     public TIP content(Element element) throws Throwable
     {
-        return content(element,true);
+        return content(QuotationMark.QOUT,element,true);
     }
 
-    @Description("Order is important. Use (hover,focus) and not (focus,hover) to allow buttons on the popover to be clicked.")
-    public TIP trigger(Trigger...triggers) throws Exception
+//    @Description("Order is important. Use (hover,focus) and not (focus,hover) to allow buttons on the popover to be clicked.")
+//    public TIP trigger(Trigger...triggers) throws Exception
+//    {
+//        if (triggers.length>1)
+//        {
+//            for (Trigger trigger:triggers)
+//            {
+//                if (trigger==Trigger.manual)
+//                {
+//                    throw new Exception("manual cannot be combined.");
+//                }
+//            }
+//        }
+//        this.toggler.attr("data-trigger",Utils.combine(triggers, " "));
+//        return (TIP)this;
+//    }
+
+    public TIP trigger(Trigger trigger) throws Exception
     {
-        if (triggers.length>1)
-        {
-            for (Trigger trigger:triggers)
-            {
-                if (trigger==Trigger.manual)
-                {
-                    throw new Exception("manual cannot be combined.");
-                }
-            }
-        }
-        this.toggler.attr("data-trigger",Utils.combine(triggers, " "));
+        this.toggler.attr("data-trigger",trigger.toString());
         return (TIP)this;
     }
     
@@ -130,6 +140,7 @@ public class TipComponent<TIP extends TipComponent<TIP>>
         return (TIP)this;
     }
     
+    @SuppressWarnings("unchecked")
     public TIP delay(Integer show,Integer hide)
     {
         Delay delay=new Delay();
@@ -137,7 +148,8 @@ public class TipComponent<TIP extends TipComponent<TIP>>
         delay.hide=hide;
         try
         {
-            this.toggler.attr("data-delay",delay,QuotationMark.SINGLE);
+//            this.toggler.attr("data-delay",delay,QuotationMark.SINGLE); //ATTR
+            this.toggler.attr("data-delay",delay);
         }
         catch (Throwable e)
         {
@@ -152,9 +164,15 @@ public class TipComponent<TIP extends TipComponent<TIP>>
         return (TIP)this;
     }
     
+    public TIP container(GlobalTagElement<?> element)
+    {
+        this.toggler.attr("data-container","#"+element.id());
+        return (TIP)this;
+    }
+    
     public TIP offset(int offsetX,int offsetY)
     {
-        this.toggler.attr("data-offset",offsetX+" "+offsetY);
+        this.toggler.attr("data-offset",offsetX+"px "+offsetY+"px");
         return (TIP)this;
     }
     public TIP boundary(Boundary boundary)

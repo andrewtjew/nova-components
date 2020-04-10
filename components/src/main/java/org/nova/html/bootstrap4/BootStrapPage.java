@@ -56,7 +56,8 @@ public class BootStrapPage extends Element
     	{
     	    this.head().addInner(new meta().http_equiv_content(http_equiv.X_UA_compatible,compatible));
     	}
-    	this.head.addInner(new meta().name(name.viewport).content("width=device-width, initial-scale=1, shrink-to-fit=no"));
+        this.head.addInner(new meta().name(name.viewport).content("width=device-width, initial-scale=1, shrink-to-fit=no"));
+//        this.head.addInner(new meta().name(name.viewport).content("width=device-width, initial-scale=2"));
     	this.head.addInner(new meta().charset(character_set.UTF_8));
         this.head.addInner(new link().rel(link_rel.stylesheet).href("https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"));
 //        this.head.addInner(new link().rel(link_rel.stylesheet).href("https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"));
@@ -65,6 +66,7 @@ public class BootStrapPage extends Element
         this.head.addInner(new script().src("https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"));
 //        this.head.addInner(new script().src("https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"));
         this.head.addInner(new script().src("/resources/html/js/ie.js"));
+        this.head.addInner(new link().rel(link_rel.stylesheet).href("https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css"));
     	this.body=html.returnAddInner(new body());
 	}
 

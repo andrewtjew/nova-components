@@ -21,6 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.elements.InputType;
 import org.nova.html.enums.autocomplete;
 import org.nova.html.tags.input_password;
 
@@ -29,7 +30,7 @@ public class InputPassword extends InputComponent<InputPassword>
 {
     public InputPassword()
     {
-        super("input","password");
+        super(InputType.password);
     }
     public InputPassword autocomplete(autocomplete autocomplete) //text, search, url, tel, email, password, datepickers, range, and color.
     {

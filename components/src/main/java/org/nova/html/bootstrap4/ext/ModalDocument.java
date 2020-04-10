@@ -35,9 +35,9 @@ public class ModalDocument extends Modal
 {
     final private ModalDialog dialog;
     final private ModalContent content;
-    private ModalHeader header;
-    private ModalFooter footer;
-    private ModalBody body;
+    final private ModalHeader header;
+    final private ModalFooter footer;
+    final private ModalBody body;
     
     public ModalDocument(boolean centered)
     {
@@ -56,6 +56,12 @@ public class ModalDocument extends Modal
         {
             this.dialog.deviceClass(deviceClass);
         }
+        this.header=new ModalHeader();
+        this.footer=new ModalFooter();
+        this.body=new ModalBody();
+        this.content.addInner(this.header);
+        this.content.addInner(this.body);
+        this.content.addInner(this.footer);
     }
     public ModalDocument(DeviceClass deviceClass)
     {
@@ -69,10 +75,6 @@ public class ModalDocument extends Modal
     
     public ModalHeader header()
     {
-        if (this.header==null)
-        {
-            this.header=new ModalHeader();
-        }
         return this.header;
     }
     public ModalDialog modalDialog()
@@ -81,18 +83,10 @@ public class ModalDocument extends Modal
     }
     public ModalFooter footer()
     {
-        if (this.footer==null)
-        {
-            this.footer=new ModalFooter();
-        }
         return this.footer;
     }
     public ModalBody body()
     {
-        if (this.body==null)
-        {
-            this.body=new ModalBody();
-        }
         return this.body;
     }
     public ModalContent modalContent()
@@ -100,23 +94,6 @@ public class ModalDocument extends Modal
         return this.content;
     }
     
-    @Override
-    public void compose(Composer composer) throws Throwable
-    {
-        if (this.header!=null)
-        {
-            this.content.addInner(this.header);
-        }
-        if (this.body!=null)
-        {
-            this.content.addInner(this.body);
-        }
-        if (this.footer!=null)
-        {
-            this.content.addInner(this.footer);
-        }
-        super.compose(composer);
-    }
     public String js_option(ModalOption option)
     {
         return "$('#"+id()+"').modal('"+option+"');";

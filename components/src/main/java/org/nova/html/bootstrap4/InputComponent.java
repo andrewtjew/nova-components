@@ -32,21 +32,38 @@ import org.nova.html.bootstrap4.classes.Rounded;
 import org.nova.html.bootstrap4.classes.StyleColor;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.InputElement;
+import org.nova.html.elements.InputType;
 import org.nova.html.elements.TagElement;
 
 public abstract class InputComponent<ELEMENT extends InputComponent<ELEMENT>> extends InputElement<ELEMENT> 
 {
-    private String name; 
-    protected InputComponent(String componentClass,String type)
+//    protected InputComponent(String componentClass,InputType inputType)
+//    {
+//        super()
+    
+//        addClass(componentClass);
+//        attr("type",type);
+//    }
+    protected InputComponent(String tag,InputType inputType,String componentClass)
     {
+        super(tag,inputType);
         addClass(componentClass);
-        attr("type",type);
     }
-    protected InputComponent(String tag,String componentClass,String type)
+
+    protected InputComponent(InputType inputType,String componentClass)
     {
-        super(tag);
+        super(inputType);
         addClass(componentClass);
-        attr("type",type);
+    }
+    
+    protected InputComponent(String tag,InputType inputType)
+    {
+        this(tag,inputType,null);
+    }
+    
+    protected InputComponent(InputType inputType)
+    {
+        super(inputType);
     }
 
     public ELEMENT form_control()

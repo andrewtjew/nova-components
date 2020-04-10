@@ -186,7 +186,10 @@ public class HttpServer
 		try
 		{
 			this.requestRateMeter.increment();
-			decode(servletRequest, servletResponse);
+			if (decodeAndDispatch(servletRequest, servletResponse)==false)
+			{
+			    return;
+			}
 		}
 		catch (Throwable t)
 		{
@@ -282,7 +285,7 @@ public class HttpServer
 		return this.identityContentEncoder;
 	}
 
-	private void decode(HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws Throwable
+	private boolean decodeAndDispatch(HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws Throwable
 	{
 		try (Trace trace = new Trace(this.traceManager, "HttpServer.handle"))
 		{
@@ -301,12 +304,14 @@ public class HttpServer
 				{
 					this.lastRequestHandlerNotFoundLogEntries.add(new RequestHandlerNotFoundLogEntry(trace,servletRequest));
 				}
+				return false;
 			}
 			if (requestHandlerWithParameters.requestHandler.isPublic()==true)
 			{
 				//TODO: prevent access
 			}
 			handle(trace, servletRequest, servletResponse, requestHandlerWithParameters);
+			return true;
 		}
 	}
 
@@ -373,7 +378,6 @@ public class HttpServer
 								Method write = writer.getClass().getMethod("write", Context.class, OutputStream.class, Object.class);
 								Object content = response.getContent();
 								write.invoke(writer, context, encoderContext.getOutputStream(), content);
-	    
 							}
 							finally
 							{
@@ -414,7 +418,8 @@ public class HttpServer
 			}
             catch (Throwable e)
             {
-                throw new Exception(requestHandlerWithParameters.requestHandler.getKey(),e);
+                String key=requestHandlerWithParameters.requestHandler.getKey();
+                throw new Exception(key,e);
             }
 			finally
 			{

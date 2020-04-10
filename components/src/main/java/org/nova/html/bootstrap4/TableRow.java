@@ -29,7 +29,7 @@ public class TableRow extends StyleComponent<TableRow>
 {
     public TableRow()
     {
-        super("tr","table");
+        super("tr",null);
     }
     
     public TableRow add(Object...objects)

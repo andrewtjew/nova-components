@@ -21,13 +21,14 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.elements.InputType;
 import org.nova.html.enums.autocomplete;
 
 public class InputNumber extends InputComponent<InputNumber>
 {
     public InputNumber()
     {
-        super("input","number");
+        super(InputType.number);
     }
     public InputNumber max(double number)
     {

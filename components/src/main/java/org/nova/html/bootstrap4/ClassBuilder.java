@@ -181,6 +181,10 @@ public class ClassBuilder
         return addClass("pre-scrollable");
     }
     
+    public ClassBuilder color(StyleColor color)
+    {
+        return addClass("color",color);
+    }
     public ClassBuilder bg(StyleColor color)
     {
         return addClass("bg",color);

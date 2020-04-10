@@ -19,15 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.bootstrap4;
+package org.nova.html.attributes;
 
-import org.nova.html.elements.InputType;
-
-public class CustomFileInput extends InputComponent<CustomFileInput>
+public enum white_space
 {
-    public CustomFileInput()
+    normal("normal"),
+    nowrap("nowrap"),
+    pre("pre"),
+    pre_line("pre-line"),
+    pre_wrap("pre-wrap"),
+    ;
+    final String value;
+    white_space(String value)
     {
-        super(InputType.file,"custom-file-input");
+        this.value=value;
+    }
+    @Override
+    public String toString()
+    {
+        return this.value;
     }
 }
-

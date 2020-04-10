@@ -45,7 +45,7 @@ public class NameValueContainer extends Container
 
     public NameValueContainer add(Object name, Object value, TextAlign valueAlign)
     {
-        Row row = returnAddInner(new Row()).my(2);
+        Row row = returnAddInner(new Row()).my(1);
         addName(row,name);
 //        row.returnAddInner(new Col(this.deviceClass, this.nameSize)).pt(1).addInner(name).text(StyleColor.dark).text(TextAlign.right);
         row.returnAddInner(new Col(this.deviceClass, 12 - this.nameSize)).py(1).addInner(value).text(valueAlign);
@@ -54,7 +54,7 @@ public class NameValueContainer extends Container
 
     public NameValueContainer add(Object name, Element element)
     {
-        Row row = returnAddInner(new Row()).my(2);
+        Row row = returnAddInner(new Row()).my(1);
         addName(row,name);
 //        row.returnAddInner(new Col(this.deviceClass, this.nameSize)).pt(1).addInner(name).text(StyleColor.dark).text(TextAlign.right);
         row.returnAddInner(new Col(this.deviceClass, 12 - this.nameSize)).py(1).addInner(element);

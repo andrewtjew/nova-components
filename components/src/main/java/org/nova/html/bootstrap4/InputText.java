@@ -21,13 +21,14 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.elements.InputType;
 import org.nova.html.enums.autocomplete;
 
 public class InputText extends InputComponent<InputText>
 {
     public InputText()
     {
-        super("input","text");
+        super(InputType.text);
     }
     public InputText autocomplete(autocomplete autocomplete) //text, search, url, tel, email, password, datepickers, range, and color.
     {
