@@ -25,8 +25,8 @@ public enum QuotationMark
 {
     SINGLE("'"), 
     DOUBLE("\""), 
-    APOS("&apos;"), 
-    QOUT("&quot;"), 
+    APOS("&#39;"), 
+    QOUT("&#34;"), 
     ESC_DOUBLE("\\\""), 
     ESC_SINGLE("\\\'") 
     ;

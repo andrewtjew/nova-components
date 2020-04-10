@@ -21,12 +21,14 @@
  ******************************************************************************/
 package org.nova.html.elements;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.nova.core.NameObject;
 import org.nova.html.ext.HtmlUtils;
+import org.nova.json.ObjectMapper;
 
-import com.amazonaws.services.dynamodbv2.document.Item;
 
 public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElement<ELEMENT>
 {
@@ -43,10 +45,20 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
         this.classBuilder=new StringBuilder();
         this.attributes=new ArrayList<NameObject>();
     }
+    
     public TagElement(String tag)
     {
         this(tag,false);
     }
+    public List<NameObject> getAttributes()
+    {
+        return this.attributes;
+    }
+    public String getTag()
+    {
+        return this.tag;
+    }
+    
     public ELEMENT addClass(String class_)
     {
         if (class_!=null)
@@ -79,13 +91,18 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
     @SuppressWarnings("unchecked")
     public ELEMENT attr(String name,Object value)
     {
-        this.attributes.add(new NameObject(name,value));
+        if (value!=null)
+        {
+            this.attributes.add(new NameObject(name,value));
+        }
         return (ELEMENT) this;
     }
+
     @SuppressWarnings("unchecked")
     public ELEMENT attr(String name)
     {
-        return attr(name,null);
+        this.attributes.add(new NameObject(name,null));
+        return (ELEMENT) this;
     }
 
     public String class_()
@@ -113,7 +130,32 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
             Object value=item.getValue();
             if (value!=null)
             {
-                composerStringBuilder.append("=").append(mark).append(value).append(mark);
+                Class<?> type=value.getClass();
+                if (type==String.class)
+                {
+                    composerStringBuilder.append("=").append(mark).append(value).append(mark);
+                }
+                else if ((type.isPrimitive())
+                        ||(type.isEnum())
+                        ||(type==Long.class)
+                        ||(type==Float.class)
+                        ||(type==Double.class)
+                        ||(type==Boolean.class)
+                        ||(type==Integer.class)
+                        ||(type==BigDecimal.class)
+                        ||(type==Byte.class)
+                        ||(type==Short.class)
+                        
+                        )
+                {
+                    composerStringBuilder.append("=").append(mark).append(value).append(mark);
+                }
+                else
+                {
+                    String text=ObjectMapper.writeObjectToString(value).replace("\"", "&#34;");
+//                    composerStringBuilder.append("=").append(mark).append(text).append(mark);
+                    composerStringBuilder.append("=").append(mark).append(text).append(mark);
+                }
             }
             
         }

@@ -801,7 +801,7 @@ public class ServerApplicationPages
         OperatorPage page=this.serverApplication.buildOperatorPage("Timers");
         OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         table.setHeader("Category"
-                ,new th_title("#", "Number")
+                ,new th_title("ID", "Timer ID Number")
                 ,"Created","Status","Due","Countdown","Duration"
                 ,new th_title("Mode","Timer scheduling mode")
                 ,new th_title("Delay","Days hours:minutes:seconds.milliseconds")
@@ -817,7 +817,9 @@ public class ServerApplicationPages
         TimerTask[] timerTasks = this.serverApplication.getTimerScheduler().getTimerTaskSnapshot();
         for (TimerTask timerTask : timerTasks)
         {
-            table.addRow(timerTask.getCategory()
+            StackTraceElement element=timerTask.getSource();
+            String source=element.getClassName()+"("+element.getLineNumber()+")";
+            table.addRow(new TitleText(source,timerTask.getCategory())
                     ,timerTask.getNumber()
                     ,DateTimeUtils.toSystemDateTimeString(timerTask.getCreated())
                     ,timerTask.getExecutableStatus()
@@ -3663,11 +3665,12 @@ public class ServerApplicationPages
             if (fields.size()>0)
             {
                 WideTable table=panel.content().returnAddInner(new WideTable(head));
-                table.setHeader("Type","Name","Description");
+                table.setHeader("Name","Type","Description");
                 for (Field field : fields)
                 {
                     TableRow row=new TableRow();
                     table.addRow(row);
+                    row.add(field.getName());
                     Class<?> fieldType = field.getType();
     
                     if (fieldType.isArray())
@@ -3679,7 +3682,6 @@ public class ServerApplicationPages
                     {
                         row.add(Utils.escapeHtml(fieldType.getName()));
                     }
-                    row.add(field.getName());
                     description = field.getAnnotation(Description.class);
                     if (description != null)
                     {

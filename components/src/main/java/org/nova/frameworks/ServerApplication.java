@@ -28,6 +28,7 @@ import org.nova.collections.FileCacheConfiguration;
 import org.nova.concurrent.Synchronization;
 import org.nova.configuration.Configuration;
 import org.nova.html.ExtionsionToTypeMappings;
+import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.operator.MenuBar;
 import org.nova.html.remoting.HtmlRemotingWriter;
@@ -81,6 +82,8 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
         this.baseDirectory=baseDirectory.getCanonicalPath();
         CoreEnvironment.SOURCE_EVENT_BOARD.set("Application.baseDirectory",this.baseDirectory);
         System.out.println("base directory: "+this.baseDirectory);
+        
+        Element.HREF_LOCAL_DIRECTORY=configuration.getValue("Application.HREF_LOCAL_DIRECTORY",null);
 
         this.test=configuration.getBooleanValue("System.test",false);
         this.disruptorManager=new DisruptorManager();
@@ -89,7 +92,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
         
         this.operatorVariableManager=new OperatorVariableManager();
 		this.typeMappings=ExtionsionToTypeMappings.fromDefault();
-		
+
         int operatorPort=this.operatorServer.getPorts()[0];
  
         { //Private
