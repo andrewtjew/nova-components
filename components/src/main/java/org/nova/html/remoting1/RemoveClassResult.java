@@ -19,44 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.elements;
+package org.nova.html.remoting1;
 
-import org.nova.html.enums.autocomplete;
-import org.nova.html.enums.target;
-
-public class FormElement<ELEMENT extends FormElement<ELEMENT>> extends GlobalEventTagElement<ELEMENT>
+public class RemoveClassResult
 {
-    public FormElement()
-    {
-        super("form");
-    }
-    
-    public  ELEMENT action(String URL) 
-    {
-        return attr("action",URL);
-    }
-    public ELEMENT autocomplete(autocomplete autocomplete) 
-    {
-        return attr("autocomplete",autocomplete);
-    }
-    public ELEMENT novalidate()  
-    {
-        return attr("novalidate");
-    }
-    public ELEMENT formnovalidate(boolean novalidate)  
-    {
-        if (novalidate)
-        {
-            return attr("novalidate");
-        }
-        return (ELEMENT)this;
-    }
-    public ELEMENT formtarget(target target)
-    {
-        return attr("target",target);
-    }
-    public ELEMENT formtarget(String framename)
-    {
-        return attr("target",framename);
-    }
+    public String id;
+    public String class_;
 }

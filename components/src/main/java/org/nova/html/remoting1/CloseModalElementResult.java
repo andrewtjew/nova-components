@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.remoting;
+package org.nova.html.remoting1;
 
 import org.nova.html.elements.Element;
 import org.nova.html.elements.GlobalEventTagElement;

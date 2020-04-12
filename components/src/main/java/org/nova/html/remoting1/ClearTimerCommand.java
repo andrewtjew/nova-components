@@ -19,10 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.remoting;
+package org.nova.html.remoting1;
 
-public enum ModalOption
+public class ClearTimerCommand
 {
-    hide,
-    show,
+    public String timerName;
 }

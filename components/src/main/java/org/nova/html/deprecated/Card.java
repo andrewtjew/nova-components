@@ -32,14 +32,14 @@ public class Card extends div
     final private img img;
     final private div content;
     
-    public Card(Head head,String id,String sourcePath,String cssFile)
+    public Card(Head head,String id,String sourcePath,String cssFile) throws Exception
     {
         id(id).addClass("card");
         head.add(Card.class.getCanonicalName(), new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
         this.img=this.returnAddInner(new img()).style("width:100%");
         this.content=this.returnAddInner(new div()).addClass("container");
     }
-    public Card(Head head,String id)
+    public Card(Head head,String id) throws Exception
     {
         this(head,id, "/resources/html","/w3c/Card/card.css");
     }

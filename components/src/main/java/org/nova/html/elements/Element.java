@@ -28,10 +28,8 @@ public abstract class Element
     @Override
     public String toString()
     {
-        throw new RuntimeException();
-        
+        return getHtml();
     }
-    
     
     public String getHtml(Composer composer)
     {
@@ -56,5 +54,19 @@ public abstract class Element
 
     static public String HREF_LOCAL_DIRECTORY=null;
     
+    static protected String replaceURL(String URL)
+    {
+        if (HREF_LOCAL_DIRECTORY!=null)
+        {
+            if (URL!=null)
+            {
+                if (URL.indexOf(':')>=0)
+                {
+                    return HREF_LOCAL_DIRECTORY+"/"+URL;
+                }
+            }
+        }
+        return URL;
+    }
     
 }

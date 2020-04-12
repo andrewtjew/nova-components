@@ -29,13 +29,13 @@ import org.nova.html.tags.script;
 
 public class Form extends FormElement<Form>
 {
-    public Form()
-    {
-    }
+//    public Form()
+//    {
+//    }
     
     public Form(method method)
     {
-        attr("method",method);    
+        super(method);
     }
     public Form inline()
     {

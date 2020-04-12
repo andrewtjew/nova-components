@@ -29,7 +29,7 @@ import org.nova.html.bootstrap4.ModalFooter;
 import org.nova.html.bootstrap4.ModalHeader;
 import org.nova.html.bootstrap4.classes.DeviceClass;
 import org.nova.html.elements.Composer;
-import org.nova.html.remoting.ModalOption;
+import org.nova.html.remoting1.ModalOption;
 
 public class ModalDocument extends Modal
 {

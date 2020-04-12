@@ -26,10 +26,12 @@ import org.nova.html.attributes.Style;
 import org.nova.html.attributes.display;
 import org.nova.html.attributes.unit;
 import org.nova.html.bootstrap4.Button;
+import org.nova.html.bootstrap4.ClassBuilder;
 import org.nova.html.bootstrap4.Item;
 import org.nova.html.bootstrap4.Popover;
 import org.nova.html.bootstrap4.StyleComponent;
 import org.nova.html.bootstrap4.TipOption;
+import org.nova.html.bootstrap4.classes.Display;
 import org.nova.html.bootstrap4.classes.Flex;
 import org.nova.html.bootstrap4.classes.Justify;
 import org.nova.html.bootstrap4.classes.Placement;
@@ -43,95 +45,71 @@ import org.nova.html.elements.InputElement;
 import org.nova.html.elements.QuotationMark;
 import org.nova.html.ext.FormQueryBuilder;
 import org.nova.html.ext.HtmlUtils;
-import org.nova.html.remoting.CallBuilder;
+import org.nova.html.tags.div;
 import org.nova.html.tags.script;
 import org.nova.html.ext.ModalBackground;
+import org.nova.html.remoting1.CallBuilder;
 import org.nova.http.client.PathAndQuery;
 
 public class RemotingEditBox extends StyleComponent<RemotingEditBox>   
 {
-	public RemotingEditBox(ModalBackground background,Size width,StyleComponent<?> valueElement,PathAndQuery pathAndQuery,InputElement<?> inputElement,GlobalEventTagElement<?> editButton,GlobalEventTagElement<?> acceptButton,GlobalEventTagElement<?> dismissButton,boolean editBottom) throws Throwable
+	public RemotingEditBox(ModalBackground background,StyleComponent<?> valueElement,String action,InputElement<?> inputElement,GlobalEventTagElement<?> editButton,GlobalEventTagElement<?> acceptButton,GlobalEventTagElement<?> dismissButton,Placement placement) throws Throwable
 	{
         super("div",null);
-//		style(new Style().z_index(background.z_index()+1).width(width));
-		style(new Style().width(width));
-		RemotingEditBox container=this;//.returnAddInner(new Item());
-		container.d_flex();//.justify_content(Justify.center);
+		this.d(Display.flex);
 		valueElement.flex(Flex.grow,1);
-		container.addInner(valueElement);
-//		inputElement.style("width:1000px;");
+		this.addInner(valueElement);
 		QuotationMark mark=QuotationMark.APOS;
 
-		Popover pop=new Popover(container);
 		String template;
+        template="<div class='popover' role='tooltip' style='margin:0;padding:0;width:inherit;max-width:100% !important;'><div class='popover-body'></div></div>";
 
-		String widthText=width.toString();
-		template="<div class='popover' role='tooltip' style='margin:0;padding:0;max-width:100% !important;width:"+widthText+";'><div class='popover-body'></div></div>";
-
-		template=HtmlUtils.escapeQuotes(template);
-		pop.template(template);
-//		pop.container("#"+valueElement.id());
-		
-		pop.container(this);
-		String showVariable=this.id()+"_show";
 		
 		
 		editButton.style(new Style().display(display.none));
-		editButton.onclick("document.getElementById("+mark+editButton.id()+mark+").style.display="+mark+"none"+mark+";"
-				+pop.js_popover(TipOption.show)+";"
-				+"document.getElementById("+mark+inputElement.id()+mark+").focus();"
-                +"document.getElementById("+mark+inputElement.id()+mark+").value=document.getElementById("+mark+valueElement.id()+mark+").innerText;"
-//                +"alert(document.getElementById("+mark+valueElement.id()+mark+").innerHtml);"
-				+"document.getElementById("+mark+inputElement.id()+mark+").select();"
-				+"document.getElementById("+mark+editButton.id()+mark+").style.display="+mark+"none"+mark+";"
-				+showVariable+"=true;"
-				+background.js_show(QuotationMark.APOS)+";");
-		container.addInner(editButton);
-		container.onmouseover("if ("+showVariable+"==false){document.getElementById("+mark+editButton.id()+mark+").style.display="+mark+"block"+mark+";}");
-		container.onmouseleave("document.getElementById("+mark+editButton.id()+mark+").style.display="+mark+"none"+mark);
 
-		Item inputGroup=new Item().d_flex();
+		this.addInner(editButton);
+		this.onmouseover("document.getElementById("+mark+editButton.id()+mark+").style.display="+mark+"block"+mark);
+		this.onmouseleave("document.getElementById("+mark+editButton.id()+mark+").style.display="+mark+"none"+mark);
+
+		Item inputGroup=new Item().d(Display.flex).mx(0).px(0);
+		inputElement.addClass(new ClassBuilder().w(100).toString());
 		inputGroup.addInner(inputElement);
-
-		String js_close=pop.js_popover(TipOption.hide)+";"+background.js_hide()+";"+showVariable+"=false;";
-		FormQueryBuilder query=new FormQueryBuilder(mark);
-		query.value(inputElement);
-		query.add("_valueElementId",valueElement.id());
-		pathAndQuery.addQuery("_valueElementId",valueElement.id());
-		String js_submit=new CallBuilder(mark).js_post(pathAndQuery,query)+";"+js_close;
-		acceptButton.onclick(js_submit);
 		inputGroup.addInner(acceptButton);
-		
-		dismissButton.onclick(js_close);
 		inputGroup.addInner(dismissButton);
 
-        pop.content(inputGroup);
-		pop.trigger(Trigger.manual);
-		if (editBottom)
-		{
-			pop.placement(Placement.bottom);
-		}
-		else
-		{
-			pop.placement(Placement.top);
-		}
-
-		this.addInner(new script().addInner(showVariable+"=false;"));
-		
+		editButton.onclick(HtmlUtils.js_call("Remoting.openEditBox"
+                , template
+                ,background!=null?background.id():null
+                ,id()
+                ,acceptButton.id()
+                ,dismissButton.id()
+                ,editButton.id()
+                ,inputElement.id()
+                ,valueElement.id()
+                ,action
+                ,inputGroup.getHtml()
+                ,placement
+                ));
 
 
 	}
-	public RemotingEditBox(ModalBackground background,Size width,StyleComponent<?> valueElement,PathAndQuery pathAndQuery,InputElement<?> inputElement,boolean editBottom) throws Throwable
+	public RemotingEditBox(ModalBackground background,StyleComponent<?> valueElement,String action,InputElement<?> inputElement,Placement placement) throws Throwable
 	{
-		this(background,width,valueElement,pathAndQuery,inputElement
+		this(background,valueElement,action,inputElement
 				,new Button().ml(1).color(StyleColor.secondary).addInner("&#x270F;")
 				,new Button().ml(1).color(StyleColor.success).addInner("&#x2713;")
 				,new Button().ml(1).color(StyleColor.secondary).addInner("&#x1f5d9;")
-				,editBottom
+				,placement
 				);
 	}
-	public RemotingEditBox(ModalBackground background,Size width,Object value,PathAndQuery pathAndQuery,InputElement<?> inputElement) throws Throwable
-	{
-		this(background,width,new Item().m(2).text(TextStyle.truncate).addInner(value),pathAndQuery,inputElement,false);
-	}
+    public RemotingEditBox(ModalBackground background,Object value,String action,InputElement<?> inputElement,Placement placement) throws Throwable
+    {
+        this(background,new Item().m(2).text(TextStyle.truncate).addInner(value),action,inputElement,placement);
+    }
+
+    public RemotingEditBox(ModalBackground background,Object value,String action,InputElement<?> inputElement) throws Throwable
+    {
+        this(background,new Item().m(2).text(TextStyle.truncate).addInner(value),action,inputElement,Placement.bottom);
+    }
 }

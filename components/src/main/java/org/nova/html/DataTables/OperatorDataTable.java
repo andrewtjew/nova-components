@@ -138,17 +138,17 @@ public class OperatorDataTable extends Table
     
     final private Objects objects;
     
-    public OperatorDataTable(Head head)
+    public OperatorDataTable(Head head) throws Exception
     {
         this(head,"display");
     }
     
-    public OperatorDataTable(Head head,String class_)
+    public OperatorDataTable(Head head,String class_) throws Exception
     {
         this(head,null,class_,"/resources/html/widgets/DataTable/datatables.min.css","/resources/html/widgets/DataTable/datatables.min.js");
     }
     
-    public OperatorDataTable(Head head,String id,String class_,String cssFilePath,String scriptFilePath)
+    public OperatorDataTable(Head head,String id,String class_,String cssFilePath,String scriptFilePath) throws Exception
     {
         super(head,class_,cssFilePath);
         this.table().id(id);

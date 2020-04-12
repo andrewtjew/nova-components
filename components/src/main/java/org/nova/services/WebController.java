@@ -23,7 +23,8 @@ package org.nova.services;
 
 import org.nova.frameworks.ServerApplication;
 import org.nova.html.elements.HtmlElementWriter;
-import org.nova.html.remoting.HtmlRemotingWriter;
+import org.nova.html.remoting.ActionResponseWriter;
+import org.nova.html.remoting1.HtmlRemotingWriter;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
 import org.nova.http.server.JSONContentReader;
@@ -38,7 +39,7 @@ import org.nova.http.server.annotations.Filters;
 @ContentDecoders(GzipContentDecoder.class)
 @ContentEncoders(GzipContentEncoder.class)
 @ContentReaders({JSONContentReader.class,JSONPatchContentReader.class})
-@ContentWriters({JSONContentWriter.class,HtmlRemotingWriter.class,HtmlElementWriter.class})
+@ContentWriters({JSONContentWriter.class,HtmlRemotingWriter.class,HtmlElementWriter.class,ActionResponseWriter.class})
 public class WebController<SERVICE extends ServerApplication>
 {
 	final protected SERVICE service;

@@ -111,7 +111,7 @@ public class OperatorUtils
         row.add(trace.getThread().getId()+":"+trace.getThread().getName());
     }
 
-    static private Element formatStackTrace(Head head,String heading,StackTraceElement[] stackTrace)
+    static private Element formatStackTrace(Head head,String heading,StackTraceElement[] stackTrace) throws Exception
     {
         Accordion accordion=new Accordion(head, false, heading);
         accordion.content().addInner(new textarea().style("width:100%;border:0;").readonly().rows(stackTrace.length+1).addInner(Utils.toString(stackTrace)));

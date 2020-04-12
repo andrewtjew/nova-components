@@ -21,6 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.elements.InputType;
 import org.nova.html.enums.autocomplete;
 import org.nova.html.tags.input_checkbox;
 import org.nova.html.tags.input_radio;
@@ -29,7 +30,7 @@ public class InputCheckbox extends InputComponent<InputCheckbox>
 {
     public InputCheckbox()
     {
-        super("input","checkbox");
+        super(InputType.checkbox);
     }
     public InputCheckbox checked() //checkbox or radio
     {
@@ -54,6 +55,11 @@ public class InputCheckbox extends InputComponent<InputCheckbox>
             return this;
         }
         return attr("value",value.toString());
+    }
+    public InputCheckbox form_check_input()
+    {
+        addClass("form-check-input");
+        return this;
     }
 }
 

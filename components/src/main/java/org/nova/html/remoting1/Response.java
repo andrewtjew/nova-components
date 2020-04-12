@@ -19,31 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.elements;
+package org.nova.html.remoting1;
 
-public class StringComposer extends Composer
+public class Response
 {
-    final private StringBuilder sb;
-
-    public StringComposer()
-    {
-        this(QuotationMark.SINGLE);
-    }
-    public StringComposer(QuotationMark quotationMark)
-    {
-        this(quotationMark,new StringBuilder());
-    }
-
-    public StringComposer(QuotationMark quotationMark,StringBuilder sb)
-    {
-        super(quotationMark);
-        this.sb=sb;
-    }
-
-    @Override
-    public StringBuilder getStringBuilder()
-    {
-        return this.sb;
-    }
-    
+    public HtmlResult[] htmlResults;
+    public HtmlResult[] appendResults;
+    public ModalResult[] modalResults;
+    public ValResult[] valResults;
+    public RemoveClassResult[] removeClassResults;
+    public AddClassResult[] addClassResults;
+    public PropResult[] propResults;
+    public ClearTimerCommand[] clearTimerCommands;
+    public String startScript;
+    public String script;
+    public String result;
+    public String location;
 }

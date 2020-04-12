@@ -31,7 +31,7 @@ public class Refresher extends Element
 {
     final private script script;
     final private GlobalTagElement<?> element;
-    public Refresher(GlobalTagElement<?> container,String url,long interval,String timerName)
+    public Refresher(GlobalTagElement<?> container,String url,long interval,String timerName) throws Exception
     {
         String id=container.id();
         if (id==null)
@@ -49,15 +49,15 @@ public class Refresher extends Element
         this.element=container;
     }
 
-    public Refresher(String id,String url,long interval,String timerName)
+    public Refresher(String id,String url,long interval,String timerName) throws Exception
     {
         this(new div().id(id),url,interval,timerName);
     }
-    public Refresher(String url,long interval,String timerName)
+    public Refresher(String url,long interval,String timerName) throws Exception
     {
         this(new div(),url,interval,timerName);
     }
-    public Refresher(String url,long interval)
+    public Refresher(String url,long interval) throws Exception
     {
         this(url,interval,null);
     }

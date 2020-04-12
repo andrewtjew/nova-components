@@ -33,7 +33,7 @@ import org.nova.html.tags.span;
 public class SideNavigationButtonMenu extends div
 {
     final private span button;
-    public SideNavigationButtonMenu(Head head,String id,int buttonWidth,int buttonHeight,unit buttonUnit,String openStateText,String closeStateText,int sideNavWidth,unit sideBarWidthUnit,String sourcePath,String cssFile)
+    public SideNavigationButtonMenu(Head head,String id,int buttonWidth,int buttonHeight,unit buttonUnit,String openStateText,String closeStateText,int sideNavWidth,unit sideBarWidthUnit,String sourcePath,String cssFile) throws Exception
     {
         if (id==null)
         {
@@ -50,19 +50,19 @@ public class SideNavigationButtonMenu extends div
         
         head.add(SideNavigationButtonMenu.class.getCanonicalName(),new link().rel(link_rel.stylesheet).type("text/css").href(sourcePath+cssFile));
     }
-    public SideNavigationButtonMenu(Head head,String id,int buttonWidth,int buttonHeight,unit buttonSizeUnit,String openStateText,String closeStateText,int sideNavWidth,unit sideNavWidthUnit)
+    public SideNavigationButtonMenu(Head head,String id,int buttonWidth,int buttonHeight,unit buttonSizeUnit,String openStateText,String closeStateText,int sideNavWidth,unit sideNavWidthUnit) throws Exception
     {
         this(head,id,buttonWidth,buttonHeight,buttonSizeUnit,openStateText,closeStateText,sideNavWidth,sideNavWidthUnit,"/resources/html","/w3c/SideNavigationMenu/sidenavbutton.css");
     }
-    public SideNavigationButtonMenu(Head head,String id,int buttonWidth,int buttonHeight,int sideNavWidth,unit sizeUnit)
+    public SideNavigationButtonMenu(Head head,String id,int buttonWidth,int buttonHeight,int sideNavWidth,unit sizeUnit) throws Exception
     {
         this(head,id,buttonWidth,buttonHeight,sizeUnit,"&#8801;","&#x2716",sideNavWidth,sizeUnit,"/resources/html","/w3c/SideNavigationMenu/sidenavbutton.css");
     }
-    public SideNavigationButtonMenu(Head head,String id,int buttonSize,int sideNavWidth,unit sizeUnit)
+    public SideNavigationButtonMenu(Head head,String id,int buttonSize,int sideNavWidth,unit sizeUnit) throws Exception
     {
         this(head,id,buttonSize,buttonSize,sideNavWidth,sizeUnit);
     }
-    public SideNavigationButtonMenu(Head head,int size,int sideNavWidth,unit sizeUnit)
+    public SideNavigationButtonMenu(Head head,int size,int sideNavWidth,unit sizeUnit) throws Exception
     {
         this(head,null,size,size,sideNavWidth,sizeUnit);
     }

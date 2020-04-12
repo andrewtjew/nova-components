@@ -23,7 +23,7 @@ package org.nova.services;
 
 import org.nova.frameworks.ServerApplication;
 import org.nova.html.elements.HtmlElementWriter;
-import org.nova.html.remoting.HtmlRemotingWriter;
+import org.nova.html.remoting1.HtmlRemotingWriter;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
 import org.nova.http.server.JSONContentReader;

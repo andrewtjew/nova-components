@@ -54,7 +54,7 @@ public class CustomSwitchControl extends StyleComponent<CustomSwitchControl>
         this(null,name);
     }
 
-    public CustomSwitchControl(String label,String name,String id)
+    public CustomSwitchControl(String label,String name,String id) throws Exception
     {
         super("div", "custom-control");
         addClass("custom-checkbox");

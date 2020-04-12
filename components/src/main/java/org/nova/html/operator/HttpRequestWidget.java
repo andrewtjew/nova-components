@@ -41,7 +41,7 @@ import org.nova.utils.Utils;
 public class HttpRequestWidget extends Element
 {
     final private Panel2 panel;
-    public HttpRequestWidget(Head head,RequestLogEntry entry)
+    public HttpRequestWidget(Head head,RequestLogEntry entry) throws Exception
     {
         String title;
         if (entry.getQueryString()!=null)
@@ -111,7 +111,7 @@ public class HttpRequestWidget extends Element
         return new TitleText(Utils.millisToNiceDurationString(durationNs/1000000),String.format("%.3f",durationNs/1.0e6));
     }
     
-    private void writeContent(Head head,String heading,InnerElement<?> content,String text,boolean htmlResponse)
+    private void writeContent(Head head,String heading,InnerElement<?> content,String text,boolean htmlResponse) throws Exception
     {
         if (text==null)
         {
@@ -130,7 +130,7 @@ public class HttpRequestWidget extends Element
         textAccodion.content().addInner(new textarea().readonly().style("width:100%;resize:none;").addInner(text).rows(rows));
     }
 
-    private void writeHeaders(Head head,String heading,InnerElement<?> content,String headers)
+    private void writeHeaders(Head head,String heading,InnerElement<?> content,String headers) throws Exception
     {
         if (headers==null)
         {
@@ -160,13 +160,13 @@ public class HttpRequestWidget extends Element
         
     }    
 
-    static private Element formatStackTrace(Head head,String heading,StackTraceElement[] stackTrace,boolean open)
+    static private Element formatStackTrace(Head head,String heading,StackTraceElement[] stackTrace,boolean open) throws Exception
     {
         Accordion accordion=new Accordion(head, false, heading);
         accordion.content().addInner(new textarea().style("width:100%;border:0;").readonly().rows(stackTrace.length+1).addInner(Utils.toString(stackTrace)));
         return accordion;
     }
-    static private Element formatThrowable(Head head,String heading,Throwable throwable,boolean open)
+    static private Element formatThrowable(Head head,String heading,Throwable throwable,boolean open) throws Exception
     {
         Accordion accordion=new Accordion(head, open, heading);
         String text=Utils.getStrackTraceAsString(throwable);

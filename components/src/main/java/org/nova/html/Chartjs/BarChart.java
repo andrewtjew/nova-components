@@ -34,7 +34,7 @@ public class BarChart extends Element
     final private String id;
     private BarType type;
     
-    public BarChart(Head head,String id,int width,int height)
+    public BarChart(Head head,String id,int width,int height) throws Exception
     {
         head.add("Chartjs",new script().src("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js"));
         this.canvas=new canvas().id(id).width(width).height(height);

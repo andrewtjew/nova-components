@@ -26,6 +26,7 @@ import org.nova.html.attributes.Style;
 import org.nova.html.attributes.display;
 import org.nova.html.attributes.unit;
 import org.nova.html.bootstrap4.Button;
+import org.nova.html.bootstrap4.ClassBuilder;
 import org.nova.html.bootstrap4.Item;
 import org.nova.html.bootstrap4.Popover;
 import org.nova.html.bootstrap4.StyleComponent;
@@ -33,6 +34,7 @@ import org.nova.html.bootstrap4.TipOption;
 import org.nova.html.bootstrap4.classes.Align;
 import org.nova.html.bootstrap4.classes.AlignSelf;
 import org.nova.html.bootstrap4.classes.Boundary;
+import org.nova.html.bootstrap4.classes.Display;
 import org.nova.html.bootstrap4.classes.Flex;
 import org.nova.html.bootstrap4.classes.Justify;
 import org.nova.html.bootstrap4.classes.Placement;
@@ -48,72 +50,59 @@ import org.nova.html.elements.TagElement;
 import org.nova.html.ext.FormQueryBuilder;
 import org.nova.html.ext.Head;
 import org.nova.html.ext.HtmlUtils;
-import org.nova.html.remoting.CallBuilder;
 import org.nova.html.tags.script;
 import org.nova.html.ext.ModalBackground;
+import org.nova.html.remoting1.CallBuilder;
 import org.nova.http.client.PathAndQuery;
 
-public class RemotingLabelPopover extends Popover    
+public class RemotingLabelPopover 
 {
-	public RemotingLabelPopover(TagElement<?> toggler,ModalBackground background,String js_onAccept,String label,GlobalEventTagElement<?> acceptButton,GlobalEventTagElement<?> dismissButton,Placement placement) throws Throwable
+	public RemotingLabelPopover(QuotationMark mark,GlobalEventTagElement<?> toggler,ModalBackground background,String action,String label,GlobalEventTagElement<?> acceptButton,GlobalEventTagElement<?> dismissButton,Placement placement) throws Throwable
 	{
-		super(toggler);
-		QuotationMark mark=QuotationMark.SINGLE;
 
 		String template;
 
 		template="<div class='popover' role='tooltip' style='margin:0;padding:0;'><div class='popover-body'></div></div>";
 
-		template=HtmlUtils.escapeQuotes(template);
-		this.template(template);
-//		pop.container("#"+valueElement.id());
-//		this.container("#"+this.id());
+		template=new Item().addClass("popover").attr("role","tooltip").style(new Style().margin(new Size(0,unit.em)).padding(new Size(0,unit.em)))
+		        .addInner(new Item().addClass("popover-body")).getHtml(QuotationMark.DOUBLE);
 		
-		Item inputGroup=new Item().d_flex();
+        Item inputGroup=new Item().d(Display.flex).mx(0).px(0);
 		inputGroup.addInner(new Item().mr(2).align_self(AlignSelf.center).addInner(label));
-
-		String js_close=js_popover(TipOption.hide,QuotationMark.APOS);
-		if (background!=null)
-	    {
-		    js_close+=";"+background.js_hide()+";";
-            String script="$('#"+toggler.id()+"').on('show.bs.popover',function(){"+background.js_show()+";});";
-            toggler.addInner(new script().addInner(script));
-	    }
-		FormQueryBuilder query=new FormQueryBuilder(mark);
-		String js_submit=js_close+";"+js_onAccept+";";
-		acceptButton.onclick(js_submit);
 		inputGroup.addInner(acceptButton);
-		
-
-		dismissButton.onclick(js_close);
 		inputGroup.addInner(dismissButton);
 
-		content(inputGroup);
-		this.boundary(Boundary.viewport);
-		//trigger(Trigger.manual);
-		placement(placement);
-		
+        toggler.onclick(HtmlUtils.js_call(mark,"Remoting.openLabel"
+                , template
+                ,background!=null?background.id():null
+                ,toggler.id()
+                ,acceptButton.id()
+                ,dismissButton.id()
+                ,action
+                ,inputGroup.getHtml()
+                ,placement
+                ));
 		
 	}
-	public RemotingLabelPopover(TagElement<?> toggler,ModalBackground background,String js_onAccept,String label,Placement placement) throws Throwable
+	public RemotingLabelPopover(QuotationMark mark,GlobalEventTagElement<?> toggler,ModalBackground background,String action,String label,Placement placement) throws Throwable
 	{
-		this(toggler,background,js_onAccept,label
+		this(mark,toggler,background,action,label
 				,new Button().ml(1).color(StyleColor.success).addInner("&#x2713;")
 				,new Button().ml(1).color(StyleColor.secondary).addInner("&#x1f5d9;")
 				,placement
 				);
 	}
-    public RemotingLabelPopover(TagElement<?> toggler,String js_onAccept,String label,Placement placement) throws Throwable
+    public RemotingLabelPopover(QuotationMark mark,GlobalEventTagElement<?> toggler,String action,String label,Placement placement) throws Throwable
     {
-        this(toggler,null,js_onAccept,label
+        this(mark,toggler,null,action,label
                 ,new Button().ml(1).color(StyleColor.success).addInner("&#x2713;")
                 ,new Button().ml(1).color(StyleColor.secondary).addInner("&#x1f5d9;")
                 ,placement
                 );
     }
-	public RemotingLabelPopover(TagElement<?> toggler,ModalBackground background,String js_onAccept,String label) throws Throwable
+	public RemotingLabelPopover(GlobalEventTagElement<?> toggler,ModalBackground background,String action,String label) throws Throwable
 	{
-		this(toggler,background,js_onAccept,label,Placement.right);
+		this(QuotationMark.SINGLE,toggler,background,action,label,Placement.right);
 	}
 
 }

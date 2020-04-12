@@ -37,7 +37,7 @@ public class ModalBox extends div
     final private div content;
     final private div header;
     final private div footer;
-    public ModalBox(Head head,String id,String header,String footer,String sourcePath,String cssFile)
+    public ModalBox(Head head,String id,String header,String footer,String sourcePath,String cssFile) throws Exception
     {
         this.id=id;
         id(id);
@@ -61,12 +61,12 @@ public class ModalBox extends div
             this.footer=null;
         }
     }
-    public ModalBox(Head head,String id,String title,String footer)
+    public ModalBox(Head head,String id,String title,String footer) throws Exception
     {
         this(head,id,title,footer,"/resources/html","/w3c/ModalBox/modal.css");
     }
     
-    public ModalBox(Head head,String id,String title)
+    public ModalBox(Head head,String id,String title) throws Exception
     {
         this(head,id,title,null);
     }

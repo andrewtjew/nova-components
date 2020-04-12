@@ -1787,7 +1787,7 @@ public class ServerApplicationPages
     }
     
     
-    private Element writeTraceNodeTree(Head head,String focusCategory)
+    private Element writeTraceNodeTree(Head head,String focusCategory) throws Exception
     {
         Map<String, TraceNode> map = this.serverApplication.getTraceManager().getTraceTreeRootsSnapshot();
         Tree tree=new Tree(head);
@@ -2341,7 +2341,7 @@ public class ServerApplicationPages
         }
     }
     
-    private Element formatStackTrace(Head head,String heading,StackTraceElement[] stackTrace)
+    private Element formatStackTrace(Head head,String heading,StackTraceElement[] stackTrace) throws Exception
     {
         Accordion accordion=new Accordion(head, false, heading);
         accordion.content().addInner(new textarea().style("width:100%;border:0;").readonly().rows(stackTrace.length+1).addInner(Utils.toString(stackTrace)));
@@ -3016,7 +3016,7 @@ public class ServerApplicationPages
         }
     }
     
-    private void writeHeaders(Head head,Panel panel,String headers)
+    private void writeHeaders(Head head,Panel panel,String headers) throws Exception
     {
         if (headers==null)
         {
@@ -3038,7 +3038,7 @@ public class ServerApplicationPages
             list.add(name,value);
         }
     }    
-    private void writeHeaders(Head head,String heading,InnerElement<?> content,String headers)
+    private void writeHeaders(Head head,String heading,InnerElement<?> content,String headers) throws Exception
     {
         if (headers==null)
         {
@@ -3061,7 +3061,7 @@ public class ServerApplicationPages
         }
     }    
     
-    private void writeContent(Head head,String heading,InnerElement<?> content,String text,boolean htmlResponse)
+    private void writeContent(Head head,String heading,InnerElement<?> content,String text,boolean htmlResponse) throws Exception
     {
         if (text==null)
         {

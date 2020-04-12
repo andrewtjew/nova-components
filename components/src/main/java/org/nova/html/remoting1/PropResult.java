@@ -19,10 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.remoting;
+package org.nova.html.remoting1;
 
-public class ValResult
+public class PropResult
 {
     public String id;
-    public Object val;
+    public String prop;
+    public Object value;
 }

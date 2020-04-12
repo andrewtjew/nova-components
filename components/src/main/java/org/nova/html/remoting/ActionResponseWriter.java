@@ -21,8 +21,43 @@
  ******************************************************************************/
 package org.nova.html.remoting;
 
-public class ModalResult
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+
+import org.nova.http.server.ContentWriter;
+import org.nova.http.server.Context;
+import org.nova.json.ObjectMapper;
+
+public class ActionResponseWriter extends ContentWriter<ActionResponse>
 {
-    public String id;
-    public ModalOption option;
+	public ActionResponseWriter() throws Exception
+	{
+	}
+	
+	@Override
+	public String getMediaType()
+	{
+		return "application/json";
+	}
+	
+	@Override
+	public void write(Context context, OutputStream outputStream, ActionResponse program) throws Throwable
+	{
+        context.getHttpServletResponse().setContentType("application/json;charset=utf-8");
+        Instruction[] instructions=program.instructions.toArray(new Instruction[program.instructions.size()]);
+        String text=ObjectMapper.writeObjectToString(instructions);
+        outputStream.write(text.getBytes(StandardCharsets.UTF_8));
+        context.setResponseContentText(text);
+	}
+
+	@Override
+	public void writeSchema(OutputStream outputStream, Class<?> contentType) throws Throwable
+	{
+	}
+
+	@Override
+	public void writeExample(OutputStream outputStream, Class<?> contentType) throws Throwable
+	{
+	}
 }
+

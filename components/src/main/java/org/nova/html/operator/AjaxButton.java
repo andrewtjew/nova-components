@@ -36,7 +36,7 @@ public class AjaxButton extends button_button
 	private String type="get";
 	private ArrayList<Pair<String,String>> queryInputs;
 	
-	public AjaxButton(String id,String text,String url)
+	public AjaxButton(String id,String text,String url) throws Exception
 	{
 	    this.id=id;
         id(id);

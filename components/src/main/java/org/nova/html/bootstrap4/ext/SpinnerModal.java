@@ -15,7 +15,7 @@ import org.nova.html.bootstrap4.classes.Justify;
 import org.nova.html.bootstrap4.classes.StyleColor;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.remoting.ModalOption;
+import org.nova.html.remoting1.ModalOption;
 
 public class SpinnerModal extends Modal
 {

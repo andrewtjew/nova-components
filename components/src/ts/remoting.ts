@@ -281,3 +281,396 @@ export class CallBuilder
 }
 }
 
+class Instruction
+{
+    code:string;
+    trace:boolean;
+}
+
+class Input 
+{
+    name:string;
+    id:string;
+    inputType:string;
+}
+
+class Remoting
+{
+
+    static toPlacement(placement:string):"top"|"bottom"|"left"|"right"|"auto"
+    {
+        switch (placement)
+        {
+            case "top":
+                return "top";
+            case "bottom":
+                return "bottom";
+            case "left":
+                return "left";
+            case "right":
+                return "right";
+            case "auto":
+                return "auto";
+            default:
+                return null;
+        }
+    }
+    public static openEditBox(
+        template:string
+        ,backgroundId:string
+        ,containerId:string
+        ,acceptButtonId:string
+        ,dismissButtonId:string
+        ,editButtonId:string
+        ,editInputId:string
+        ,valueElementId:string
+        ,action:string
+        ,content:string
+        ,placement:string
+        )
+    {
+        var background=document.getElementById(backgroundId);
+        var container=document.getElementById(containerId);
+
+        if (background!=null)
+        {
+            background.style.display="block";
+        }
+
+        //Need to create popover first to create the buttons.
+        var pop=$('#'+containerId).popover(
+            {
+                trigger:"manual",
+                container:'#'+containerId,
+                template:template,
+                html:true,
+                content:content,
+                sanitize:false,
+                placement:Remoting.toPlacement(placement)
+            }
+        );
+        pop.popover("show");
+
+        var acceptButton=document.getElementById(acceptButtonId);
+        var dismissButton=document.getElementById(dismissButtonId);
+        var editInput=document.getElementById(editInputId) as HTMLInputElement;
+        var editButton=document.getElementById(editButtonId);
+        var valueElement=document.getElementById(valueElementId);
+
+        var close=function()
+        {
+            pop.popover("hide");     
+            if (background!=null)
+            {
+                background.style.display="none";
+            }
+        }
+        dismissButton.onclick=function()
+        {
+            close();
+        }
+    
+        acceptButton.onclick=function()
+        {
+            var data=new Object();
+            data[editInput.name]=editInput.value;
+            $.ajax(
+                {url:action,
+                type:"POST",
+                async:true,
+                dataType:"json",
+                cache: false,
+                data:data,
+                success:function(result:object)
+                {
+                    if (result!=null)
+                    {
+                        var instructions=result as Instruction[];
+                        if (instructions!=null)
+                        {
+                            Remoting.run(instructions);
+                        }
+                        else
+                        {
+                            valueElement.innerText=result.toString();
+                        }
+                    }
+                    close();
+                },
+                error:function(xhr)
+                {
+                    close();
+                    alert("Error: "+xhr.status+" "+xhr.statusText);
+                }
+            }); 
+            }
+    }
+
+    public static openInput(
+        template:string
+        ,backgroundId:string
+        ,containerId:string
+        ,acceptButtonId:string
+        ,dismissButtonId:string
+        ,editInputId:string
+        ,action:string
+        ,content:string
+        ,placement:string
+        )
+    {
+        var background=document.getElementById(backgroundId);
+
+        if (background!=null)
+        {
+            background.style.display="block";
+        }
+        var p="bottom";
+        //Need to create popover first to create the buttons.
+        var pop=$('#'+containerId).popover(
+            {
+                trigger:"manual",
+                placement:Remoting.toPlacement(placement),
+                template:template,
+                html:true,
+                content:content,
+                sanitize:false,
+            }
+        );
+        pop.popover("show");
+
+        var acceptButton=document.getElementById(acceptButtonId);
+        var dismissButton=document.getElementById(dismissButtonId);
+        var editInput=document.getElementById(editInputId) as HTMLInputElement;
+
+        var close=function()
+        {
+            pop.popover("hide");     
+            if (background!=null)
+            {
+                background.style.display="none";
+            }
+        }
+        dismissButton.onclick=function()
+        {
+            close();
+        }
+    
+        acceptButton.onclick=function()
+        {
+            var data=new Object();
+            data[editInput.name]=editInput.value;
+            $.ajax(
+                {url:action,
+                type:"POST",
+                async:true,
+                dataType:"json",
+                cache: false,
+                data:data,
+                success:function(instructions:Instruction[])
+                {
+                    close();
+                    Remoting.run(instructions);
+                },
+                error:function(xhr)
+                {
+                    close();
+                    alert("Error: "+xhr.status+" "+xhr.statusText);
+                }
+            }); 
+            }
+
+    }    
+    public static openLabel(
+        template:string
+        ,backgroundId:string
+        ,containerId:string
+        ,acceptButtonId:string
+        ,dismissButtonId:string
+        ,action:string
+        ,content:string
+        ,placement:string
+        )
+    {
+        var background=document.getElementById(backgroundId);
+
+        if (background!=null)
+        {
+            background.style.display="block";
+        }
+        var p="bottom";
+        //Need to create popover first to create the buttons.
+        var pop=$('#'+containerId).popover(
+            {
+                trigger:"manual",
+                placement:Remoting.toPlacement(placement),
+                template:template,
+                html:true,
+                content:content,
+                sanitize:false,
+            }
+        );
+        pop.popover("show");
+
+        var acceptButton=document.getElementById(acceptButtonId);
+        var dismissButton=document.getElementById(dismissButtonId);
+
+        var close=function()
+        {
+            pop.popover("hide");     
+            if (background!=null)
+            {
+                background.style.display="none";
+            }
+        }
+        dismissButton.onclick=function()
+        {
+            close();
+        }
+    
+        console.log(action);
+        acceptButton.onclick=function()
+        {
+            $.ajax(
+                {url:action,
+                type:"POST",
+                async:true,
+                dataType:"json",
+                cache: false,
+                success:function(instructions:Instruction[])
+                {
+                    close();
+                    Remoting.run(instructions);
+                },
+                error:function(xhr)
+                {
+                    close();
+                    alert("Error: "+xhr.status+" "+xhr.statusText);
+                }
+            }); 
+            }
+
+    }    
+
+    public static post(action:string,text:string,async:boolean)
+    {
+        var inputs=JSON.parse(text) as Input[];
+        var data=new Object();
+        inputs.forEach(input=>
+        {
+            switch (input.inputType)
+            {
+                case "value":
+                data[input.name]=(document.getElementById(input.id) as HTMLInputElement).value;
+                break;
+                
+                case "checked":
+                data[input.name]=(document.getElementById(input.id) as HTMLInputElement).checked;
+                break;
+                
+                case "select":
+                {
+                    var select=document.getElementById(input.id) as HTMLSelectElement;
+                    data[input.name]=select.options[select.selectedIndex].value;
+                }
+                break;
+
+                case "radio":
+                var radio=document.getElementById(input.id) as HTMLInputElement;
+                if (radio.checked)
+                {
+                    data[input.name]=(document.getElementById(input.id) as HTMLInputElement).value;
+                }
+                break;
+
+                case "constant":
+                data[input.name]=input.id;
+                break;
+            }
+        }
+        );
+        this.call("POST",action,data,async);
+    }
+    public static get(action:string,text:string,async:boolean)
+    {
+        var inputs=JSON.parse(text) as Input[];
+        var seperator="?";
+        inputs.forEach(input=>
+        {
+            switch (input.inputType)
+            {
+                case "value":
+                action+=seperator+input.name+"="+encodeURIComponent((document.getElementById(input.id) as HTMLInputElement).value);
+                break;
+                
+                case "checked":
+                action+=seperator+input.name+"="+encodeURIComponent((document.getElementById(input.id) as HTMLInputElement).checked);
+                break;
+                
+                case "select":
+                var select=document.getElementById(input.id) as HTMLSelectElement;
+                action+=seperator+input.name+"="+encodeURIComponent(select.options[select.selectedIndex].value);
+                break;
+
+                case "radio":
+                var radio=document.getElementById(input.id) as HTMLInputElement;
+                if (radio.checked)
+                {
+                    action+=seperator+input.name+"="+encodeURIComponent(radio.value);
+                }
+                break;
+
+                case "constant":
+                action+=seperator+input.name+"="+encodeURIComponent(input.id);
+                break;
+            }
+            seperator="&";
+        }
+        );
+        console.log(action);
+        this.call("GET",action,null,async);
+    }
+
+    static call(type:string,pathAndQuery:string,data:object,async:boolean)
+    {
+        $.ajax(
+            {url:pathAndQuery,
+            type:type,
+            async:async,
+            dataType:"json",
+            cache: false,
+            data:data,
+            success:function(instructions:Instruction[])
+            {
+                Remoting.run(instructions);
+            },
+            error:function(xhr)
+            {
+                alert("Error: "+xhr.status+" "+xhr.statusText);
+            }
+        }); 
+    }
+
+    static run(instructions:Instruction[])
+    {
+        if (instructions!=null)
+        {
+            instructions.forEach(instruction=>
+                {
+                    if (instruction.trace)
+                    {
+                        console.log("code:"+instruction.code);
+                    }
+                    try
+                    {
+                        eval(instruction.code);
+                    }
+                    catch (ex)
+                    {
+                        alert(ex);
+                    }
+                }
+                );
+            }
+    }
+}
+

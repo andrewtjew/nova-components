@@ -19,10 +19,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.remoting;
+package org.nova.html.remoting1;
 
-public class RemoveClassResult
-{
-    public String id;
-    public String class_;
-}

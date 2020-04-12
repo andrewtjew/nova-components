@@ -22,6 +22,7 @@
 package org.nova.html.bootstrap4;
 
 import org.nova.html.bootstrap4.classes.Size;
+import org.nova.html.elements.FormElement;
 
 public abstract class ButtonComponent<ELEMENT extends ButtonComponent<ELEMENT>> extends ToggleComponent<ELEMENT> 
 {
@@ -44,7 +45,14 @@ public abstract class ButtonComponent<ELEMENT extends ButtonComponent<ELEMENT>> 
         return (ELEMENT)this;
     }
 
-
+    public ELEMENT form(String form_id)
+    {
+        return attr("form",form_id);
+    }
+    public ELEMENT form(FormElement<?> element)
+    {
+        return attr("form",element.id());
+    }
     @SuppressWarnings("unchecked")
     public ELEMENT size(Size value)
     {
@@ -56,6 +64,10 @@ public abstract class ButtonComponent<ELEMENT extends ButtonComponent<ELEMENT>> 
     {
         attr("name",name);
         return (ELEMENT)this;
+    }
+    public ELEMENT value(Object value)
+    {
+        return attr("value",value);
     }
     
 }

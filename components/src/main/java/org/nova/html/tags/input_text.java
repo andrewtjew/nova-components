@@ -21,17 +21,15 @@
  ******************************************************************************/
 package org.nova.html.tags;
 
-import org.nova.html.bootstrap4.InputText;
 import org.nova.html.elements.InputElement;
-import org.nova.html.elements.TagElement;
+import org.nova.html.elements.InputType;
 import org.nova.html.enums.autocomplete;
 
 public class input_text extends InputElement<input_text>
 {
     public input_text()
     {
-        super();
-        attr("type","text");
+        super(InputType.text);
     }
     
     public input_text autocomplete(autocomplete autocomplete) //text, search, url, tel, email, password, datepickers, range, and color.
@@ -75,14 +73,6 @@ public class input_text extends InputElement<input_text>
     public input_text value(String text) //button, reset, submit, text, password, hidden, checkbox, radio, image
     {
         return attr("value",text);
-    }
-    public input_text list(String id)
-    {
-        return attr("list",id);
-    }
-    public input_text list(TagElement element)
-    {
-        return attr("list",element.id());
     }
 
     

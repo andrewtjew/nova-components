@@ -43,7 +43,7 @@ public class Tree extends Element
         public String[] plugins;
     }
     
-    public Tree(Head head,String id,String sourcePath,String cssFile)
+    public Tree(Head head,String id,String sourcePath,String cssFile) throws Exception
     {
         if (id==null)
         {
@@ -63,12 +63,12 @@ public class Tree extends Element
         this.ul=this.div.returnAddInner(new ul());
     }
 
-    public Tree(Head head)
+    public Tree(Head head) throws Exception
     {
         this(head,null,"/resources/html/widgets/jsTree","/themes/default/style.min.css");
     }
     
-    public Tree(Head head,String id)
+    public Tree(Head head,String id) throws Exception
     {
         this(head,id,"/resources/html/widgets/jsTree","/themes/default/style.min.css");
     }

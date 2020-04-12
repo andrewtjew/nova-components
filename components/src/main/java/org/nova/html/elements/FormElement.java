@@ -22,19 +22,36 @@
 package org.nova.html.elements;
 
 import org.nova.html.enums.autocomplete;
+import org.nova.html.enums.method;
 import org.nova.html.enums.target;
 
 public class FormElement<ELEMENT extends FormElement<ELEMENT>> extends GlobalEventTagElement<ELEMENT>
 {
-    public FormElement()
+    private String action;
+    private method method;
+    public FormElement(method method)
     {
         super("form");
+        attr("method",method);
+        this.method=method;
+    }
+    
+    public method method()
+    {
+        return this.method;
     }
     
     public  ELEMENT action(String URL) 
     {
+        this.action=URL;
         return attr("action",URL);
     }
+    
+    public String action()
+    {
+        return this.action;
+    }
+    
     public ELEMENT autocomplete(autocomplete autocomplete) 
     {
         return attr("autocomplete",autocomplete);

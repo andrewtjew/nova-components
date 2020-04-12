@@ -44,7 +44,7 @@ public class TraceWidget extends Element
     final private Panel2 panel;
     final private Head head;
     final private Trace trace;
-    public TraceWidget(Head head,Trace trace,boolean showStackTraces,boolean openExceptionStackTraces,boolean openStackTraces)
+    public TraceWidget(Head head,Trace trace,boolean showStackTraces,boolean openExceptionStackTraces,boolean openStackTraces) throws Exception
     {
         this.panel=new Panel2(head, trace.getCategory());
         this.head=head;
@@ -215,13 +215,13 @@ public class TraceWidget extends Element
         row.add(trace.getThread().getId()+":"+trace.getThread().getName());
     }
 
-    static private Element formatStackTrace(Head head,String heading,StackTraceElement[] stackTrace,boolean open)
+    static private Element formatStackTrace(Head head,String heading,StackTraceElement[] stackTrace,boolean open) throws Exception
     {
         Accordion accordion=new Accordion(head, false, heading);
         accordion.content().addInner(new textarea().style("width:100%;border:0;").readonly().rows(stackTrace.length+1).addInner(Utils.toString(stackTrace)));
         return accordion;
     }
-    static private Element formatThrowable(Head head,String heading,Throwable throwable,boolean open)
+    static private Element formatThrowable(Head head,String heading,Throwable throwable,boolean open) throws Exception
     {
         Accordion accordion=new Accordion(head, open, heading);
         String text=Utils.getStrackTraceAsString(throwable);

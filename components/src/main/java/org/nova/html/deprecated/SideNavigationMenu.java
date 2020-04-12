@@ -33,7 +33,7 @@ public class SideNavigationMenu extends div
 {
     final private String id;
     final private int width;
-    public SideNavigationMenu(Head head,String id,int width,String sourcePath,String cssFile)
+    public SideNavigationMenu(Head head,String id,int width,String sourcePath,String cssFile) throws Exception
     {
         if (id==null)
         {
@@ -49,15 +49,15 @@ public class SideNavigationMenu extends div
         addClass("sidenav");
         this.addInner(new a().href("javascript:void(0)").addClass("closebtn").onclick("document.getElementById('"+id+"').style.width = '0';").addInner("&times;"));
     }
-    public SideNavigationMenu(Head head,String id,int width)
+    public SideNavigationMenu(Head head,String id,int width) throws Exception
     {
         this(head,id,width,"/resources/html","/w3c/SideNavigationMenu/style.css");
     }
-    public SideNavigationMenu(Head head,int width)
+    public SideNavigationMenu(Head head,int width) throws Exception
     {
         this(head,null,width);
     }
-    public SideNavigationMenu(int width)
+    public SideNavigationMenu(int width) throws Exception
     {
         this(null,width);
     }

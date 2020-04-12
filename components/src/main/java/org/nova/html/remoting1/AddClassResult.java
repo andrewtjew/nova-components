@@ -19,45 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.bootstrap4;
+package org.nova.html.remoting1;
 
-import org.nova.html.enums.autocomplete;
-import org.nova.html.tags.input_checkbox;
-
-public class FormCheckbox extends InputComponent<FormCheckbox>
+public class AddClassResult
 {
-    public FormCheckbox()
-    {
-        super("form-check-input","checkbox");
-        
-    }
-    public FormCheckbox checked() //checkbox or radio
-    {
-        return attr("checked");
-    }
-    public FormCheckbox checked(boolean checked)
-    {
-        if (checked)
-        {
-            attr("checked");
-        }
-        return this;
-    }
-    public FormCheckbox required()  //text, search, url, tel, email, password, date pickers, number, checkbox, radio, and file.
-    {
-        return attr("required");
-    }
-    public FormCheckbox required(boolean required)
-    {
-        if (required)
-        {
-            attr("required");
-        }
-        return this;
-    }
-    public FormCheckbox value(Object text) //button, reset, submit, text, password, hidden, checkbox, radio, image
-    {
-        return attr("value",text);
-    }
+    public String id;
+    public String class_;
 }
-

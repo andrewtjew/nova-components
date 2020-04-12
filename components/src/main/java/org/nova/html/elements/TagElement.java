@@ -71,10 +71,14 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
         }
         return (ELEMENT) this;
     }
-    public ELEMENT id(String value)
+    public ELEMENT id(String value) throws Exception
     {
         if (value!=null)
         {
+            if (this.id!=null)
+            {
+                throw new Exception("id cannot be changed");
+            }
             this.id=value;
         }
         return (ELEMENT) this;
@@ -84,7 +88,6 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
         if (this.id==null)
         {
             this.id="_"+this.hashCode();
-            return this.id;
         }
         return this.id;
     }

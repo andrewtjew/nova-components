@@ -21,11 +21,13 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.elements.InputType;
+
 public class InputRadio extends InputComponent<InputRadio>
 {
     public InputRadio()
     {
-        super("input","radio");
+        super(InputType.radio);
     }
     public InputRadio checked() //checkbox or radio
     {

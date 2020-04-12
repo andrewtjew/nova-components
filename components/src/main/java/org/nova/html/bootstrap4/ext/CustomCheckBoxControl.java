@@ -53,7 +53,7 @@ public class CustomCheckBoxControl extends StyleComponent<CustomControl>
         }
     }
 
-    public CustomCheckBoxControl(String label,String name,String id,Object value)
+    public CustomCheckBoxControl(String label,String name,String id,Object value) throws Exception
     {
         super("div", "custom-control");
         addClass("custom-checkbox");

@@ -38,7 +38,7 @@ public class SelectList extends Element
     private StyleColor textColor;
     private Integer borderSize;
     
-    public SelectList(String id,String label)
+    public SelectList(String id,String label) throws Exception
     {
         this.div=new div().addClass("form-group");
         if (label!=null)
@@ -66,7 +66,7 @@ public class SelectList extends Element
         return this;
     }
     
-    public SelectList(String id)
+    public SelectList(String id) throws Exception
     {
         this(id,null);
     }

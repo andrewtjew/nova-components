@@ -32,7 +32,7 @@ public class Accordion extends Content
 {
     final private button_button button;
     final private div content;
-    public Accordion(Head head,String id,boolean opened,String heading,String cssFilePath)
+    public Accordion(Head head,String id,boolean opened,String heading,String cssFilePath) throws Exception
     {
         if (id==null)
         {
@@ -61,11 +61,11 @@ public class Accordion extends Content
         this.button.addInner(heading);
         
     }
-    public Accordion(Head head,String id,boolean opened,String heading)
+    public Accordion(Head head,String id,boolean opened,String heading) throws Exception
     {
         this(head,id, opened, heading, "/resources/html/w3c/Accordion/style.css");
     }
-    public Accordion(Head head,boolean opened,String heading)
+    public Accordion(Head head,boolean opened,String heading) throws Exception
     {
         this(head,null, opened, heading);
     }
