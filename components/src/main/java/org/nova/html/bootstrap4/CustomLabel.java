@@ -35,7 +35,7 @@ public class CustomLabel extends StyleComponent<CustomLabel>
     }
     public CustomLabel for_(TagElement<?> element)
     {
-        return attr("for",element.id());
+        return attr("for",element);
     }
     public CustomLabel form(String form_id)
     {

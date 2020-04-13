@@ -50,7 +50,7 @@ public class SubmitButton extends ButtonComponent<SubmitButton>
     }
     public SubmitButton form(TagElement<?> element)
     {
-        attr("form",element.id());
+        attr("form",element);
         return this;
     }
 }

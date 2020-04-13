@@ -40,7 +40,8 @@ public class Tooltip extends TipComponent<Tooltip>
 {
     public Tooltip(TagElement<?> toggler)
     {
-    	super(toggler,"tooltip");
+    	super(toggler);
+        this.toggler.attr("data-toggle","tooltip");
     }
     
     public String js_tooltip(TipOption option,QuotationMark mark)

@@ -51,7 +51,7 @@ public abstract class ButtonComponent<ELEMENT extends ButtonComponent<ELEMENT>> 
     }
     public ELEMENT form(FormElement<?> element)
     {
-        return attr("form",element.id());
+        return attr("form",element);
     }
     @SuppressWarnings("unchecked")
     public ELEMENT size(Size value)

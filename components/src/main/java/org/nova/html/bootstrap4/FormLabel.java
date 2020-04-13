@@ -41,7 +41,7 @@ public class FormLabel extends StyleComponent<FormLabel>
     }
     public FormLabel for_(TagElement<?> element)
     {
-        return attr("for",element.id());
+        return attr("for",element);
     }
     public FormLabel form(String form_id)
     {

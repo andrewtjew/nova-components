@@ -105,7 +105,7 @@ public class InputElement<ELEMENT extends InputElement<ELEMENT>> extends GlobalE
     }
     public ELEMENT form(TagElement<?> element)
     {
-        return attr("form",element.id());
+        return attr("form",element);
     }
     public ELEMENT readonly()
     {
@@ -127,7 +127,7 @@ public class InputElement<ELEMENT extends InputElement<ELEMENT>> extends GlobalE
     }
     public ELEMENT list(TagElement<?> element)
     {
-        attr("list",element.id());
+        attr("list",element);
         return (ELEMENT)this;
     }
     public String name()

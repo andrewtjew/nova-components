@@ -24,6 +24,7 @@ package org.nova.html.bootstrap4.DataTables;
 import java.util.ArrayList;
 
 import org.nova.html.DataTables.ColumnDef;
+import org.nova.html.DataTables.DataTable1_10;
 import org.nova.html.DataTables.DataTableColumnOrder;
 import org.nova.html.DataTables.DataTableOptions;
 import org.nova.html.bootstrap4.StyleComponent;
@@ -50,31 +51,67 @@ public class DataTableBootstrap4 extends StyleComponent<DataTableBootstrap4>
     private TableHeader header;
     private TableFooter footer;
     
-    public DataTableBootstrap4(DataTableOptions options)
+    
+    public DataTableBootstrap4(Head head,DataTableOptions options)
     {
         super("table","table");
         this.tbody=new tbody();
         this.options=options;
 
+        if (head!=null)
+        {
+            String key=DataTableBootstrap4.class.getCanonicalName();
+            head.add(key,new link().rel(link_rel.stylesheet).type("text/css").href("https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"));
+        }
     }
     
-    public DataTableBootstrap4 bordered()
+    
+    public DataTableBootstrap4(DataTableOptions options)
     {
-        addClass("table-bordered");
+        this(null,options);
+    }
+    
+    public DataTableBootstrap4 cell_border()
+    {
+        addClass("cell-border");
+        return this;
+    }
+
+    public DataTableBootstrap4 compact()
+    {
+        addClass("compact");
+        return this;
+    }
+
+    public DataTableBootstrap4 hover()
+    {
+        addClass("hover");
         return this;
     }
     
-    public DataTableBootstrap4 striped()
+    public DataTableBootstrap4 order_column()
     {
-        addClass("table-striped");
+        addClass("order-column");
         return this;
     }
     
-    public DataTableBootstrap4 responsive()
+    public DataTableBootstrap4 row_border()
     {
-        addClass("dt-responsive");
+        addClass("row-border");
         return this;
     }
+    
+    public DataTableBootstrap4 stripe()
+    {
+        addClass("stripe");
+        return this;
+    }
+    
+//    public DataTableBootstrap4 responsive()
+//    {
+//        addClass("dt-responsive");
+//        return this;
+//    }
     
     public DataTableBootstrap4 setHeader(TableHeader header)
     {

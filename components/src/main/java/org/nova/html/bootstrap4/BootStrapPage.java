@@ -21,6 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.bootstrap4.DataTables.DataTableBootstrap4;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.enums.character_set;
@@ -63,7 +64,6 @@ public class BootStrapPage extends Element
         this.head.addInner(new script().src("https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"));
         this.head.addInner(new script().src("https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"));
         this.head.addInner(new script().src("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"));
-        
     	
 //    	this.head.addInner(new link().rel(link_rel.stylesheet).href("https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"));
 //        this.head.addInner(new script().src("https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"));
@@ -71,7 +71,12 @@ public class BootStrapPage extends Element
 //        this.head.addInner(new script().src("https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"));
       
         this.head.addInner(new script().src("/resources/html/js/ie.js"));
-        this.head.addInner(new link().rel(link_rel.stylesheet).href("https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css"));
+        
+        String dataTableKey=DataTableBootstrap4.class.getCanonicalName();
+        this.head().add(dataTableKey,new link().rel(link_rel.stylesheet).type("text/css").href("https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"));
+        this.head().add(dataTableKey, new script().src("https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css"));
+        this.head().add(dataTableKey, new script().src("https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"));
+        this.head().add(dataTableKey, new script().src("https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"));
 
         
         this.body=html.returnAddInner(new body());

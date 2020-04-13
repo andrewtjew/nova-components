@@ -51,7 +51,7 @@ public class ButtonElement<ELEMENT extends ButtonElement<ELEMENT>> extends Globa
     }
     public ELEMENT form(FormElement<?> element)
     {
-        return attr("form",element.id());
+        return attr("form",element);
     }
     public ELEMENT name(String text)
     {

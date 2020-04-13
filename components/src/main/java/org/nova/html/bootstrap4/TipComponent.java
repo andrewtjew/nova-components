@@ -41,6 +41,7 @@ import org.nova.utils.Utils;
 public class TipComponent<TIP extends TipComponent<TIP>>
 {
     final protected TagElement<?> toggler;
+    final protected Options options;
     
     static class Delay
     {
@@ -48,10 +49,33 @@ public class TipComponent<TIP extends TipComponent<TIP>>
         public Integer hide;
     }
     
-    protected TipComponent(TagElement<?> toggler,String tipType)
+    static class Options
     {
-    	this.toggler=toggler;
-        this.toggler.attr("data-toggle",tipType);
+        public String container;
+        public String content;
+        public Delay delay;
+        public boolean html;
+        public boolean animation;
+        public Placement placement;
+        public String selector;
+        public String template;
+        public String title;
+        public String trigger;
+//        public int offset;
+        public String boundary;
+        public boolean sanitize;
+    }
+    
+    protected TipComponent(TagElement<?> toggler)
+    {
+        this.toggler=toggler;
+        this.options=null;
+    }
+    
+    protected TipComponent()
+    {
+        this.toggler=null;
+        this.options=new Options();
     }
     
     @SuppressWarnings("unchecked")
@@ -63,7 +87,15 @@ public class TipComponent<TIP extends TipComponent<TIP>>
     
     public TIP template(String template)
     {
-        this.toggler.attr("data-template",template);
+        if (this.toggler!=null)
+        {
+            this.toggler.attr("data-template",template);
+        }
+        else
+        {
+            this.options.template=template;
+        }
+           
         return (TIP)this;
     }
     public TIP animation()
@@ -73,60 +105,76 @@ public class TipComponent<TIP extends TipComponent<TIP>>
 
     public TIP animation(boolean animation)
     {
-    	if (animation)
-    	{
-    		this.toggler.attr("data-animation",animation);
-    	}
+        if (this.toggler!=null)
+        {
+            this.toggler.attr("data-animation",animation);
+        }
+        else
+        {
+            this.options.animation=animation;
+        }
         return (TIP)this;
     }
 
     public TIP content(String content)
     {
-        this.toggler.attr("data-content",content);
+        if (this.toggler!=null)
+        {
+            this.toggler.attr("data-content",content);
+        }
+        else
+        {
+            this.options.content=content;
+        }
         return (TIP)this;
     }
 
-    public TIP content(QuotationMark quotationMark,Element element,boolean html) throws Throwable
+    public TIP content(QuotationMark quotationMark,Element element) throws Throwable
     {
-        if (html)
+        
+        String content=element.getHtml(new StringComposer(quotationMark));
+        if (this.toggler!=null)
         {
             this.toggler.attr("data-html",true);
+            this.toggler.attr("data-content",content);
+            this.toggler.attr("data-content",content);
         }
-        String content=element.getHtml(new StringComposer(quotationMark));
-        this.toggler.attr("data-content",content);
+        else
+        {
+            this.options.html=true;
+            this.options.content=content;
+        }
+
         return (TIP)this;
     }
     public TIP content(Element element) throws Throwable
     {
-        return content(QuotationMark.QOUT,element,true);
+        return content(QuotationMark.QOUT,element);
     }
-
-//    @Description("Order is important. Use (hover,focus) and not (focus,hover) to allow buttons on the popover to be clicked.")
-//    public TIP trigger(Trigger...triggers) throws Exception
-//    {
-//        if (triggers.length>1)
-//        {
-//            for (Trigger trigger:triggers)
-//            {
-//                if (trigger==Trigger.manual)
-//                {
-//                    throw new Exception("manual cannot be combined.");
-//                }
-//            }
-//        }
-//        this.toggler.attr("data-trigger",Utils.combine(triggers, " "));
-//        return (TIP)this;
-//    }
 
     public TIP trigger(Trigger trigger) throws Exception
     {
-        this.toggler.attr("data-trigger",trigger.toString());
+        if (this.toggler!=null)
+        {
+            this.toggler.attr("data-trigger",trigger.toString());
+        }
+        else
+        {
+            this.options.trigger=trigger.toString();
+        }
         return (TIP)this;
     }
     
     public TIP placement(Placement placement)
     {
-        this.toggler.attr("data-placement",placement);
+        if (this.toggler!=null)
+        {
+            this.toggler.attr("data-placement",placement);
+        }
+        else
+        {
+            this.options.placement=placement;
+        }
         return (TIP)this;
     }
     
@@ -138,7 +186,6 @@ public class TipComponent<TIP extends TipComponent<TIP>>
         delay.hide=hide;
         try
         {
-//            this.toggler.attr("data-delay",delay,QuotationMark.SINGLE); //ATTR
             this.toggler.attr("data-delay",delay);
         }
         catch (Throwable e)

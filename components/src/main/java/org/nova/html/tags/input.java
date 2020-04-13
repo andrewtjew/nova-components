@@ -43,7 +43,7 @@ public class input extends InputElement<input>
     }
     public input list(datalist datalist)
     {
-        list(datalist.id());
+        attr("list",datalist);
         return this;
     }
     public input add(datalist datalist)

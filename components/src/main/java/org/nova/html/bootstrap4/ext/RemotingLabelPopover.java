@@ -60,11 +60,9 @@ public class RemotingLabelPopover
 	public RemotingLabelPopover(QuotationMark mark,GlobalEventTagElement<?> toggler,ModalBackground background,String action,String label,GlobalEventTagElement<?> acceptButton,GlobalEventTagElement<?> dismissButton,Placement placement) throws Throwable
 	{
 
-		String template;
+//		template="<div class='popover' role='tooltip' style='margin:0;padding:0;'><div class='popover-body'></div></div>";
 
-		template="<div class='popover' role='tooltip' style='margin:0;padding:0;'><div class='popover-body'></div></div>";
-
-		template=new Item().addClass("popover").attr("role","tooltip").style(new Style().margin(new Size(0,unit.em)).padding(new Size(0,unit.em)))
+		String template=new Item().addClass("popover").attr("role","tooltip").style(new Style().margin(new Size(0,unit.em)).padding(new Size(0,unit.em)))
 		        .addInner(new Item().addClass("popover-body")).getHtml(QuotationMark.DOUBLE);
 		
         Item inputGroup=new Item().d(Display.flex).mx(0).px(0);

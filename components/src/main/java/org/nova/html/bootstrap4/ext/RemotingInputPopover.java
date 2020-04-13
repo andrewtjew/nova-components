@@ -81,4 +81,6 @@ public class RemotingInputPopover
 	{
 		this(toggler,background,width,action,inputElement,Placement.bottom);
 	}
+	
+	
 }

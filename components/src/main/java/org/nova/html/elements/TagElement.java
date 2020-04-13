@@ -134,11 +134,8 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
             if (value!=null)
             {
                 Class<?> type=value.getClass();
-                if (type==String.class)
-                {
-                    composerStringBuilder.append("=").append(mark).append(value).append(mark);
-                }
-                else if ((type.isPrimitive())
+                if ((type==String.class)
+                        ||(type.isPrimitive())
                         ||(type.isEnum())
                         ||(type==Long.class)
                         ||(type==Float.class)
@@ -148,16 +145,22 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
                         ||(type==BigDecimal.class)
                         ||(type==Byte.class)
                         ||(type==Short.class)
-                        
                         )
                 {
                     composerStringBuilder.append("=").append(mark).append(value).append(mark);
                 }
+                else if (value instanceof TagElement<?>)
+                {   
+                    TagElement<?> element=(TagElement<?>)value;
+                    composerStringBuilder.append("=").append(mark).append(element.id()).append(mark);
+                    
+                }
                 else
                 {
-                    String text=ObjectMapper.writeObjectToString(value).replace("\"", "&#34;");
+                    throw new Exception();
+//                    String text=ObjectMapper.writeObjectToString(value).replace("\"", "&#34;");
 //                    composerStringBuilder.append("=").append(mark).append(text).append(mark);
-                    composerStringBuilder.append("=").append(mark).append(text).append(mark);
+//                    composerStringBuilder.append("=").append(mark).append(text).append(mark);
                 }
             }
             

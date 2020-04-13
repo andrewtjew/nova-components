@@ -37,7 +37,7 @@ public class label extends GlobalEventTagElement<label>
     }
     public label for_(TagElement<?> element)
     {
-        return attr("for",element.id());
+        return attr("for",element);
     }
     public label form(String form_id)
     {

@@ -41,7 +41,7 @@ public class FormCheckLabel extends StyleComponent<FormCheckLabel>
     }
     public FormCheckLabel for_(TagElement<?> element)
     {
-        return attr("for",element.id());
+        return attr("for",element);
     }
     
 }
