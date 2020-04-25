@@ -191,7 +191,6 @@ public class DataTableBootstrap4 extends StyleComponent<DataTableBootstrap4>
             script script=new script().addInner(sb.toString());
             composer.getStringBuilder().append(script.getHtml());
         }
-        //this.compose(composer);
         super.compose(composer);
     }
 
