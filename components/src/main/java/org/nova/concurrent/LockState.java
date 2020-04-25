@@ -21,8 +21,23 @@
  ******************************************************************************/
 package org.nova.concurrent;
 
-class Slot
+public class LockState<KEY>
 {
+    final KEY key;
+    long created;
 	int waiting;
 	boolean locked;
+	
+	LockState(KEY key)
+	{
+	    this.key=key;
+	}
+	public KEY getKey()
+	{
+	    return this.key;
+	}
+	public long getCreated()
+	{
+	    return this.created;
+	}
 }

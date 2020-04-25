@@ -92,7 +92,7 @@ public class CoreEnvironment
         this.logger=getLogger("application");
 	
 		this.traceManager=new TraceManager(traceLogger);
-		this.multiTaskScheduler=new MultiTaskScheduler(traceManager,configuration.getIntegerValue("Environment.FutureScheduler.threads",1000),this.logger);
+		this.multiTaskScheduler=new MultiTaskScheduler(traceManager,configuration.getIntegerValue("Environment.TaskScheduler.threads",1000),this.logger);
 		this.timerScheduler=new TimerScheduler(traceManager, this.getLogger());
 		this.timerScheduler.start();
 

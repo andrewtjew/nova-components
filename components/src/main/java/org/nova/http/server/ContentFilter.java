@@ -19,40 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.concurrent;
+package org.nova.http.server;
 
 import org.nova.tracing.Trace;
 
-public class Lock<KEY> implements AutoCloseable
+public abstract class ContentFilter
 {
-	final LockState<KEY> slot;
-	LockManager<KEY> lockManager;
-	final Trace trace;
+    public abstract Response<?> executeNext(Trace trace,Context context,FilterChain filterChain) throws Throwable;
+    public void onRegister(RequestHandler requestHandler)
+    {
+    }
 	
-	Lock(LockManager<KEY> lockManager,LockState<KEY> lockObject,Trace trace)
-	{
-		this.trace=trace;
-		this.lockManager=lockManager;
-		this.slot=lockObject;
-	}
-	
-	@Override
-	public void close()
-	{
-		synchronized (this)
-		{
-			if (this.lockManager==null)
-			{
-				return;
-			}
-			this.lockManager.release(this.slot);
-			this.trace.close();
-			this.lockManager=null;
-		}
-	}
-
-	public KEY getKey()
-	{
-	    return this.slot.key;
-	}
 }

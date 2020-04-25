@@ -265,119 +265,121 @@ public class FilterChain
 //        throw new Exception("Unable to parse parameter "+parameterInfo.getName()+", value="+value);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Response<?> next(Trace trace,Context context) throws Throwable
-	{
-		if (this.filterIndex<this.filters.length)
-		{
-			return filters[this.filterIndex++].executeNext(trace,context,this);
-		}
-		RequestHandler requestHandler=this.methodResult.requestHandler;
-		String[] pathParameters=this.methodResult.parameters;
-		ParameterInfo[] parameterInfos=requestHandler.getParameterInfos();
-		Object[] parameters=new Object[parameterInfos.length];
-		HttpServletRequest request=context.getHttpServletRequest();
-		
-		ContentReader<?> reader=null;
-		Object content=null;
-		
-		for (int i=0;i<parameterInfos.length;i++)
-		{
-			ParameterInfo parameterInfo=parameterInfos[i];
-			switch (parameterInfo.getSource())
-			{
-			case CONTENT:
-				if (reader==null)
-				{
-					reader=context.getContentReader();
-					if (reader!=null)
-					{
+    RequestHandler requestHandler;
+    Object[] parameters;
+
+    public void decodeParameters(Trace trace,Context context) throws Throwable
+    {
+        if (this.requestHandler!=null)
+        {
+            return; 
+        }
+        this.requestHandler=this.methodResult.requestHandler;
+        String[] pathParameters=this.methodResult.parameters;
+        ParameterInfo[] parameterInfos=requestHandler.getParameterInfos();
+        this.parameters=new Object[parameterInfos.length];
+        HttpServletRequest request=context.getHttpServletRequest();
+        
+        ContentReader<?> reader=null;
+        Object content=null;
+        
+        for (int i=0;i<parameterInfos.length;i++)
+        {
+            ParameterInfo parameterInfo=parameterInfos[i];
+            switch (parameterInfo.getSource())
+            {
+            case CONTENT:
+                if (reader==null)
+                {
+                    reader=context.getContentReader();
+                    if (reader!=null)
+                    {
                         content=reader.read(context,this.decoderContext.getContentLength(),this.decoderContext.getInputStream(),parameterInfo.getType());
-					}
-					else
-					{
-					    int value=this.decoderContext.getInputStream().read();
-					    if (value==-1)
-					    {
-					        content=null;
-					    }
-					    else
-					    {
-					        throw new AbnormalException(Abnormal.NO_READER);
-					    }
-					}
-				}
-				parameters[i]=content;
-				break;
-			case COOKIE:
-				try
-				{
-					Cookie cookie=null;
-					for (Cookie c:request.getCookies())
-					{
-						if (parameterInfo.getName().equals(c.getName()))
-						{
-							cookie=c;
-							break;
-						}
-					}
-					if (parameterInfo.getType()==Cookie.class)
-					{
-						parameters[i]=cookie;
-					}
-					else if (cookie!=null)
-					{
-						parameters[i]=buildParameter(parameterInfo,cookie.getValue());
-					}
-					else
-					{
-						parameters[i]=buildParameter(parameterInfo,null);
-					}
-				}
-				catch (Throwable t)
-				{
-					throw new AbnormalException(Abnormal.BAD_COOKIE,t);
-				}
-				break;
-			case HEADER:
-				try
-				{
-					parameters[i]=buildParameter(parameterInfo,request.getHeader(parameterInfo.getName()));
-				}
-				catch (Throwable t)
-				{
-					throw new AbnormalException(Abnormal.BAD_HEADER,t);
-				}
-				break;
-			case PATH:
-				try
-				{
-					parameters[i]=buildParameter(parameterInfo,pathParameters[parameterInfo.getPathIndex()]);
-				}
-				catch (Throwable t)
-				{
-					throw new AbnormalException(Abnormal.BAD_PATH,t);
-				}
-				break;
-			case QUERY:
-				try
-				{
-					parameters[i]=buildParameter(parameterInfo,request.getParameter(parameterInfo.getName()));
-				}
-				catch (Throwable t)
-				{
-					throw new AbnormalException(Abnormal.BAD_QUERY,parameterInfo.getName(),t);
-				}
-				break;
-			case CONTEXT:
-				parameters[i]=context;
-				break;
-			case STATE:
-				parameters[i]=context.getState();
-				break;
-			case TRACE:
-				parameters[i]=trace;
-				break;
+                    }
+                    else
+                    {
+                        int value=this.decoderContext.getInputStream().read();
+                        if (value==-1)
+                        {
+                            content=null;
+                        }
+                        else
+                        {
+                            throw new AbnormalException(Abnormal.NO_READER);
+                        }
+                    }
+                }
+                parameters[i]=content;
+                break;
+            case COOKIE:
+                try
+                {
+                    Cookie cookie=null;
+                    for (Cookie c:request.getCookies())
+                    {
+                        if (parameterInfo.getName().equals(c.getName()))
+                        {
+                            cookie=c;
+                            break;
+                        }
+                    }
+                    if (parameterInfo.getType()==Cookie.class)
+                    {
+                        parameters[i]=cookie;
+                    }
+                    else if (cookie!=null)
+                    {
+                        parameters[i]=buildParameter(parameterInfo,cookie.getValue());
+                    }
+                    else
+                    {
+                        parameters[i]=buildParameter(parameterInfo,null);
+                    }
+                }
+                catch (Throwable t)
+                {
+                    throw new AbnormalException(Abnormal.BAD_COOKIE,t);
+                }
+                break;
+            case HEADER:
+                try
+                {
+                    parameters[i]=buildParameter(parameterInfo,request.getHeader(parameterInfo.getName()));
+                }
+                catch (Throwable t)
+                {
+                    throw new AbnormalException(Abnormal.BAD_HEADER,t);
+                }
+                break;
+            case PATH:
+                try
+                {
+                    parameters[i]=buildParameter(parameterInfo,pathParameters[parameterInfo.getPathIndex()]);
+                }
+                catch (Throwable t)
+                {
+                    throw new AbnormalException(Abnormal.BAD_PATH,t);
+                }
+                break;
+            case QUERY:
+                try
+                {
+                    parameters[i]=buildParameter(parameterInfo,request.getParameter(parameterInfo.getName()));
+                }
+                catch (Throwable t)
+                {
+                    throw new AbnormalException(Abnormal.BAD_QUERY,parameterInfo.getName(),t);
+                }
+                break;
+            case CONTEXT:
+                parameters[i]=context;
+                break;
+            case STATE:
+                parameters[i]=context.getState();
+                break;
+            case TRACE:
+                parameters[i]=trace;
+                break;
             case QUERIES:
                 parameters[i]=new Queries(request);
                 break;
@@ -404,12 +406,23 @@ public class FilterChain
                 }
                 break;
             }
-			default:
-				break;
-			}
+            default:
+                break;
+            }
+        }
+    }
+	
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Response<?> next(Trace trace,Context context) throws Throwable
+	{
+		if (this.filterIndex<this.filters.length)
+		{
+			return filters[this.filterIndex++].executeNext(trace,context,this);
 		}
-		
-		
+
+		decodeParameters(trace, context);
+        ParameterInfo[] parameterInfos=this.requestHandler.getParameterInfos();
 		try
 		{
 			Object result=requestHandler.getMethod().invoke(requestHandler.getObject(), parameters);

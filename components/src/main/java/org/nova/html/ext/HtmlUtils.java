@@ -250,7 +250,11 @@ public class HtmlUtils
         String call=returnFunction(function, parameters);
         return "setTimeout(function(){"+call+"},"+delay+");";
     }
-        
+
+    public static String js_callElement(String id,String function,Object...parameters)
+    {
+        return js_call("document.getElementById('"+id+"')."+function,parameters);
+    }  
 
     public static String js_call(String function,Object...parameters)
     {
