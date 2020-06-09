@@ -13,6 +13,10 @@ class HostConnection implements TraceRunnable
     final private long created;
     final private int outputPort;
     final private OutputStream outputStream;
+    long totalReceived;
+    long totalSent;
+    long lastReceived;
+    long lastSent;
     private Socket socket;
     
     public HostConnection(InsideServer server,int outsidePort) throws Throwable
@@ -27,6 +31,8 @@ class HostConnection implements TraceRunnable
         socket.setSendBufferSize(configuration.hostSendBufferSize);
         socket.setTcpNoDelay(true);
         this.outputStream=socket.getOutputStream();
+        this.totalReceived=0;
+        this.totalSent=0;
     }
     @Override
     public void run(Trace parent) throws Throwable
@@ -48,7 +54,11 @@ class HostConnection implements TraceRunnable
                 if (read>0)
                 {
                     this.server.sendToProxy(hostPacket);
-                    System.out.println("HostConnection: port="+this.outputPort+", sent to proxy="+hostPacket.getDataSize());
+                    synchronized(this)
+                    {
+                        this.totalReceived+=read;
+                        this.lastReceived=System.currentTimeMillis();
+                    }
                 }
             }
             
@@ -66,10 +76,44 @@ class HostConnection implements TraceRunnable
         {
             //this.outputStream cannot be null. If so, then implementation error.
             proxyPacket.writeToStream(this.outputStream);
-            System.out.println("HostConnection: port="+this.outputPort+", sent to host="+proxyPacket.getDataSize());
+            this.totalSent+=proxyPacket.getDataSize()-4;
+            this.lastSent=System.currentTimeMillis();
         }
     }
     
+    public long getTotalReceived()
+    {
+        synchronized(this)
+        {
+            return this.totalReceived;
+        }
+    }
+    public long getTotalSent()
+    {
+        synchronized(this)
+        {
+            return this.totalSent;
+        }
+    }
+    public long getLastSent()
+    {
+        synchronized(this)
+        {
+            return this.lastSent;
+        }
+    }
+    public long getLastReceived()
+    {
+        synchronized(this)
+        {
+            return this.lastReceived;
+        }
+    }
+    
+    public long getCreated()
+    {
+        return this.created;
+    }
     public void close()
     {
         try

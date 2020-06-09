@@ -19,21 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.bootstrap4.ext;
+package org.nova.html.bootstrap4;
 
-import org.nova.html.bootstrap4.StyleComponent;
+import org.nova.html.elements.TagElement;
+import org.nova.html.tags.label;
 
-public class Span extends StyleComponent<Span>
+public class Label extends StyleComponent<Label> 
 {
-    public Span()
+    public Label()
     {
-        super("span",null);
+        super("label",null);
     }
-
-    public Span input_group_btn()
+    public Label for_(String element_id)
     {
-        addClass("input-group-btn");
-        return this;
+        return attr("for",element_id);
     }
-
+    public Label for_(TagElement<?> element)
+    {
+        return attr("for",element.id());
+    }
+    public Label form(String form_id)
+    {
+        return attr("form",form_id);
+    }    
 }

@@ -56,7 +56,7 @@ public class BootStrapPage extends Element
     	{
     	    this.head().addInner(new meta().http_equiv_content(http_equiv.X_UA_compatible,compatible));
     	}
-        this.head.addInner(new meta().name(name.viewport).content("width=device-width, initial-scale=1, shrink-to-fit=no"));
+        this.head.addInner(new meta().name(name.viewport).content("width=device-width, initial-scale=1"));
 //        this.head.addInner(new meta().name(name.viewport).content("width=device-width, initial-scale=2"));
     	this.head.addInner(new meta().charset(character_set.UTF_8));
         this.head.addInner(new link().rel(link_rel.stylesheet).href("https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"));

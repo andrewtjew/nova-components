@@ -98,6 +98,7 @@ import org.nova.http.server.Filter;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
 import org.nova.http.server.HttpServer;
+import org.nova.http.server.HttpTransport;
 import org.nova.http.server.JSONContentReader;
 import org.nova.http.server.JSONContentWriter;
 import org.nova.http.server.JSONPatchContentReader;
@@ -3046,7 +3047,7 @@ public class ServerApplicationPages
         }
         content.addInner(new p());
         String[] array=Utils.split(headers, '\r');
-        Accordion accordion=content.returnAddInner(new Accordion(head,null,false, heading+", length: "+(array.length-1)));
+        Accordion accordion=content.returnAddInner(new Accordion(head,null,false, heading+", count: "+(array.length-1)));
         NameValueList list=accordion.content().returnAddInner(new NameValueList());
         for (String item:array)
         {
@@ -3437,12 +3438,29 @@ public class ServerApplicationPages
         }
         throw new Exception();
     }
+
+    private HttpTransport getHttpTransport(String server) throws Exception
+    {
+        if ("public".equals(server))
+        {
+            return this.serverApplication.getPublicTransport();
+        }
+        else if ("private".equals(server))
+        {
+            return this.serverApplication.getPrivateTransport();
+        }
+        else if ("operator".equals(server))
+        {
+            return this.serverApplication.getOperatorTransport();
+        }
+        throw new Exception();
+    }
     
     private OperatorPage buildServerOperatorPage(String title,String server) throws Throwable
     {
-        HttpServer httpServer=getHttpServer(server);
+        HttpTransport httpTransport=getHttpTransport(server);
         OperatorPage page=this.serverApplication.buildOperatorPage(title);
-        int[] ports=httpServer.getPorts();
+        int[] ports=httpTransport.getPorts();
         if (ports.length==1)
         {
             page.content().addInner("Server: "+server+", port: "+ports[0]);
@@ -3459,11 +3477,11 @@ public class ServerApplicationPages
     @Path("/operator/httpServer/methods/{server}")
     public Element methods(@PathParam("server") String server) throws Throwable
     {
-        HttpServer httpServer=getHttpServer(server);
+        HttpTransport httpTransport=getHttpTransport(server);
         OperatorPage page=buildServerOperatorPage("Methods",server);
-        RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
+        RequestHandler[] requestHandlers = httpTransport.getHttpServer().getRequestHandlers();
         OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
-        table.setHeader("Method","Path","Description","Filters","");
+        table.setHeader("Method","Path","Description","");
         for (RequestHandler requestHandler : requestHandlers)
         {
             TableRow row=new TableRow().add(requestHandler.getHttpMethod());
@@ -3480,24 +3498,6 @@ public class ServerApplicationPages
                 row.add("");
             }
 
-            Filter[] filters = requestHandler.getFilters();
-            if (filters != null)
-            {
-                StringBuilder sb = new StringBuilder();
-                for (Filter filter : filters)
-                {
-                    if (sb.length() > 0)
-                    {
-                        sb.append(',');
-                    }
-                    sb.append(filter.getClass().getSimpleName());
-                }
-                row.add(sb);
-            }
-            else
-            {
-                row.add("");
-            }
             row.add(new RightMoreLink(page.head(),new PathAndQuery("/operator/httpServer/method/"+server).addQuery("key", requestHandler.getKey()).toString()));
             table.addRow(row);
         }
@@ -4351,7 +4351,7 @@ public class ServerApplicationPages
         }
     }
     
-    private HttpClientEndPoint getExecuteClient(HttpServer httpServer,Context context) throws Throwable
+    private HttpClientEndPoint getExecuteClient(HttpTransport httpTransport,Context context) throws Throwable
     {
         String endPoint = context.getHttpServletRequest().getHeader("Referer");
         int index=endPoint.lastIndexOf(':');
@@ -4363,12 +4363,12 @@ public class ServerApplicationPages
         boolean http=configuration.getBooleanValue("HttpServer.public.http",false);
         if (http==false)
         {
-            int[] ports=httpServer.getPorts();
+            int[] ports=httpTransport.getPorts();
             endPoint=endPoint+":"+ports[0];
             boolean https=configuration.getBooleanValue("HttpServer.public.https",false);
             if (https)
             {
-                if (this.serverApplication.getPublicServer().getPorts()[0]==ports[0])
+                if (this.serverApplication.getPublicTransport().getPorts()[0]==ports[0])
                 {
                     Vault vault=this.serverApplication.getVault();
                     String serverCertificatePassword=vault.get("KeyStore.serverCertificate.password");
@@ -4382,7 +4382,7 @@ public class ServerApplicationPages
             }
             throw new Exception();
         }
-        int[] ports=httpServer.getPorts();
+        int[] ports=httpTransport.getPorts();
         endPoint=endPoint+":"+ports[ports.length-1];
         return new HttpClientEndPoint(HttpClientFactory.createClient(),endPoint);
     }
@@ -4395,7 +4395,7 @@ public class ServerApplicationPages
     {
         try
         {
-            HttpServer httpServer=getHttpServer(server);
+            HttpTransport httpTransport=getHttpTransport(server);
             HttpServletRequest request = context.getHttpServletRequest();
             ArrayList<Header> headers = new ArrayList<>();
             ArrayList<Cookie> cookies = new ArrayList<>();
@@ -4473,12 +4473,13 @@ public class ServerApplicationPages
                 }
             }
 
-            HttpClientEndPoint httpClientEndPoint=getExecuteClient(httpServer,context);
+            HttpClientEndPoint httpClientEndPoint=getExecuteClient(httpTransport,context);
             JSONClient client = new JSONClient(this.serverApplication.getTraceManager(), this.serverApplication.getLogger(), httpClientEndPoint.endPoint,httpClientEndPoint.httpClient);
             int statusCode;
             TextResponse response=null;
             double duration = 0;
             String accept = request.getParameter("accept");
+            accept="text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2";
             if (Strings.isNullOrEmpty(accept)==false)
             {
                 headers.add(new Header("Accept", accept));
@@ -4606,7 +4607,7 @@ public class ServerApplicationPages
     @ContentWriters(HtmlElementWriter.class)
     public Element run(Trace parent, Context context, @PathParam("server") String server,@QueryParam("key") String key) throws Throwable
     {
-        HttpServer httpServer=getHttpServer(server);
+        HttpTransport httpTransport=getHttpTransport(server);
         HttpServletRequest request = context.getHttpServletRequest();
         String[] methodSchema = Utils.split(key, ' ');
         String method = methodSchema[0];
@@ -4643,7 +4644,7 @@ public class ServerApplicationPages
             }
         }
         
-        HttpClientEndPoint httpClientEndPoint=getExecuteClient(httpServer,context);
+        HttpClientEndPoint httpClientEndPoint=getExecuteClient(httpTransport,context);
         String content=httpClientEndPoint.endPoint+pathAndQuery.toString();
         BasicPage page=new BasicPage();
         page.head().addInner(new meta().http_equiv(http_equiv.refresh).content("0;URL='"+content+"'"));

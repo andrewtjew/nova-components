@@ -16,7 +16,10 @@ import org.nova.tracing.TraceRunnable;
         final private int port;
         private Socket socket;
         private OutputStream outputStream;
+        private long lastSent;
         private long lastReceived;
+        private long totalReceived;
+        private long totalSent;
         
         public OutsideConnection(ProxyConnection proxyConnection,Socket socket,int port)
         {
@@ -46,11 +49,15 @@ import org.nova.tracing.TraceRunnable;
                 for (;;)
                 {
                     int read=packet.readFromStream(inputStream);
-                    this.lastReceived=System.currentTimeMillis();
 //                    System.out.println("OutsideConnection: port="+this.port+", read="+read);
                     if (read<0)
                     {
                         break;
+                    }
+                    synchronized(this)
+                    {
+                        this.totalReceived+=read;
+                        this.lastReceived=System.currentTimeMillis();
                     }
                     if (read>0)
                     {
@@ -83,6 +90,8 @@ import org.nova.tracing.TraceRunnable;
             {
                 //this.outputStream cannot be null. If so, then implementation error.
                 proxyPacket.writeToStream(this.outputStream);
+                this.totalSent+=proxyPacket.getDataSize()-4;
+                this.lastSent=System.currentTimeMillis();
             }
         }
         
@@ -92,9 +101,32 @@ import org.nova.tracing.TraceRunnable;
         }
         public long getLastReceived()
         {
-            return this.lastReceived;
+            synchronized(this)
+            {
+                return this.lastReceived;
+            }
         }
-        
+        public long getLastSent()
+        {
+            synchronized(this)
+            {
+                return this.lastSent;
+            }
+        }
+        public long getTotalReceived()
+        {
+            synchronized(this)
+            {
+                return this.totalReceived;
+            }
+        }
+        public long getTotalSent()
+        {
+            synchronized(this)
+            {
+                return this.totalSent;
+            }
+        }
         public void close()
         {
             try

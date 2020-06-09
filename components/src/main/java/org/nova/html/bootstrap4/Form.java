@@ -22,15 +22,24 @@
 package org.nova.html.bootstrap4;
 
 import org.nova.html.bootstrap4.classes.DeviceClass;
+import org.nova.html.elements.FormElement;
+import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.elements.TagElement;
+import org.nova.html.enums.method;
+import org.nova.html.tags.form_get;
 
-public class Form extends StyleComponent<Form>
+public class Form extends FormElement<Form>
 {
     public Form()
     {
-        super("form",null);
+        super();
     }
     
+    public Form method(method method)
+    {
+        attr("method",method);
+        return this;
+    }
     public Form inline()
     {
         addClass("form-inline");

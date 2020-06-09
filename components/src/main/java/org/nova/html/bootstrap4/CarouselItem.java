@@ -21,6 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
+import org.nova.html.bootstrap4.classes.Display;
 import org.nova.html.elements.Composer;
 
 public class CarouselItem extends StyleComponent<CarouselItem>
@@ -34,7 +35,7 @@ public class CarouselItem extends StyleComponent<CarouselItem>
     }
     public CarouselItem(String src,String alt)
     {
-        this(new Image(src,alt).w(100));
+        this(new Image(src,alt).w(100).d(Display.block));
     }
     public CarouselItem(Image image)
     {
@@ -50,6 +51,11 @@ public class CarouselItem extends StyleComponent<CarouselItem>
     {
         this.active=true;
         addClass("active");
+        return this;
+    }
+    public CarouselItem data_interval(int ms)
+    {
+        this.attr("data-interval", ms);
         return this;
     }
     

@@ -54,7 +54,6 @@ import org.nova.utils.DateTimeUtils;
 import org.nova.utils.TypeUtils;
 import org.nova.utils.Utils;
 
-@Description("Handlers for server operator pages")
 @ContentDecoders(GzipContentDecoder.class)
 @ContentEncoders(GzipContentEncoder.class)
 @ContentWriters({HtmlContentWriter.class, HtmlElementWriter.class})
@@ -76,7 +75,7 @@ public class OutsideServer
         {
             this.serverApplication=serverApplication;
             MenuBar menuBar=serverApplication.getMenuBar();
-            menuBar.add("/proxy/outside/viewConnections", "Proxy","View Outside Connections");
+            menuBar.add("/proxy/outside/viewConnections", "Proxy","View Proxy Connections");
         }
         else
         {
@@ -97,7 +96,7 @@ public class OutsideServer
     
     public void start() throws IOException
     {
-        this.scheduler.schedule(null, "handleInsideSocket", (trace)->{handleProxyConnection(trace);});
+        this.scheduler.schedule(null, "handleProxyConnection", (trace)->{handleProxyConnection(trace);});
         
     }
     private void handleProxyConnection(Trace parent) throws Exception
@@ -114,13 +113,17 @@ public class OutsideServer
                        Socket socket = serverSocket.accept();
 //                       System.out.println("Accept inside connection");
                        InetSocketAddress socketAddress=(InetSocketAddress)socket.getRemoteSocketAddress();
-                       String insideHost=socketAddress.getHostString();
-                       closeProxyConnection(insideHost);
-                       ProxyConnection connection=new ProxyConnection(this,socket);
-                       
+                       String key=socketAddress.getHostString()+":"+socketAddress.getPort();
+                       ProxyConnection current;
+                       ProxyConnection connection=new ProxyConnection(this,socket,key);
                        synchronized(this.proxyConnections)
                        {
-                           this.proxyConnections.put(insideHost, connection);
+                           current=this.proxyConnections.remove(key);
+                           this.proxyConnections.put(key, connection);
+                       }
+                       if (current!=null)
+                       {
+                           current.close();
                        }
                        this.scheduler.schedule(parent, "InsideConnection", connection);
                     }
@@ -133,19 +136,18 @@ public class OutsideServer
         }
     }
     
-    void closeProxyConnection(String insideHost)
+    public void removeProxyConnection(String key)
     {
         ProxyConnection connection;
         synchronized(this.proxyConnections)
         {
-            connection=this.proxyConnections.remove(insideHost);
+            connection=this.proxyConnections.remove(key);
         }
         if (connection!=null)
         {
             connection.close();
         }
     }
-    
     public Logger getLogger()
     {
         return this.logger;
@@ -155,9 +157,9 @@ public class OutsideServer
     @Path("/proxy/outside/viewConnections")
     public Element viewConnections(Trace parent) throws Throwable
     {
-        OperatorPage page=this.serverApplication.buildOperatorPage("View Outside Connections");
+        OperatorPage page=this.serverApplication.buildOperatorPage("View Proxy Connections");
         OperatorTable table=page.content().returnAddInner(new OperatorTable(page.head()));
-        table.setHeader("Inside Host","Created","Inside Name","Inside Mac Address","Port","Connected","");
+        table.setHeader("Inside Host","Created","Last Keep Alive","Inside Name","Inside Mac Address","Port","Connected","");
         synchronized (this.proxyConnections)
         {
             for (Entry<String, ProxyConnection> entry:this.proxyConnections.entrySet())
@@ -166,6 +168,7 @@ public class OutsideServer
                 tr.add(entry.getKey());
                 ProxyConnection connection=entry.getValue();
                 tr.add(DateTimeUtils.toSystemDateTimeString(connection.getCreated()));
+                tr.add(DateTimeUtils.toSystemDateTimeString(connection.getLastKeepAliveReceived()));
                 ProxyConfiguration configuration=connection.getProxyConfiguration();
                 if (configuration!=null)
                 {
@@ -197,7 +200,7 @@ public class OutsideServer
         if (connection!=null)
         {
             OperatorTable table=page.content().returnAddInner(new OperatorTable(page.head()));
-            table.setHeader("Host","Port","Created","Last Received");
+            table.setHeader("Host","Port","Created","Total Received","Total Sent","Last Received","Last Sent");
             OutsideConnection[] outsideConnections=connection.getOutsideConnections();
             for (OutsideConnection outsideConnection:outsideConnections)
             {
@@ -205,7 +208,13 @@ public class OutsideServer
                 tr.add(outsideConnection.getHost());
                 tr.add(outsideConnection.getPort());
                 tr.add(DateTimeUtils.toSystemDateTimeString(outsideConnection.getCreated()));
-                tr.add(DateTimeUtils.toSystemDateTimeString(outsideConnection.getLastReceived()));
+                tr.add(outsideConnection.getTotalReceived()); 
+                tr.add(outsideConnection.getTotalSent());
+
+                long lastReceived=outsideConnection.getLastReceived();
+                tr.add(lastReceived>0?DateTimeUtils.toSystemDateTimeString(lastReceived):"");
+                long lastSent=outsideConnection.getLastSent();
+                tr.add(lastSent>0?DateTimeUtils.toSystemDateTimeString(lastSent):"");
                 table.addRow(tr);
             }
         }

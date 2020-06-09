@@ -21,11 +21,14 @@
  ******************************************************************************/
 package org.nova.html.elements;
 
+import java.util.Stack;
+
 import com.amazonaws.services.mturk.model.QualificationStatus;
 
 public abstract class Composer
 {
-    final private QuotationMark quotationMark;
+    private QuotationMark quotationMark;
+    private Stack<QuotationMark> stack;
     public abstract StringBuilder getStringBuilder();
 
     
@@ -37,6 +40,21 @@ public abstract class Composer
     {
         return this.quotationMark;
     }
+    public void pushQuotationMark(QuotationMark quotationMark)
+    {
+        if (this.stack==null)
+        {
+            this.stack=new Stack<>();
+        }
+        this.stack.push(this.quotationMark);
+        this.quotationMark=quotationMark;
+    }
+    public QuotationMark popQuotationMark()
+    {
+        this.quotationMark=this.stack.pop();
+        return this.quotationMark;
+    }
+    
     public void compose(Element element) throws Throwable
     {
         if (element!=null)

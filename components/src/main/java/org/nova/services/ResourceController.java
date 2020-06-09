@@ -21,11 +21,15 @@
  ******************************************************************************/
 package org.nova.services;
 import java.io.File;
+import java.security.MessageDigest;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.http.HttpStatus;
 import org.nova.annotations.Description;
+import org.nova.collections.FileCache;
 import org.nova.frameworks.ServerApplication;
 import org.nova.html.elements.Element;
 import org.nova.http.client.BinaryResponse;
@@ -54,30 +58,82 @@ import org.nova.utils.FileUtils;
 
 public class ResourceController
 {
-    public final ServerApplication serverApplication;
+    private final ServerApplication serverApplication;
+    private final FileCache cache; 
     private int cacheControlMaxAge = 300;
     private String cacheControlValue = "public";
     private final boolean cacheControl;
+    private final HashMap<String,String> hashMap;
+    private final HashSet<String> doNotCacheFiles;  
+    private final MessageDigest digest; 
     
     public final static boolean TEST=true;
 
     public ResourceController(ServerApplication serverApplication) throws Throwable
     {
+        this.cache=serverApplication.getFileCache();
         this.cacheControl= serverApplication.getConfiguration().getBooleanValue("ResourceController.cacheControl", true);
         this.cacheControlMaxAge = serverApplication.getConfiguration().getIntegerValue("ResourceController.cacheControl.maxAgeS", 3600*24);
         this.cacheControlValue = serverApplication.getConfiguration().getValue("ResourceController.cacheControl.controlValue", "public");
         this.serverApplication = serverApplication;
+        this.hashMap=new HashMap<>();
+        this.doNotCacheFiles=new HashSet<>();
+        this.digest = MessageDigest.getInstance("SHA-256");
+        
     }
 
+    public void clearCache()
+    {
+        this.cache.removeAll();
+        synchronized(this)
+        {
+            this.hashMap.clear();
+        }
+    }
+    
+    public void doNotCache(String file)
+    {
+        this.doNotCacheFiles.add(file);
+    }
+    
+    public String getHash(String file)
+    {
+        try
+        {
+            String fileName=this.cache.getLocalDirectory()+File.separator+file;
+            synchronized(this)
+            {
+                String hash=this.hashMap.get(file);
+                if (hash!=null)
+                {
+                    return hash;
+                }
+            }
+            String hash=FileUtils.computeHash(this.digest,new File(fileName),65536);
+            synchronized(this)
+            {
+                this.hashMap.put(file, hash);
+            }
+            return hash;
+        }
+        catch (Throwable e)
+        {
+            return null;
+        }
+        
+    }
+    
     @GET
     @Path("/resources/{+}")
     @Log(responseContent=false)
     public void resource(@PathParam(PathParam.AT_LEAST_ONE_SEGMENT) String file, Context context, Trace parent) throws Throwable
     {
         Trace trace=new Trace(parent,"ResourceController.resource");
-        trace.setDetails(file);
         try
         {
+            trace.setDetails(file);
+            context.setCaptured(true);
+
             String external=null;
             if (Element.HREF_LOCAL_DIRECTORY!=null)
             {
@@ -91,13 +147,12 @@ public class ResourceController
                     
                 }
             }
-            
+            file=FileUtils.toNativePath(file);
             HttpServletResponse response = context.getHttpServletResponse();
-            context.setCaptured(true);
             byte[] bytes;
             try
             {
-                bytes = this.serverApplication.getFileCache().get(parent, file);
+                bytes = this.cache.get(parent, file);
                 if (TEST)
                 {
                     Testing.printf("Resource:"+file);
@@ -121,8 +176,7 @@ public class ResourceController
                     JSONClient client=new JSONClient(this.serverApplication.getTraceManager(),this.serverApplication.getLogger(),endPoint);
                     BinaryResponse binaryResponse=client.getBinary(parent, null, pathAndQuery);
                     
-                    
-                    String fileName=this.serverApplication.getFileCache().getLocalDirectory()+"/"+file;
+                    String fileName=this.cache.getLocalDirectory()+"/"+file;
                     String dirs=FileUtils.toNativePath(fileName.substring(0,fileName.lastIndexOf('/')));
                     new File(dirs).mkdirs();
                     bytes=binaryResponse.get();
@@ -135,6 +189,7 @@ public class ResourceController
                 {
                     Testing.printf("Resource: "+file + " not found");
                 }
+                response.setHeader("Cache-Control","no-store, no-cache, must-revalidate, max-age=0");
                 response.setStatus(HttpStatus.NOT_FOUND_404);
                 return;
             }
@@ -144,9 +199,32 @@ public class ResourceController
                 response.setContentType(contentType);
             }
 //            response.setContentLength(bytes.length);
-            if (this.cacheControl)
+            
+            boolean cacheControl=this.cacheControl;
+            if (this.doNotCacheFiles.contains(file))
+            {
+                cacheControl=false;
+            }
+            else
+            {
+                int lastIndex=file.lastIndexOf('.');
+                if (lastIndex>=0)
+                {
+                    String pattern="*"+file.substring(lastIndex);
+                    if (this.doNotCacheFiles.contains(pattern))
+                    {
+                        cacheControl=false;
+                    }
+                }
+            }
+                    
+            if (cacheControl)
             {
                 response.setHeader("Cache-Control",(this.cacheControlValue == null || this.cacheControlValue.length() == 0) ? "max-age=" + this.cacheControlMaxAge : this.cacheControlValue + ",max-age=" + this.cacheControlMaxAge);
+            }
+            else
+            {
+                response.setHeader("Cache-Control","no-store, no-cache, must-revalidate, max-age=0");
             }
             
             response.setStatus(HttpStatus.OK_200);

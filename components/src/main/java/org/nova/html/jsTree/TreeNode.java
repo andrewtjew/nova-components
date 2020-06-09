@@ -114,6 +114,7 @@ public class TreeNode extends Element
     @Override
     public void compose(Composer composer) throws Throwable
     {
+        composer.pushQuotationMark(QuotationMark.SINGLE);
         li li=new li().id(this.id);
         String jsonText=ObjectMapper.writeObjectToString(this.attributes);
 //        li.attr("data-jstree",jsonText,QuotationMark.SINGLE);
@@ -121,6 +122,7 @@ public class TreeNode extends Element
         li.addInner(element);
         li.addInner(this.ul);
         composer.compose(li);
+        composer.popQuotationMark();
     }
 
 }

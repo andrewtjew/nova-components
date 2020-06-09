@@ -29,4 +29,5 @@ public class FileCacheConfiguration
     public long maxAgeMs=Long.MAX_VALUE;
     public long maxSize=Long.MAX_VALUE;
     public int capacity=10000;
+    public long freeMemoryCapacity=1024L*1024L*64L;
 }
