@@ -60,16 +60,20 @@ public class HtmlUtils
     
     public static String js_location(PathAndQuery pathAndQuery)
     {
-        return js_location(QuotationMark.QOUT,pathAndQuery);
+        return js_location(QuotationMark.DOUBLE,pathAndQuery);
     }
     public static String js_location(QuotationMark mark,PathAndQuery pathAndQuery)
     {
         return "window.location="+mark+pathAndQuery.toString()+mark;
     }
 
+    public static String js_location(QuotationMark mark,String url)
+    {
+        return "window.location="+mark+url+mark;
+    }
     public static String js_location(String url)
     {
-        return "window.location='"+url+"'";
+        return js_location(QuotationMark.DOUBLE,url);
     }
     public static String js_disableElementAfterCall(String code)
     {
@@ -236,11 +240,11 @@ public class HtmlUtils
             switch (c)
             {
                 case '"':
-                    sb.append("&#34;");
+                    sb.append("\\\"");
                     break;
                     
                 case '\'':
-                    sb.append("\\'");
+                    sb.append("&#39;");
                     break;
                     
                 case '\\':
@@ -250,6 +254,65 @@ public class HtmlUtils
                     
                 default:
                     sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+    
+
+    public static String escapeString(char escapeChar,String string)
+    {
+        StringBuilder sb=new StringBuilder();
+//        if (escapeChar=='"')
+            if (true)
+        {
+            for (int i=0;i<string.length();i++)
+            {
+                char c=string.charAt(i);
+                switch (c)
+                {
+                    case '"':
+                        sb.append("\\\"");
+                        break;
+                        
+                    case '\'':
+                        sb.append("&#39;");
+                        break;
+                        
+                    case '\\':
+                        sb.append("\\\\");
+                        break;
+                        
+                        
+                    default:
+                        sb.append(c);
+                }
+                
+            }
+        }
+        else
+        {
+            for (int i=0;i<string.length();i++)
+            {
+                char c=string.charAt(i);
+                switch (c)
+                {
+                    case '"':
+                        sb.append("&#34;");
+                        break;
+                        
+                    case '\'':
+                        sb.append("\\'");
+                        break;
+                        
+                    case '\\':
+                        sb.append("\\\\");
+                        break;
+                        
+                        
+                    default:
+                        sb.append(c);
+                }
             }
         }
         return sb.toString();
@@ -293,11 +356,12 @@ public class HtmlUtils
         
     public static String js_call(String function,Object...parameters)
     {
-        return js_call(QuotationMark.SINGLE,function,parameters);
+        return js_call(QuotationMark.DOUBLE,function,parameters);
     }
     
     public static String js_call(QuotationMark mark,String function,Object...parameters)
     {
+        char escapeChar=QuotationMark.asChar(mark);
         StringBuilder sb=new StringBuilder(function+"(");
         boolean commaNeeded=false;
         for (Object parameter:parameters)
@@ -333,13 +397,13 @@ public class HtmlUtils
                             {
                                 sb.append(',');
                             }
-                            sb.append(mark.toString()+toStringParameter(Array.get(parameter, i).toString())+mark.toString());
+                            sb.append(mark.toString()+escapeString(escapeChar,Array.get(parameter, i).toString())+mark.toString());
                         }
                         sb.append(']');
                     }
                     else
                     {
-                        sb.append(mark.toString()+toStringParameter(parameter.toString())+mark.toString());
+                        sb.append(mark.toString()+escapeString(escapeChar,parameter.toString())+mark.toString());
                     }
                 }
                 else if ((type==byte.class)

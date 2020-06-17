@@ -60,7 +60,7 @@ public class DocumentResult extends Result
     }
     public DocumentResult() throws Throwable
     {
-        this(QuotationMark.DOUBLE);
+        this(QuotationMark.SINGLE);
     }
     
     public void setLocation(String location)

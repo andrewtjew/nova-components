@@ -81,6 +81,7 @@ import org.nova.html.tags.td;
 import org.nova.html.tags.textarea;
 import org.nova.html.tags.th;
 import org.nova.html.tags.tr;
+import org.nova.html.tags.ext.meta_refresh;
 import org.nova.html.tags.ext.th_title;
 import org.nova.http.Header;
 import org.nova.http.client.HttpClientConfiguration;
@@ -839,24 +840,6 @@ public class ServerApplicationPages
     }
 
 
-    void write(Table table, Trace trace, Object family) throws Exception
-    {
-        TableRow row=new TableRow().
-        add(family,trace.getNumber()).
-        add(new TitleText(trace.getCategory(),80)).
-        add(new TitleText(trace.getDetails(),80)).
-        add(
-        DateTimeUtils.toSystemDateTimeString(trace.getCreatedMs()),
-        formatNsToMs(trace.getActiveNs()),
-        formatNsToMs(trace.getWaitNs()),
-        formatNsToMs(trace.getDurationNs()),
-        trace.isWaiting(),
-        trace.getThread().getName()
-        );
-        row.tr().onclick("window.location='"+new PathAndQuery("./activeTrace").addQuery("number", trace.getNumber()).toString()+"'");
-        table.addRow(row);
-    }
-
     
     static class ActiveTraceTreeElement extends Element
     {
@@ -1054,7 +1037,7 @@ public class ServerApplicationPages
                 this.threadExecutionProfiler.start();
             }
             button_button button=new button_button().addInner("Stop Sampling");
-            button.onclick("$.post('/operator/tracing/sample/stop',function(data){$('#stackTraceTree').html(data);});");
+            button.onclick("$.post(\"/operator/tracing/sample/stop\",function(data){$(\"#stackTraceTree\").html(data);});");
             page.content().addInner(button);
 
             new Tree(page.head());
@@ -4033,7 +4016,7 @@ public class ServerApplicationPages
         String id=textarea.id();
         
         button_button button=new button_button().addInner("&#128203;").title("Copy to clipboard");
-        button.onclick("var copyText=document.getElementById('"+id+"');copyText.select();document.execCommand('Copy');");
+        button.onclick("var copyText=document.getElementById(\""+id+"\");copyText.select();document.execCommand(\"Copy\");");
         
         
         panel.addRightInHeader(button);
@@ -4646,7 +4629,7 @@ public class ServerApplicationPages
         HttpClientEndPoint httpClientEndPoint=getExecuteClient(httpServer,context);
         String content=httpClientEndPoint.endPoint+pathAndQuery.toString();
         BasicPage page=new BasicPage();
-        page.head().addInner(new meta().http_equiv(http_equiv.refresh).content("0;URL='"+content+"'"));
+        page.head().addInner(new meta().http_equiv(http_equiv.refresh).content("0;URL=\""+content+"\""));
         return page;
     }
 

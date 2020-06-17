@@ -40,7 +40,8 @@ public class Popover extends TipComponent<Popover>
 {
     public Popover(TagElement<?> toggler)
     {
-    	super(toggler,"popover");
+    	super(toggler);
+        this.toggler.attr("data-toggle","popover");
     }
     
     public String js_popover(TipOption option,QuotationMark mark)
@@ -50,7 +51,7 @@ public class Popover extends TipComponent<Popover>
     }
     public String js_popover(TipOption option)
     {
-    	return js_popover(option, QuotationMark.SINGLE);
+    	return js_popover(option, QuotationMark.DOUBLE);
     }
     
     public static script js_ready()

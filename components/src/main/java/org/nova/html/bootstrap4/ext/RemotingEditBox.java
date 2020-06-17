@@ -31,6 +31,7 @@ import org.nova.html.bootstrap4.Item;
 import org.nova.html.bootstrap4.Popover;
 import org.nova.html.bootstrap4.StyleComponent;
 import org.nova.html.bootstrap4.TipOption;
+import org.nova.html.bootstrap4.classes.AlignSelf;
 import org.nova.html.bootstrap4.classes.Display;
 import org.nova.html.bootstrap4.classes.Flex;
 import org.nova.html.bootstrap4.classes.Justify;
@@ -48,37 +49,157 @@ import org.nova.html.ext.HtmlUtils;
 import org.nova.html.tags.div;
 import org.nova.html.tags.script;
 import org.nova.html.ext.ModalBackground;
+import org.nova.html.remoting.Inputs;
 import org.nova.html.remoting1.CallBuilder;
 import org.nova.http.client.PathAndQuery;
 
+import com.amazonaws.services.kinesisanalytics.model.Input;
+
 public class RemotingEditBox extends StyleComponent<RemotingEditBox>   
 {
-	public RemotingEditBox(ModalBackground background,StyleComponent<?> valueElement,String action,InputElement<?> inputElement,GlobalEventTagElement<?> editButton,GlobalEventTagElement<?> acceptButton,GlobalEventTagElement<?> dismissButton,Placement placement) throws Throwable
-	{
+    final private QuotationMark mark;
+    final private Inputs inputs;
+    final private InputElement<?> inputElement;
+    final private StyleComponent<?> valueElement;
+    private Element content;
+    private ModalBackground background;
+    private GlobalEventTagElement<?> acceptButton;
+    private GlobalEventTagElement<?> dismissButton;
+    private GlobalEventTagElement<?> editButton;
+    
+    private Placement placement;
+    
+//	public RemotingEditBox(ModalBackground background,StyleComponent<?> valueElement,String action,InputElement<?> inputElement,GlobalEventTagElement<?> editButton,GlobalEventTagElement<?> acceptButton,GlobalEventTagElement<?> dismissButton,Placement placement) throws Throwable
+//	{
+//        super("div",null);
+//		this.d(Display.flex);
+//		valueElement.flex(Flex.grow,1);
+//		this.addInner(valueElement);
+//
+//		String template;
+//        template="<div class='popover' role='tooltip' style='margin:0;padding:0;width:inherit;max-width:100% !important;'><div class='popover-body'></div></div>";
+//		
+//		editButton.style(new Style().display(display.none));
+//
+//		this.addInner(editButton);
+//        QuotationMark mark=QuotationMark.DOUBLE;
+//		this.onmouseover("document.getElementById("+mark+editButton.id()+mark+").style.display="+mark+"block"+mark);
+//		this.onmouseleave("document.getElementById("+mark+editButton.id()+mark+").style.display="+mark+"none"+mark);
+//
+//		Item inputGroup=new Item().d(Display.flex).mx(0).px(0);
+//		inputElement.addClass(new ClassBuilder().w(100).toString());
+//		inputGroup.addInner(inputElement);
+//		inputGroup.addInner(acceptButton);
+//		inputGroup.addInner(dismissButton);
+//
+//		editButton.onclick(HtmlUtils.js_call("Remoting.openEditBox"
+//                , template
+//                ,background!=null?background.id():null
+//                ,id()
+//                ,acceptButton.id()
+//                ,dismissButton.id()
+//                ,editButton.id()
+//                ,inputElement.id()
+//                ,valueElement.id()
+//                ,action
+//                ,inputGroup.getHtml() //This cannot be called before the id() method, otherwise the ids won't be generated.
+//                ,placement
+//                ));
+//
+//
+//	}
+    public RemotingEditBox(QuotationMark mark,StyleComponent<?> valueElement,InputElement<?> inputElement,Inputs inputs)
+    {
         super("div",null);
-		this.d(Display.flex);
-		valueElement.flex(Flex.grow,1);
-		this.addInner(valueElement);
-		QuotationMark mark=QuotationMark.APOS;
+        this.d(Display.flex);
+        valueElement.flex(Flex.grow,1);
+        this.addInner(valueElement);
 
-		String template;
+        this.mark=mark;
+        this.placement=Placement.bottom;
+        this.inputs=inputs;
+        this.inputElement=inputElement;
+        this.valueElement=valueElement;
+    
+    }
+    public RemotingEditBox(QuotationMark mark,StyleComponent<?> valueElement,InputElement<?> inputElement)
+    {
+        this(mark,valueElement,inputElement,new Inputs());
+    }
+    public RemotingEditBox(StyleComponent<?> valueElement,InputElement<?> inputElement)
+    {
+        this(QuotationMark.DOUBLE,valueElement,inputElement,new Inputs());
+    }
+    public RemotingEditBox(String value,InputElement<?> inputElement)
+    {
+        this(QuotationMark.DOUBLE,new Item().m(2).text(TextStyle.truncate).addInner(value),inputElement,new Inputs());
+    }
+
+    public RemotingEditBox modalBackground(ModalBackground background)
+    {
+        this.background=background;
+        return this;
+    }
+    public RemotingEditBox acceptButton(GlobalEventTagElement<?> acceptButton)
+    {
+        this.acceptButton=acceptButton;
+        return this;
+    }
+    public RemotingEditBox editButton(GlobalEventTagElement<?> editButton)
+    {
+        this.editButton=editButton;
+        return this;
+    }
+    public RemotingEditBox dismissButton(GlobalEventTagElement<?> dismissButton)
+    {
+        this.acceptButton=dismissButton;
+        return this;
+    }
+    public RemotingEditBox placement(Placement placement)
+    {
+        this.placement=placement;
+        return this;
+    }
+    
+
+    public void post(String action) throws Throwable
+    {
+
+//        String template=new Item().addClass("popover").attr("role","tooltip").style(new Style().margin(new Size(0,unit.em)).padding(new Size(0,unit.em)))
+//                .addInner(new Item().addClass("popover-body")).getHtml();
+//        
+
+        if (this.acceptButton==null)
+        {
+            this.acceptButton=new Button().ml(1).color(StyleColor.success).addInner("&#x2713;");
+        }
+        if (this.dismissButton==null)
+        {
+            this.dismissButton=new Button().ml(1).color(StyleColor.secondary).addInner("&#x1f5d9;");
+        }
+        if (this.editButton==null)
+        {
+            this.editButton=new Button().ml(1).color(StyleColor.secondary).addInner("&#x270F;");
+        }
+        this.editButton.style(new Style().display(display.none));
+        this.addInner(this.editButton);
+
+        this.onmouseover("document.getElementById("+mark+this.editButton.id()+mark+").style.display="+mark+"block"+mark);
+        this.onmouseleave("document.getElementById("+mark+this.editButton.id()+mark+").style.display="+mark+"none"+mark);
+        
+        
+        String template;
         template="<div class='popover' role='tooltip' style='margin:0;padding:0;width:inherit;max-width:100% !important;'><div class='popover-body'></div></div>";
+        
 
-		
-		
-		editButton.style(new Style().display(display.none));
 
-		this.addInner(editButton);
-		this.onmouseover("document.getElementById("+mark+editButton.id()+mark+").style.display="+mark+"block"+mark);
-		this.onmouseleave("document.getElementById("+mark+editButton.id()+mark+").style.display="+mark+"none"+mark);
+        Item inputGroup=new Item().d(Display.flex).mx(0).px(0);
+        inputElement.addClass(new ClassBuilder().w(100).toString());
+        inputGroup.addInner(inputElement);
+        inputGroup.addInner(acceptButton);
+        inputGroup.addInner(dismissButton);
 
-		Item inputGroup=new Item().d(Display.flex).mx(0).px(0);
-		inputElement.addClass(new ClassBuilder().w(100).toString());
-		inputGroup.addInner(inputElement);
-		inputGroup.addInner(acceptButton);
-		inputGroup.addInner(dismissButton);
-
-		editButton.onclick(HtmlUtils.js_call("Remoting.openEditBox"
+        editButton.onclick(HtmlUtils.js_call("Remoting.openEditBox"
                 , template
                 ,background!=null?background.id():null
                 ,id()
@@ -88,28 +209,11 @@ public class RemotingEditBox extends StyleComponent<RemotingEditBox>
                 ,inputElement.id()
                 ,valueElement.id()
                 ,action
-                ,inputGroup.getHtml()
+                ,this.inputs.getContent()
+                ,inputGroup.getHtml() //This cannot be called before the id() method, otherwise the ids won't be generated.
                 ,placement
                 ));
 
-
-	}
-	public RemotingEditBox(ModalBackground background,StyleComponent<?> valueElement,String action,InputElement<?> inputElement,Placement placement) throws Throwable
-	{
-		this(background,valueElement,action,inputElement
-				,new Button().ml(1).color(StyleColor.secondary).addInner("&#x270F;")
-				,new Button().ml(1).color(StyleColor.success).addInner("&#x2713;")
-				,new Button().ml(1).color(StyleColor.secondary).addInner("&#x1f5d9;")
-				,placement
-				);
-	}
-    public RemotingEditBox(ModalBackground background,Object value,String action,InputElement<?> inputElement,Placement placement) throws Throwable
-    {
-        this(background,new Item().m(2).text(TextStyle.truncate).addInner(value),action,inputElement,placement);
     }
 
-    public RemotingEditBox(ModalBackground background,Object value,String action,InputElement<?> inputElement) throws Throwable
-    {
-        this(background,new Item().m(2).text(TextStyle.truncate).addInner(value),action,inputElement,Placement.bottom);
-    }
-}
+}    

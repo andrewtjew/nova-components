@@ -43,7 +43,7 @@ public class CallBuilder
     }
     public CallBuilder(Head head)
     {
-    	this(QuotationMark.SINGLE,head);
+    	this(QuotationMark.DOUBLE,head);
     }
     
     final private QuotationMark mark;
@@ -55,7 +55,7 @@ public class CallBuilder
     
     public CallBuilder()
     {
-    	this(QuotationMark.SINGLE);
+    	this(QuotationMark.DOUBLE);
     }
 
     /*

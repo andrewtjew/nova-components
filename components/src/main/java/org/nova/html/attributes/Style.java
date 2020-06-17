@@ -33,6 +33,21 @@ public class Style
         sb.append("width:"+size+";");
         return this;
     }
+    public Style width_inherit()
+    {
+        sb.append("width:inherit");
+        return this;
+    }
+    public Style max_width(Size size)
+    {
+        sb.append("max-width:"+size+";");
+        return this;
+    }
+    public Style max_width_inherit()
+    {
+        sb.append("max-width:inherit");
+        return this;
+    }
     public Style text(String text)
     {
         sb.append(text);

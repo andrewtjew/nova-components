@@ -79,7 +79,7 @@ public class ModalBackground extends GlobalEventTagElement<div>
     }
     public String js_show()
     {
-    	return js_show(QuotationMark.SINGLE);
+    	return js_show(QuotationMark.DOUBLE);
     }
     public String js_hide(QuotationMark mark)
     {
@@ -87,6 +87,6 @@ public class ModalBackground extends GlobalEventTagElement<div>
     }
     public String js_hide()
     {
-    	return js_hide(QuotationMark.SINGLE);
+    	return js_hide(QuotationMark.DOUBLE);
     }
 }

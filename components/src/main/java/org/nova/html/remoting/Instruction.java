@@ -3,10 +3,13 @@ package org.nova.html.remoting;
 public class Instruction
 {
     public boolean trace;
-    public String code;
-    Instruction(String code,boolean trace)
+    public Command command;
+    public String[] parameters;
+    
+    Instruction(boolean trace,Command command,String...parameters)
     {
-        this.code=code;
         this.trace=trace;
+        this.command=command;
+        this.parameters=parameters;
     }
 }

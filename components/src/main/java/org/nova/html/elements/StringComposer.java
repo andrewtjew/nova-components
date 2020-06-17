@@ -27,7 +27,7 @@ public class StringComposer extends Composer
 
     public StringComposer()
     {
-        this(QuotationMark.DOUBLE);
+        this(QuotationMark.SINGLE);
     }
     public StringComposer(QuotationMark quotationMark)
     {

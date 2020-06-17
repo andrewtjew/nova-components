@@ -38,13 +38,17 @@ public class Inputs
         this.inputs=new ArrayList<Input>();
     }
 
-    public Inputs()
+    public Inputs(QuotationMark mark)
     {
-        this(null,QuotationMark.SINGLE);
+        this(null,QuotationMark.DOUBLE);
     }
     public Inputs(FormElement<?> form)
     {
-        this(form,QuotationMark.SINGLE);
+        this(form,QuotationMark.DOUBLE);
+    }
+    public Inputs()
+    {
+        this(null,QuotationMark.DOUBLE);
     }
     public Inputs add(String name,Object value)
     {
@@ -53,6 +57,7 @@ public class Inputs
     }
     public Inputs add(InputElement<?> inputElement)
     {
+        inputElement.id();
         this.inputs.add(new Input(inputElement));
         return this;
     }
@@ -105,6 +110,14 @@ public class Inputs
         return null;
     }
     
+    public String getContent() throws Throwable
+    {
+        if (this.data==null)
+        {
+            this.data=ObjectMapper.writeObjectToString(this.inputs.toArray(new Input[this.inputs.size()]));
+        }
+        return this.data;
+    }
     
     public String js_post(String action) throws Throwable
     {
@@ -112,7 +125,7 @@ public class Inputs
         {
             this.data=ObjectMapper.writeObjectToString(this.inputs.toArray(new Input[this.inputs.size()]));
         }
-        return HtmlUtils.js_call("Remoting.post",action,this.data);
+        return HtmlUtils.js_call(this.mark,"Remoting.post",action,this.data);
     }
     public String js_get(String action) throws Throwable
     {
@@ -120,7 +133,7 @@ public class Inputs
         {
             this.data=ObjectMapper.writeObjectToString(this.inputs.toArray(new Input[this.inputs.size()]));
         }
-        return HtmlUtils.js_call("Remoting.get",action,this.data);
+        return HtmlUtils.js_call(this.mark,"Remoting.get",action,this.data);
     }
 
     

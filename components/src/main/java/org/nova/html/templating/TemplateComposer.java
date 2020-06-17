@@ -35,7 +35,7 @@ public class TemplateComposer extends Composer
     
     public TemplateComposer()
     {
-        this(QuotationMark.DOUBLE);
+        this(QuotationMark.SINGLE);
     }
     
     public TemplateComposer(QuotationMark quotationMark)

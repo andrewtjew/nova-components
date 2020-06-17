@@ -45,7 +45,7 @@ public abstract class Element
    }
     public String getHtml()
     {
-        return getHtml(QuotationMark.DOUBLE);
+        return getHtml(QuotationMark.SINGLE);
    }
     public String getHtml(QuotationMark quotationMark)
     {

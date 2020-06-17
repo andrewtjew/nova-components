@@ -283,8 +283,9 @@ export class CallBuilder
 
 class Instruction
 {
-    code:string;
     trace:boolean;
+    command:string;
+    parameters:string[];
 }
 
 class Input 
@@ -325,6 +326,7 @@ class Remoting
         ,editInputId:string
         ,valueElementId:string
         ,action:string
+        ,text:string
         ,content:string
         ,placement:string
         )
@@ -351,15 +353,23 @@ class Remoting
         );
         pop.popover("show");
 
+
         var acceptButton=document.getElementById(acceptButtonId);
         var dismissButton=document.getElementById(dismissButtonId);
         var editInput=document.getElementById(editInputId) as HTMLInputElement;
         var editButton=document.getElementById(editButtonId);
         var valueElement=document.getElementById(valueElementId);
 
+        container.onmouseover=function(){
+        }
+        editButton.style.display="none";
+
         var close=function()
         {
             pop.popover("hide");     
+            container.onmouseover=function(){
+                editButton.style.display="block";
+            }
             if (background!=null)
             {
                 background.style.display="none";
@@ -372,7 +382,7 @@ class Remoting
     
         acceptButton.onclick=function()
         {
-            var data=new Object();
+            var data=Remoting.toData(text);
             data[editInput.name]=editInput.value;
             $.ajax(
                 {url:action,
@@ -385,15 +395,7 @@ class Remoting
                 {
                     if (result!=null)
                     {
-                        var instructions=result as Instruction[];
-                        if (instructions!=null)
-                        {
-                            Remoting.run(instructions);
-                        }
-                        else
-                        {
-                            valueElement.innerText=result.toString();
-                        }
+                        valueElement.innerText=result.toString();
                     }
                     close();
                 },
@@ -406,14 +408,14 @@ class Remoting
             }
     }
 
-    public static openInput(
+    public static openDialogPopover(
         template:string
         ,backgroundId:string
         ,containerId:string
         ,acceptButtonId:string
         ,dismissButtonId:string
-        ,editInputId:string
         ,action:string
+        ,text:string
         ,content:string
         ,placement:string
         )
@@ -424,7 +426,6 @@ class Remoting
         {
             background.style.display="block";
         }
-        var p="bottom";
         //Need to create popover first to create the buttons.
         var pop=$('#'+containerId).popover(
             {
@@ -440,7 +441,6 @@ class Remoting
 
         var acceptButton=document.getElementById(acceptButtonId);
         var dismissButton=document.getElementById(dismissButtonId);
-        var editInput=document.getElementById(editInputId) as HTMLInputElement;
 
         var close=function()
         {
@@ -457,8 +457,7 @@ class Remoting
     
         acceptButton.onclick=function()
         {
-            var data=new Object();
-            data[editInput.name]=editInput.value;
+            var data=Remoting.toData(text);
             $.ajax(
                 {url:action,
                 type:"POST",
@@ -480,81 +479,10 @@ class Remoting
             }
 
     }    
-    public static openLabel(
-        template:string
-        ,backgroundId:string
-        ,containerId:string
-        ,acceptButtonId:string
-        ,dismissButtonId:string
-        ,action:string
-        ,content:string
-        ,placement:string
-        )
+    static toData(text:string):object
     {
-        var background=document.getElementById(backgroundId);
-
-        if (background!=null)
-        {
-            background.style.display="block";
-        }
-        var p="bottom";
-        //Need to create popover first to create the buttons.
-        var pop=$('#'+containerId).popover(
-            {
-                trigger:"manual",
-                placement:Remoting.toPlacement(placement),
-                template:template,
-                html:true,
-                content:content,
-                sanitize:false,
-            }
-        );
-        pop.popover("show");
-
-        var acceptButton=document.getElementById(acceptButtonId);
-        var dismissButton=document.getElementById(dismissButtonId);
-
-        var close=function()
-        {
-            pop.popover("hide");     
-            if (background!=null)
-            {
-                background.style.display="none";
-            }
-        }
-        dismissButton.onclick=function()
-        {
-            close();
-        }
-    
-        console.log(action);
-        acceptButton.onclick=function()
-        {
-            $.ajax(
-                {url:action,
-                type:"POST",
-                async:true,
-                dataType:"json",
-                cache: false,
-                success:function(instructions:Instruction[])
-                {
-                    close();
-                    Remoting.run(instructions);
-                },
-                error:function(xhr)
-                {
-                    close();
-                    alert("Error: "+xhr.status+" "+xhr.statusText);
-                }
-            }); 
-            }
-
-    }    
-
-    public static post(action:string,text:string,async:boolean)
-    {
-        var inputs=JSON.parse(text) as Input[];
         var data=new Object();
+        var inputs=JSON.parse(text) as Input[];
         inputs.forEach(input=>
         {
             switch (input.inputType)
@@ -588,6 +516,12 @@ class Remoting
             }
         }
         );
+        return data;
+    }
+
+    public static post(action:string,text:string,async:boolean)
+    {
+        var data=Remoting.toData(text);
         this.call("POST",action,data,async);
     }
     public static get(action:string,text:string,async:boolean)
@@ -626,7 +560,6 @@ class Remoting
             seperator="&";
         }
         );
-        console.log(action);
         this.call("GET",action,null,async);
     }
 
@@ -656,17 +589,49 @@ class Remoting
         {
             instructions.forEach(instruction=>
                 {
+                    var parameters=instruction.parameters;
                     if (instruction.trace)
                     {
-                        console.log("code:"+instruction.code);
+                        console.log("ActionResponse:"+instruction.command);
+                        console.log("parameters:"+parameters);
                     }
                     try
                     {
-                        eval(instruction.code);
+                        switch (instruction.command)
+                        {
+                            case "innerHTML":
+                                document.getElementById(parameters[0]).innerHTML=parameters[1];
+                                break;
+                                
+                            case "outerHTML":
+                                document.getElementById(parameters[0]).outerHTML=parameters[1];
+                                break;
+
+                            case "innerText":
+                            document.getElementById(parameters[0]).innerText=parameters[1];
+                            break;
+                                    
+                            case "alert":
+                            alert(parameters[0]);
+                            break;
+                                    
+                            case "log":
+                            console.log(parameters[0]);
+                            break;
+                                    
+                            case "location":
+                            document.location.href=parameters[0];
+                            break;
+                                    
+                            case "script":
+                                eval(parameters[0]);
+                                break;
+
+                        }
                     }
                     catch (ex)
                     {
-                        alert(ex);
+                        alert("ActionResponse Exception:"+ex);
                     }
                 }
                 );

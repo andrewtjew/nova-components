@@ -54,7 +54,7 @@ public class FormQueryBuilder
 
     public FormQueryBuilder()
     {
-        this(QuotationMark.SINGLE);
+        this(QuotationMark.DOUBLE);
     }
 
     public FormQueryBuilder(QuotationMark mark,FormQueryBuilder parent)
@@ -64,7 +64,7 @@ public class FormQueryBuilder
     }
     public FormQueryBuilder(FormQueryBuilder parent)
     {
-    	this(QuotationMark.SINGLE,parent);
+    	this(QuotationMark.DOUBLE,parent);
     }
     
     private void addName(String name)

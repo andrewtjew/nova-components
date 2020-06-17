@@ -74,7 +74,7 @@ public class BootStrapPage extends Element
         
         String dataTableKey=DataTableBootstrap4.class.getCanonicalName();
         this.head().add(dataTableKey,new link().rel(link_rel.stylesheet).type("text/css").href("https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"));
-        this.head().add(dataTableKey, new script().src("https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css"));
+        this.head().add(dataTableKey,new link().rel(link_rel.stylesheet).type("text/css").href("https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css"));
         this.head().add(dataTableKey, new script().src("https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"));
         this.head().add(dataTableKey, new script().src("https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"));
 
