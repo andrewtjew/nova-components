@@ -1,4 +1,4 @@
-namespace nova.assist
+namespace nova.remote
 {
     function toData(text:string):object
     {

@@ -1,4 +1,4 @@
-package org.nova.html.assist;
+package org.nova.html.remote;
 
 import org.nova.html.elements.InputElement;
 import org.nova.json.ObjectMapper;

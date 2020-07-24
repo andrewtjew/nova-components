@@ -1,4 +1,4 @@
-package org.nova.html.assist;
+package org.nova.html.remote;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -127,7 +127,7 @@ public class Inputs
     }
     public String js_post(String action,boolean async) throws Throwable
     {
-        return HtmlUtils.js_call(this.mark,"nova.assist.post",action,getContent(),async);
+        return HtmlUtils.js_call(this.mark,"nova.remote.post",action,getContent(),async);
     }
     public String js_get(String action,boolean async) throws Throwable
     {
@@ -135,7 +135,7 @@ public class Inputs
         {
             this.data=ObjectMapper.writeObjectToString(this.inputs.toArray(new Input[this.inputs.size()]));
         }
-        return HtmlUtils.js_call(this.mark,"nova.assist.get",action,getContent(),async);
+        return HtmlUtils.js_call(this.mark,"nova.remote.get",action,getContent(),async);
     }
 
     public String js_action() throws Throwable

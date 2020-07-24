@@ -28,10 +28,10 @@ import org.nova.collections.FileCacheConfiguration;
 import org.nova.concurrent.Synchronization;
 import org.nova.configuration.Configuration;
 import org.nova.html.ExtionsionToTypeMappings;
-import org.nova.html.assist.AssistResponseWriter;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.operator.MenuBar;
+import org.nova.html.remote.ResponseWriter;
 import org.nova.html.remoting.HtmlRemotingWriter;
 import org.nova.html.templating.Template;
 import org.nova.http.server.JettyServerFactory;
@@ -147,7 +147,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
                 this.privateServer.addContentDecoders(new GzipContentDecoder());
                 this.privateServer.addContentEncoders(new GzipContentEncoder());
                 this.privateServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
-                this.privateServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter(),new HtmlRemotingWriter(),new AssistResponseWriter());
+                this.privateServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter(),new HtmlRemotingWriter(),new ResponseWriter());
             }
             else
             {
@@ -207,7 +207,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
                 this.publicServer.addContentDecoders(new GzipContentDecoder());
                 this.publicServer.addContentEncoders(new GzipContentEncoder());
                 this.publicServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
-                this.publicServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter(),new HtmlRemotingWriter(),new AssistResponseWriter());
+                this.publicServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter(),new HtmlRemotingWriter(),new ResponseWriter());
             }
             else
             {

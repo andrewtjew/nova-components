@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.assist;
+package org.nova.html.remote;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -28,9 +28,9 @@ import org.nova.http.server.ContentWriter;
 import org.nova.http.server.Context;
 import org.nova.json.ObjectMapper;
 
-public class AssistResponseWriter extends ContentWriter<AssistResponse>
+public class ResponseWriter extends ContentWriter<Response>
 {
-	public AssistResponseWriter() throws Exception
+	public ResponseWriter() throws Exception
 	{
 	}
 	
@@ -41,7 +41,7 @@ public class AssistResponseWriter extends ContentWriter<AssistResponse>
 	}
 	
 	@Override
-	public void write(Context context, OutputStream outputStream, AssistResponse program) throws Throwable
+	public void write(Context context, OutputStream outputStream, Response program) throws Throwable
 	{
         context.getHttpServletResponse().setContentType("application/json;charset=utf-8");
         Instruction[] instructions=program.instructions.toArray(new Instruction[program.instructions.size()]);

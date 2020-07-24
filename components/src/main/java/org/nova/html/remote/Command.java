@@ -1,4 +1,4 @@
-package org.nova.html.assist;
+package org.nova.html.remote;
 
 public enum Command
 {
