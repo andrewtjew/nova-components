@@ -1,6 +1,7 @@
-package org.nova.html.remoting;
+package org.nova.html.assist;
 
 import org.nova.html.elements.InputElement;
+import org.nova.json.ObjectMapper;
 
 public class Input
 {
@@ -8,9 +9,9 @@ public class Input
     final public String name;
     final public InputType inputType;
     
-    public Input(String name,Object value)
+    public Input(String name,Object value) throws Throwable
     {
-        this.id=value!=null?value.toString():null;
+        this.id=ObjectMapper.writeObjectToString(value);
         this.name=name;
         this.inputType=InputType.constant;
     }

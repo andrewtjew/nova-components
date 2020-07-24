@@ -19,10 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.remoting1;
+package org.nova.html.remoting;
 
-public class ModalResult
+public abstract class Result
 {
-    public String id;
-    public ModalOption option;
+    abstract public String serialize() throws Throwable;
+    
 }

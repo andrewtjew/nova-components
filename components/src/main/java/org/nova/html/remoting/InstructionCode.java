@@ -1,4 +1,4 @@
-package org.nova.html.remoting1;
+package org.nova.html.remoting;
 
 public enum InstructionCode
 {

@@ -19,10 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.remoting1;
+package org.nova.html.remoting;
 
-public class HtmlResult
+public class Response
 {
-    public String id;
-    public String html;
+    public HtmlResult[] htmlResults;
+    public HtmlResult[] appendResults;
+    public ModalResult[] modalResults;
+    public ValResult[] valResults;
+    public RemoveClassResult[] removeClassResults;
+    public AddClassResult[] addClassResults;
+    public PropResult[] propResults;
+    public ClearTimerCommand[] clearTimerCommands;
+    public String startScript;
+    public String script;
+    public String result;
+    public String location;
 }

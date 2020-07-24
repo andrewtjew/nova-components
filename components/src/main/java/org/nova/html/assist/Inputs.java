@@ -1,4 +1,4 @@
-package org.nova.html.remoting;
+package org.nova.html.assist;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -28,45 +28,56 @@ public class Inputs
     private String data;
     final private QuotationMark mark;
     final private ArrayList<Input> inputs;
-    final private FormElement<?> form; 
+    final private ArrayList<Element> elements;
+    final private FormElement<?> form;
     
 
-    public Inputs(FormElement<?> form,QuotationMark mark)
+    public Inputs(FormElement<?> element,QuotationMark mark)
     {
-        this.form=form;
+        this.elements=new ArrayList<Element>();
+        this.elements.add(element);
         this.mark=mark;
         this.inputs=new ArrayList<Input>();
+        this.form=element;
     }
 
     public Inputs(QuotationMark mark)
     {
         this(null,QuotationMark.DOUBLE);
     }
-    public Inputs(FormElement<?> form)
+    public Inputs(FormElement<?> element)
     {
-        this(form,QuotationMark.DOUBLE);
+        this(element,QuotationMark.DOUBLE);
     }
     public Inputs()
     {
         this(null,QuotationMark.DOUBLE);
     }
-    public Inputs add(String name,Object value)
+    public Inputs add(String name,Object value) throws Throwable
     {
         this.inputs.add(new Input(name,value));
         return this;
     }
-    public Inputs add(InputElement<?> inputElement)
+    public Inputs add(Element element)
     {
-        inputElement.id();
-        this.inputs.add(new Input(inputElement));
+        this.elements.add(element);
         return this;
     }
-    public InputElement<?> returnAdd(InputElement<?> inputElement)
+//    public InputElement<?> returnAdd(InputElement<?> inputElement)
+//    {
+//        this.inputs.add(new Input(inputElement));
+//        return inputElement;
+//    }
+    
+    private void addElements()
     {
-        this.inputs.add(new Input(inputElement));
-        return inputElement;
+        for (Element element:this.elements)
+        {
+            addElements(element);
+        }
     }
-    private void addInputs(Element element)
+    
+    private void addElements(Element element)
     {
         if (element==null)
         {
@@ -85,30 +96,13 @@ public class Inputs
             {
                 for (Element inner:inners)
                 {
-                    addInputs(inner);
+                    addElements(inner);
                 }
             }
         }
         return;
     }
     
-    public String js_action() throws Throwable
-    {
-        if (this.form!=null)
-        {
-            addInputs(this.form);
-            if (form.method()==method.get)
-            {
-                return js_get(this.form.action());
-            }
-            else
-            {
-                return js_post(this.form.action());
-            }
-                
-        }
-        return null;
-    }
     
     public String getContent() throws Throwable
     {
@@ -119,21 +113,50 @@ public class Inputs
         return this.data;
     }
     
-    public String js_post(String action) throws Throwable
+    public String js_action(boolean async) throws Throwable
+    {
+        addElements();
+        if (form.method()==method.get)
+        {
+            return js_get(this.form.action(),async);
+        }
+        else
+        {
+            return js_post(this.form.action(),async);
+        }
+    }
+    public String js_post(String action,boolean async) throws Throwable
+    {
+        return HtmlUtils.js_call(this.mark,"nova.assist.post",action,getContent(),async);
+    }
+    public String js_get(String action,boolean async) throws Throwable
     {
         if (this.data==null)
         {
             this.data=ObjectMapper.writeObjectToString(this.inputs.toArray(new Input[this.inputs.size()]));
         }
-        return HtmlUtils.js_call(this.mark,"Remoting.post",action,this.data);
+        return HtmlUtils.js_call(this.mark,"nova.assist.get",action,getContent(),async);
+    }
+
+    public String js_action() throws Throwable
+    {
+        addElements();
+        if (form.method()==method.get)
+        {
+            return js_get(this.form.action());
+        }
+        else
+        {
+            return js_post(this.form.action());
+        }
+    }
+    public String js_post(String action) throws Throwable
+    {
+        return js_post(action,true);
     }
     public String js_get(String action) throws Throwable
     {
-        if (this.data==null)
-        {
-            this.data=ObjectMapper.writeObjectToString(this.inputs.toArray(new Input[this.inputs.size()]));
-        }
-        return HtmlUtils.js_call(this.mark,"Remoting.get",action,this.data);
+        return js_get(action,true);
     }
 
     

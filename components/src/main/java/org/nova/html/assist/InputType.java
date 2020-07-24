@@ -1,4 +1,4 @@
-package org.nova.html.remoting;
+package org.nova.html.assist;
 
 public enum InputType
 {

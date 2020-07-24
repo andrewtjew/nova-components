@@ -19,5 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.remoting1;
+package org.nova.html.remoting;
 
+public class AddClassResult
+{
+    public String id;
+    public String class_;
+}
