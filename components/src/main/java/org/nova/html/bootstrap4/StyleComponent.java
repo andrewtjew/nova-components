@@ -177,7 +177,7 @@ public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> ex
     }
     public ELEMENT border(StyleColor color)
     {
-//        addClass("border");
+        addClass("border");
         return addClass("border",color);
     }
     public ELEMENT border(String color)

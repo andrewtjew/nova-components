@@ -21,44 +21,34 @@
  ******************************************************************************/
 package org.nova.html.bootstrap4;
 
-import org.nova.html.elements.InputType;
-import org.nova.html.enums.autocomplete;
-import org.nova.html.tags.input_checkbox;
+import org.nova.html.elements.TagElement;
+import org.nova.html.tags.label;
+import org.nova.html.tags.small;
 
-public class FormCheckBox extends InputComponent<FormCheckBox>
+public class FormCheckLabel extends StyleComponent<FormCheckLabel>
 {
-    public FormCheckBox()
+    public FormCheckLabel()
     {
-        super(InputType.checkbox,"form-check-input");
-        
+        super("label","form-check-label");
     }
-    public FormCheckBox checked() //checkbox or radio
+    public FormCheckLabel(String text,FormCheckInput input)
     {
-        return attr("checked");
+        this();
+        addInner(text);
+        for_(input.id());
     }
-    public FormCheckBox checked(boolean checked)
+    public FormCheckLabel for_(String element_id)
     {
-        if (checked)
-        {
-            attr("checked");
-        }
-        return this;
+        return attr("for",element_id);
     }
-    public FormCheckBox required()  //text, search, url, tel, email, password, date pickers, number, checkbox, radio, and file.
+    public FormCheckLabel for_(TagElement<?> element)
     {
-        return attr("required");
+        return attr("for",element.id());
     }
-    public FormCheckBox required(boolean required)
+    public FormCheckLabel form(String form_id)
     {
-        if (required)
-        {
-            attr("required");
-        }
-        return this;
+        return attr("form",form_id);
     }
-    public FormCheckBox value(Object text) //button, reset, submit, text, password, hidden, checkbox, radio, image
-    {
-        return attr("value",text);
-    }
+    
+    
 }
-

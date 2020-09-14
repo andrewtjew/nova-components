@@ -67,27 +67,7 @@ public class InputNumber extends InputComponent<InputNumber>
         }
         return this;
     }
-    public InputNumber value(Double value)
-    {
-        return attr("value",value);
-    }
-    public InputNumber value(double value)
-    {
-        return attr("value",value);
-    }
-    public InputNumber value(Long value)
-    {
-        return attr("value",value);
-    }
-    public InputNumber value(long value)
-    {
-        return attr("value",value);
-    }
-    public InputNumber value(Integer value)
-    {
-        return attr("value",value);
-    }
-    public InputNumber value(int value)
+    public InputNumber value(Object value)
     {
         return attr("value",value);
     }
@@ -95,9 +75,9 @@ public class InputNumber extends InputComponent<InputNumber>
     {
         return attr("size",number);
     }
-    public InputNumber placeholder(String text) //text, search, url, tel, email, and password.
+    public InputNumber placeholder(Object value) //text, search, url, tel, email, and password.
     {
-        return attr("placeholder",text);
+        return attr("placeholder",value);
     }
     public InputNumber autocomplete(autocomplete autocomplete) //text, search, url, tel, email, password, datepickers, range, and color.
     {

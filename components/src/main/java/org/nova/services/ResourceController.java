@@ -152,11 +152,16 @@ public class ResourceController
             byte[] bytes;
             try
             {
+                if (this.cacheControl==false)
+                {
+                    this.cache.remove(file);
+                }
                 bytes = this.cache.get(parent, file);
                 if (TEST)
                 {
                     Testing.printf("Resource:"+file);
                 }
+//                Testing.printf("Resource:"+file+"\r\n");
             }
             catch (Throwable t)
             {
@@ -176,8 +181,9 @@ public class ResourceController
                     JSONClient client=new JSONClient(this.serverApplication.getTraceManager(),this.serverApplication.getLogger(),endPoint);
                     BinaryResponse binaryResponse=client.getBinary(parent, null, pathAndQuery);
                     
-                    String fileName=this.cache.getLocalDirectory()+"/"+file;
-                    String dirs=FileUtils.toNativePath(fileName.substring(0,fileName.lastIndexOf('/')));
+                    String localDirectory=this.cache.getLocalDirectory();
+                    String fileName=localDirectory+File.separator+file;
+                    String dirs=FileUtils.toNativePath(localDirectory+File.separator+file.substring(0,file.lastIndexOf(File.separator)));
                     new File(dirs).mkdirs();
                     bytes=binaryResponse.get();
                     FileUtils.writeBinaryFile(fileName, bytes);

@@ -184,4 +184,7 @@ public class ServerApplicationRunner //
             context.getHttpServletResponse().setStatus(HttpStatus.TEMPORARY_REDIRECT_307);
         }
     }
+    
+    
+    
 }

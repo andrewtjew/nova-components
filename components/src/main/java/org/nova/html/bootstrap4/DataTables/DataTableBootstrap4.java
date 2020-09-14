@@ -55,7 +55,6 @@ public class DataTableBootstrap4 extends StyleComponent<DataTableBootstrap4>
         super("table","table");
         this.tbody=new tbody();
         this.options=options;
-
     }
     
     public DataTableBootstrap4 bordered()

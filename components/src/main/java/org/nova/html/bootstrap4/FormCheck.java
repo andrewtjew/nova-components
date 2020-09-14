@@ -24,7 +24,7 @@ package org.nova.html.bootstrap4;
 import org.nova.html.tags.label;
 import org.nova.html.tags.small;
 
-public class FormCheck extends Component<FormCheck>
+public class FormCheck extends StyleComponent<FormCheck>
 {
     public FormCheck()
     {
@@ -37,7 +37,7 @@ public class FormCheck extends Component<FormCheck>
         return this;
     }
 
-    public FormCheck add(String labelText,FormCheckBox element)
+    public FormCheck add(String labelText,FormCheckInput element)
     {
         returnAddInner(element);
         label label=returnAddInner(new label()).addInner(labelText);

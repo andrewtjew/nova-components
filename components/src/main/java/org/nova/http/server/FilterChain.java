@@ -68,6 +68,7 @@ public class FilterChain
     		    {
     		        return 0;
     		    }
+                value=value.trim();
                 if (value.length()==0)
                 {
                     if (parameterInfo.getDefaultValue()!=null)
@@ -83,6 +84,7 @@ public class FilterChain
                 {
                     return null;
                 }
+                value=value.trim();
                 if (value.length()==0)
                 {
                     return null;
@@ -95,6 +97,7 @@ public class FilterChain
                 {
                     return 0L;
                 }
+                value=value.trim();
                 if (value.length()==0)
                 {
                     if (parameterInfo.getDefaultValue()!=null)
@@ -110,6 +113,7 @@ public class FilterChain
                 {
                     return null;
                 }
+                value=value.trim();
                 if (value.length()==0)
                 {
                     return null;
@@ -122,6 +126,7 @@ public class FilterChain
                 {
                     return (short)0;
                 }
+                value=value.trim();
                 if (value.length()==0)
                 {
                     if (parameterInfo.getDefaultValue()!=null)
@@ -137,6 +142,7 @@ public class FilterChain
                 {
                     return null;
                 }
+                value=value.trim();
                 if (value.length()==0)
                 {
                     return null;
@@ -149,6 +155,7 @@ public class FilterChain
                 {
                     return 0.0f;
                 }
+                value=value.trim();
                 if (value.length()==0)
                 {
                     if (parameterInfo.getDefaultValue()!=null)
@@ -164,6 +171,7 @@ public class FilterChain
                 {
                     return null;
                 }
+                value=value.trim();
                 if (value.length()==0)
                 {
                     return null;
@@ -176,6 +184,7 @@ public class FilterChain
                 {
                     return 0.0;
                 }
+                value=value.trim();
                 if (value.length()==0)
                 {
                     if (parameterInfo.getDefaultValue()!=null)
@@ -191,6 +200,7 @@ public class FilterChain
                 {
                     return null;
                 }
+                value=value.trim();
                 if (value.length()==0)
                 {
                     return null;
@@ -203,6 +213,7 @@ public class FilterChain
                 {
                     return false;
                 }
+                value=value.trim();
                 if (value.length()==0)
                 {
                     if (parameterInfo.getDefaultValue()!=null)
@@ -222,6 +233,7 @@ public class FilterChain
                 {
                     return null;
                 }
+                value=value.trim();
                 if (value.length()==0)
                 {
                     return null;
@@ -238,6 +250,7 @@ public class FilterChain
                 {
                     return null;
                 }
+                value=value.trim();
                 if (value.length()==0)
                 {
                     return null;
@@ -250,6 +263,7 @@ public class FilterChain
                 {
                     return null;
                 }
+                value=value.trim();
                 if (value.length()==0)
                 {
                     return null;

@@ -26,8 +26,6 @@ import org.nova.html.elements.TagElement;
 
 public class SubmitButton extends ButtonComponent<SubmitButton>
 {
-    private ButtonState buttonState;
-    private boolean block;
     
     public SubmitButton(String label)
     {
@@ -35,6 +33,12 @@ public class SubmitButton extends ButtonComponent<SubmitButton>
         attr("type","submit");
 //        attr("value",label);
         addInner(label);
+        
+    }
+    public SubmitButton()
+    {
+        super("button");
+        attr("type","submit");
         
     }
     

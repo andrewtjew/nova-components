@@ -138,12 +138,11 @@ abstract public class ContentCache<KEY,VALUE>
             if (node!=null)
             {
                 long now=System.currentTimeMillis();
-                if ((this.maxAgeMs>0)&&(now-node.created<this.maxAgeMs))
+                if ((this.maxAgeMs<=0)||(now-node.created<this.maxAgeMs))
                 {
                     if (node.previous!=null)
                     {
                         node.previous.next=node.next;
-                        node.previous=null;
                         if (node.next!=null)
                         {
                             node.next.previous=node.previous;
@@ -152,6 +151,7 @@ abstract public class ContentCache<KEY,VALUE>
                         {
                             this.last=node.previous;
                         }
+                        node.previous=null;
                         node.next=this.first;
                         this.first=node;
                     }
@@ -181,6 +181,10 @@ abstract public class ContentCache<KEY,VALUE>
     
     boolean needRemove(Node<KEY,VALUE> node)
     {
+        if (this.nodeMap.size()==0)
+        {
+            return false;
+        }
         if ((this.contentCapacity>0)&&(this.totalContentSize+node.valueSize.size>this.contentCapacity))
         {
             return true;
@@ -236,6 +240,10 @@ abstract public class ContentCache<KEY,VALUE>
                 this.nodeMap.put(key, node);
                 this.totalContentSize+=node.valueSize.size;
                 node.next=this.first;
+                if (this.first!=null)
+                {
+                    this.first.previous=node;
+                }
                 this.first=node;
                 if (this.last==null)
                 {

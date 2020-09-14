@@ -79,7 +79,10 @@ public class CoreEnvironment
                 break;
 
             case "JSONBufferedLZ4Queue":
-                this.logSourceQueue=new HighPerformanceLogger(logDirectoryManager, new HighPerformanceConfiguration());
+            {
+                HighPerformanceConfiguration conf=configuration.getJSONObject("Environment.Logger.JSONBufferedLZ4Queue", new HighPerformanceConfiguration(),HighPerformanceConfiguration.class);
+                this.logSourceQueue=new HighPerformanceLogger(logDirectoryManager, conf);
+            }
                 break;
                 
 		    default:

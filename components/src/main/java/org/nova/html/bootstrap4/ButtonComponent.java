@@ -69,5 +69,10 @@ public abstract class ButtonComponent<ELEMENT extends ButtonComponent<ELEMENT>> 
     {
         return attr("value",value);
     }
+    public ELEMENT block() 
+    {
+        addClass("btn-block");
+        return (ELEMENT)this;
+    }
     
 }

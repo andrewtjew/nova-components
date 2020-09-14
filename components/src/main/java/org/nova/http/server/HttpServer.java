@@ -331,7 +331,9 @@ public class HttpServer
 						{
 						    for (Cookie cookie:response.cookies)
 						    {
-						        servletResponse.addCookie(new javax.servlet.http.Cookie(cookie.getName(),cookie.getValue()));
+						        javax.servlet.http.Cookie httpCookie=new javax.servlet.http.Cookie(cookie.getName(),cookie.getValue());
+						        httpCookie.setPath("/");
+						        servletResponse.addCookie(httpCookie);
 						    }
 						}
 						servletResponse.setStatus(response.getStatusCode());

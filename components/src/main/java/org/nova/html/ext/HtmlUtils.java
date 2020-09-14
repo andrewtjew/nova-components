@@ -68,7 +68,7 @@ public class HtmlUtils
     public static String confirmPOST(String title,String text,PathAndQuery post,Object content,PathAndQuery success) throws Throwable
     {
         String data=content==null?null:ObjectMapper.writeObjectToString(content);
-        return js_call("confirmPOST",title,text,post.toString(),data,success.toString());
+        return js_statement("confirmPOST",title,text,post.toString(),data,success.toString());
     }
     
     public static List<String> getSelectionNames(Context context,String prefix)
@@ -241,7 +241,7 @@ public class HtmlUtils
     
     public static String js_callWithDelay(long delay,String function,Object...parameters)
     {
-        String call=js_call(function, parameters);
+        String call=js_statement(function, parameters);
         return "setTimeout(function(){"+call+"},"+delay+");";
     }
         
@@ -251,11 +251,27 @@ public class HtmlUtils
         return "setTimeout(function(){"+call+"},"+delay+");";
     }
 
-    public static String js_callElement(String id,String function,Object...parameters)
+    @Deprecated
+    public static String js_elementStatement(String id,String function,Object...parameters)
+    {
+        return js_statement("document.getElementById('"+id+"')."+function,parameters);
+    }  
+
+    public static String js_statement(String function,Object...parameters)
+    {
+        return js_call(function,parameters)+";";
+    }
+
+    public static String js_elementCall(String id,String function,Object...parameters)
     {
         return js_call("document.getElementById('"+id+"')."+function,parameters);
     }  
-
+    
+    public static String js_element(String id)
+    {
+        return "document.getElementById('"+id+"')";
+    }  
+    
     public static String js_call(String function,Object...parameters)
     {
         StringBuilder sb=new StringBuilder(function+"(");
@@ -304,7 +320,7 @@ public class HtmlUtils
                 }
             }
         }
-        sb.append(");");
+        sb.append(")");
         return sb.toString();
     }
     

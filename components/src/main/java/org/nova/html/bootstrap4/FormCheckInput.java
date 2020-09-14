@@ -19,12 +19,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.flow;
+package org.nova.html.bootstrap4;
 
-public abstract class Node
+import org.nova.html.elements.InputType;
+import org.nova.html.enums.autocomplete;
+import org.nova.html.tags.input_checkbox;
+
+public class FormCheckInput extends InputComponent<FormCheckInput>
 {
-	abstract public void process(Packet packet) throws Throwable;
-    abstract public void flush() throws Throwable;
-    abstract public void beginGroup(long marker) throws Throwable;
-    abstract public void endGroup() throws Throwable;
+    public FormCheckInput(boolean radio)
+    {
+        super(radio?InputType.radio:InputType.checkbox,"form-check-input");
+        
+    }
+    public FormCheckInput()
+    {
+        this(false);
+        
+    }
+    public FormCheckInput checked() //checkbox or radio
+    {
+        return attr("checked");
+    }
+    public FormCheckInput checked(boolean checked)
+    {
+        if (checked)
+        {
+            attr("checked");
+        }
+        return this;
+    }
+    public FormCheckInput required()  //text, search, url, tel, email, password, date pickers, number, checkbox, radio, and file.
+    {
+        return attr("required");
+    }
+    public FormCheckInput required(boolean required)
+    {
+        if (required)
+        {
+            attr("required");
+        }
+        return this;
+    }
+    public FormCheckInput value(Object text) //button, reset, submit, text, password, hidden, checkbox, radio, image
+    {
+        return attr("value",text);
+    }
 }
+

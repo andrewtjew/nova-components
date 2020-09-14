@@ -30,6 +30,10 @@ public class JSONResponse<TYPE>
 		this.statusCode=statusCode;
 		this.content=content;
 	}
+    public JSONResponse(TYPE content) 
+    {
+        this(200,content);
+    }
 	public TYPE get() throws Exception
 	{
 		if (this.statusCode>=300)
