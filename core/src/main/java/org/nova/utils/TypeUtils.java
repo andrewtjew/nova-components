@@ -64,7 +64,30 @@ public class TypeUtils
         return (value==null)?nullReplacementValue:value;
     }
 
-    
+    static public boolean isNullOrZero(Long value)
+    {
+        if (value==null)
+        {
+            return true;
+        }
+        return value==0L;
+    }
+    static public boolean isNullOrZero(Integer value)
+    {
+        if (value==null)
+        {
+            return true;
+        }
+        return value==0;
+    }
+    static public boolean isNullOrZero(Short value)
+    {
+        if (value==null)
+        {
+            return true;
+        }
+        return value==0;
+    }
     
     static public int replaceNullWithZero(Integer value)
     {

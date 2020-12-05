@@ -19,61 +19,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.deprecated;
+package org.nova.html.Chartjs;
 
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.elements.InnerElement;
-import org.nova.html.elements.QuotationMark;
 import org.nova.html.ext.Head;
-import org.nova.html.tags.div;
+import org.nova.html.tags.canvas;
+import org.nova.html.tags.script;
+import org.nova.json.ObjectMapper;
 
-public abstract class TemplatePage extends Element
+public class ScatterChart extends Element
 {
-    final private Template template;
-    final private Head head;
-    final private InnerElement<?> content;
-    private QuotationMark quotationMark;
+    final private canvas canvas;
+    final private String id;
+    private ScatterType type;
     
-    protected abstract Template getStaticTemplate();
+    public ScatterChart(String id,int width,int height)
+    {
+        this.canvas=new canvas().id(id).width(width).height(height);
+        this.id=id;
+        this.type=new ScatterType();
+    }
     
-    public TemplatePage()
+    public void setData(Data data)
     {
-        this.content=new div();
-        this.head=new Head(); 
-        this.template=getStaticTemplate().copy();
-        this.quotationMark=QuotationMark.DOUBLE;
+        this.type.data=data;
     }
-    public Template getTemplate()
+    
+    public String script() throws Throwable
     {
-        return this.template;
-    }
-
-    public InnerElement<?> content()
-    {
-        return this.content;
-    }
-    public Head head()
-    {
-        return this.head;
+        String data=ObjectMapper.writeObjectToString(this.type);
+        
+        StringBuilder sb=new StringBuilder();
+        String ctx=this.id+"_idx";
+        sb.append("var "+ctx+"=document.getElementById('"+this.id+"');");
+        sb.append("var "+this.id+"=new Chart("+ctx+",");
+        sb.append(data);
+        sb.append(");");
+        return sb.toString();
     }
     
     @Override
     public void compose(Composer composer) throws Throwable
     {
-        composer.pushQuotationMark(this.quotationMark);
-        try
-        {
-            this.template.compose(composer);
-        }
-        finally
-        {
-            composer.popQuotationMark();
-        }
-    }
-    
-    public void setQuotationMark(QuotationMark quotationMark)
-    {
-        this.quotationMark=quotationMark;
+        composer.compose(this.canvas);
+        script script=new script();
+        script.addInner(script());
+        composer.compose(script);
     }
 }

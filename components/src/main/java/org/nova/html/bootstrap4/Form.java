@@ -30,16 +30,10 @@ import org.nova.html.tags.form_get;
 
 public class Form extends FormElement<Form>
 {
-    public Form()
+    public Form(method method)
     {
-        super();
-    }
-    
-    public Form method(method method)
-    {
-        attr("method",method);
-        return this;
-    }
+        super(method);
+    }    
     public Form inline()
     {
         addClass("form-inline");

@@ -272,6 +272,11 @@ public class HtmlUtils
         return "document.getElementById('"+id+"')";
     }  
     
+    public static String js_new(String instanceName,String className,Object...parameters)
+    {
+        return "var "+instanceName+"=new "+js_call(className,parameters)+";";
+    }    
+    
     public static String js_call(String function,Object...parameters)
     {
         StringBuilder sb=new StringBuilder(function+"(");

@@ -28,14 +28,17 @@ import org.nova.html.enums.target;
 public class FormElement<ELEMENT extends FormElement<ELEMENT>> extends GlobalEventTagElement<ELEMENT>
 {
     private String action;
-    public FormElement()
-    {
-        super("form");
-    }
+    private method method;
     public FormElement(method method)
     {
         super("form");
-        attr("method",method);    
+        attr("method",method);
+        this.method=method;
+    }
+    
+    public method method()
+    {
+        return this.method;
     }
     
     public  ELEMENT action(String URL) 

@@ -213,7 +213,7 @@ public class FilterChain
                 {
                     return false;
                 }
-                value=value.trim();
+                value=value.trim().toLowerCase();
                 if (value.length()==0)
                 {
                     if (parameterInfo.getDefaultValue()!=null)
@@ -233,7 +233,7 @@ public class FilterChain
                 {
                     return null;
                 }
-                value=value.trim();
+                value=value.trim().toLowerCase();
                 if (value.length()==0)
                 {
                     return null;

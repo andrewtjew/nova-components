@@ -161,7 +161,6 @@ public class ResourceController
                 {
                     Testing.printf("Resource:"+file);
                 }
-//                Testing.printf("Resource:"+file+"\r\n");
             }
             catch (Throwable t)
             {
@@ -169,12 +168,6 @@ public class ResourceController
                 {
                     int colon=external.indexOf(':');
                     int firstSlash=external.indexOf('/',colon+3);
-//                    int secondSlash=external.indexOf('/',firstSlash);
-//                    int lastSlash=external.lastIndexOf('/');
-                    
-                    //String protocol=external.substring(0,colon);
-                    //String path=external.substring(colon+2,lastSlash);
-                    //String fileExt=external.substring(lastSlash);
                     String endPoint=external.substring(0,firstSlash);
                     String pathAndQuery=external.substring(firstSlash);
                     
@@ -187,7 +180,6 @@ public class ResourceController
                     new File(dirs).mkdirs();
                     bytes=binaryResponse.get();
                     FileUtils.writeBinaryFile(fileName, bytes);
-                    
                     
                 }
                 trace.close(t);

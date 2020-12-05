@@ -19,18 +19,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.Chartjs;
+package org.nova.html.remote;
 
-import org.nova.html.attributes.Color;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
-public class Dataset
+import org.nova.http.server.ContentWriter;
+import org.nova.http.server.Context;
+import org.nova.json.ObjectMapper;
+
+public class RemoteResponseWriter extends ContentWriter<RemoteResponse>
 {
-    public String xAxisID;
-    public String yAxisID;
-    public String label;
-    public Color[] backgroundColor;
-    public Color[] borderColor;
-//    public double[] data;
-    public Long borderWidth;
-    public Object fill;
+	public RemoteResponseWriter() throws Exception
+	{
+	}
+	
+	@Override
+	public String getMediaType()
+	{
+		return "application/json";
+	}
+	
+	@Override
+	public void write(Context context, OutputStream outputStream, RemoteResponse program) throws Throwable
+	{
+        context.getHttpServletResponse().setContentType("application/json;charset=utf-8");
+        Instruction[] instructions=program.instructions.toArray(new Instruction[program.instructions.size()]);
+        String text=ObjectMapper.writeObjectToString(instructions);
+        outputStream.write(text.getBytes(StandardCharsets.UTF_8));
+        context.setResponseContentText(text);
+	}
+
+	@Override
+	public void writeSchema(OutputStream outputStream, Class<?> contentType) throws Throwable
+	{
+	}
+
+	@Override
+	public void writeExample(OutputStream outputStream, Class<?> contentType) throws Throwable
+	{
+	}
 }
+

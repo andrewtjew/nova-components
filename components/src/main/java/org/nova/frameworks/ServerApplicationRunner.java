@@ -116,7 +116,7 @@ public class ServerApplicationRunner //
         CoreEnvironment coreEnvironment=null;
         try
         {
-            System.out.println("Starting CoreEnvironment...");
+            //  //System.out.println("Starting CoreEnvironment...");
             coreEnvironment=new CoreEnvironment(configuration);
         }
         catch (Throwable t)

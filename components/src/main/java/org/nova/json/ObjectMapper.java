@@ -1003,6 +1003,12 @@ public class ObjectMapper
         public boolean getPrimitiveBoolean() throws Exception
         {
             char character=nextNonWhiteSpaceCharacter();
+            boolean quoted=false;
+            if (character=='\"')
+            {
+                quoted=true;
+                character=next();
+            }
             if (character=='t')
             {
                 if (next()=='r')
@@ -1011,6 +1017,13 @@ public class ObjectMapper
                     {
                         if (next()=='e')
                         {
+                            if (quoted)
+                            {
+                                if (next()!='\"')
+                                {
+                                    throw new Exception("Boolean value expected: "+getError());
+                                }
+                            }
                             return true;
                         }
                     }
@@ -1026,6 +1039,13 @@ public class ObjectMapper
                         {
                             if (next()=='e')
                             {
+                                if (quoted)
+                                {
+                                    if (next()!='\"')
+                                    {
+                                        throw new Exception("Boolean value expected: "+getError());
+                                    }
+                                }
                                 return false;
                             }
                         }

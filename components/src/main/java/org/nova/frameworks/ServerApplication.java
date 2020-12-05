@@ -31,6 +31,7 @@ import org.nova.html.ExtionsionToTypeMappings;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.operator.MenuBar;
+import org.nova.html.remote.RemoteResponseWriter;
 import org.nova.html.remoting.HtmlRemotingWriter;
 import org.nova.html.templating.Template;
 import org.nova.http.server.JettyServerFactory;
@@ -241,6 +242,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
 
         this.menuBar=new MenuBar();
         String namespace=configuration.getValue("ServerApplication.APIDefinitionNamespace","");
+        this.operatorTransport.getHttpServer().getTransformers().add(new RemoteResponseWriter());
         this.operatorTransport.getHttpServer().registerHandlers(new ServerApplicationPages(this,namespace));
         
         //Build template and start operator server so we can monitor the rest of the startup.
