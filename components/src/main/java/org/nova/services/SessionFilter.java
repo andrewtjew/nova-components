@@ -21,6 +21,7 @@
  ******************************************************************************/
 package org.nova.services;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import javax.servlet.http.Cookie;
@@ -134,25 +135,34 @@ public class SessionFilter extends Filter
         Session session=this.sessionManager.getSessionByToken(token);
         if (session==null)
         {
-            if (this.debugSession==null)
+            Method method=context.getRequestHandler().getMethod();
+            if (method.getAnnotation(AllowNullSession.class)!=null)
             {
-                Response<?> response=getAbnormalSessionRequestHandler(context).handleNoSessionRequest(parent,this, context);
-                if (response!=null)
-                {
-                    return response;
-                }
-                // handleNoSessionRequest() can create a valid session, so we check again.
-                session=this.sessionManager.getSessionByToken(token);
-                if (session==null)
-                {
-                    return null;
-                }
+                return filterChain.next(parent, context);
             }
             else
             {
-                session=this.debugSession;
+                if (this.debugSession==null)
+                {
+                    Response<?> response=getAbnormalSessionRequestHandler(context).handleNoSessionRequest(parent,this, context);
+                    if (response!=null)
+                    {
+                        return response;
+                    }
+                    // handleNoSessionRequest() can create a valid session, so we check again.
+                    session=this.sessionManager.getSessionByToken(token);
+                    if (session==null)
+                    {
+                        return null;
+                    }
+                }
+                else
+                {
+                    session=this.debugSession;
+                }
             }
         }
+        
         Lock<String> lock=sessionManager.waitForLock(parent,session.getToken());
         if (lock==null)
         {

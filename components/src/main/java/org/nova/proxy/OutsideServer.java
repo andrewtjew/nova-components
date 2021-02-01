@@ -18,6 +18,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import org.nova.annotations.Description;
+import org.nova.collections.ContentCache.ValueSize;
 import org.nova.concurrent.MultiTaskScheduler;
 import org.nova.concurrent.RunState;
 import org.nova.concurrent.Synchronization;

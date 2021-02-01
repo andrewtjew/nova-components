@@ -2704,7 +2704,7 @@ public class ServerApplicationPages
     @Path("/operator/httpServer/performance/{server}")
     public Element performance(@PathParam("server")String server) throws Throwable
     {
-        OperatorPage page=buildServerOperatorPage("Last Performance",server);
+        OperatorPage page=buildServerOperatorPage("Last Performance",server,null);
         HttpServer httpServer=getHttpServer(server);
         RateMeter requestRateMeter = httpServer.getRequestRateMeter();
         RateSample sample=requestRateMeter.sample();
@@ -2772,7 +2772,7 @@ public class ServerApplicationPages
     @Path("/operator/httpServer/allPerformance/{server}")
     public Element allPerformance(@PathParam("server")String server) throws Throwable
     {
-        OperatorPage page=buildServerOperatorPage("All Performance",server);
+        OperatorPage page=buildServerOperatorPage("All Performance",server,null);
         HttpServer httpServer=getHttpServer(server);
         RateMeter requestRateMeter = httpServer.getRequestRateMeter();
         RateSample sample=requestRateMeter.sample();
@@ -3158,7 +3158,8 @@ public class ServerApplicationPages
     public Element lastRequests(@PathParam("server") String server) throws Throwable
     {
         HttpServer httpServer=this.getHttpServer(server);
-        OperatorPage page=buildServerOperatorPage("Last Requests", server);
+        OperatorPage page=buildServerOperatorPage("Last Requests", server,"lastRequests");
+        
         RequestLogEntry[] entries = httpServer.getLastRequestLogEntries();
         page.content().addInner(writeRequestLogEntries(page.head(), entries));
         return page;
@@ -3171,7 +3172,7 @@ public class ServerApplicationPages
     {
         
         HttpServer httpServer=this.getHttpServer(server);
-        OperatorPage page=buildServerOperatorPage("Last Exception Requests", server);
+        OperatorPage page=buildServerOperatorPage("Last Exception Requests", server,"lastExceptionRequests");
         RequestLogEntry[] entries = httpServer.getLastExceptionRequestLogEntries();
         page.content().addInner(writeRequestLogEntries(page.head(), entries));
         return page;
@@ -3183,7 +3184,7 @@ public class ServerApplicationPages
     public Element lastNotFoundRequests(@PathParam("server") String server) throws Throwable
     {
         HttpServer httpServer=this.getHttpServer(server);
-        OperatorPage page=buildServerOperatorPage("Last Not Founds (404s)",server);
+        OperatorPage page=buildServerOperatorPage("Last Not Founds (404s)",server,"lastNotFounds");
         
         RequestHandlerNotFoundLogEntry[] entries = httpServer.getRequestHandlerNotFoundLogEntries();
         for (RequestHandlerNotFoundLogEntry entry : entries)
@@ -3203,7 +3204,7 @@ public class ServerApplicationPages
     {
         HttpServer httpServer=getHttpServer(server);
         RequestHandler[] requestHandlers = httpServer.getRequestHandlers();
-        OperatorPage page=buildServerOperatorPage("Server Status",server);
+        OperatorPage page=buildServerOperatorPage("Server Status",server,null);
         OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         TableHeader header=new TableHeader();
         header.add("Method","Path","200","300","400","500","");
@@ -3478,7 +3479,7 @@ public class ServerApplicationPages
         throw new Exception();
     }
     
-    private OperatorPage buildServerOperatorPage(String title,String server) throws Throwable
+    private OperatorPage buildServerOperatorPage(String title,String server,String clear) throws Throwable
     {
         HttpTransport httpTransport=getHttpTransport(server);
         OperatorPage page=this.serverApplication.buildOperatorPage(title);
@@ -3491,16 +3492,49 @@ public class ServerApplicationPages
         {
             page.content().addInner("Server: "+server+", ports: "+Utils.combine(TypeUtils.intArrayToList(ports),","));
         }
+        if (clear!=null)
+        {
+            String action="/operator/httpServer/clearLastRequests/"+server+"/"+clear;
+            ConfirmButton confirm=new ConfirmButton(action, "Clear").style("float:right;");
+            page.content().addInner(confirm);
+            page.content().addInner(new br());
+            page.content().addInner(new hr());
+        }
+        
         page.content().addInner(new hr());
         return page;
     }
+
+    @GET
+    @Path("/operator/httpServer/clearLastRequests/{server}/{clear}")
+    public Element clearLastRequests(@PathParam("server") String server,@PathParam("clear") String clear) throws Throwable
+    {
+        HttpServer httpServer=this.getHttpServer(server);
+        switch (clear)
+        {
+            case "lastRequests":
+                httpServer.clearLastRequestLogEntries();
+                break;
+                
+            case "lastExceptionRequests":
+                httpServer.clearLastExceptionRequestLogEntries();
+                break;
+                
+            case "lastNotFounds":
+                httpServer.clearRequestHandlerNotFoundLogEntries();
+                break;
+
+        }
+        return new Redirect("/operator/httpServer/"+clear+"/"+server);
+    }
+    
     
     @GET
     @Path("/operator/httpServer/methods/{server}")
     public Element methods(@PathParam("server") String server) throws Throwable
     {
         HttpTransport httpTransport=getHttpTransport(server);
-        OperatorPage page=buildServerOperatorPage("Methods",server);
+        OperatorPage page=buildServerOperatorPage("Methods",server,null);
         RequestHandler[] requestHandlers = httpTransport.getHttpServer().getRequestHandlers();
         OperatorDataTable table=page.content().returnAddInner(new OperatorTable(page.head()));
         table.setHeader("Method","Path","Description","");
@@ -3742,7 +3776,7 @@ public class ServerApplicationPages
     @Path("/operator/httpServer/info")
     public Element info(@QueryParam("key") String key,@QueryParam("server") String server) throws Throwable
     {
-        OperatorPage page=buildServerOperatorPage("Method: "+key, server);
+        OperatorPage page=buildServerOperatorPage("Method: "+key, server,null);
         HttpServer httpServer=getHttpServer(server);
         RequestHandler requestHandler = httpServer.getRequestHandler(key);
 
@@ -4012,7 +4046,7 @@ public class ServerApplicationPages
     @Path("/operator/httpServer/classDefinitions/{server}")
     public Element classDefinitions(Context context,@PathParam("server") String server) throws Throwable
     {
-        OperatorPage page=buildServerOperatorPage("Interoperability", server);
+        OperatorPage page=buildServerOperatorPage("Interoperability", server,null);
         
         form_get form=page.content().returnAddInner(new form_get().action("/operator/httpServer/classDefinitions/download/"+server));
         fieldset fieldset=form.returnAddInner(new fieldset());
@@ -4080,7 +4114,7 @@ public class ServerApplicationPages
     @Path("/operator/httpServer/method/{server}")
     public Element method(Context context,@PathParam("server") String server,@QueryParam("key") String key) throws Throwable
     {
-        OperatorPage page=buildServerOperatorPage("Method: "+key,server);
+        OperatorPage page=buildServerOperatorPage("Method: "+key,server,null);
         HttpServer httpServer=getHttpServer(server);
         RequestHandler requestHandler = httpServer.getRequestHandler(key);
         Method method = requestHandler.getMethod();

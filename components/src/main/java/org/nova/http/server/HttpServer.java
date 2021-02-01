@@ -483,24 +483,49 @@ public class HttpServer
             return list.toArray(new RequestLogEntry[list.size()]);
 		}
 	}
+
+	public void clearLastRequestLogEntries()
+    {
+        synchronized (this.lastRequestsLogEntries)
+        {
+            this.lastRequestsLogEntries.clear();
+        }
+    }
 	
 	public RequestHandlerNotFoundLogEntry[] getRequestHandlerNotFoundLogEntries()
 	{
-		synchronized (this.lastRequestsLogEntries)
+		synchronized (this.lastRequestHandlerNotFoundLogEntries)
 		{
 			List<RequestHandlerNotFoundLogEntry> list=this.lastRequestHandlerNotFoundLogEntries.getSnapshot();
             return list.toArray(new RequestHandlerNotFoundLogEntry[list.size()]);
 		}
 	}
 	
+    public void clearRequestHandlerNotFoundLogEntries()
+    {
+        synchronized (this.lastRequestHandlerNotFoundLogEntries)
+        {
+            this.lastRequestHandlerNotFoundLogEntries.clear();
+        }
+    }
+    
 	public RequestLogEntry[] getLastExceptionRequestLogEntries()
 	{
-		synchronized (this.lastRequestsLogEntries)
+		synchronized (this.lastExceptionRequestsLogEntries)
 		{
             List<RequestLogEntry> list=this.lastExceptionRequestsLogEntries.getSnapshot();
             return list.toArray(new RequestLogEntry[list.size()]);
 		}
 	}
+
+	public void clearLastExceptionRequestLogEntries()
+    {
+        synchronized (this.lastExceptionRequestsLogEntries)
+        {
+            this.lastExceptionRequestsLogEntries.clear();
+        }
+    }
+	
 	public RateMeter getRequestRateMeter()
 	{
 		return this.requestRateMeter;

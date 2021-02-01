@@ -61,7 +61,23 @@ public class TimerTask
 		this.category=category;
 		this.timerScheduler=timerScheduler;
 		this.executable=executable;
-		this.period=period;
+        switch (schedulingMode)
+        {
+            case DAY:
+            case HALF_HOUR:
+            case HOUR:
+            case MINUTE:
+            case MONTH:
+            case QUARTER_HOUR:
+            case WEEK:
+            case YEAR:
+                this.period=0;
+                break;
+                
+            default:
+                this.period=period;
+                break;
+        }
 		this.executeStatus=TaskStatus.READY;
 		this.schedulingMode=schedulingMode;
 		this.key=new Key(this.due, this.number);

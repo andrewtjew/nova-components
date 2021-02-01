@@ -161,12 +161,7 @@ public class InsideServer
                         int outsidePort=proxyPacket.getPort();
                         if (dataSize==4)
                         {
-                            synchronized(this.hostConnections)
-                            {
-                                HostConnection connection=this.hostConnections.remove(outsidePort);
-                                connection.close();
-                                continue;
-                            }
+                            this.closeOutside(outsidePort);
                         }
                         HostConnection connection;
                         synchronized(this.hostConnections)

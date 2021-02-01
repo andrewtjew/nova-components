@@ -42,6 +42,7 @@ public abstract class Retry<THROWABLE extends Throwable>
                 try 
                 {
                     retry.retry(parent);
+                    return;
                 }
                 catch (Throwable t)
                 {

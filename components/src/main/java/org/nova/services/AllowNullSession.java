@@ -19,30 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.bootstrap4;
+package org.nova.services;
 
-import org.nova.html.bootstrap4.classes.DeviceClass;
-import org.nova.html.bootstrap4.classes.TextAlign;
-import org.nova.html.elements.TagElement;
-import org.nova.html.tags.label;
-import org.nova.html.tags.small;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class FormGroup extends StyleComponent<FormGroup>
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD,ElementType.TYPE})
+public @interface AllowNullSession
 {
-    public FormGroup()
-    {
-        super("div","form-group");
-    }
-
-    public FormGroup row()
-    {
-        this.addClass("row");
-        return this;
-    }
-    public FormGroup custom_control()
-    {
-        addClass("custom-control");
-        return this;
-    }
-    
 }

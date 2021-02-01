@@ -89,6 +89,10 @@ public class TypeUtils
         return value==0;
     }
     
+    static public short replaceNullWithZero(Short value)
+    {
+        return (value==null)?0:value;
+    }
     static public int replaceNullWithZero(Integer value)
     {
         return (value==null)?0:value;

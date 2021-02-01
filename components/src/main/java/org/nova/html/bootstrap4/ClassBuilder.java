@@ -238,6 +238,10 @@ public class ClassBuilder
     {
         return addClass("form-check");
     }
+    public ClassBuilder form_text()
+    {
+        return addClass("form-text");
+    }
     public ClassBuilder form_check_inline()
     {
         return addClass("form-check-inline");
