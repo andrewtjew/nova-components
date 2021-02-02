@@ -21,6 +21,7 @@
  ******************************************************************************/
 package org.nova.html.ext;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import java.util.Map.Entry;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.FormElement;
 import org.nova.html.elements.InputElement;
+import org.nova.html.elements.QuotationMark;
 import org.nova.html.elements.StringComposer;
 import org.nova.html.elements.TagElement;
 import org.nova.html.remoting.ModalOption;
@@ -267,6 +269,64 @@ public class HtmlUtils
         return js_call("document.getElementById('"+id+"')."+function,parameters);
     }  
     
+    public static String escapeString(char escapeChar,String string)
+    {
+        StringBuilder sb=new StringBuilder();
+//        if (escapeChar=='"')
+            if (true)
+        {
+            for (int i=0;i<string.length();i++)
+            {
+                char c=string.charAt(i);
+                switch (c)
+                {
+                    case '"':
+                        sb.append("\\\"");
+                        break;
+                        
+                    case '\'':
+                        sb.append("&#39;");
+                        break;
+                        
+                    case '\\':
+                        sb.append("\\\\");
+                        break;
+                        
+                        
+                    default:
+                        sb.append(c);
+                }
+                
+            }
+        }
+        else
+        {
+            for (int i=0;i<string.length();i++)
+            {
+                char c=string.charAt(i);
+                switch (c)
+                {
+                    case '"':
+                        sb.append("&#34;");
+                        break;
+                        
+                    case '\'':
+                        sb.append("\\'");
+                        break;
+                        
+                    case '\\':
+                        sb.append("\\\\");
+                        break;
+                        
+                        
+                    default:
+                        sb.append(c);
+                }
+            }
+        }
+        return sb.toString();
+    }
+    
     public static String js_element(String id)
     {
         return "document.getElementById('"+id+"')";
@@ -279,6 +339,12 @@ public class HtmlUtils
     
     public static String js_call(String function,Object...parameters)
     {
+        return js_call(QuotationMark.DOUBLE,function,parameters);
+    }
+    
+    public static String js_call(QuotationMark mark,String function,Object...parameters)
+    {
+        char escapeChar=QuotationMark.asChar(mark);
         StringBuilder sb=new StringBuilder(function+"(");
         boolean commaNeeded=false;
         for (Object parameter:parameters)
@@ -298,9 +364,30 @@ public class HtmlUtils
             else 
             {
                 Class<?> type=parameter.getClass();
+                boolean isArray=type.isArray();
+                if (isArray)
+                {
+                    type=type.getComponentType();
+                }
                 if (type==String.class)
                 {
-                    sb.append("'"+toStringParameter(parameter.toString())+"'");
+                    if (isArray)
+                    {
+                        sb.append('[');
+                        for (int i=0;i<Array.getLength(parameter);i++)
+                        {
+                            if (i>0)
+                            {
+                                sb.append(',');
+                            }
+                            sb.append(mark.toString()+escapeString(escapeChar,Array.get(parameter, i).toString())+mark.toString());
+                        }
+                        sb.append(']');
+                    }
+                    else
+                    {
+                        sb.append(mark.toString()+escapeString(escapeChar,parameter.toString())+mark.toString());
+                    }
                 }
                 else if ((type==byte.class)
                         ||(type==short.class)
@@ -308,6 +395,7 @@ public class HtmlUtils
                         ||(type==long.class)
                         ||(type==float.class)
                         ||(type==double.class)
+                        ||(type==boolean.class)
                         ||(type==BigDecimal.class)
                         ||(type==Byte.class)
                         ||(type==Short.class)
@@ -315,20 +403,52 @@ public class HtmlUtils
                         ||(type==Long.class)
                         ||(type==Float.class)
                         ||(type==Double.class)
+                        ||(type==Boolean.class)
                         )
                 {
-                    sb.append(parameter);
+                    if (isArray)
+                    {
+                        sb.append('[');
+                        for (int i=0;i<Array.getLength(parameter);i++)
+                        {
+                            if (i>0)
+                            {
+                                sb.append(',');
+                            }
+                            sb.append(Array.get(parameter, i));
+                        }
+                        sb.append(']');
+                    }
+                    else
+                    {
+                        sb.append(parameter);
+                    }
                 }
                 else
                 {
-                    sb.append("'"+parameter.toString()+"'");
+                    if (isArray)
+                    {
+                        sb.append('[');
+                        for (int i=0;i<Array.getLength(parameter);i++)
+                        {
+                            if (i>0)
+                            {
+                                sb.append(',');
+                            }
+                            sb.append(mark.toString()+Array.get(parameter, i).toString()+mark.toString());
+                        }
+                        sb.append(']');
+                    }
+                    else
+                    {
+                        sb.append(mark.toString()+parameter.toString()+mark.toString());
+                    }
                 }
             }
         }
-        sb.append(")");
+        sb.append(");");
         return sb.toString();
     }
-    
     public static String returnFunction(String function,Object...parameters)
     {
         StringBuilder sb=new StringBuilder(function+"(");

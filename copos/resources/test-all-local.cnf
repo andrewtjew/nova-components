@@ -1,0 +1,75 @@
+@default.cnf
+Environment.Vault.unsecureVaultFile=.\resources\UnsecureVault.cnf
+System.test=true
+
+HttpServer.serverCertificate.keyStorePath=.\testcerts\server.jks
+HttpServer.clientCertificate.keyStorePath=.\testcerts\client.jks
+
+Application.Database.ConnectorAndMigrationConfiguration.cogas=
+{ 
+	"user":"test"
+	,"passwordKey":"SqlServer.password.cogas"
+	,"scriptFile":"./resources/cogas.sql"
+	,"connectorConfiguration":
+	{
+		"host":"localhost"
+		,"database":"cogas"
+		,"poolSize":4
+	}
+}
+
+Application.Database.ConnectorAndMigrationConfiguration.cogas1=
+{ 
+	"user":"test"
+	,"passwordKey":"SqlServer.password.cogas"
+	,"connectorConfiguration":
+	{
+		"host":"192.168.2.11"
+		,"database":"cogas"
+		,"poolSize":4
+	}
+}
+
+Application.Database.ConnectorAndMigrationConfiguration.cogas1=
+{ 
+	"user":"test"
+	,"passwordKey":"SqlServer.password.cogas"
+	,"connectorConfiguration":
+	{
+		"host":"integration.cx3kaospoih6.us-east-1.rds.amazonaws.com"
+		,"database":"cogas"
+		,"poolSize":32
+	}
+}
+
+Application.Database.ConnectorAndMigrationConfiguration.cogas1=
+{ 
+	"user":"test"
+	,"passwordKey":"SqlServer.password.cogas"
+	,"scriptFile":"./resources/cogas.sql"
+	,"connectorConfiguration":
+	{
+		"host":"localhost"
+		,"port":1434
+		,"database":"cogas"
+		,"poolSize":16
+	}
+}
+
+
+Application.communityPrizeDefinition={
+
+    "contributionRatio":0.01,
+    "baseAmount":1000,
+    "awardThreshold":100000,
+    "prizeContributionRatios":[5,3,2,1,1],
+    "prizeRangeStartMin":840,
+    "prizeRangeEndMin":1560,
+    "prizeDayRange":-1
+}
+
+Application.CommunityPrize.smsOffSiteMessageTemplate=Congratulations! You just won %,d points from the Center Stage Community prize! Come in at your earliest to redeem your prize.
+Application.CommunityPrize.smsOnSiteMessageTemplate=Congratulations! You just won %,d points from the Center Stage Community prize!
+
+%local.cnf
+

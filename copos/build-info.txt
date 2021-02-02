@@ -1,0 +1,5 @@
+package: copos
+maven version: 0.0.1-SNAPSHOT
+build version: 2.214
+built on: 2021-02-01T20:09:26.2132257Z[UTC]
+built at: DESKTOP-M3Q7QGB

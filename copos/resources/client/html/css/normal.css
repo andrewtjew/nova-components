@@ -1,0 +1,55 @@
+
+html {
+  font-size: 25px;
+}
+
+body {
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  -o-background-size: cover;
+  background-color: #aaf;
+ }
+
+
+.key-value-form
+{
+	background-color:rgba(0,0,0,0.0);
+	border:none;
+	border-collapse:separate; 
+	border-spacing: 0.3em 0.3em;
+}
+
+.clear
+{
+	background-color:rgba(0,0,0,0.2);
+	border:none;
+}
+
+.dark-translucent
+{
+	background-color:rgba(0,0,0,0.3);
+	border:none;
+}
+
+.text-shadow
+{
+	  text-shadow: 0.1em 0.3em 0.2em #000000;
+}
+
+.border-warning
+{
+	 border-width:0.2em !important;
+}
+
+.border-success
+{
+	 border-width:0.2em !important;
+}
+
+
+.btn-dark:hover {
+    background-color: #439653;
+}
+
+

@@ -1,0 +1,1 @@
+java -jar copos.jar config=.\resources\integration.cnf

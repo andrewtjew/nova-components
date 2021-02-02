@@ -1,0 +1,16 @@
+https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css
+https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css
+https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js
+https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js
+https://cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js
+https://cdn.datatables.net/responsive/2.2.1/js/responsive.bootstrap4.min.js
+https://cdn.datatables.net/fixedcolumns/3.2.4/js/dataTables.fixedColumns.min.js
+https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css
+https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js
+https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js
+https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js
+https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/fonts/fontawesome-webfont.woff
+https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/fonts/fontawesome-webfont.woff2
+https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/fonts/fontawesome-webfont.eot
+https://cdn.datatables.net/v/bs4/dt-1.10.18/datatables.min.css
+http://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css

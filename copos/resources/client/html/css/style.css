@@ -1,0 +1,78 @@
+body 
+{
+
+  background-color: #efefef;
+  
+  min-height:400px;
+  margin-bottom:72px;
+ }
+
+ table
+ {
+  background-color: #fff;
+ }
+ 
+ .key-value-form
+{
+	background-color:rgba(0,0,0,0.0);
+	border:none;
+	border-collapse:separate; 
+	border-spacing: 0.5em 0.5em;
+}
+
+ .key-value-form-narrow
+{
+	background-color:rgba(0,0,0,0.0);
+	border:none;
+	border-collapse:collapse; 
+	border-spacing: 0.0em 0.0em;
+}
+
+ .button-pin-digit
+{
+	font-size:3em;
+	font-weight:bold;
+	width:3em;
+	height:1.8em;
+}
+ .button-pin-back-space-digit
+{
+	font-size:1.5em;
+	font-weight:bold;
+	width:6em;
+	height:3.6em;
+}
+
+.W9
+{
+	font-size:1.8em;
+	font-weight:bold;
+}
+
+.W9-form
+{
+	font-size:1.25em;
+}
+
+.W9-input
+{
+	font-size:1.0em;
+	border-style:solid;
+	border-color:#ddd;
+	width:100%;
+	padding-left:0.5em;
+}
+
+.popover
+{
+	min-width:480px;
+	background-color:#ffd;
+}
+
+.W9-button
+{
+	font-size:1.5em;
+	font-weight:bold;
+	height:2em;
+}
+

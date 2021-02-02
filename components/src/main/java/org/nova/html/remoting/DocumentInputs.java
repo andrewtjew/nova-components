@@ -14,7 +14,6 @@ import org.nova.html.elements.InnerElement;
 import org.nova.html.elements.InputElement;
 import org.nova.html.elements.QuotationMark;
 import org.nova.html.elements.TagElement;
-import org.nova.html.ext.FormQueryBuilder;
 import org.nova.html.tags.form;
 import org.nova.http.client.PathAndQuery;
 

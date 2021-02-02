@@ -24,7 +24,6 @@ package org.nova.html.remoting;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.QuotationMark;
 import org.nova.html.elements.TagElement;
-import org.nova.html.ext.FormQueryBuilder;
 import org.nova.html.ext.Head;
 import org.nova.html.tags.script;
 import org.nova.http.client.PathAndQuery;
