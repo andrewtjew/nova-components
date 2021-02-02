@@ -19,16 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.DataTables;
+package org.nova.html.deprecated;
 
-import org.nova.html.deprecated.ObjectBuilder;
-import org.nova.html.deprecated.TableFooter;
-import org.nova.html.deprecated.TableHeader;
-import org.nova.html.deprecated.TableRow;
+import org.nova.html.DataTables.DataTableOptions;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.enums.link_rel;
 import org.nova.html.ext.Head;
+import org.nova.html.ext.TableFooter;
+import org.nova.html.ext.TableHeader;
+import org.nova.html.ext.TableRow;
 import org.nova.html.tags.link;
 import org.nova.html.tags.script;
 import org.nova.html.tags.tbody;

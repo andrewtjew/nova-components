@@ -31,6 +31,7 @@ public class Column
     public String defaultContent;
     public String name;
     public Boolean orderable;
+    public String title;
 
     
 }

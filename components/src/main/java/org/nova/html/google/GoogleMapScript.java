@@ -25,7 +25,11 @@ import java.util.ArrayList;
 
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
+import org.nova.html.elements.QuotationMark;
+import org.nova.html.ext.HtmlObjectWriter;
+import org.nova.html.ext.Script;
 import org.nova.html.tags.script;
+import org.nova.json.ObjectMapper;
 
 public class GoogleMapScript extends Element
 {
@@ -60,6 +64,17 @@ public class GoogleMapScript extends Element
                 sb.append("new google.maps.Circle({strokeColor:'"+circle.strokeColor+"',strokeOpacity:"+circle.strokeOpacity+",strokeWeight:"+circle.strokeWeight+",fillColor:'"+circle.fillColor+"',fillOpacity:"+circle.fillOpacity+",map: "+var+",center:{lat:"+circle.lattitude+",lng:"
                         +circle.longitude+"},radius:"+circle.radius+"});");
             }
+            for (GoogleMapMarker circle:map.markers)
+            {
+                circle.map=new Script(var);
+                String data=HtmlObjectWriter.writeObject(circle,QuotationMark.DOUBLE);
+//                sb.append("new google.maps.Marker({map:"+var+",position:{lat:"+circle.position.lat+",lng:"
+//                        +circle.position.lng+"},title:'"+circle.title+"'});");
+                sb.append("new google.maps.Marker("+data+");");
+
+            }
+            
+            
         }        
         sb.append('}');
         

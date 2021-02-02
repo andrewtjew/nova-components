@@ -19,48 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.deprecated;
+package org.nova.html.google;
 
-import org.nova.html.elements.Composer;
-import org.nova.html.elements.Element;
-import org.nova.html.tags.td;
-import org.nova.html.tags.tr;
+import org.nova.html.ext.Script;
 
-public class TableRow extends Element
+public class GoogleMapMarker
 {
-    final private tr tr;
-    public TableRow()
+    public LatLng position;
+    public String title;
+    public Script icon;
+    Script map;
+    
+    public GoogleMapMarker(LatLng position,String title)
     {
-        this.tr=new tr();
+        this.position=position;
+        this.title=title;
+    }
+
+    public GoogleMapMarker(LatLng position)
+    {
+        this.position=position;
     }
     
-    public tr tr()
+    public GoogleMapMarker icon(Script script)
     {
-        return this.tr;
-    }
-    public TableRow add(Object...items)
-    {
-        for (Object item:items)
-        {
-            if (item==null)
-            {
-                tr.addInner(new td());
-            }
-            else if (item instanceof td)
-            {
-                tr.addInner(item);
-            }
-            else
-            {
-                tr.addInner(new td().addInner(item));
-            }
-        }
+        this.icon=script;
         return this;
     }
-
-    @Override
-    public void compose(Composer composer) throws Throwable
-    {
-        composer.compose(this.tr);
-    }
+    
 }

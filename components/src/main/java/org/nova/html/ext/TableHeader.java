@@ -19,39 +19,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.deprecated;
+package org.nova.html.ext;
 
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
-import org.nova.html.tags.th;
-import org.nova.html.tags.td;
+import org.nova.html.elements.GlobalEventTagElement;
+import org.nova.html.elements.TagElement;
 import org.nova.html.tags.tfoot;
+import org.nova.html.tags.th;
+import org.nova.html.tags.thead;
 import org.nova.html.tags.tr;
 
-public class TableFooter extends Element
+public class TableHeader extends GlobalEventTagElement<TableHeader>
 {
-    final private tfoot tfoot;
     final private tr tr;
-    public TableFooter()
+    public TableHeader()
     {
-        this.tfoot=new tfoot();
-        this.tr=this.tfoot.returnAddInner(new tr());
+        super("thead");
+        this.tr=this.returnAddInner(new tr());
     }
-    public tfoot tfoot()
-    {
-        return this.tfoot;
-    }
-    public TableFooter add(Object...items)
+    public TableHeader add(Object...items)
     {
         for (Object item:items)
         {
             if (item==null)
             {
-                tr.addInner(new td());
+                tr.addInner(new th());
             }
-            else if (item instanceof td)
+            else if (item instanceof TagElement)
             {
-                tr.addInner(item);
+                TagElement<?> tagElement=(TagElement<?>)item;
+                if (tagElement.getTag().equals("th"))
+                {
+                    tr.addInner(item);
+                }
+                else
+                {
+                    tr.addInner(new th().addInner(item));
+                }
             }
             else
             {
@@ -61,9 +66,4 @@ public class TableFooter extends Element
         return this;
     }
 
-    @Override
-    public void compose(Composer composer) throws Throwable
-    {
-        composer.compose(this.tfoot);
-    }
 }

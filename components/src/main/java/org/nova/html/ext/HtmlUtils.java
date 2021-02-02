@@ -22,6 +22,8 @@
 package org.nova.html.ext;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.nova.annotations.Alias;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.FormElement;
 import org.nova.html.elements.InputElement;
@@ -412,6 +415,7 @@ public class HtmlUtils
                         ||(type==long.class)
                         ||(type==float.class)
                         ||(type==double.class)
+                        ||(type==boolean.class)
                         ||(type==BigDecimal.class)
                         ||(type==Byte.class)
                         ||(type==Short.class)
@@ -419,6 +423,7 @@ public class HtmlUtils
                         ||(type==Long.class)
                         ||(type==Float.class)
                         ||(type==Double.class)
+                        ||(type==Boolean.class)
                         )
                 {
                     if (isArray)
@@ -594,6 +599,8 @@ public class HtmlUtils
         return "return !(window.event && window.event.keyCode == 13);";
     }
     */
+    
+
     
     
 }

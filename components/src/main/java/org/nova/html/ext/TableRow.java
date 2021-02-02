@@ -19,36 +19,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.services;
+package org.nova.html.ext;
 
-import org.nova.frameworks.ServerApplication;
-import org.nova.html.elements.HtmlElementWriter;
-import org.nova.html.remote.RemoteResponseWriter;
-import org.nova.html.remoting.HtmlRemotingWriter;
-import org.nova.http.server.GzipContentDecoder;
-import org.nova.http.server.GzipContentEncoder;
-import org.nova.http.server.JSONContentReader;
-import org.nova.http.server.JSONContentWriter;
-import org.nova.http.server.JSONPatchContentReader;
-import org.nova.http.server.annotations.ContentDecoders;
-import org.nova.http.server.annotations.ContentEncoders;
-import org.nova.http.server.annotations.ContentReaders;
-import org.nova.http.server.annotations.ContentWriters;
-import org.nova.http.server.annotations.Filters;
+import org.nova.html.elements.Composer;
+import org.nova.html.elements.Element;
+import org.nova.html.elements.GlobalEventTagElement;
+import org.nova.html.elements.TagElement;
+import org.nova.html.tags.td;
+import org.nova.html.tags.th;
+import org.nova.html.tags.tr;
 
-@ContentDecoders(GzipContentDecoder.class)
-@ContentEncoders(GzipContentEncoder.class)
-@ContentReaders({JSONContentReader.class,JSONPatchContentReader.class})
-@ContentWriters({JSONContentWriter.class,HtmlRemotingWriter.class,HtmlElementWriter.class,RemoteResponseWriter.class})
-public class WebController<SERVICE extends ServerApplication>
+public class TableRow extends GlobalEventTagElement<TableRow>
 {
-	final protected SERVICE service;
-	public WebController(SERVICE service)
-	{
-		this.service=service;
-	}
-	public SERVICE getService()
-	{
-		return this.service;
-	}
+    public TableRow()
+    {
+       super("tr");
+    }
+    
+    public TableRow add(Object...items)
+    {
+        for (Object item:items)
+        {
+            if (item==null)
+            {
+                addInner(new td());
+            }
+            else if (item instanceof TagElement)
+            {
+                TagElement<?> tagElement=(TagElement<?>)item;
+                if (tagElement.getTag().equals("td"))
+                {
+                    addInner(item);
+                }
+                else
+                {
+                    addInner(new th().addInner(item));
+                }
+            }
+            else
+            {
+                addInner(new td().addInner(item));
+            }
+        }
+        return this;
+    }
+
 }

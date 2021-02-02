@@ -59,7 +59,7 @@ public class OperatorPage extends Document
         return content;
     }
     
-    static Template buildTemplate(MenuBar menuBar,String name,String hostName) throws Throwable
+    static public Template buildTemplate(MenuBar menuBar,String name,String hostName) throws Throwable
     {
         Content content=new Content();
         content.addInner(new DocType("html"));

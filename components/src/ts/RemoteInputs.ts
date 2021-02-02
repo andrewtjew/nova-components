@@ -1,5 +1,25 @@
 namespace nova.remote
 {
+    function toPlacement(placement:string):"top"|"bottom"|"left"|"right"|"auto"
+    {
+        switch (placement)
+        {
+            case "top":
+                return "top";
+            case "bottom":
+                return "bottom";
+            case "left":
+                return "left";
+            case "right":
+                return "right";
+            case "auto":
+                return "auto";
+            default:
+                return null;
+        }
+    }
+
+
     export function openEditBox(
         template:string
         ,backgroundId:string
@@ -32,7 +52,7 @@ namespace nova.remote
                 html:true,
                 content:content,
                 sanitize:false,
-                placement:Remoting.toPlacement(placement)
+                placement:toPlacement(placement)
             }
         );
         pop.popover("show");
@@ -114,7 +134,7 @@ namespace nova.remote
         var pop=$('#'+containerId).popover(
             {
                 trigger:"manual",
-                placement:Remoting.toPlacement(placement),
+                placement:toPlacement(placement),
                 template:template,
                 html:true,
                 content:content,
@@ -141,26 +161,8 @@ namespace nova.remote
     
         acceptButton.onclick=function()
         {
-            var data=Remoting.toData(text);
-            $.ajax(
-                {url:action,
-                type:"POST",
-                async:true,
-                dataType:"json",
-                cache: false,
-                data:data,
-                success:function(instructions:Instruction[])
-                {
-                    close();
-                    Remoting.run(instructions);
-                },
-                error:function(xhr)
-                {
-                    close();
-                    alert("Error: "+xhr.status+" "+xhr.statusText);
-                }
-            }); 
-            }
+            nova.remote.post(action,text,false);
+        }
 
     }    
 }

@@ -29,6 +29,8 @@ import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.tags.div;
 
+import com.amazonaws.transform.SimpleTypeIonUnmarshallers.LongIonUnmarshaller;
+
 public class GoogleMap extends Element
 {
     final div div;
@@ -36,21 +38,40 @@ public class GoogleMap extends Element
     final double longtitude;
     final double zoom;
     final ArrayList<GoogleMapCircle> circles;
+    final ArrayList<GoogleMapMarker> markers;
     
-    public GoogleMap(Size width,Size height,double lattitude,double longtitude,double zoom)
+    public GoogleMap(String id,Size width,Size height,double lattitude,double longtitude,double zoom) throws Exception
     {
         this.div=new div();
-        this.div.id();
+        if (id!=null)
+        {
+            this.div.id(id);
+        }
+        else
+        {
+            this.div.id();
+        }
         div.style(new Style().width(width).height(height));
         this.lattitude=lattitude;
         this.longtitude=longtitude;
         this.zoom=zoom;
         this.circles=new ArrayList<>();
+        this.markers=new ArrayList<>();
+    }
+
+    public GoogleMap(Size width,Size height,double lattitude,double longtitude,double zoom) throws Exception
+    {
+        this(null,width,height,lattitude,longtitude,zoom);
     }
     
     public void add(GoogleMapCircle circle)
     {
         this.circles.add(circle);
+    }
+
+    public void add(GoogleMapMarker marker)
+    {
+        this.markers.add(marker);
     }
 
     @Override

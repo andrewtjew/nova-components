@@ -12,22 +12,26 @@ import org.nova.json.ObjectMapper;
 
 import com.amazonaws.services.devicefarm.model.Run;
 
-public class Response
+public class RemoteResponse
 {
     final ArrayList<Instruction> instructions;
     boolean trace;
-    public Response()
+    public RemoteResponse()
     {
         this.instructions=new ArrayList<Instruction>();
         this.trace=false;
     }
     
-    public Response trace(boolean trace)
+    public RemoteResponse trace(boolean trace)
     {
         this.trace=trace;
         return this;
     }
-    public Response value(String id,Object value)
+    public RemoteResponse trace()
+    {
+        return trace(true);
+    }
+    public RemoteResponse value(String id,Object value)
     {
         if (value==null)
         {
@@ -36,72 +40,85 @@ public class Response
         this.instructions.add(new Instruction(this.trace,Command.value,id,value.toString()));
         return this;
     }
-    public Response documentObject(String name,Object documentObject) throws Throwable
+    public RemoteResponse documentObject(String name,Object documentObject) throws Throwable
     {
         String text=ObjectMapper.writeObjectToString(documentObject);
         this.instructions.add(new Instruction(this.trace,Command.documentObject,name,text));
         return this;
     }
-    public Response innerHtml(String id,Element element,QuotationMark mark)
+    public RemoteResponse innerHtml(String id,Element element,QuotationMark mark)
     {
         String text=element.getHtml(mark);
         this.instructions.add(new Instruction(this.trace,Command.innerHTML,id,text));
         return this;
     }
-    public Response innerHtml(String id,Element element)
+    public RemoteResponse innerHtml(String id,Element element)
     {
         String text=element.getHtml();
         this.instructions.add(new Instruction(this.trace,Command.innerHTML,id,text));
         return this;
     }
-    public Response outerHtml(String id,Element element,QuotationMark mark)
+    public RemoteResponse outerHtml(String id,Element element,QuotationMark mark)
     {
         String text=element.getHtml(mark);
         this.instructions.add(new Instruction(this.trace,Command.outerHTML,id,text));
         return this;
     }
-    public Response outerHtml(String id,Element element)
+    public RemoteResponse outerHtml(String id,Element element)
     {
         String text=element.getHtml();
         this.instructions.add(new Instruction(this.trace,Command.outerHTML,id,text));
         return this;
     }
-    public Response innerText(String id,String text)
+    public RemoteResponse innerText(String id,String text)
     {
         this.instructions.add(new Instruction(this.trace,Command.innerText,id,text));
         return this;
     }
-    public Response runScript(String script)
+    public RemoteResponse script(String script)
     {
         this.instructions.add(new Instruction(this.trace,Command.script,script));
         return this;
     }
-    public Response alert(Object value)
+    public RemoteResponse alert(Object value)
     {
         this.instructions.add(new Instruction(this.trace,Command.alert,value==null?null:value.toString()));
         return this;
     }
-    public Response log(Object value)
+    public RemoteResponse log(Object value)
     {
         this.instructions.add(new Instruction(this.trace,Command.log,value==null?null:value.toString()));
         return this;
     }
 
-    public Response location(String pathAndQuery) throws UnsupportedEncodingException
+    public RemoteResponse location(String pathAndQuery) throws UnsupportedEncodingException
     {
         QuotationMark mark=QuotationMark.SINGLE;
         String code="document.location.href="+mark+URLEncoder.encode(pathAndQuery,StandardCharsets.UTF_8.toString())+mark+";";
-        return runScript(code);
+        return script(code);
     }
-    public Response location(PathAndQuery pathAndQuery) throws UnsupportedEncodingException
+    public RemoteResponse prop(String id,String prop,Object value) throws UnsupportedEncodingException
+    {
+//        (String id,String prop,Object value)
+//        QuotationMark mark=QuotationMark.SINGLE;
+        String code="$('#"+id+"').prop('"+prop+"',"+value+");";
+        return script(code);
+    }
+    public RemoteResponse location(PathAndQuery pathAndQuery) throws UnsupportedEncodingException
     {
         return location(pathAndQuery.toString());
     }
-    public Response showModal(String id)
+    public RemoteResponse showModal(String id)
     {
         QuotationMark mark=QuotationMark.SINGLE;
         String code="$("+mark+"#"+id+mark+").modal("+mark+"show"+mark+");";
-        return runScript(code);
+        return script(code);
+    }
+    public RemoteResponse hideModal(String id)
+    {
+        QuotationMark mark=QuotationMark.SINGLE;
+        String code="$("+mark+"#"+id+mark+").modal("+mark+"hide"+mark+");";
+        return script(code);
     }
 
     

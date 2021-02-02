@@ -31,10 +31,14 @@ import org.nova.html.ExtionsionToTypeMappings;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.operator.MenuBar;
-import org.nova.html.remote.ResponseWriter;
+import org.nova.html.remote.RemoteResponseWriter;
 import org.nova.html.remoting.HtmlRemotingWriter;
 import org.nova.html.templating.Template;
 import org.nova.http.server.JettyServerFactory;
+import org.nova.http.server.annotations.ContentDecoders;
+import org.nova.http.server.annotations.ContentEncoders;
+import org.nova.http.server.annotations.ContentReaders;
+import org.nova.http.server.annotations.ContentWriters;
 import org.nova.http.server.GzipContentDecoder;
 import org.nova.http.server.GzipContentEncoder;
 import org.nova.http.server.HtmlContentWriter;
@@ -51,6 +55,10 @@ import org.nova.utils.Utils;
 
 import com.nova.disrupt.DisruptorManager;
 
+@ContentDecoders(GzipContentDecoder.class)
+@ContentEncoders(GzipContentEncoder.class)
+@ContentReaders({ JSONContentReader.class, JSONPatchContentReader.class })
+@ContentWriters({HtmlElementWriter.class})
 public abstract class ServerApplication extends CoreEnvironmentApplication
 {
 	final private HttpServer publicServer;
@@ -147,7 +155,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
                 this.privateServer.addContentDecoders(new GzipContentDecoder());
                 this.privateServer.addContentEncoders(new GzipContentEncoder());
                 this.privateServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
-                this.privateServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter(),new HtmlRemotingWriter(),new ResponseWriter());
+                this.privateServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter(),new HtmlRemotingWriter(),new RemoteResponseWriter());
             }
             else
             {
@@ -207,7 +215,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
                 this.publicServer.addContentDecoders(new GzipContentDecoder());
                 this.publicServer.addContentEncoders(new GzipContentEncoder());
                 this.publicServer.addContentReaders(new JSONContentReader(),new JSONPatchContentReader());
-                this.publicServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter(),new HtmlRemotingWriter(),new ResponseWriter());
+                this.publicServer.addContentWriters(new JSONContentWriter(),new HtmlContentWriter(),new HtmlElementWriter(),new HtmlRemotingWriter(),new RemoteResponseWriter());
             }
             else
             {

@@ -19,12 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.DataTables;
+package org.nova.html.deprecated;
 
 import java.util.ArrayList;
 
 import org.nova.core.NameObject;
-import org.nova.html.deprecated.Table;
+import org.nova.html.DataTables.DataTableColumnOrder;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.ext.Head;

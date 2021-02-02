@@ -1,7 +1,25 @@
 namespace nova.remote
 {
+    class Input 
+    {
+        name:string;
+        id:string;
+        inputType:string;
+    }
+
+    class Instruction
+    {
+        trace:boolean;
+        command:string;
+        parameters:string[];
+    }
+    
     function toData(text:string):object
     {
+        if (text==null)
+        {
+            return;
+        }
         var data=new Object();
         var inputs=JSON.parse(text) as Input[];
         inputs.forEach(input=>
@@ -85,7 +103,7 @@ namespace nova.remote
         call("GET",action,null,async);
     }
 
-    function call(type:string,pathAndQuery:string,data:object,async:boolean)
+    export function call(type:string,pathAndQuery:string,data:object,async:boolean)
     {
         $.ajax(
             {url:pathAndQuery,
@@ -157,7 +175,7 @@ namespace nova.remote
                     }
                     catch (ex)
                     {
-                        alert("ActionResponse Exception:"+ex);
+                        alert("remote exception:"+ex);
                     }
                 }
                 );

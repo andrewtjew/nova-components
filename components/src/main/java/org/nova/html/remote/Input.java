@@ -11,7 +11,26 @@ public class Input
     
     public Input(String name,Object value) throws Throwable
     {
-        this.id=ObjectMapper.writeObjectToString(value);
+        if (value!=null)
+        {
+            Class<?> type=value.getClass();
+            if (type.isPrimitive())
+            {
+                this.id=value.toString();
+            }
+            else if (type==String.class)
+            {
+                this.id=value.toString();
+            }
+            else
+            {
+                this.id=ObjectMapper.writeObjectToString(value);
+            }
+        }
+        else
+        {
+            this.id=null;
+        }
         this.name=name;
         this.inputType=InputType.constant;
     }
