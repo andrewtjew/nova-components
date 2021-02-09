@@ -27,6 +27,7 @@ import org.nova.html.bootstrap.CustomLabel;
 import org.nova.html.bootstrap.CustomRadio;
 import org.nova.html.bootstrap.CustomSwitch;
 import org.nova.html.bootstrap.StyleComponent;
+import org.nova.html.bootstrap.Component;
 
 public class CustomSwitchControl extends StyleComponent<CustomSwitchControl>
 {

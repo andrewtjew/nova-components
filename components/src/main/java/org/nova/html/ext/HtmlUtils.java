@@ -183,34 +183,6 @@ public class HtmlUtils
         return map;
     }
     
-    public static String toStringParameter(String string)
-    {
-        StringBuilder sb=new StringBuilder();
-        for (int i=0;i<string.length();i++)
-        {
-            char c=string.charAt(i);
-            switch (c)
-            {
-                case '"':
-                    sb.append("&#34;");
-                    break;
-                    
-                case '\'':
-                    sb.append("\\'");
-                    break;
-                    
-                case '\\':
-                    sb.append("\\\\");
-                    break;
-                    
-                    
-                default:
-                    sb.append(c);
-            }
-        }
-        return sb.toString();
-    }
-    
     public static String toReturnStringParameter(String string)
     {
         StringBuilder sb=new StringBuilder();
@@ -269,59 +241,29 @@ public class HtmlUtils
         return js_call("document.getElementById('"+id+"')."+function,parameters);
     }  
     
-    public static String escapeString(char escapeChar,String string)
+    public static String escapeString(String string)
     {
         StringBuilder sb=new StringBuilder();
-//        if (escapeChar=='"')
-            if (true)
+        for (int i=0;i<string.length();i++)
         {
-            for (int i=0;i<string.length();i++)
+            char c=string.charAt(i);
+            switch (c)
             {
-                char c=string.charAt(i);
-                switch (c)
-                {
-                    case '"':
-                        sb.append("\\\"");
-                        break;
-                        
-                    case '\'':
-                        sb.append("&#39;");
-                        break;
-                        
-                    case '\\':
-                        sb.append("\\\\");
-                        break;
-                        
-                        
-                    default:
-                        sb.append(c);
-                }
-                
-            }
-        }
-        else
-        {
-            for (int i=0;i<string.length();i++)
-            {
-                char c=string.charAt(i);
-                switch (c)
-                {
-                    case '"':
-                        sb.append("&#34;");
-                        break;
-                        
-                    case '\'':
-                        sb.append("\\'");
-                        break;
-                        
-                    case '\\':
-                        sb.append("\\\\");
-                        break;
-                        
-                        
-                    default:
-                        sb.append(c);
-                }
+                case '"':
+                    sb.append("&quot;");
+                    break;
+                    
+                case '\'':
+                    sb.append("&apos;");
+                    break;
+                    
+                case '\\':
+                    sb.append("\\\\");
+                    break;
+                    
+                    
+                default:
+                    sb.append(c);
             }
         }
         return sb.toString();
@@ -339,12 +281,11 @@ public class HtmlUtils
     
     public static String js_call(String function,Object...parameters)
     {
-        return js_call(QuotationMark.DOUBLE,function,parameters);
+        return js_call(QuotationMark.SINGLE,function,parameters);
     }
     
     public static String js_call(QuotationMark mark,String function,Object...parameters)
     {
-        char escapeChar=QuotationMark.asChar(mark);
         StringBuilder sb=new StringBuilder(function+"(");
         boolean commaNeeded=false;
         for (Object parameter:parameters)
@@ -380,13 +321,13 @@ public class HtmlUtils
                             {
                                 sb.append(',');
                             }
-                            sb.append(mark.toString()+escapeString(escapeChar,Array.get(parameter, i).toString())+mark.toString());
+                            sb.append(mark.toString()+escapeString(Array.get(parameter, i).toString())+mark.toString());
                         }
                         sb.append(']');
                     }
                     else
                     {
-                        sb.append(mark.toString()+escapeString(escapeChar,parameter.toString())+mark.toString());
+                        sb.append(mark.toString()+escapeString(parameter.toString())+mark.toString());
                     }
                 }
                 else if ((type==byte.class)
@@ -446,7 +387,7 @@ public class HtmlUtils
                 }
             }
         }
-        sb.append(");");
+        sb.append(")");
         return sb.toString();
     }
     public static String returnFunction(String function,Object...parameters)

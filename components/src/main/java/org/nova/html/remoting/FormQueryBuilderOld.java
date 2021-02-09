@@ -153,12 +153,12 @@ public class FormQueryBuilderOld
     
     public FormQueryBuilderOld generateOnClick(GlobalEventTagElement<?> element,String functionName)
     {
-        element.onclick(functionName+"("+HtmlUtils.toStringParameter(generate())+")");
+        element.onclick(functionName+"("+HtmlUtils.escapeString(generate())+")");
         return this;
     }
     public FormQueryBuilderOld generateOnClickLocation(GlobalEventTagElement<?> element)
     {
-        element.onclick("window.location="+HtmlUtils.toStringParameter(generate()));
+        element.onclick("window.location="+HtmlUtils.escapeString(generate()));
         return this;
     }
     public FormQueryBuilderOld generateWindowLocationAssignScript(String name,Head head)

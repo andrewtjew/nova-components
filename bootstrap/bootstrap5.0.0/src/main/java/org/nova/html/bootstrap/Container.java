@@ -29,25 +29,12 @@ public class Container extends StyleComponent<Container>
     
 	public Container()
 	{
-	    super("div",null);
+	    super("div","container");
 	}
     public Container fluid()
     {
-        this.fluid=true;
+        addClass(this.getComponentClass(),"fluid");
         return this;
     }
     
-    @Override
-    public void compose(Composer composer) throws Throwable
-    {
-        if (fluid)
-        {
-            this.addClass("container","fluid");
-        }
-        else
-        {
-            this.addClass("container");
-        }
-        super.compose(composer);
-    }
 }

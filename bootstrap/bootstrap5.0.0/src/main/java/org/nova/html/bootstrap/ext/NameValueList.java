@@ -30,9 +30,10 @@ import org.nova.html.bootstrap.Container;
 import org.nova.html.bootstrap.FormLabel;
 import org.nova.html.bootstrap.Item;
 import org.nova.html.bootstrap.Row;
-import org.nova.html.bootstrap.StyleComponent;
+import org.nova.html.bootstrap.Component;
 import org.nova.html.bootstrap.Table;
 import org.nova.html.bootstrap.classes.DeviceClass;
+import org.nova.html.bootstrap.classes.Display;
 import org.nova.html.bootstrap.classes.Edge;
 import org.nova.html.bootstrap.classes.Float_;
 import org.nova.html.bootstrap.classes.Font;
@@ -46,64 +47,64 @@ import org.nova.html.tags.hr;
 import org.nova.html.tags.td;
 
 
-public class NameValueList extends StyleComponent<NameValueList>
-{
-    final private Size width;
-
-    public NameValueList(Size width)
-    {
-        super("div",null);
-        this.width=width;
-    }
-
-    public NameValueList add(Object name, Element element)
-    {
-        Item item=returnAddInner(new Item());
-        item.d_flex().justify_content(Justify.start);
-        item.addInner(new Item().mr(2).text(TextAlign.right).addInner(new b().addInner(name)).style(new Style().width(this.width)));
-        item.addInner(element);
-        return this;
-    }
-    public NameValueList add(Object name, Object value)
-    {
-        Item item=returnAddInner(new Item());
-        item.d_flex().justify_content(Justify.start);
-        item.addInner(new Item().mr(2).text(TextAlign.right).addInner(new b().addInner(name)).style(new Style().width(this.width)));
-        item.addInner(new Item().addInner(value));
-        
-        return this;
-    }
-    public NameValueList add(Integer topSpacing,Integer bottomSpacing,Object name, Object value)
-    {
-        Item item=returnAddInner(new Item());
-        item.d_flex().justify_content(Justify.start);
-        item.addInner(new Item().mr(2).text(TextAlign.right).addInner(new b().addInner(name)).style(new Style().width(this.width)));
-        item.addInner(new Item().addInner(value));
-        if (topSpacing!=null)
-        {
-            item.mt(topSpacing);
-        }
-        if (bottomSpacing!=null)
-        {
-            item.mb(bottomSpacing);
-        }
-        return this;
-    }
-    public NameValueList add(Integer topSpacing,Integer bottomSpacing,Object name, Element element)
-    {
-        Item item=returnAddInner(new Item());
-        item.d_flex().justify_content(Justify.start);
-        item.addInner(new Item().mr(2).text(TextAlign.right).addInner(new b().addInner(name)).style(new Style().width(this.width)));
-        item.addInner(element);
-        if (topSpacing!=null)
-        {
-            item.mt(topSpacing);
-        }
-        if (bottomSpacing!=null)
-        {
-            item.mb(bottomSpacing);
-        }
-        return this;
-    }
-
-}
+//public class NameValueList extends Component<NameValueList>
+//{
+//    final private Size width;
+//
+//    public NameValueList(Size width)
+//    {
+//        super("div",null);
+//        this.width=width;
+//    }
+//
+//    public NameValueList add(Object name, Element element)
+//    {
+//        Item item=returnAddInner(new Item());
+//        item.d(Display.flex).justify_content(Justify.start);
+//        item.addInner(new Item().mr(2).text(TextAlign.right).addInner(new b().addInner(name)).style(new Style().width(this.width)));
+//        item.addInner(element);
+//        return this;
+//    }
+//    public NameValueList add(Object name, Object value)
+//    {
+//        Item item=returnAddInner(new Item());
+//        item.d(Display.flex).justify_content(Justify.start);
+//        item.addInner(new Item().mr(2).text(TextAlign.right).addInner(new b().addInner(name)).style(new Style().width(this.width)));
+//        item.addInner(new Item().addInner(value));
+//        
+//        return this;
+//    }
+//    public NameValueList add(Integer topSpacing,Integer bottomSpacing,Object name, Object value)
+//    {
+//        Item item=returnAddInner(new Item());
+//        item.d(Display.flex).justify_content(Justify.start);
+//        item.addInner(new Item().mr(2).text(TextAlign.right).addInner(new b().addInner(name)).style(new Style().width(this.width)));
+//        item.addInner(new Item().addInner(value));
+//        if (topSpacing!=null)
+//        {
+//            item.mt(topSpacing);
+//        }
+//        if (bottomSpacing!=null)
+//        {
+//            item.mb(bottomSpacing);
+//        }
+//        return this;
+//    }
+//    public NameValueList add(Integer topSpacing,Integer bottomSpacing,Object name, Element element)
+//    {
+//        Item item=returnAddInner(new Item());
+//        item.d(Display.flex).justify_content(Justify.start);
+//        item.addInner(new Item().mr(2).text(TextAlign.right).addInner(new b().addInner(name)).style(new Style().width(this.width)));
+//        item.addInner(element);
+//        if (topSpacing!=null)
+//        {
+//            item.mt(topSpacing);
+//        }
+//        if (bottomSpacing!=null)
+//        {
+//            item.mb(bottomSpacing);
+//        }
+//        return this;
+//    }
+//
+//}

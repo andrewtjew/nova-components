@@ -22,7 +22,7 @@
 package org.nova.html.bootstrap;
 
 
-public class ButtonToolbar extends Component<ButtonToolbar>
+public class ButtonToolbar extends StyleComponent<ButtonToolbar>
 {
     public ButtonToolbar()
     { 

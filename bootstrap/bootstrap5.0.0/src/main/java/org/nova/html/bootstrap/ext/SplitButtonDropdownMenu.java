@@ -5,6 +5,7 @@ import org.nova.html.bootstrap.ButtonDropdown;
 import org.nova.html.bootstrap.ButtonGroup;
 import org.nova.html.bootstrap.DropdownMenu;
 import org.nova.html.bootstrap.StyleComponent;
+import org.nova.html.bootstrap.Component;
 import org.nova.html.bootstrap.ToggleDropdownButton;
 import org.nova.html.bootstrap.classes.Drop;
 import org.nova.html.bootstrap.classes.StyleColor;
@@ -47,12 +48,12 @@ public class SplitButtonDropdownMenu extends StyleComponent<SplitButtonDropdownM
         return menu;
     }
     
-    public SplitButtonDropdownMenu color(StyleColor color)
-    {
-        this.button().color(color);
-        this.toggler().color(color);
-        return this;
-    }
+//    public SplitButtonDropdownMenu color(StyleColor color)
+//    {
+//        this.button().color(color);
+//        this.toggler().color(color);
+//        return this;
+//    }
     public SplitButtonDropdownMenu static_()
     {
         this.toggler.attr("data-display","static");

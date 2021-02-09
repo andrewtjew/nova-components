@@ -28,12 +28,7 @@ public class FormLabel extends StyleComponent<FormLabel>
 {
     public FormLabel()
     {
-        super("label","col-form-label");
-    }
-    public FormLabel(DeviceClass deviceClass,int size)
-    {
-        super("label","col-form-label");
-        col(deviceClass,size);
+        super("label","form-label");
     }
     public FormLabel for_(String element_id)
     {

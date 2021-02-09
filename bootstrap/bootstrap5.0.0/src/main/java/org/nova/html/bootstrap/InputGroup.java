@@ -24,7 +24,7 @@ package org.nova.html.bootstrap;
 import org.nova.html.bootstrap.classes.TextAlign;
 import org.nova.html.elements.Element;
 
-public class InputGroup extends StyleComponent<InputGroup>
+public class InputGroup extends Component<InputGroup>
 {
     public InputGroup()
     {
@@ -53,7 +53,10 @@ public class InputGroup extends StyleComponent<InputGroup>
 
     public InputGroup prepend(String text,int percentageWidth)
     {
-        returnAddInner(new InputGroupPrepend()).style("flex: 0 0 "+percentageWidth+"%;").returnAddInner(new InputGroupText(text)).w(100);
+        InputGroupPrepend prepend=returnAddInner(new InputGroupPrepend()).style("flex: 0 0 "+percentageWidth+"%;");
+        
+        InputGroupText groupText=prepend.returnAddInner(new InputGroupText(text));
+        Styler.style(groupText).w(100);
         return this;
     }
 

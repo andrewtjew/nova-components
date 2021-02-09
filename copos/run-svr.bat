@@ -1,1 +1,0 @@
-java -XX:+UseCompressedOops -XX:+UseG1GC -XX:MaxGCPauseMillis=1000 -XX:G1ReservePercent=25 -Xms1G -Xmx1G -jar copos.jar config=.\resources\svr.cnf

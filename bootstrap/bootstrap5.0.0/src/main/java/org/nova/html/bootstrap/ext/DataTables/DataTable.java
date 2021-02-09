@@ -25,7 +25,7 @@ import java.util.ArrayList;
 
 import org.nova.html.DataTables.ColumnDef;
 import org.nova.html.DataTables.DataTableOptions;
-import org.nova.html.bootstrap.StyleComponent;
+import org.nova.html.bootstrap.Component;
 import org.nova.html.ext.TableRow;
 import org.nova.html.deprecated.ObjectBuilder;
 import org.nova.html.elements.Composer;
@@ -41,7 +41,7 @@ import org.nova.utils.TypeUtils;
 
 //!!! Requires jquery
 
-public class DataTable extends StyleComponent<DataTable>
+public class DataTable extends Component<DataTable>
 {
     final private tbody tbody;
     private DataTableOptions options;

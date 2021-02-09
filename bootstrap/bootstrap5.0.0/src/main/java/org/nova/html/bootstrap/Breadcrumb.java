@@ -26,7 +26,7 @@ import org.nova.html.elements.Element;
 import org.nova.html.elements.InnerElement;
 import org.nova.html.tags.nav;
 
-public class Breadcrumb extends StyleComponent<Breadcrumb>
+public class Breadcrumb extends Component<Breadcrumb>
 {
     public Breadcrumb()
     {

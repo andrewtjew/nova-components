@@ -23,8 +23,10 @@ package org.nova.html.bootstrap.classes;
 
 public enum DeviceClass
 {
+    xs,
     sm, 
     md, 
     lg, 
     xl, 
+    xxl,
 }

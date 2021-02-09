@@ -26,10 +26,9 @@ import org.nova.html.attributes.Style;
 import org.nova.html.attributes.display;
 import org.nova.html.attributes.unit;
 import org.nova.html.bootstrap.Button;
-import org.nova.html.bootstrap.ClassBuilder;
 import org.nova.html.bootstrap.Item;
 import org.nova.html.bootstrap.Popover;
-import org.nova.html.bootstrap.StyleComponent;
+import org.nova.html.bootstrap.Component;
 import org.nova.html.bootstrap.TipOption;
 import org.nova.html.bootstrap.classes.Align;
 import org.nova.html.bootstrap.classes.AlignSelf;
@@ -105,7 +104,7 @@ public class RemoteDialogPopover
     }
     public RemoteDialogPopover content(String label)
     {
-        return content(new Item().mr(2).align_self(AlignSelf.center).addInner(label));
+        return content(new Item().addInner(label));
     }
     public RemoteDialogPopover modalBackground(ModalBackground background)
     {
@@ -134,17 +133,17 @@ public class RemoteDialogPopover
         String template=new Item().addClass("popover").attr("role","tooltip").style(new Style().margin(new Size(0,unit.em)).padding(new Size(0,unit.em)))
                 .addInner(new Item().addClass("popover-body")).getHtml();
         
-        if (this.acceptButton==null)
-        {
-            this.acceptButton=new Button().ml(1).color(StyleColor.success).addInner("&#x2713;");
-        }
-        if (this.dismissButton==null)
-        {
-            this.dismissButton=new Button().ml(1).color(StyleColor.secondary).addInner("&#x1f5d9;");
-        }
-
+//        if (this.acceptButton==null)
+//        {
+//            this.acceptButton=new Button().ml(1).color(StyleColor.success).addInner("&#x2713;");
+//        }
+//        if (this.dismissButton==null)
+//        {
+//            this.dismissButton=new Button().ml(1).color(StyleColor.secondary).addInner("&#x1f5d9;");
+//        }
+//
         
-        Item inputGroup=new Item().d(Display.flex).mx(0).px(0);
+        Item inputGroup=new Item();//.d(Display.flex).mx(0).px(0);
         inputGroup.addInner(this.content);
                 
         inputGroup.addInner(acceptButton);

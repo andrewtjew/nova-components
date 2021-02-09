@@ -21,38 +21,53 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
+import org.nova.html.attributes.Style;
+import org.nova.html.bootstrap.classes.Align;
+import org.nova.html.bootstrap.classes.AlignItems;
+import org.nova.html.bootstrap.classes.AlignSelf;
 import org.nova.html.bootstrap.classes.DeviceClass;
+import org.nova.html.bootstrap.classes.Display;
+import org.nova.html.bootstrap.classes.Edge;
+import org.nova.html.bootstrap.classes.Flex;
 import org.nova.html.bootstrap.classes.Float_;
+import org.nova.html.bootstrap.classes.Font;
+import org.nova.html.bootstrap.classes.Justify;
+import org.nova.html.bootstrap.classes.Overflow;
+import org.nova.html.bootstrap.classes.Placement;
+import org.nova.html.bootstrap.classes.Position;
+import org.nova.html.bootstrap.classes.Rounded;
+import org.nova.html.bootstrap.classes.StyleColor;
+import org.nova.html.bootstrap.classes.TextAlign;
+import org.nova.html.bootstrap.classes.TextStyle;
+import org.nova.html.elements.Composer;
 import org.nova.html.elements.GlobalEventTagElement;
+import org.nova.html.elements.TagElement;
 
-public abstract class Component<ELEMENT extends Component<ELEMENT>> extends GlobalEventTagElement<ELEMENT> 
+public class Component<ELEMENT extends Component<ELEMENT>> extends GlobalEventTagElement<ELEMENT>
 {
     final private String componentClass;
-//    private DeviceClass deviceClass;
 
-    public Component(String tag,String componentClass)
+    public Component(String tag, String componentClass)
     {
-        this(tag,componentClass,false);
+        this(tag, componentClass, false);
     }
-    
-    public Component(String tag,String componentClass,boolean noEndTag)
+
+    public Component(String tag, String componentClass, boolean noEndTag)
     {
-        super(tag,noEndTag);
-        this.componentClass=componentClass;
+        super(tag, noEndTag);
+        this.componentClass = componentClass;
         addClass(componentClass);
+    }
+
+    protected void composeThis(Composer composer) throws Throwable
+    {
+        super.compose(composer);
     }
     
     protected String getComponentClass()
     {
         return this.componentClass;
     }
-    /*
-    protected DeviceClass getDeviceClass()
-    {
-        return this.deviceClass;
-    }
-    */
-    
     public ELEMENT addClass(Object class_,Object...fragments)
     {
         if (fragments!=null)
@@ -67,21 +82,10 @@ public abstract class Component<ELEMENT extends Component<ELEMENT>> extends Glob
                         sb.append('-').append(fragment);
                     }
                 }
-                addClass(sb.toString());
+                this.addClass(sb.toString());
             }
         }
         return (ELEMENT)this;
-    }
-
-    public ELEMENT addClass(ClassBuilder classBuilder)
-    {
-        addClass(classBuilder.toString());
-        return (ELEMENT)this;
-    }
-    
-    public ELEMENT deviceClass(DeviceClass deviceClass)
-    {
-        return addClass(this.getComponentClass(),deviceClass);
     }
 
 }

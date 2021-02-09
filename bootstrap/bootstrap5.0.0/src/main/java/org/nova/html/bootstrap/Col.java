@@ -31,14 +31,17 @@ public class Col extends StyleComponent<Col>
     }
     public Col(DeviceClass deviceClass)
     {
-        super("div",new ClassBuilder().addClass("col", deviceClass).toString());
+        super("div","col");
+        addClass(this.getComponentClass(),deviceClass);
     }
     public Col(DeviceClass deviceClass,int columns)
     {
-        super("div",new ClassBuilder().addClass("col", deviceClass,columns).toString());
+        super("div","col");
+        addClass(this.getComponentClass(),deviceClass,columns);
     }
     public Col(int columns)
     {
-        super("div",new ClassBuilder().addClass("col", columns).toString());
+        super("div","col");
+        addClass(this.getComponentClass(),columns);
     }
 }

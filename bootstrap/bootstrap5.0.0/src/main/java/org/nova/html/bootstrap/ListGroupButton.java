@@ -21,13 +21,13 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-
-public class ListGroupButton extends StyleComponent<ListGroupButton>
-{
-    public ListGroupButton()
-    { 
-        super("button","list-group-item list-group-item-action");
-        attr("type","button");
-    }
-    
-}
+//
+//public class ListGroupButton extends StyleComponent<ListGroupButton>
+//{
+//    public ListGroupButton()
+//    { 
+//        super("button","list-group-item list-group-item-action");
+//        attr("type","button");
+//    }
+//    
+//}

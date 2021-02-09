@@ -49,7 +49,7 @@ public class InputDialog extends ModalDocument
         }
         input.autofocus();
         group.addInner(input);
-        group.append(new SubmitButton(buttonLabel).mr(2).color(StyleColor.success).form(form.id()));
+        group.append(new SubmitButton(buttonLabel).form(form.id()));
     }
     public InputDialog(boolean centered,String title,String prepend,InputComponent<?> input,String action)
     {

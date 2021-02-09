@@ -26,10 +26,11 @@ import org.nova.html.attributes.Style;
 import org.nova.html.attributes.display;
 import org.nova.html.attributes.unit;
 import org.nova.html.bootstrap.Button;
-import org.nova.html.bootstrap.ClassBuilder;
 import org.nova.html.bootstrap.Item;
 import org.nova.html.bootstrap.Popover;
 import org.nova.html.bootstrap.StyleComponent;
+import org.nova.html.bootstrap.Styler;
+import org.nova.html.bootstrap.Component;
 import org.nova.html.bootstrap.TipOption;
 import org.nova.html.bootstrap.classes.AlignSelf;
 import org.nova.html.bootstrap.classes.Display;
@@ -60,7 +61,7 @@ public class RemoteEditBox extends StyleComponent<RemoteEditBox>
     final private QuotationMark mark;
     final private Inputs inputs;
     final private InputElement<?> inputElement;
-    final private StyleComponent<?> valueElement;
+    final private Component<?> valueElement;
     private Element content;
     private ModalBackground background;
     private GlobalEventTagElement<?> acceptButton;
@@ -108,11 +109,11 @@ public class RemoteEditBox extends StyleComponent<RemoteEditBox>
 //
 //
 //	}
-    public RemoteEditBox(QuotationMark mark,StyleComponent<?> valueElement,InputElement<?> inputElement,Inputs inputs)
+    public RemoteEditBox(QuotationMark mark,Component<?> valueElement,InputElement<?> inputElement,Inputs inputs)
     {
         super("div",null);
-        this.d(Display.flex);
-        valueElement.flex(Flex.grow,1);
+//        this.d(Display.flex);
+//        valueElement.flex(Flex.grow,1);
         this.addInner(valueElement);
 
         this.mark=mark;
@@ -122,18 +123,18 @@ public class RemoteEditBox extends StyleComponent<RemoteEditBox>
         this.valueElement=valueElement;
     
     }
-    public RemoteEditBox(QuotationMark mark,StyleComponent<?> valueElement,InputElement<?> inputElement)
+    public RemoteEditBox(QuotationMark mark,Component<?> valueElement,InputElement<?> inputElement)
     {
         this(mark,valueElement,inputElement,new Inputs());
     }
-    public RemoteEditBox(StyleComponent<?> valueElement,InputElement<?> inputElement)
+    public RemoteEditBox(Component<?> valueElement,InputElement<?> inputElement)
     {
         this(QuotationMark.DOUBLE,valueElement,inputElement,new Inputs());
     }
-    public RemoteEditBox(String value,InputElement<?> inputElement)
-    {
-        this(QuotationMark.DOUBLE,new Item().m(2).text(TextStyle.truncate).addInner(value),inputElement,new Inputs());
-    }
+//    public RemoteEditBox(String value,InputElement<?> inputElement)
+//    {
+//        this(QuotationMark.DOUBLE,new Item().m(2).text(TextStyle.truncate).addInner(value),inputElement,new Inputs());
+//    }
 
     public RemoteEditBox modalBackground(ModalBackground background)
     {
@@ -169,18 +170,18 @@ public class RemoteEditBox extends StyleComponent<RemoteEditBox>
 //                .addInner(new Item().addClass("popover-body")).getHtml();
 //        
 
-        if (this.acceptButton==null)
-        {
-            this.acceptButton=new Button().ml(1).color(StyleColor.success).addInner("&#x2713;");
-        }
-        if (this.dismissButton==null)
-        {
-            this.dismissButton=new Button().ml(1).color(StyleColor.secondary).addInner("&#x1f5d9;");
-        }
-        if (this.editButton==null)
-        {
-            this.editButton=new Button().ml(1).color(StyleColor.secondary).addInner("&#x270F;");
-        }
+//        if (this.acceptButton==null)
+//        {
+//            this.acceptButton=new Button().ml(1).color(StyleColor.success).addInner("&#x2713;");
+//        }
+//        if (this.dismissButton==null)
+//        {
+//            this.dismissButton=new Button().ml(1).color(StyleColor.secondary).addInner("&#x1f5d9;");
+//        }
+//        if (this.editButton==null)
+//        {
+//            this.editButton=new Button().ml(1).color(StyleColor.secondary).addInner("&#x270F;");
+//        }
         this.editButton.style(new Style().display(display.none));
         this.addInner(this.editButton);
 
@@ -193,8 +194,8 @@ public class RemoteEditBox extends StyleComponent<RemoteEditBox>
         
 
 
-        Item inputGroup=new Item().d(Display.flex).mx(0).px(0);
-        inputElement.addClass(new ClassBuilder().w(100).toString());
+        Item inputGroup=new Item();//.d(Display.flex).mx(0).px(0);
+        Styler.style(inputElement).w(100);
         inputGroup.addInner(inputElement);
         inputGroup.addInner(acceptButton);
         inputGroup.addInner(dismissButton);

@@ -21,7 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-public class PageLink extends Component<PageLink>
+public class PageLink extends StyleComponent<PageLink>
 {
     public PageLink()
     {

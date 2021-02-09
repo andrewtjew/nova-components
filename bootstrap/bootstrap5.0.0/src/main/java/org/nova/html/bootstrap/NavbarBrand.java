@@ -46,5 +46,10 @@ public class NavbarBrand extends StyleComponent<NavbarBrand>
         this(label,href,null,0,0);
     }
     
+    public NavbarBrand(String label)
+    {
+        this(label,null,null,0,0);
+    }
+    
     
 }

@@ -34,7 +34,8 @@ public class CarouselItem extends StyleComponent<CarouselItem>
     }
     public CarouselItem(String src,String alt)
     {
-        this(new Image(src,alt).w(100));
+        super("div","carousel-item");
+        Styler.style(returnAddInner(new Image(src,alt))).w(100);
     }
     public CarouselItem(Image image)
     {

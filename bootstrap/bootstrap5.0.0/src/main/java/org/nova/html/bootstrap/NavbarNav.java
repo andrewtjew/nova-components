@@ -28,7 +28,8 @@ public class NavbarNav extends StyleComponent<NavbarNav>
 {
     public NavbarNav()
     {
-        super("ul","nav navbar-nav");
+        super("ul",null);
+        addClass("navbar-nav");
     }
     public NavbarNav addItem(Element element)
     {

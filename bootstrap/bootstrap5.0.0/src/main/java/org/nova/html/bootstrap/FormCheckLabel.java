@@ -30,11 +30,6 @@ public class FormCheckLabel extends StyleComponent<FormCheckLabel>
     {
         super("label","form-check-label");
     }
-    public FormCheckLabel(DeviceClass deviceClass,int size)
-    {
-        super("label","col-form-label");
-        col(deviceClass,size);
-    }
     public FormCheckLabel for_(String element_id)
     {
         return attr("for",element_id);

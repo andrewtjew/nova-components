@@ -30,6 +30,10 @@ public abstract class ButtonComponent<ELEMENT extends ButtonComponent<ELEMENT>> 
     {
         super(tag,"btn");
     }
+    public ButtonComponent(String tag,String componentClass)
+    {
+        super(tag,componentClass);
+    }
     @SuppressWarnings("unchecked")
     public ELEMENT active()
     {

@@ -21,7 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-public class Pagination extends Component<Pagination>
+public class Pagination extends StyleComponent<Pagination>
 {
     public Pagination()
     {

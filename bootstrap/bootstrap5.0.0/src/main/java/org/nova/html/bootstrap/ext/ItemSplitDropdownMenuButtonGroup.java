@@ -38,12 +38,12 @@ public class ItemSplitDropdownMenuButtonGroup extends ButtonGroup<ItemSplitDropd
         return menu;
     }
     
-    public ItemSplitDropdownMenuButtonGroup color(StyleColor color)
-    {
-        this.item().bg(color);
-        this.toggler().color(color);
-        return this;
-    }
+//    public ItemSplitDropdownMenuButtonGroup color(StyleColor color)
+//    {
+//        this.item().bg(color);
+//        this.toggler().color(color);
+//        return this;
+//    }
     
     
     

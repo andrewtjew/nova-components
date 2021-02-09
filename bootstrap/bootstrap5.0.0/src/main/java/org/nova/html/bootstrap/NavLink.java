@@ -33,6 +33,10 @@ public class NavLink extends StyleComponent<NavLink>
         attr("href",href);
         addInner(label);
     }
+    public NavLink(String label)
+    {
+        this(label,"#");
+    }
     public NavLink active()
     {
         addClass("active");

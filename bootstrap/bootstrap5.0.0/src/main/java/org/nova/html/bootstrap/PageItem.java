@@ -21,7 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-public class PageItem extends Component<PageItem>
+public class PageItem extends StyleComponent<PageItem>
 {
     public PageItem()
     {

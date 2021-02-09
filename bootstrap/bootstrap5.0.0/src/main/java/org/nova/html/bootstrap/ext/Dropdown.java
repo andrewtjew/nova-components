@@ -30,11 +30,11 @@ public class Dropdown extends ButtonGroup<Dropdown>
         return menu;
     }
     
-    public Dropdown color(StyleColor color)
-    {
-        this.toggler().color(color);
-        return this;
-    }
+//    public Dropdown color(StyleColor color)
+//    {
+//        this.toggler().color(color);
+//        return this;
+//    }
     
     
     

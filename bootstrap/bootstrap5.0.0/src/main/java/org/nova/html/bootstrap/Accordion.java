@@ -42,15 +42,15 @@ public class Accordion extends StyleComponent<Accordion>
     {
         Card card=returnAddInner(new Card());
         Button button=card.returnAddInner(new Button()).addInner(title);
-        button.rounded(0);
-        button.text(TextAlign.left);
+//        button.rounded(0);
+//        button.text(TextAlign.left);
         button.addClass("btn-accordion");
         
         Collapse collapse=returnAddInner(new Collapse());
         collapse.linkDataParent(card);
         CardBody body=collapse.returnAddInner(new CardBody());
-        body.border();
-        body.addInner(text);
+//        body.border();
+//        body.addInner(text);
         
         button.data("toggle","collapse");
         button.data("target","#"+collapse.id());

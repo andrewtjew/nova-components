@@ -32,30 +32,30 @@ import org.nova.html.tags.div;
 
 public class DropdownMenu extends StyleComponent<DropdownMenu>
 {
-    public StyleComponent<?> toggler;
+    final private Component<?> toggler;
     
-    public DropdownMenu(StyleComponent<?> toggler)
+    public DropdownMenu(Component<?> toggler)
     {
         this(toggler,false);
     }
-    public DropdownMenu(StyleComponent<?> toggler,boolean split)
+    public DropdownMenu(Component<?> toggler,boolean split)
     {
-        super("div", "dropdown-menu");
+        super("ul", "dropdown-menu");
+        this.toggler=toggler;
         if (toggler!=null)
         {
             toggler.addClass("dropdown-toggle");
-            toggler.data("toggle","dropdown");
+            toggler.data("bs-toggle","dropdown");
             if (split)
             {
                 toggler.addClass("dropdown-toggle-split");
             }
-            this.toggler=toggler;
         }
     }
     
-    public DropdownMenu right()
+    public DropdownMenu end()
     {
-        addClass("dropdown-menu-right");
+        addClass("dropdown-menu-end");
         return this;
     }
     
@@ -104,7 +104,7 @@ public class DropdownMenu extends StyleComponent<DropdownMenu>
         return this;
     }
  
-    public DropdownMenu reference_toggle(StyleComponent<?> button)
+    public DropdownMenu reference_toggle(Component<?> button)
     {
         this.toggler.attr("data-reference","toggle");
         return this;
@@ -134,7 +134,7 @@ public class DropdownMenu extends StyleComponent<DropdownMenu>
         return this;
     }
  
-    public DropdownMenu reference(StyleComponent<?> button,GlobalTagElement<?> element)
+    public DropdownMenu reference(Component<?> button,GlobalTagElement<?> element)
     {
         this.toggler.attr("data-reference","#"+element.id());
         return this;

@@ -22,7 +22,7 @@
 package org.nova.html.bootstrap;
 
 
-public class Toolbar extends Component<Toolbar>
+public class Toolbar extends StyleComponent<Toolbar>
 {
     public Toolbar()
     { 

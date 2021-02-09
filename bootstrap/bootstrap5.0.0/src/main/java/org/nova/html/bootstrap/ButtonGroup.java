@@ -23,7 +23,7 @@ package org.nova.html.bootstrap;
 
 import org.nova.html.bootstrap.classes.Drop;
 
-public class ButtonGroup<ELEMENT extends ButtonGroup<ELEMENT>> extends StyleComponent<ELEMENT>
+public class ButtonGroup<ELEMENT extends ButtonGroup<ELEMENT>> extends Component<ELEMENT>
 {
     public ButtonGroup()
     { 

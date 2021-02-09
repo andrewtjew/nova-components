@@ -21,11 +21,18 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-public class Nav extends Component<Nav>
+import org.nova.html.elements.TagElement;
+
+public class Nav extends StyleComponent<Nav>
 {
+    public Nav(String tag)
+    {
+        super(tag,"nav");
+    }
+    
     public Nav()
     {
-        super("ul","nav");
+        this("ul");
     }
 
     public Nav tabs()
@@ -44,4 +51,6 @@ public class Nav extends Component<Nav>
     {
         return addClass("nav-justified");
     }
+
+
 }

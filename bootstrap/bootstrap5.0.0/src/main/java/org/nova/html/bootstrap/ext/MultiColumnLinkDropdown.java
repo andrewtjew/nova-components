@@ -25,6 +25,7 @@ import org.nova.html.bootstrap.Button;
 import org.nova.html.bootstrap.ButtonComponent;
 import org.nova.html.bootstrap.Container;
 import org.nova.html.bootstrap.Item;
+import org.nova.html.bootstrap.classes.Display;
 import org.nova.html.bootstrap.classes.Justify;
 import org.nova.html.bootstrap.classes.StyleColor;
 import org.nova.html.elements.Composer;
@@ -52,14 +53,14 @@ public class MultiColumnLinkDropdown extends ButtonComponent<MultiColumnLinkDrop
         attr("href",href);
         addInner(label);
         this.menu=new Item();
-        this.container=new Item().d_flex();
+        this.container=new Item();
         this.menu.addInner(container);
         addColumn();
     }
 
     public MultiColumnLinkDropdown addColumn()
     {
-        this.current=this.container.returnAddInner(new Item()).mx(1);
+        this.current=this.container.returnAddInner(new Item());
         return this;
     }
     
