@@ -71,26 +71,6 @@ public abstract class InputComponent<ELEMENT extends InputComponent<ELEMENT>> ex
         return addClass("form-control");
     }
 
-    public ELEMENT addClass(Object class_,Object...fragments)
-    {
-        if (fragments!=null)
-        {
-            if (class_!=null)
-            {
-                StringBuilder sb=new StringBuilder(class_.toString());
-                for (Object fragment:fragments)
-                {
-                    if (fragment!=null)
-                    {
-                        sb.append('-').append(fragment);
-                    }
-                }
-                addClass(sb.toString());
-            }
-        }
-        return (ELEMENT)this;
-    }
-
     public ELEMENT addClass(ClassBuilder classBuilder)
     {
         addClass(classBuilder.toString());
