@@ -24,40 +24,53 @@ package org.nova.html.bootstrap.ext;
 
 import org.nova.html.attributes.Style;
 import org.nova.html.attributes.text_align;
+import org.nova.html.bootstrap.Item;
+import org.nova.html.bootstrap.StyleTemplate;
 import org.nova.html.bootstrap.Table;
 import org.nova.html.bootstrap.classes.Float_;
 import org.nova.html.bootstrap.classes.Font;
+import org.nova.html.elements.Element;
+import org.nova.html.elements.TagElement;
 import org.nova.html.ext.TableRow;
+import org.nova.html.tags.tbody;
 import org.nova.html.tags.td;
 
-//public class NameValueTable extends Table
-//{
-//    public NameValueTable add(Object name,Object value)
-//    {
-//        TableRow tr=new TableRow();
-//        addRow(tr);
-//        tr.add(new Span().font(Font.weight_bold).float_(Float_.right).addInner(name),value);
-//        return this;
-//    }
-//    public NameValueTable add(Object name,Object value,text_align valueAlign)
-//    {
-//        TableRow tr=new TableRow();
-//        addRow(tr);
-//        tr.add(new Span().font(Font.weight_bold).float_(Float_.right).addInner(name),new td().style(new Style().text_align(valueAlign)).addInner(value));
-//        return this;
-//    }
-//    public NameValueTable add(Object name,Object value,Style valueStyle)
-//    {
-//        TableRow tr=new TableRow();
-//        addRow(tr);
-//        tr.add(new Span().font(Font.weight_bold).float_(Float_.right).addInner(name),new td().style(valueStyle).addInner(value));
-//        return this;
-//    }
-//    public NameValueTable add(Object name,Object value,String valueStyle)
-//    {
-//        TableRow tr=new TableRow();
-//        addRow(tr);
-//        tr.add(new Span().font(Font.weight_bold).float_(Float_.right).addInner(name),new td().style(valueStyle).addInner(value));
-//        return this;
-//    }
-//}
+public class NameValueTable extends Table
+{
+    final private StyleTemplate nameTemplate;
+    final private StyleTemplate valueTemplate;
+    private tbody body;
+    
+    public NameValueTable(StyleTemplate nameTemplate,StyleTemplate valueTemplate)
+    {
+        this.nameTemplate=nameTemplate;
+        this.valueTemplate=valueTemplate;
+        this.body=returnAddInner(new tbody());
+    }
+    public NameValueTable()
+    {
+        this(null,null);
+    }
+
+    public NameValueTable add(StyleTemplate nameTemplate,Object name,StyleTemplate valueTemplate,Object value)
+    {
+//        tr.addClass("table-striped");
+        TableRow tr=this.body.returnAddInner(new TableRow());
+        tr.add(StyleTemplate.apply(nameTemplate,name));
+        tr.add(StyleTemplate.apply(valueTemplate,value));
+            
+        return this;
+    }
+    public NameValueTable add(Object name,Object value)
+    {
+        return add(this.nameTemplate,name,this.valueTemplate,value);
+    }
+    public NameValueTable add(StyleTemplate nameTemplateOverride,Object name,Object value)
+    {
+        return add(nameTemplate,name,this.valueTemplate,value);
+    }
+    public NameValueTable add(Object name,StyleTemplate valueTemplateOverride,Object value)
+    {
+        return add(this.nameTemplate,name,valueTemplate,value);
+    }
+}

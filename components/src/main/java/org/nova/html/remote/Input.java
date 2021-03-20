@@ -5,39 +5,37 @@ import org.nova.json.ObjectMapper;
 
 public class Input
 {
-    final public String id;
     final public String name;
     final public InputType inputType;
     
-    public Input(String name,Object value) throws Throwable
-    {
-        if (value!=null)
-        {
-            Class<?> type=value.getClass();
-            if (type.isPrimitive())
-            {
-                this.id=value.toString();
-            }
-            else if (type==String.class)
-            {
-                this.id=value.toString();
-            }
-            else
-            {
-                this.id=ObjectMapper.writeObjectToString(value);
-            }
-        }
-        else
-        {
-            this.id=null;
-        }
-        this.name=name;
-        this.inputType=InputType.constant;
-    }
+//    public Input(String name,Object value) throws Throwable
+//    {
+//        if (value!=null)
+//        {
+//            Class<?> type=value.getClass();
+//            if (type.isPrimitive())
+//            {
+//                this.id=value.toString();
+//            }
+//            else if (type==String.class)
+//            {
+//                this.id=value.toString();
+//            }
+//            else
+//            {
+//                this.id=ObjectMapper.writeObjectToString(value);
+//            }
+//        }
+//        else
+//        {
+//            this.id=null;
+//        }
+//        this.name=name;
+//        this.inputType=InputType.constant;
+//    }
     
     public Input(InputElement<?> inputElement)
     {
-        this.id=inputElement.id();
         this.name=inputElement.name();
         switch (inputElement.getInputType())
         {

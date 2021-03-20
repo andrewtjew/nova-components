@@ -26,9 +26,6 @@ import org.nova.html.elements.TagElement;
 
 public class SubmitButton extends ButtonComponent<SubmitButton>
 {
-    private ButtonState buttonState;
-    private boolean block;
-    
     public SubmitButton(String label)
     {
         super("input");

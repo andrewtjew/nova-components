@@ -1,6 +1,6 @@
 package org.nova.html.bootstrap;
 
-public class ValidFeedback extends Component<ValidFeedback>
+public class ValidFeedback extends StyleComponent<ValidFeedback>
 {
 
     public ValidFeedback()

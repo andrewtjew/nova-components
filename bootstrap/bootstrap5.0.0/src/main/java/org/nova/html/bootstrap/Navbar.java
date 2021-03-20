@@ -21,7 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-import org.nova.html.bootstrap.classes.DeviceClass;
+import org.nova.html.bootstrap.classes.BreakPoint;
 import org.nova.html.bootstrap.classes.Fixed;
 import org.nova.html.bootstrap.classes.NavbarPlacement;
 
@@ -32,7 +32,7 @@ public class Navbar extends StyleComponent<Navbar>
         super("nav","navbar");
     }
     
-    public Navbar expand(DeviceClass deviceClass)
+    public Navbar expand(BreakPoint deviceClass)
     {
         addClass("navbar-expand",deviceClass);
         return this;

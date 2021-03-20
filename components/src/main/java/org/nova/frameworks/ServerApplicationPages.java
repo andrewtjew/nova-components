@@ -112,7 +112,6 @@ import org.nova.http.server.RequestHandlerNotFoundLogEntry;
 import org.nova.http.server.RequestLogEntry;
 import org.nova.http.server.Response;
 import org.nova.http.server.HtmlContentWriter;
-import org.nova.html.DataTables.OperatorDataTable;
 import org.nova.html.attributes.Color;
 import org.nova.html.attributes.Size;
 import org.nova.html.attributes.Style;
@@ -122,6 +121,7 @@ import org.nova.html.deprecated.ConfirmButton;
 import org.nova.html.deprecated.DisableElementToggler;
 import org.nova.html.deprecated.NameInputValueList;
 import org.nova.html.deprecated.NameValueList;
+import org.nova.html.deprecated.OperatorDataTable;
 import org.nova.html.deprecated.Table;
 import org.nova.html.deprecated.TableHeader;
 import org.nova.html.deprecated.TableRow;
@@ -4989,7 +4989,7 @@ public class ServerApplicationPages
                 String buttonKey=(category+name+"Button").replace('.', '_');
                 String[] options=variable.options();
                 Inputs inputs=new Inputs(QuotationMark.QOUT);
-                inputs.add("resultElementId", resultElementId);
+                inputs.add(new InputHidden("resultElementId", resultElementId));
                 if (options[0].length()!=0)
                 {
                     row.add("","","");

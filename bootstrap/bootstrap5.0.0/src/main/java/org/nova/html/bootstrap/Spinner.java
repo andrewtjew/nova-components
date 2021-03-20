@@ -1,16 +1,16 @@
 package org.nova.html.bootstrap;
 
-import org.nova.html.bootstrap.classes.DeviceClass;
+import org.nova.html.bootstrap.classes.BreakPoint;
 
 public class Spinner extends StyleComponent<Spinner>
 {
-    public Spinner(String tag,SpinnerType type,DeviceClass deviceClass)
+    public Spinner(String tag,SpinnerType type,BreakPoint deviceClass)
     {
         super(tag,null);
         addClass("spinner",type,deviceClass);
         attr("role","status");
     }
-    public Spinner(DeviceClass deviceClass,SpinnerType type)
+    public Spinner(BreakPoint deviceClass,SpinnerType type)
     {
         this("div",type,deviceClass);
     }

@@ -21,13 +21,13 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-import org.nova.html.bootstrap.classes.DeviceClass;
+import org.nova.html.bootstrap.classes.BreakPoint;
 import org.nova.html.bootstrap.classes.TextAlign;
 import org.nova.html.elements.TagElement;
 import org.nova.html.tags.label;
 import org.nova.html.tags.small;
 
-public class FormGroup extends Component<FormGroup>
+public class FormGroup extends StyleComponent<FormGroup>
 {
     public FormGroup()
     {

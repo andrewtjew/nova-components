@@ -30,7 +30,6 @@ import org.nova.html.bootstrap.Item;
 import org.nova.html.bootstrap.Popover;
 import org.nova.html.bootstrap.StyleComponent;
 import org.nova.html.bootstrap.Styler;
-import org.nova.html.bootstrap.Component;
 import org.nova.html.bootstrap.TipOption;
 import org.nova.html.bootstrap.classes.AlignSelf;
 import org.nova.html.bootstrap.classes.Display;
@@ -38,7 +37,7 @@ import org.nova.html.bootstrap.classes.Flex;
 import org.nova.html.bootstrap.classes.Justify;
 import org.nova.html.bootstrap.classes.Placement;
 import org.nova.html.bootstrap.classes.StyleColor;
-import org.nova.html.bootstrap.classes.TextStyle;
+import org.nova.html.bootstrap.classes.Text;
 import org.nova.html.bootstrap.classes.Trigger;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.GlobalEventTagElement;
@@ -61,7 +60,7 @@ public class RemoteEditBox extends StyleComponent<RemoteEditBox>
     final private QuotationMark mark;
     final private Inputs inputs;
     final private InputElement<?> inputElement;
-    final private Component<?> valueElement;
+    final private StyleComponent<?> valueElement;
     private Element content;
     private ModalBackground background;
     private GlobalEventTagElement<?> acceptButton;
@@ -109,7 +108,7 @@ public class RemoteEditBox extends StyleComponent<RemoteEditBox>
 //
 //
 //	}
-    public RemoteEditBox(QuotationMark mark,Component<?> valueElement,InputElement<?> inputElement,Inputs inputs)
+    public RemoteEditBox(QuotationMark mark,StyleComponent<?> valueElement,InputElement<?> inputElement,Inputs inputs)
     {
         super("div",null);
 //        this.d(Display.flex);
@@ -123,11 +122,11 @@ public class RemoteEditBox extends StyleComponent<RemoteEditBox>
         this.valueElement=valueElement;
     
     }
-    public RemoteEditBox(QuotationMark mark,Component<?> valueElement,InputElement<?> inputElement)
+    public RemoteEditBox(QuotationMark mark,StyleComponent<?> valueElement,InputElement<?> inputElement)
     {
         this(mark,valueElement,inputElement,new Inputs());
     }
-    public RemoteEditBox(Component<?> valueElement,InputElement<?> inputElement)
+    public RemoteEditBox(StyleComponent<?> valueElement,InputElement<?> inputElement)
     {
         this(QuotationMark.DOUBLE,valueElement,inputElement,new Inputs());
     }

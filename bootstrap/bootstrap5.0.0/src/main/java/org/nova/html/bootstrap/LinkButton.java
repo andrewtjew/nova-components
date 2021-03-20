@@ -23,11 +23,11 @@ package org.nova.html.bootstrap;
 
 public class LinkButton extends ButtonComponent<LinkButton>
 {
-    public LinkButton(String href)
+    public LinkButton(String label)
     {
         super("a");
-        attr("href",href);
         attr("role","button");
+        addInner(label);
     }
     public LinkButton(String label,String href)
     {
@@ -41,27 +41,6 @@ public class LinkButton extends ButtonComponent<LinkButton>
         super("a");
         attr("role","button");
     }
-    /*
-    public LinkButton toggle(Collapse collapse)
-    {
-        attr("data-toggle","collapse");
-        attr("data-target","#"+collapse.id());
-        return this;
-    }
-    public LinkButton toggle(Collapse collapse,String collapseClass)
-    {
-        attr("data-toggle","collapse");
-        attr("data-target","."+collapseClass);
-        return this;
-    }
-
-    //?? test this out
-    public LinkButton toggle()
-    {
-        attr("data-toggle","button");
-        return this;
-    }
-    */
     
     public LinkButton target(String target)
     {

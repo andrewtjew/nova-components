@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import org.nova.html.elements.Element;
 import org.nova.html.elements.QuotationMark;
+import org.nova.html.ext.HtmlUtils;
 import org.nova.http.client.PathAndQuery;
 import org.nova.json.ObjectMapper;
 
@@ -94,7 +95,7 @@ public class RemoteResponse
     public RemoteResponse location(String pathAndQuery) throws UnsupportedEncodingException
     {
         QuotationMark mark=QuotationMark.SINGLE;
-        String code="document.location.href="+mark+URLEncoder.encode(pathAndQuery,StandardCharsets.UTF_8.toString())+mark+";";
+        String code=HtmlUtils.js_location(pathAndQuery);
         return script(code);
     }
     public RemoteResponse prop(String id,String prop,Object value) throws UnsupportedEncodingException

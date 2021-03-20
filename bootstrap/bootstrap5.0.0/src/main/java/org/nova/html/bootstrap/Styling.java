@@ -25,9 +25,10 @@ import org.nova.html.attributes.Style;
 import org.nova.html.bootstrap.classes.Align;
 import org.nova.html.bootstrap.classes.AlignItems;
 import org.nova.html.bootstrap.classes.AlignSelf;
-import org.nova.html.bootstrap.classes.DeviceClass;
+import org.nova.html.bootstrap.classes.BreakPoint;
 import org.nova.html.bootstrap.classes.Display;
 import org.nova.html.bootstrap.classes.Edge;
+import org.nova.html.bootstrap.classes.FW;
 import org.nova.html.bootstrap.classes.Flex;
 import org.nova.html.bootstrap.classes.Float_;
 import org.nova.html.bootstrap.classes.Font;
@@ -37,23 +38,23 @@ import org.nova.html.bootstrap.classes.Position;
 import org.nova.html.bootstrap.classes.Rounded;
 import org.nova.html.bootstrap.classes.StyleColor;
 import org.nova.html.bootstrap.classes.TextAlign;
-import org.nova.html.bootstrap.classes.TextStyle;
+import org.nova.html.bootstrap.classes.Text;
+import org.nova.html.bootstrap.classes.Translate;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.TagElement;
 
-public interface Styling
+public interface Styling<ELEMENT>
 {
 //    final private TagElement<?> element;
-    public Styling addClass(Object class_,Object...fragments);
+    public ELEMENT addClass(Object class_,Object...fragments);
     public TagElement<?> getElement();
 
-
-    public default Styling color(StyleColor value,boolean outline)
+    public default ELEMENT color(StyleColor value,boolean outline)
     {
         TagElement<?> element=getElement();
-        if (element instanceof Component<?>)
+        if (element instanceof StyleComponent<?>)
         {
-            Component<?> component=(Component<?>)element;
+            StyleComponent<?> component=(StyleComponent<?>)element;
             if (outline)
             {
                 addClass(component.getComponentClass(),outline?"outline":null,value.toString());
@@ -64,16 +65,16 @@ public interface Styling
             }
         }
         
-        return this;
+        return (ELEMENT)this;
     }
 
     @SuppressWarnings("unchecked")
-    public default Styling color(StyleColor value)
+    public default ELEMENT color(StyleColor value)
     {
         return color(value,false);
     }
 
-//    public default Styling addClass(Object class_,Object...fragments)
+//    public default ELEMENT addClass(Object class_,Object...fragments)
 //    {
 //        if (fragments!=null)
 //        {
@@ -93,361 +94,382 @@ public interface Styling
 //        return this;
 //    }
 
-    public default Styling col(DeviceClass deviceClass,int columns)
+    public default ELEMENT col(BreakPoint breakPoint,int columns)
     {
-        if (deviceClass==DeviceClass.xs)
+        if (breakPoint==BreakPoint.xs)
         {
             return addClass("col",columns);
         }
-        return addClass("col",deviceClass,columns);
+        return addClass("col",breakPoint,columns);
     }
-    public default Styling col(DeviceClass deviceClass)
+    public default ELEMENT col(BreakPoint breakPoint)
     {
-        if (deviceClass==DeviceClass.xs)
+        if (breakPoint==BreakPoint.xs)
         {
             return addClass("col");
         }
-        return addClass("col",deviceClass);
+        return addClass("col",breakPoint);
     }
-    public default Styling col(int columns)
+    public default ELEMENT col(int columns)
     {
         return addClass("col",columns);
     }
-    public default Styling col()
+    public default ELEMENT col()
     {
         return addClass("col");
     }
-    public default Styling float_(DeviceClass deviceClass,Float_ value)
+    public default ELEMENT float_(BreakPoint breakPoint,Float_ value)
     {
-        return addClass("float",deviceClass,value);
+        return addClass("float",breakPoint,value);
     }
-    public default Styling form_control()
+    public default ELEMENT form_control()
     {
         return addClass("form-control");
     }
-
-/*
-    protected StyleColor color()
-    {
-        return this.color;
-    }
-*/
-    public default Styling bg(StyleColor value)
+    public default ELEMENT bg(StyleColor value)
     {
         return addClass("bg",value);
     }
-    public default Styling bg_gradient(StyleColor value)
+    public default ELEMENT bg_gradient(StyleColor value)
     {
         return addClass("bg","gradient",value);
     }
-    public default Styling text(StyleColor value)
+    public default ELEMENT text(StyleColor value)
     {
         return addClass("text",value);
     }
-    public default Styling text(TextAlign value)
+    public default ELEMENT text(TextAlign value)
     {
         return addClass("text",value);
     }
-    public default Styling text(DeviceClass deviceClass,TextAlign value)
+    public default ELEMENT text(BreakPoint breakPoint,TextAlign value)
     {
-        return addClass("text",deviceClass,value);
+        return addClass("text",breakPoint,value);
     }
-    public default Styling text(TextStyle value)
+    public default ELEMENT text(Text value)
     {
         return addClass("text",value);
     }
-    public default Styling font(Font value)
+    public default ELEMENT font(Font value)
     {
         return addClass("font",value);
     }
-    public default Styling lead()
+    public default ELEMENT lead()
     {
         return addClass("lead");
     }
-    public default Styling small()
+    public default ELEMENT small()
     {
         return addClass("small");
     }
-    public default Styling float_(Float_ value)
+    public default ELEMENT float_(Float_ value)
     {
         return addClass("float",value);
     }
-    public default Styling offset(int offset)
+    public default ELEMENT offset(int offset)
     {
         return addClass("offset",offset);
     }
-    public default Styling display(int size)
+    public default ELEMENT display(int size)
     {
         return addClass("display",size);
     }
-    public default Styling rounded()
+    public default ELEMENT rounded()
     {
         return addClass("rounded");
     }
-    public default Styling rounded(int value)
+    public default ELEMENT rounded(int value)
     {
         return addClass("rounded",value);
     }
-    public default Styling rounded(Rounded value)
+    public default ELEMENT rounded(Rounded value)
     {
         return addClass("rounded",value);
     }
-    public default Styling border(Edge value)
+    public default ELEMENT rounded(Rounded value,boolean subtract)
     {
-        return addClass("border",value);
+        return addClass("rounded",value,0);
     }
-    public default Styling border(Edge value,int size)
-    {
-        return addClass("border",value,size);
-    }
-    public default Styling border()
+    public default ELEMENT border()
     {
         return addClass("border");
     }
-    public default Styling border(StyleColor color)
+    public default ELEMENT border(Edge value)
+    {
+        return addClass("border",value);
+    }
+    public default ELEMENT border(Edge value,boolean substract)
+    {
+        if (substract)
+        {
+            return addClass("border",value,0);
+        }
+        else
+        {
+            return addClass("border",value);
+        }
+    }
+    public default ELEMENT border(int size)
+    {
+        return addClass("border",size);
+    }
+    public default ELEMENT border(StyleColor color)
     {
         addClass("border");
         return addClass("border",color);
     }
-    public default Styling border(String color)
-    {
-        addClass("border");
-        return addClass("border",color);
-//        return (ClassStyler)this;
-    }
-    public default Styling clearfix()
+    public default ELEMENT clearfix()
     {
         return addClass("clearfix");
     }
-    public default Styling flex(Flex flex)
+    public default ELEMENT flex(Flex flex)
     {
         return addClass("flex",flex);
     }
-    public default Styling flex(Flex flex,int value)
+    public default ELEMENT flex(Flex flex,int value)
     {
         return addClass("flex",flex,value);
     }
 
-    public default Styling flex(DeviceClass deviceClass,Flex flex)
+    public default ELEMENT flex(BreakPoint breakPoint,Flex flex)
     {
-        return addClass("flex",deviceClass,flex);
+        return addClass("flex",breakPoint,flex);
     }
 
-    public default Styling align_self(AlignSelf value)
+    public default ELEMENT align_self(AlignSelf value)
     {
         return addClass("align-self",value);
     }
     
-    public default Styling align_self(DeviceClass deviceClass,AlignSelf value)
+    public default ELEMENT align_self(BreakPoint breakPoint,AlignSelf value)
     {
-        return addClass("align-self",deviceClass,value);
+        return addClass("align-self",breakPoint,value);
     }
     
-    public default Styling align_items(AlignItems value)
+    public default ELEMENT align_items(AlignItems value)
     {
         return addClass("align-items",value);
     }
     
-    public default Styling align(Align value)
+    public default ELEMENT align(Align value)
     {
         return addClass("align",value);
     }
     
-    public default Styling order(int value)
+    public default ELEMENT order(int value)
     {
         return addClass("order",value);
     }
     
-    public default Styling mr(DeviceClass deviceClass,int value)
+    public default ELEMENT me(BreakPoint breakPoint,int value)
     {
-        return addClass("mr",deviceClass,value);
+        return addClass("me",breakPoint,value);
     }
-    public default Styling mr(int value)
+    public default ELEMENT me(int value)
     {
-        return addClass("mr",value);
+        return addClass("me",value);
     }
-    public default Styling ml(int value)
+    public default ELEMENT ms(int value)
     {
-        return addClass("ml",value);
+        return addClass("ms",value);
     }
-    public default Styling mt(int value)
+    public default ELEMENT mt(int value)
     {
         return addClass("mt",value);
     }
-    public default Styling mb(int value)
+    public default ELEMENT mb(int value)
     {
         return addClass("mb",value);
     }
-    public default Styling mx(int value)
+    public default ELEMENT mx(int value)
     {
         return addClass("mx",value);
     }
-    public default Styling my(int value)
+    public default ELEMENT my(int value)
     {
         return addClass("my",value);
     }
-    public default Styling m(int value)
+    public default ELEMENT m(int value)
     {
         return addClass("m",value);
     }
     //----
-    public default Styling mt(DeviceClass deviceClass,int value)
+    public default ELEMENT mt(BreakPoint breakPoint,int value)
     {
-        return addClass("mt",deviceClass,value);
+        return addClass("mt",breakPoint,value);
     }
-    public default Styling mb(DeviceClass deviceClass,int value)
+    public default ELEMENT mb(BreakPoint breakPoint,int value)
     {
-        return addClass("mb",deviceClass,value);
+        return addClass("mb",breakPoint,value);
     }
-    public default Styling mx(DeviceClass deviceClass,int value)
+    public default ELEMENT mx(BreakPoint breakPoint,int value)
     {
-        return addClass("mx",deviceClass,value);
+        return addClass("mx",breakPoint,value);
     }
-    public default Styling my(DeviceClass deviceClass,int value)
+    public default ELEMENT my(BreakPoint breakPoint,int value)
     {
-        return addClass("my",deviceClass,value);
+        return addClass("my",breakPoint,value);
     }
-    public default Styling m(DeviceClass deviceClass,int value)
+    public default ELEMENT m(BreakPoint breakPoint,int value)
     {
-        return addClass("m",deviceClass,value);
+        return addClass("m",breakPoint,value);
     }
     
-    
-    
-    public default Styling mr_auto()
-    {
-        return addClass("mr","auto");
-    }
-    public default Styling ml_auto()
-    {
-        return addClass("ml","auto");
-    }
-    public default Styling mt_auto()
+    public default ELEMENT mt_auto()
     {
         return addClass("mt","auto");
     }
-    public default Styling mb_auto()
+    public default ELEMENT mb_auto()
     {
         return addClass("mb","auto");
     }
-    public default Styling mx_auto()
+    public default ELEMENT mx_auto()
     {
         return addClass("mx","auto");
     }
-    public default Styling my_auto()
+    public default ELEMENT my_auto()
     {
         return addClass("my","auto");
     }
-    public default Styling me_auto()
+    public default ELEMENT me_auto()
     {
         return addClass("me","auto");
     }
-    public default Styling ms_auto()
+    public default ELEMENT ms_auto()
     {
         return addClass("ms","auto");
     }
 
-    public default Styling pr(int value)
+    public default ELEMENT pe(int value)
     {
-        return addClass("pr",value);
+        return addClass("pe",value);
     }
-    public default Styling pl(int value)
+    public default ELEMENT ps(int value)
     {
-        return addClass("pl",value);
+        return addClass("ps",value);
     }
-    public default Styling pt(int value)
+    public default ELEMENT pt(int value)
     {
         return addClass("pt",value);
     }
-    public default Styling pb(int value)
+    public default ELEMENT pb(int value)
     {
         return addClass("pb",value);
     }
-    public default Styling px(int value)
+    public default ELEMENT px(int value)
     {
         return addClass("px",value);
     }
-    public default Styling py(int value)
+    public default ELEMENT py(int value)
     {
         return addClass("py",value);
     }
-    public default Styling p(int value)
+    public default ELEMENT p(int value)
     {
         return addClass("p",value);
     }
-    public default Styling pr_auto()
+    public default ELEMENT pe_auto()
     {
-        return addClass("pr","auto");
+        return addClass("pe","auto");
     }
-    public default Styling pl_auto()
+    public default ELEMENT ps_auto()
     {
-        return addClass("pl","auto");
+        return addClass("ps","auto");
     }
-    public default Styling pt_auto()
+    public default ELEMENT pt_auto()
     {
         return addClass("pt","auto");
     }
-    public default Styling pb_auto()
+    public default ELEMENT pb_auto()
     {
         return addClass("pb","auto");
     }
-    public default Styling px_auto()
+    public default ELEMENT px_auto()
     {
         return addClass("px","auto");
     }
-    public default Styling py_auto()
+    public default ELEMENT py_auto()
     {
         return addClass("py","auto");
     }
 
-    public default Styling d(Display display)
+    public default ELEMENT d(Display display)
     {
         return addClass("d",display);
         
     }
-    public default Styling d(DeviceClass deviceClass,Display display)
+    public default ELEMENT d(BreakPoint breakPoint,Display display)
     {
-        return addClass("d",deviceClass,display);
+        return addClass("d",breakPoint,display);
         
     }
     
-    public default Styling w(int value)
+    public default ELEMENT w(int value)
     {
         return addClass("w",value);
     }
-    public default Styling mw(int value)
+    public default ELEMENT mw(int value)
     {
         return addClass("mw",value);
     }
     
-    public default Styling h(int value)
+    public default ELEMENT h(int value)
     {
         return addClass("h",value);
     }
-    public default Styling h_auto()
+    public default ELEMENT h_auto()
     {
         return addClass("h","auto");
     }
-    public default Styling mh(int value)
+    public default ELEMENT mh(int value)
     {
         return addClass("mh",value);
     }
     
-    public default Styling position(Position value)
+    public default ELEMENT position(Position value)
     {
         return addClass("position",value);
         
     }
-    public default Styling overflow(Overflow value)
+    public default ELEMENT overflow(Overflow value)
     {
         return addClass("overflow",value);
         
     }
     
-    public default Styling justify_content(Justify value)
+    public default ELEMENT justify_content(Justify value)
     {
         return addClass("justify-content",value);
     }
     
+    public default ELEMENT justify_content(BreakPoint breakPoint,Justify value)
+    {
+        return addClass("justify-content",breakPoint,value);
+    }
+    
+    public default ELEMENT fs(int value)
+    {
+        return addClass("fs",value);
+    }
+    public default ELEMENT fw(FW value)
+    {
+        return addClass("fw",value);
+    }
+    public default ELEMENT top(int value)
+    {
+        return addClass("top",value);
+    }
+    public default ELEMENT bottom(int value)
+    {
+        return addClass("bottom",value);
+    }
+    public default ELEMENT start(int value)
+    {
+        return addClass("start",value);
+    }
+    public default ELEMENT translate(Translate value)
+    {
+        return addClass("translate",value);
+    }
     
 }

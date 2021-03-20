@@ -26,18 +26,18 @@ import org.nova.html.bootstrap.ModalCloseButton;
 import org.nova.html.bootstrap.classes.StyleColor;
 import org.nova.html.tags.h5;
 
-public class ConfirmDialog extends ModalDocument 
-{ 
-    public ConfirmDialog(boolean center,String title,String message,String cancelButtonText,String confirmButtonText,String confirmButtonSCript)
-    {
-        super(center);
-        header().addInner(new h5().addInner((title)));
-        body().addInner(message);
-        footer().addInner(new Button().addInner(confirmButtonText).onclick(confirmButtonSCript));
-        footer().addInner(new ModalCloseButton(cancelButtonText));
-    }
-    public ConfirmDialog(boolean center,String title,String message,String confirmButtonSCript)
-    {
-        this(center,title,message,"Cancel","OK",confirmButtonSCript);
-    }
-}
+//public class ConfirmDialog extends ModalDocument 
+//{ 
+//    public ConfirmDialog(boolean center,String title,String message,String cancelButtonText,String confirmButtonText,String confirmButtonSCript)
+//    {
+//        super(center);
+//        header().addInner(new h5().addInner((title)));
+//        body().addInner(message);
+//        footer().addInner(new Button().addInner(confirmButtonText).onclick(confirmButtonSCript));
+//        footer().addInner(new ModalCloseButton(cancelButtonText));
+//    }
+//    public ConfirmDialog(boolean center,String title,String message,String confirmButtonSCript)
+//    {
+//        this(center,title,message,"Cancel","OK",confirmButtonSCript);
+//    }
+//}

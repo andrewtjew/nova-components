@@ -23,8 +23,8 @@ package org.nova.html.bootstrap.classes;
 
 public enum Edge
 {
-    left("left"), 
-    right("right"), 
+    start("start"), 
+    end("end"), 
     bottom("bottom"), 
     top("top"),
     ;

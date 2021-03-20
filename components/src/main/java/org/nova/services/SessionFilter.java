@@ -105,8 +105,13 @@ public class SessionFilter extends Filter
         
     }
     
-    @Override
-    public Response<?> executeNext(Trace parent, Context context, FilterChain filterChain) throws Throwable
+    public Session getSession(Context context)
+    {
+        String token=getToken(context);
+        return this.sessionManager.getSessionByToken(token);
+    }
+
+    private String getToken(Context context)
     {
         String token=null;
         if (this.headerTokenKey!=null)
@@ -132,7 +137,17 @@ public class SessionFilter extends Filter
                 }
             }
         }
+        return token;
+    }
+
+    
+    
+    @Override
+    public Response<?> executeNext(Trace parent, Context context, FilterChain filterChain) throws Throwable
+    {
+        String token=getToken(context);
         Session session=this.sessionManager.getSessionByToken(token);
+
         if (session==null)
         {
             Method method=context.getRequestHandler().getMethod();

@@ -59,7 +59,20 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
         return this.tag;
     }
     
-    public ELEMENT addClass(String class_)
+//    public ELEMENT addClass(String class_)
+//    {
+//        if (class_!=null)
+//        {
+//            if (this.classBuilder.length()>0)
+//            {
+//                this.classBuilder.append(' ');
+//            }
+//            this.classBuilder.append(class_);
+//        }
+//        return (ELEMENT) this;
+//    }
+    
+    public ELEMENT addClass(Object class_,Object...fragments)
     {
         if (class_!=null)
         {
@@ -68,9 +81,24 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
                 this.classBuilder.append(' ');
             }
             this.classBuilder.append(class_);
+            if (fragments!=null)
+            {
+                if (class_!=null)
+                {
+                    for (Object fragment:fragments)
+                    {
+                        if (fragment!=null)
+                        {
+                            this.classBuilder.append('-').append(fragment);
+                        }
+                    }
+                }
+            }
         }
-        return (ELEMENT) this;
+        return (ELEMENT)this;
     }
+    
+    
     public ELEMENT id(String value)
     {
         if (value!=null)
@@ -94,6 +122,14 @@ public class TagElement<ELEMENT extends TagElement<ELEMENT>> extends InnerElemen
         if (value!=null)
         {
             this.attributes.add(new NameObject(name,value));
+        }
+        return (ELEMENT) this;
+    }
+    public ELEMENT attr(NameObject attr)
+    {
+        if (attr!=null)
+        {
+            this.attributes.add(attr);
         }
         return (ELEMENT) this;
     }

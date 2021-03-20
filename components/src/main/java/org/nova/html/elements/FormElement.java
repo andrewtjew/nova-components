@@ -35,6 +35,11 @@ public class FormElement<ELEMENT extends FormElement<ELEMENT>> extends GlobalEve
         attr("method",method);
         this.method=method;
     }
+    public FormElement()
+    {
+        super("form");
+        this.method=null;
+    }
     
     public method method()
     {

@@ -24,10 +24,11 @@ package org.nova.html.bootstrap.classes;
 public enum Rounded
 {
     top("top"), 
-    right("right"), 
+    end("end"), 
     bottom("bottom"), 
-    left("left"), 
+    start("start"), 
     circle("circle"), 
+    pill("pill"), 
     ;
     private String value;
 

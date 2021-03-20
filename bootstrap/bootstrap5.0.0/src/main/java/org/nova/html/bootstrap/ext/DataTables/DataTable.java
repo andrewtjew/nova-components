@@ -25,7 +25,8 @@ import java.util.ArrayList;
 
 import org.nova.html.DataTables.ColumnDef;
 import org.nova.html.DataTables.DataTableOptions;
-import org.nova.html.bootstrap.Component;
+import org.nova.html.bootstrap.StyleComponent;
+import org.nova.html.bootstrap.Table;
 import org.nova.html.ext.TableRow;
 import org.nova.html.deprecated.ObjectBuilder;
 import org.nova.html.elements.Composer;
@@ -41,179 +42,44 @@ import org.nova.utils.TypeUtils;
 
 //!!! Requires jquery
 
-public class DataTable extends Component<DataTable>
+public class DataTable extends StyleComponent<DataTable>
 {
-    final private tbody tbody;
     private DataTableOptions options;
 
-    private TableHeader header;
-    private TableFooter footer;
-    
-    
     public DataTable(DataTableOptions options)
     {
         super("table","table");
-        this.tbody=new tbody();
         if (options==null)
         {
             options=new DataTableOptions();
         }
         this.options=options;
     }
-    
-    
-    public DataTable cell_border()
+
+    public DataTable w_auto()
     {
-        addClass("cell-border");
+        addClass("w-auto");
         return this;
     }
-
-    public DataTable compact()
-    {
-        addClass("compact");
-        return this;
-    }
-
     public DataTable hover()
     {
-        addClass("hover");
+        addClass("table-hover");
         return this;
     }
-    
-    public DataTable order_column()
+    public DataTable striped()
     {
-        addClass("order-column");
+        addClass("table-striped");
         return this;
     }
-    
-    public DataTable row_border()
+    public DataTable bordered()
     {
-        addClass("row-border");
+        addClass("table-bordered");
         return this;
     }
-    
-    public DataTable stripe()
+    public DataTable borderless()
     {
-        addClass("stripe");
+        addClass("table-borderless");
         return this;
-    }
-    
-    
-    public DataTable setHeader(TableHeader header)
-    {
-        this.header=header;
-        return this;
-    }
-    public DataTable setHeader(Object...objects)
-    {
-        if (this.options.columnDefs==null)
-        {
-            ArrayList<Integer> list=new ArrayList<>();
-            for (int i=0;i<objects.length;i++)
-            {
-                Object object=objects[i];
-                if (object==null)
-                {
-                    list.add(i);
-                }
-                else if (object instanceof String)
-                {
-                    if (((String)object).length()==0)
-                    {
-                        list.add(i);
-                    }
-                }
-            }
-            if (list.size()>0)
-            {
-                ColumnDef columnDef=new ColumnDef(TypeUtils.intListToArray(list));
-                columnDef.orderable=false;
-                columnDef.searchable=false;
-                this.options.columnDefs=new ColumnDef[]{columnDef}; 
-            }
-        }
-        
-        this.header=new TableHeader().add(objects);
-        return this;
-//        this.header=new TableHeader().add(objects);
-//        return this;
-    }
-    public DataTable setHeaderWithBlankColumnsNotOrderable(Object...objects)
-    {
-        if (this.options.columnDefs==null)
-        {
-            ArrayList<Integer> list=new ArrayList<>();
-            for (int i=0;i<objects.length;i++)
-            {
-                Object object=objects[i];
-                if (object==null)
-                {
-                    list.add(i);
-                }
-                else if (object instanceof String)
-                {
-                    if (((String)object).length()==0)
-                    {
-                        list.add(i);
-                    }
-                }
-            }
-            if (list.size()>0)
-            {
-                ColumnDef columnDef=new ColumnDef(TypeUtils.intListToArray(list));
-                columnDef.orderable=false;
-                columnDef.searchable=false;
-                this.options.columnDefs=new ColumnDef[]{columnDef}; 
-            }
-        }
-        
-        this.header=new TableHeader().add(objects);
-        return this;
-    }
-
-    public TableRow returnAddRow()
-    {
-        TableRow row=new TableRow();
-        this.tbody.addInner(row);
-        return row;
-    }
-    public DataTable addRow(TableRow row)
-    {
-        this.tbody.addInner(row);
-        return this;
-    }
-    public DataTable addRow(tr row)
-    {
-        this.tbody.addInner(row);
-        return this;
-    }
-    public DataTable addRow(Object...objects)
-    {
-        this.tbody.addInner(new TableRow().add(objects));
-        return this;
-    }
-    public DataTable setFooter(TableFooter footer)
-    {
-        this.footer=footer;
-        return this;
-    }
-    public DataTable setFooter(Object...objects)
-    {
-        this.footer=new TableFooter().add(objects);
-        return this;
-    }
-    
-    public tbody tbody()
-    {
-        return this.tbody;
-    }
-    public TableHeader header()
-    {
-        return this.header;
-    }
-    public TableFooter footer()
-    {
-        return this.footer;
     }
 
     @Override
@@ -221,7 +87,6 @@ public class DataTable extends Component<DataTable>
     {
         StringBuilder sb=new StringBuilder();
         sb.append("$(document).ready(function(){$('#").append(id()).append("').DataTable(");
-                
         {
             ObjectBuilder ob=new ObjectBuilder();
             ob.add(this.options);
@@ -229,18 +94,11 @@ public class DataTable extends Component<DataTable>
         }
         sb.append(");});");
 
-        this.addInner(this.header);
-        this.addInner(this.tbody);
-        this.addInner(this.footer);
-
-        
-
         if (sb.length()>0)
         {
             script script=new script().addInner(sb.toString());
             composer.getStringBuilder().append(script.getHtml());
         }
-        //this.compose(composer);
         super.compose(composer);
     }
 

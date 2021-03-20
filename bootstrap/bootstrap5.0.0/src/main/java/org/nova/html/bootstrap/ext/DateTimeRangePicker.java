@@ -21,7 +21,6 @@
  ******************************************************************************/
 package org.nova.html.bootstrap.ext;
 
-import org.nova.html.bootstrap.Component;
 import org.nova.html.bootstrap.StyleComponent;
 import org.nova.html.deprecated.ObjectBuilder;
 import org.nova.html.elements.Composer;

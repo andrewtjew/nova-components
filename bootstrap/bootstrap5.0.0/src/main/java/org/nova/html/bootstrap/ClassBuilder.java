@@ -25,7 +25,7 @@ import org.nova.html.bootstrap.classes.Align;
 import org.nova.html.bootstrap.classes.AlignItems;
 import org.nova.html.bootstrap.classes.AlignSelf;
 import org.nova.html.bootstrap.classes.ComponentClass;
-import org.nova.html.bootstrap.classes.DeviceClass;
+import org.nova.html.bootstrap.classes.BreakPoint;
 import org.nova.html.bootstrap.classes.Display;
 import org.nova.html.bootstrap.classes.Edge;
 import org.nova.html.bootstrap.classes.Flex;
@@ -37,7 +37,7 @@ import org.nova.html.bootstrap.classes.Position;
 import org.nova.html.bootstrap.classes.Rounded;
 import org.nova.html.bootstrap.classes.StyleColor;
 import org.nova.html.bootstrap.classes.TextAlign;
-import org.nova.html.bootstrap.classes.TextStyle;
+import org.nova.html.bootstrap.classes.Text;
 import org.nova.html.elements.TagElement;
 
 //public class ClassBuilder

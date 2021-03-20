@@ -21,7 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-public class NavLink extends StyleComponent<NavLink>
+public class NavLink extends ToggleComponent<NavLink>
 {
     public NavLink()
     {
@@ -35,7 +35,7 @@ public class NavLink extends StyleComponent<NavLink>
     }
     public NavLink(String label)
     {
-        this(label,"#");
+        this(label,null);
     }
     public NavLink active()
     {
@@ -45,6 +45,11 @@ public class NavLink extends StyleComponent<NavLink>
     public NavLink disabled()
     {
         addClass("disabled");
+        return this;
+    }
+    public NavLink href(String href)
+    {
+        attr("href",href);
         return this;
     }
 }

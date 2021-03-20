@@ -21,7 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-import org.nova.html.bootstrap.classes.DeviceClass;
+import org.nova.html.bootstrap.classes.BreakPoint;
 import org.nova.html.elements.TagElement;
 
 public class FormLabel extends StyleComponent<FormLabel>
@@ -30,17 +30,18 @@ public class FormLabel extends StyleComponent<FormLabel>
     {
         super("label","form-label");
     }
+    public FormLabel(String label)
+    {
+        super("label","form-label");
+        addInner(label);
+    }
     public FormLabel for_(String element_id)
     {
         return attr("for",element_id);
     }
     public FormLabel for_(TagElement<?> element)
     {
-        return attr("for",element);
-    }
-    public FormLabel form(String form_id)
-    {
-        return attr("form",form_id);
+        return attr("for",element.id());
     }
     
     

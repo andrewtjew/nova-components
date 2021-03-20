@@ -2,7 +2,7 @@ package org.nova.html.remote;
 
 public enum InputType
 {
-    constant,
+//    constant,
     value,
     checked,
     select,

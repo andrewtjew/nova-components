@@ -23,8 +23,8 @@ package org.nova.html.bootstrap.classes;
 
 public enum Float_
 {
-    left("left"), 
-    right("right"),
+    start("start"), 
+    end("end"),
     none("none"),
     ;
     

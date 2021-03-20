@@ -42,6 +42,100 @@ import org.nova.json.ObjectMapper;
 
 public class HtmlUtils
 {
+    @Deprecated
+    public static String returnFunction(String function,Object...parameters)
+    {
+        StringBuilder sb=new StringBuilder(function+"(");
+        boolean commaNeeded=false;
+        for (Object parameter:parameters)
+        {
+            if (commaNeeded==false)
+            {
+                commaNeeded=true;
+            }
+            else
+            {
+                sb.append(',');
+            }
+            if (parameter==null)
+            {
+                sb.append("null");
+            }
+            else 
+            {
+                Class<?> type=parameter.getClass();
+                if (type==String.class)
+                {
+                    sb.append("'"+toReturnStringParameter(parameter.toString())+"'");
+                }
+                else if ((type==byte.class)
+                        ||(type==short.class)
+                        ||(type==int.class)
+                        ||(type==long.class)
+                        ||(type==float.class)
+                        ||(type==double.class)
+                        ||(type==BigDecimal.class)
+                        ||(type==Byte.class)
+                        ||(type==Short.class)
+                        ||(type==Integer.class)
+                        ||(type==Long.class)
+                        ||(type==Float.class)
+                        ||(type==Double.class)
+                        )
+                {
+                    sb.append(parameter);
+                }
+                else
+                {
+                    sb.append("'"+parameter.toString()+"'");
+                }
+            }
+        }
+        sb.append(");");
+        return sb.toString();
+    }
+
+    @Deprecated
+    public static String escapeQuotes(String text)
+    {
+        StringBuilder sb=new StringBuilder();
+        for (int i=0;i<text.length();i++)
+        {
+            char c=text.charAt(i);
+            if (c=='"')
+            {
+                sb.append("&quot;");
+            }
+            else if (c=='\'')
+            {
+                sb.append("&#39;");
+            }
+            else 
+            {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+    
+    @Deprecated
+    public static String js_disableElementAfterCall(String code)
+    {
+        return "(function(){this.disabled=true;"+code+";})();";
+    }
+    @Deprecated
+    public static String js_hideModalAndCall(String modalId,String code)
+    {
+        return "(function(){$('#"+modalId+"').modal('"+ModalOption.hide+"');"+code+";})();";
+    }
+    @Deprecated
+    public static String confirmPOST(String title,String text,PathAndQuery post,Object content,PathAndQuery success) throws Throwable
+    {
+        String data=content==null?null:ObjectMapper.writeObjectToString(content);
+        return js_statement("confirmPOST",title,text,post.toString(),data,success.toString());
+    }
+    
+    @Deprecated
     public static String js_peekPassword(String id)
     {
         return "var x = document.getElementById('"+id+"');if (x.type === 'password') {x.type = 'text';} else {x.type = 'password';}";
@@ -59,18 +153,9 @@ public class HtmlUtils
     {
         return "window.location='"+url+"'";
     }
-    public static String js_disableElementAfterCall(String code)
+    public static String js_focus(InputElement element)
     {
-        return "(function(){this.disabled=true;"+code+";})();";
-    }
-    public static String js_hideModalAndCall(String modalId,String code)
-    {
-        return "(function(){$('#"+modalId+"').modal('"+ModalOption.hide+"');"+code+";})();";
-    }
-    public static String confirmPOST(String title,String text,PathAndQuery post,Object content,PathAndQuery success) throws Throwable
-    {
-        String data=content==null?null:ObjectMapper.writeObjectToString(content);
-        return js_statement("confirmPOST",title,text,post.toString(),data,success.toString());
+        return "document.getElementById('"+element.id()+"').focus();";
     }
     
     public static List<String> getSelectionNames(Context context,String prefix)
@@ -218,7 +303,8 @@ public class HtmlUtils
         String call=js_statement(function, parameters);
         return "setTimeout(function(){"+call+"},"+delay+");";
     }
-        
+
+    @Deprecated
     public static String js_returnFunctionWithDelay(long delay,String function,Object...parameters)
     {
         String call=returnFunction(function, parameters);
@@ -239,6 +325,16 @@ public class HtmlUtils
     public static String js_elementCall(String id,String function,Object...parameters)
     {
         return js_call("document.getElementById('"+id+"')."+function,parameters);
+    }  
+    
+    public static String js_jqueryCall(String id,String function,Object...parameters)
+    {
+        return js_call("$","#"+id)+"."+js_call(function,parameters);
+    }  
+    
+    public static String js_jqueryCall(TagElement<?> element,String function,Object...parameters)
+    {
+        return js_call("$","#"+element.id())+"."+js_call(function,parameters);
     }  
     
     public static String escapeString(String string)
@@ -266,6 +362,65 @@ public class HtmlUtils
                     sb.append(c);
             }
         }
+        return sb.toString();
+    }
+
+    public static String escapeString(QuotationMark mark,String string)
+    {
+        StringBuilder sb=new StringBuilder();
+        switch (mark)
+        {
+            case SINGLE:
+            for (int i=0;i<string.length();i++)
+            {
+                char c=string.charAt(i);
+                switch (c)
+                {
+                    case '"':
+                        sb.append("&quot;");
+                        break;
+                        
+                    case '\'':
+                        sb.append("\\'");
+                        break;
+                        
+                    case '\\':
+                        sb.append("\\\\");
+                        break;
+                        
+                        
+                    default:
+                        sb.append(c);
+                }
+            }
+            break;
+
+            case DOUBLE:
+            for (int i=0;i<string.length();i++)
+            {
+                char c=string.charAt(i);
+                switch (c)
+                {
+                    case '"':
+                        sb.append("\\\"");
+                        break;
+                        
+                    case '\'':
+                        sb.append("&apos;");
+                        break;
+                        
+                    case '\\':
+                        sb.append("\\\\");
+                        break;
+                        
+                        
+                    default:
+                        sb.append(c);
+                }
+            }
+            break;
+        }
+        
         return sb.toString();
     }
     
@@ -321,13 +476,13 @@ public class HtmlUtils
                             {
                                 sb.append(',');
                             }
-                            sb.append(mark.toString()+escapeString(Array.get(parameter, i).toString())+mark.toString());
+                            sb.append(mark.toString()+escapeString(mark,Array.get(parameter, i).toString())+mark.toString());
                         }
                         sb.append(']');
                     }
                     else
                     {
-                        sb.append(mark.toString()+escapeString(parameter.toString())+mark.toString());
+                        sb.append(mark.toString()+escapeString(mark,parameter.toString())+mark.toString());
                     }
                 }
                 else if ((type==byte.class)
@@ -345,6 +500,7 @@ public class HtmlUtils
                         ||(type==Float.class)
                         ||(type==Double.class)
                         ||(type==Boolean.class)
+                        ||(type==JsObject.class)
                         )
                 {
                     if (isArray)
@@ -365,6 +521,26 @@ public class HtmlUtils
                         sb.append(parameter);
                     }
                 }
+                else if (type.isEnum())
+                {
+                    if (isArray)
+                    {
+                        sb.append('[');
+                        for (int i=0;i<Array.getLength(parameter);i++)
+                        {
+                            if (i>0)
+                            {
+                                sb.append(',');
+                            }
+                            sb.append(mark.toString()+Array.get(parameter, i)+mark.toString());
+                        }
+                        sb.append(']');
+                    }
+                    else
+                    {
+                        sb.append(mark.toString()+parameter+mark.toString());
+                    }
+                }
                 else
                 {
                     if (isArray)
@@ -376,13 +552,27 @@ public class HtmlUtils
                             {
                                 sb.append(',');
                             }
-                            sb.append(mark.toString()+Array.get(parameter, i).toString()+mark.toString());
+                            try
+                            {
+                                sb.append(mark.toString()+ObjectMapper.writeObjectToString(Array.get(parameter, i))+mark.toString());
+                            }
+                            catch (Throwable e)
+                            {
+                                throw new RuntimeException(e);
+                            }
                         }
                         sb.append(']');
                     }
                     else
                     {
-                        sb.append(mark.toString()+parameter.toString()+mark.toString());
+                        try
+                        {
+                            sb.append(mark.toString()+ObjectMapper.writeObjectToString(parameter)+mark.toString());
+                        }
+                        catch (Throwable e)
+                        {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             }
@@ -390,58 +580,6 @@ public class HtmlUtils
         sb.append(")");
         return sb.toString();
     }
-    public static String returnFunction(String function,Object...parameters)
-    {
-        StringBuilder sb=new StringBuilder(function+"(");
-        boolean commaNeeded=false;
-        for (Object parameter:parameters)
-        {
-            if (commaNeeded==false)
-            {
-                commaNeeded=true;
-            }
-            else
-            {
-                sb.append(',');
-            }
-            if (parameter==null)
-            {
-                sb.append("null");
-            }
-            else 
-            {
-                Class<?> type=parameter.getClass();
-                if (type==String.class)
-                {
-                    sb.append("'"+toReturnStringParameter(parameter.toString())+"'");
-                }
-                else if ((type==byte.class)
-                        ||(type==short.class)
-                        ||(type==int.class)
-                        ||(type==long.class)
-                        ||(type==float.class)
-                        ||(type==double.class)
-                        ||(type==BigDecimal.class)
-                        ||(type==Byte.class)
-                        ||(type==Short.class)
-                        ||(type==Integer.class)
-                        ||(type==Long.class)
-                        ||(type==Float.class)
-                        ||(type==Double.class)
-                        )
-                {
-                    sb.append(parameter);
-                }
-                else
-                {
-                    sb.append("'"+parameter.toString()+"'");
-                }
-            }
-        }
-        sb.append(");");
-        return sb.toString();
-    }
-
     public static String toHtmlText(String text)
     {
         StringBuilder sb=new StringBuilder();
@@ -475,28 +613,6 @@ public class HtmlUtils
         }
         return sb.toString();
     }
-    public static String escapeQuotes(String text)
-    {
-        StringBuilder sb=new StringBuilder();
-        for (int i=0;i<text.length();i++)
-        {
-            char c=text.charAt(i);
-            if (c=='"')
-            {
-                sb.append("&quot;");
-            }
-            else if (c=='\'')
-            {
-                sb.append("&#39;");
-            }
-            else 
-            {
-                sb.append(c);
-            }
-        }
-        return sb.toString();
-    }
-    
     public static String js_copyToClipboard(TagElement<?> element)
     {
         return "var copyText=getElementById('"+element.id()+"');copyText.select();document.execCommand('Copy');";

@@ -23,6 +23,8 @@ package org.nova.http.server;
 
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -366,15 +368,33 @@ public class FilterChain
                 }
                 break;
             case PATH:
+            {
+                String name=null;
                 try
                 {
-                    parameters[i]=buildParameter(parameterInfo,pathParameters[parameterInfo.getPathIndex()]);
+                    name=URLDecoder.decode(pathParameters[parameterInfo.getPathIndex()],StandardCharsets.UTF_8);
+                }
+                catch (Throwable t)
+                {
+                    try
+                    {
+                        name=URLDecoder.decode(pathParameters[parameterInfo.getPathIndex()]);
+                    }
+                    catch (Throwable tt)
+                    {
+                        name=request.getParameter(parameterInfo.getName());
+                    }
+                }
+                try
+                {
+                    parameters[i]=buildParameter(parameterInfo,name);
                 }
                 catch (Throwable t)
                 {
                     throw new AbnormalException(Abnormal.BAD_PATH,t);
                 }
                 break;
+            }
             case QUERY:
                 try
                 {
@@ -382,7 +402,7 @@ public class FilterChain
                 }
                 catch (Throwable t)
                 {
-                    throw new AbnormalException(Abnormal.BAD_QUERY,parameterInfo.getName(),t);
+                    throw new AbnormalException(Abnormal.BAD_QUERY,t);
                 }
                 break;
             case CONTEXT:

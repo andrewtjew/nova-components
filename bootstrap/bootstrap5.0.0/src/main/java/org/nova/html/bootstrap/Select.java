@@ -57,5 +57,10 @@ public class Select extends InputComponent<Select>
         }
         return this;
     }
+    public Select form_select()
+    {
+        addClass("form-select");
+        return this;
+    }
  }
 

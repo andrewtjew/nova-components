@@ -21,12 +21,26 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
+import org.nova.html.elements.TagElement;
+import org.nova.html.tags.label;
 
 public class LabelButton extends ButtonComponent<LabelButton>
 {
     public LabelButton()
     { 
         super("label");
+    }
+    public LabelButton for_(String element_id)
+    {
+        return attr("for",element_id);
+    }
+    public LabelButton for_(TagElement<?> element)
+    {
+        return attr("for",element.id());
+    }
+    public LabelButton form(String form_id)
+    {
+        return attr("form",form_id);
     }
     
     

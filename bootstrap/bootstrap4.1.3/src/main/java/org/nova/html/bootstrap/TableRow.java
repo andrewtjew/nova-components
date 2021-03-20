@@ -34,34 +34,26 @@ public class TableRow extends StyleComponent<TableRow>
     
     public TableRow add(Object...objects)
     {
-        if (objects==null)
+        for (Object object:objects)
         {
-            addInner(new td());
-        }
-        else
-        {
-            for (Object object:objects)
+            if (object==null)
             {
-                if (object==null)
-                {
-                    addInner(new td());
-                }
-                else if (object instanceof td)
-                {
-                    addInner(object);
-                }
-                else if (object instanceof Element)
-                {
-                    addInner(new td().addInner((Element)object));
-                }
-                else
-                {
-                    addInner(new td().addInner(object.toString()));
-                }
+                addInner(new td());
+            }
+            else if (object instanceof td)
+            {
+                addInner(object);
+            }
+            else if (object instanceof Element)
+            {
+                addInner(new td().addInner((Element)object));
+            }
+            else
+            {
+                addInner(new td().addInner(object.toString()));
             }
         }
         return this;
-        
     }
     
     public TableRow table_color(StyleColor value)

@@ -21,14 +21,16 @@
  ******************************************************************************/
 package org.nova.html.bootstrap.ext;
 
+import org.nova.html.bootstrap.Button;
 import org.nova.html.bootstrap.Modal;
 import org.nova.html.bootstrap.ModalBody;
 import org.nova.html.bootstrap.ModalContent;
 import org.nova.html.bootstrap.ModalDialog;
 import org.nova.html.bootstrap.ModalFooter;
 import org.nova.html.bootstrap.ModalHeader;
-import org.nova.html.bootstrap.classes.DeviceClass;
+import org.nova.html.bootstrap.classes.BreakPoint;
 import org.nova.html.elements.Composer;
+import org.nova.html.ext.HtmlUtils;
 
 public class ModalDocument extends Modal
 {
@@ -42,7 +44,7 @@ public class ModalDocument extends Modal
     {
         this(centered,null);
     }
-    public ModalDocument(boolean centered,DeviceClass deviceClass)
+    public ModalDocument(boolean centered,BreakPoint deviceClass)
     {
         this.dialog=returnAddInner(new ModalDialog());
         
@@ -55,8 +57,11 @@ public class ModalDocument extends Modal
         {
             this.dialog.deviceClass(deviceClass);
         }
+        this.header=this.content.returnAddInner(new ModalHeader());
+        this.body=this.content.returnAddInner(new ModalBody());
+        this.footer=this.content.returnAddInner(new ModalFooter());
     }
-    public ModalDocument(DeviceClass deviceClass)
+    public ModalDocument(BreakPoint deviceClass)
     {
         this(false,deviceClass);
     }
@@ -68,10 +73,6 @@ public class ModalDocument extends Modal
     
     public ModalHeader header()
     {
-        if (this.header==null)
-        {
-            this.header=new ModalHeader();
-        }
         return this.header;
     }
     public ModalDialog modalDialog()
@@ -80,18 +81,10 @@ public class ModalDocument extends Modal
     }
     public ModalFooter footer()
     {
-        if (this.footer==null)
-        {
-            this.footer=new ModalFooter();
-        }
         return this.footer;
     }
     public ModalBody body()
     {
-        if (this.body==null)
-        {
-            this.body=new ModalBody();
-        }
         return this.body;
     }
     public ModalContent modalContent()
@@ -99,26 +92,13 @@ public class ModalDocument extends Modal
         return this.content;
     }
     
-    @Override
-    public void compose(Composer composer) throws Throwable
-    {
-        if (this.header!=null)
-        {
-            this.content.addInner(this.header);
-        }
-        if (this.body!=null)
-        {
-            this.content.addInner(this.body);
-        }
-        if (this.footer!=null)
-        {
-            this.content.addInner(this.footer);
-        }
-        super.compose(composer);
-    }
     public String js_option(ModalOption option)
     {
-        return "$(\"#"+id()+"\").modal(\""+option+"\");";
+        return HtmlUtils.js_jqueryCall(this,"modal",option);
     }
     
+    public Button showDismissbutton()
+    {
+        return this.header.returnAddInner(new Button()).addClass("btn-close").dismissModal();
+    }
 }

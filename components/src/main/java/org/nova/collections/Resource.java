@@ -51,7 +51,10 @@ public abstract class Resource implements AutoCloseable
 	        {
 	            this.activateStackTrace=this.activateThread.getStackTrace();
 	        }
-	        this.trace=new Trace(parent,this.getClass().getName());
+	        if (parent!=null)
+	        {
+	            this.trace=new Trace(parent,this.getClass().getName());
+	        }
 			activate();
 		}
 	}
@@ -94,7 +97,10 @@ public abstract class Resource implements AutoCloseable
 			        
 			    }
 			    pool.release(this);
-				this.trace.close();
+			    if (this.trace!=null)
+			    {
+			        this.trace.close();
+			    }
 				this.activateThread=null;
 				this.activateStackTrace=null;
 				this.activated=false;
@@ -106,7 +112,10 @@ public abstract class Resource implements AutoCloseable
 	{
         synchronized(this)
         {
-            this.trace.close(throwable);
+            if (this.trace!=null)
+            {
+                this.trace.close(throwable);
+            }
             pool.retire(this);
         }
 	}

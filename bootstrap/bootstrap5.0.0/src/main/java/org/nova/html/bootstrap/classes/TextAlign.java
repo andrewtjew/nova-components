@@ -23,9 +23,9 @@ package org.nova.html.bootstrap.classes;
 
 public enum TextAlign
 {
-    left("left"), 
+    start("start"), 
     center("center"), 
-    right("right"), 
+    end("end"), 
     justify("justify"), 
     ;
     

@@ -21,7 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-import org.nova.html.bootstrap.classes.DeviceClass;
+import org.nova.html.bootstrap.classes.BreakPoint;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.GlobalTagElement;
@@ -32,13 +32,13 @@ import org.nova.html.tags.div;
 
 public class DropdownMenu extends StyleComponent<DropdownMenu>
 {
-    final private Component<?> toggler;
+    final private StyleComponent<?> toggler;
     
-    public DropdownMenu(Component<?> toggler)
+    public DropdownMenu(StyleComponent<?> toggler)
     {
         this(toggler,false);
     }
-    public DropdownMenu(Component<?> toggler,boolean split)
+    public DropdownMenu(StyleComponent<?> toggler,boolean split)
     {
         super("ul", "dropdown-menu");
         this.toggler=toggler;
@@ -65,12 +65,12 @@ public class DropdownMenu extends StyleComponent<DropdownMenu>
         return this;
     }
     
-    public DropdownMenu right(DeviceClass deviceClass)
+    public DropdownMenu right(BreakPoint deviceClass)
     {
         addClass("dropdown-menu",deviceClass,"right");
         return this;
     }
-    public DropdownMenu left(DeviceClass deviceClass)
+    public DropdownMenu left(BreakPoint deviceClass)
     {
         addClass("dropdown-menu",deviceClass,"left");
         return this;
@@ -104,7 +104,7 @@ public class DropdownMenu extends StyleComponent<DropdownMenu>
         return this;
     }
  
-    public DropdownMenu reference_toggle(Component<?> button)
+    public DropdownMenu reference_toggle(StyleComponent<?> button)
     {
         this.toggler.attr("data-reference","toggle");
         return this;
@@ -134,7 +134,7 @@ public class DropdownMenu extends StyleComponent<DropdownMenu>
         return this;
     }
  
-    public DropdownMenu reference(Component<?> button,GlobalTagElement<?> element)
+    public DropdownMenu reference(StyleComponent<?> button,GlobalTagElement<?> element)
     {
         this.toggler.attr("data-reference","#"+element.id());
         return this;

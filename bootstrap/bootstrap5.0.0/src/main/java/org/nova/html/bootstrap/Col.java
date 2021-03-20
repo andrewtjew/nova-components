@@ -21,27 +21,40 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-import org.nova.html.bootstrap.classes.DeviceClass;
+import org.nova.html.bootstrap.classes.BreakPoint;
 
 public class Col extends StyleComponent<Col>
 {
     public Col()
     {
-        super("div","col");
+        super("div",null);
     }
-    public Col(DeviceClass deviceClass)
+    public Col(BreakPoint breakPoint)
     {
-        super("div","col");
-        addClass(this.getComponentClass(),deviceClass);
+        super("div",null);
+        addClass("col",breakPoint);
     }
-    public Col(DeviceClass deviceClass,int columns)
+    public Col(BreakPoint breakPoint,boolean auto)
     {
-        super("div","col");
-        addClass(this.getComponentClass(),deviceClass,columns);
+        super("div",null);
+        if (auto)
+        {
+            addClass("col",breakPoint,"auto");
+        }
+        else
+        {
+            addClass("col",breakPoint);
+        }
+            
+    }
+    public Col(BreakPoint breakPoint,int columns)
+    {
+        super("div",null);
+        addClass("col",breakPoint,columns);
     }
     public Col(int columns)
     {
-        super("div","col");
-        addClass(this.getComponentClass(),columns);
+        super("div",null);
+        addClass("col",columns);
     }
 }

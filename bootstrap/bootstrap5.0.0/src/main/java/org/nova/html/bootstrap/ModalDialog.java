@@ -21,7 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-import org.nova.html.bootstrap.classes.DeviceClass;
+import org.nova.html.bootstrap.classes.BreakPoint;
 
 public class ModalDialog extends StyleComponent<ModalDialog>
 {
@@ -35,7 +35,7 @@ public class ModalDialog extends StyleComponent<ModalDialog>
         addClass("modal-dialog","centered");
         return this;
     }
-    public ModalDialog deviceClass(DeviceClass deviceClass)
+    public ModalDialog deviceClass(BreakPoint deviceClass)
     {
         addClass("modal",deviceClass);
         return this;

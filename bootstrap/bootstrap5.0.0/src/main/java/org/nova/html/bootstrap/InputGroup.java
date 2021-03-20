@@ -24,47 +24,47 @@ package org.nova.html.bootstrap;
 import org.nova.html.bootstrap.classes.TextAlign;
 import org.nova.html.elements.Element;
 
-public class InputGroup extends Component<InputGroup>
+public class InputGroup extends StyleComponent<InputGroup>
 {
     public InputGroup()
     {
         super("div","input-group");
     }
 
-    public InputGroup prepend(Element element)
-    {
-//        returnAddInner(new InputGroupPrepend()).addInner(new InputGroupText().addInner(element));
-        returnAddInner(new InputGroupPrepend()).addInner(element);
-        return this;
-    }
-
-    public InputGroup append(Element element)
-    {
-        returnAddInner(new InputGroupAppend()).addInner(element);
-//        returnAddInner(new InputGroupAppend()).addInner(new InputGroupText().addInner(element));
-        return this;
-    }
-
-    public InputGroup prepend(String text)
-    {
-        returnAddInner(new InputGroupPrepend()).returnAddInner(new InputGroupText(text));
-        return this;
-    }
-
-    public InputGroup prepend(String text,int percentageWidth)
-    {
-        InputGroupPrepend prepend=returnAddInner(new InputGroupPrepend()).style("flex: 0 0 "+percentageWidth+"%;");
-        
-        InputGroupText groupText=prepend.returnAddInner(new InputGroupText(text));
-        Styler.style(groupText).w(100);
-        return this;
-    }
-
-    public InputGroup append(String text)
-    {
-        returnAddInner(new InputGroupAppend()).returnAddInner(new InputGroupText(text));
-        return this;
-    }
+//    public InputGroup prepend(Element element)
+//    {
+////        returnAddInner(new InputGroupPrepend()).addInner(new InputGroupText().addInner(element));
+//        returnAddInner(new InputGroupPrepend()).addInner(element);
+//        return this;
+//    }
+//
+//    public InputGroup append(Element element)
+//    {
+//        returnAddInner(new InputGroupAppend()).addInner(element);
+////        returnAddInner(new InputGroupAppend()).addInner(new InputGroupText().addInner(element));
+//        return this;
+//    }
+//
+//    public InputGroup prepend(String text)
+//    {
+//        returnAddInner(new InputGroupPrepend()).returnAddInner(new InputGroupText(text));
+//        return this;
+//    }
+//
+//    public InputGroup prepend(String text,int percentageWidth)
+//    {
+//        InputGroupPrepend prepend=returnAddInner(new InputGroupPrepend()).style("flex: 0 0 "+percentageWidth+"%;");
+//        
+//        InputGroupText groupText=prepend.returnAddInner(new InputGroupText(text));
+//        Styler.style(groupText).w(100);
+//        return this;
+//    }
+//
+//    public InputGroup append(String text)
+//    {
+//        returnAddInner(new InputGroupAppend()).returnAddInner(new InputGroupText(text));
+//        return this;
+//    }
 
     
 }

@@ -23,7 +23,7 @@ package org.nova.html.bootstrap;
 
 import org.nova.html.elements.Composer;
 
-public class CardDocument extends Card
+public class CardDocument extends Card 
 {
     private CardHeader header;
     private CardFooter footer;

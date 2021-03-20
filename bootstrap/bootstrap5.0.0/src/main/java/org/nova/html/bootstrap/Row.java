@@ -21,6 +21,8 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
+import org.nova.html.bootstrap.classes.BreakPoint;
+
 public class Row extends StyleComponent<Row> 
 {
     public Row()
@@ -28,10 +30,42 @@ public class Row extends StyleComponent<Row>
         super("div","row");
 	}
 
-    public Row no_gutters()
-    {
-        addClass("no-gutters");
-        return this;
-    }
+//    public Row no_gutters()
+//    {
+//        addClass("no-gutters");
+//        return this;
+//    }
     
+    public Row gx(int value)
+    {
+        return addClass("gx",value);
+    }
+    public Row gx(BreakPoint breakPoint,int value)
+    {
+        return addClass("gx",breakPoint,value);
+    }
+    public Row gy(int value)
+    {
+        return addClass("gy",value);
+    }
+    public Row gy(BreakPoint breakPoint,int value)
+    {
+        return addClass("gy",breakPoint,value);
+    }
+    public Row g(int value)
+    {
+        return addClass("g",value);
+    }
+    public Row g(BreakPoint breakPoint,int value)
+    {
+        return addClass("g",breakPoint,value);
+    }
+    public Row cols(int value)
+    {
+        return addClass(getComponentClass(),"cols",value);
+    }
+    public Row cols(BreakPoint breakPoint,int value)
+    {
+        return addClass(getComponentClass(),"cols",breakPoint,value);
+    }
 }

@@ -21,25 +21,47 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
+import org.nova.html.elements.Composer;
+import org.nova.html.elements.GlobalEventTagElement;
 import org.nova.html.elements.TagElement;
 
-public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> extends Component<ELEMENT> implements Styling
+public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> extends GlobalEventTagElement<ELEMENT> implements Styling<ELEMENT>
 {
-    private String color;
-    private boolean outline;
-    
-    public StyleComponent(String tag,String componentClass)
+    final private String componentClass;
+
+    public StyleComponent(String tag, String componentClass)
     {
-        super(tag,componentClass);
+        this(tag, componentClass, false, false);
     }
-    public StyleComponent(String tag,String componentClass,boolean noEndTag)
+
+    public StyleComponent(String tag, String componentClass, boolean noEndTag)
     {
-        super(tag,componentClass,noEndTag);
+        this(tag, componentClass, noEndTag, false);
+    }
+
+    public StyleComponent(String tag, String componentClass, boolean noEndTag,boolean noRootComponentClass)
+    {
+        super(tag, noEndTag);
+        this.componentClass = componentClass;
+        if (noRootComponentClass==false)
+        {
+            addClass(componentClass);
+        }
     }
     
     public TagElement<?> getElement()
     {
         return this;
     }    
+    
+    protected void composeThis(Composer composer) throws Throwable
+    {
+        super.compose(composer);
+    }
+    
+    protected String getComponentClass()
+    {
+        return this.componentClass;
+    }
     
 }

@@ -46,7 +46,7 @@ class HostConnection implements TraceRunnable
             for (;;)
             {
                 int read=hostPacket.readFromStream(inputStream);
-                System.out.println("HostConnection: port="+this.outputPort+", read from host="+read);
+//                System.out.println("HostConnection: port="+this.outputPort+", read from host="+read);
                 if (read<0)
                 {
                     break;

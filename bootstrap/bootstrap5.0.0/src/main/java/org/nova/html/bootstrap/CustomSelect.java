@@ -21,7 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-import org.nova.html.bootstrap.classes.DeviceClass;
+import org.nova.html.bootstrap.classes.BreakPoint;
 import org.nova.html.elements.InputType;
 
 public class CustomSelect extends InputComponent<CustomSelect>
@@ -30,7 +30,7 @@ public class CustomSelect extends InputComponent<CustomSelect>
     {
         super("select",InputType.select,"custom-select");
     }
-    public CustomSelect(DeviceClass deviceClass)
+    public CustomSelect(BreakPoint deviceClass)
     {
         this();
         addClass("custom-select-"+deviceClass);

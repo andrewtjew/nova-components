@@ -21,7 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-public class BreadcrumbItem extends Component<BreadcrumbItem>
+public class BreadcrumbItem extends StyleComponent<BreadcrumbItem>
 {
     public BreadcrumbItem(String label,String href)
     { 

@@ -21,7 +21,6 @@
  ******************************************************************************/
 package org.nova.html.bootstrap.ext;
 
-import org.nova.html.bootstrap.Component;
 import org.nova.html.bootstrap.StyleComponent;
 
 public class Span extends StyleComponent<Span>

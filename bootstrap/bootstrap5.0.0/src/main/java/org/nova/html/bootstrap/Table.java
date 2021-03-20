@@ -21,6 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
+import org.nova.html.bootstrap.classes.BreakPoint;
 import org.nova.html.elements.Composer;
 import org.nova.html.elements.Element;
 import org.nova.html.ext.TableRow;
@@ -29,23 +30,15 @@ import org.nova.html.tags.tbody;
 
 public class Table extends StyleComponent<Table>
 {
-    private final tbody tbody;
-    private boolean responsive=false;
-    public Table(TableHeading heading)
+    public Table(TableHeader heading)
     {
        super("table","table");
        if (heading!=null)
        {
            addInner(heading);
        }
-       this.tbody=returnAddInner(new tbody());
     }
 
-    public Table addHeading(TableHeading heading)
-    {
-        addInner(heading);
-        return this;
-    }
     public Table()
     {
         this(null);
@@ -71,55 +64,19 @@ public class Table extends StyleComponent<Table>
         addClass("table-bordered");
         return this;
     }
-    public Table responsive()
+    public Table borderless()
     {
-        this.responsive=true;
+        addClass("table-borderless");
         return this;
     }
-
-    public Table addRow(TableRow row)
-    {
-        this.tbody.addInner(row);
-        return this;
-    }
-    public Table addRowInline(Object...objects)
-    {
-        this.tbody.addInner(new TableRow().add(objects));
-        return this;
-    }
-    
-    public TableRow returnAddRow()
-    {
-        TableRow tableRow=new TableRow();
-        addRow(tableRow);
-        return tableRow;
-    }
-    public tbody tbody()
-    {
-        return this.tbody;
-    }
-    @Override
-    public void compose(Composer composer) throws Throwable
-    {
-        
-        if (this.responsive)
-        {
-            div group=new div().addClass("table-responsive");
-            group.addInner(new Element()
-            {
-                @Override
-                public void compose(Composer composer) throws Throwable
-                {
-                    composeThis(composer);
-                }
-            });
-            group.compose(composer);
-        }
-        else
-        {
-            super.compose(composer);
-        }
-        
-    }
-    
+//    public Table responsive()
+//    {
+//        addClass("table-responsive");
+//        return this;
+//    }
+//    public Table responsive(BreakPoint breakPoint)
+//    {
+//        addClass("table-responsive",breakPoint);
+//        return this;
+//    }
 }

@@ -159,7 +159,7 @@ public class ResourceController
                 bytes = this.cache.get(parent, file);
                 if (TEST)
                 {
-                    Testing.printf("Resource:"+file);
+//                    Testing.printf("Resource:"+file);
                 }
             }
             catch (Throwable t)

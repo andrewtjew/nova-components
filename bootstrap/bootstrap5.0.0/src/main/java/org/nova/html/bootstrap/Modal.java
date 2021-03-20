@@ -36,7 +36,7 @@ public class Modal extends StyleComponent<Modal>
 
     public Modal backdrop(boolean value)
     {
-        attr("data-backdrop",value);
+        attr("data-bs-backdrop",value);
         return this;
     }
     public Modal backdrop()
@@ -45,12 +45,12 @@ public class Modal extends StyleComponent<Modal>
     }
     public Modal backdrop_static()
     {
-        attr("data-backdrop","static");
+        attr("data-bs-backdrop","static");
         return this;
     }
     public Modal keyboard(boolean value)
     {
-        attr("data-keyboard",value);
+        attr("data-bs-keyboard",value);
         return this;
     }
     public Modal keyboard()
@@ -60,7 +60,7 @@ public class Modal extends StyleComponent<Modal>
 
     public Modal show(boolean value)
     {
-        attr("data-show",value);
+        attr("data-bs-show",value);
         return this;
     }
     public Modal show()
@@ -69,7 +69,7 @@ public class Modal extends StyleComponent<Modal>
     }
     public Modal focus(boolean value)
     {
-        attr("data-focus",value);
+        attr("data-bs-focus",value);
         return this;
     }
     public Modal focus()

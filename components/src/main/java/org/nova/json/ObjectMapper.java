@@ -831,6 +831,54 @@ public class ObjectMapper
         public void skip() throws Exception
         {
             char c=nextNonWhiteSpaceCharacter();
+            if (c=='"')
+            {
+                this.position--;
+                getString(); //we can optimize this by noticing that we don't need the computed string.
+            }
+            else if (c=='{')
+            {
+                if (nextNonWhiteSpaceCharacter()!='}')
+                {
+                    this.position--;
+                    for (;;)
+                    {
+                        if (getName()==null)
+                        {
+                            break;
+                        }
+                        skip();
+                        if (isEndOfElements())
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            else if (c=='[')
+            {
+                if (nextNonWhiteSpaceCharacter()!=']')
+                {
+                    this.position--;
+                    for (;;)
+                    {
+                        skip();
+                        if (isEndOfArray())
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                this.position--;
+                getValueText();
+            }
+        }
+        public void skipOld() throws Exception
+        {
+            char c=nextNonWhiteSpaceCharacter();
             this.position--;
             if (c=='"')
             {

@@ -43,23 +43,20 @@ public class TableRow extends GlobalEventTagElement<TableRow>
             if (item==null)
             {
                 addInner(new td());
+                continue;
             }
-            else if (item instanceof TagElement)
+            if (item instanceof TagElement)
             {
                 TagElement<?> tagElement=(TagElement<?>)item;
-                if (tagElement.getTag().equals("td"))
+                String tag=tagElement.getTag();
+                
+                if (tag.equals("td")||(tag.equals("th")))
                 {
                     addInner(item);
-                }
-                else
-                {
-                    addInner(new th().addInner(item));
+                    continue;
                 }
             }
-            else
-            {
-                addInner(new td().addInner(item));
-            }
+            addInner(new td().addInner(item));
         }
         return this;
     }

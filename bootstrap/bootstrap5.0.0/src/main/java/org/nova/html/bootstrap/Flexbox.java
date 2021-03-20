@@ -25,7 +25,7 @@ import org.nova.html.bootstrap.classes.AlignSelf;
 import org.nova.html.bootstrap.classes.Flex;
 import org.nova.html.bootstrap.classes.Justify;
 
-public class Flexbox extends Component<Flexbox> 
+public class Flexbox extends StyleComponent<Flexbox> 
 {
     public Flexbox(Flex flex)
     {

@@ -21,7 +21,7 @@
  ******************************************************************************/
 package org.nova.html.bootstrap;
 
-import org.nova.html.bootstrap.classes.DeviceClass;
+import org.nova.html.bootstrap.classes.BreakPoint;
 import org.nova.html.bootstrap.classes.Display;
 import org.nova.html.bootstrap.classes.Edge;
 import org.nova.html.bootstrap.classes.Flex;
@@ -34,8 +34,10 @@ import org.nova.html.elements.Composer;
 import org.nova.html.elements.InputElement;
 import org.nova.html.elements.InputType;
 import org.nova.html.elements.TagElement;
+import org.nova.html.enums.autocomplete;
+import org.nova.html.tags.input_text;
 
-public class InputComponent<ELEMENT extends InputComponent<ELEMENT>> extends InputElement<ELEMENT> implements Styling
+public class InputComponent<ELEMENT extends InputComponent<ELEMENT>> extends InputElement<ELEMENT> implements Styling<ELEMENT>
 {
     protected InputComponent(String tag,InputType inputType,String componentClass)
     {
@@ -59,36 +61,29 @@ public class InputComponent<ELEMENT extends InputComponent<ELEMENT>> extends Inp
         super(inputType);
     }
 
-    public ELEMENT form_control()
+    public ELEMENT btn_check()
     {
-        return addClass("form-control");
+        return addClass("btn-check");
     }
 
-    @Override
-    public ELEMENT addClass(Object class_,Object...fragments)
+    public ELEMENT autocomplete(autocomplete autocomplete) //text, search, url, tel, email, password, datepickers, range, and color.
     {
-        if (fragments!=null)
+        return attr("autocomplete",autocomplete);
+    }
+    public ELEMENT autocomplete(boolean autocomplete)
+    {
+        if (autocomplete)
         {
-            if (class_!=null)
-            {
-                StringBuilder sb=new StringBuilder(class_.toString());
-                for (Object fragment:fragments)
-                {
-                    if (fragment!=null)
-                    {
-                        sb.append('-').append(fragment);
-                    }
-                }
-                addClass(sb.toString());
-            }
+            attr("autocomplete");
         }
         return (ELEMENT)this;
     }
-
+    
     @Override
     public TagElement<?> getElement()
     {
         return this;
     }
 
+    
 }
