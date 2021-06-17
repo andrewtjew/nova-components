@@ -70,6 +70,10 @@ public class CallBuilder
     {
         return "org.nova.html.remoting.post("+formQueryBuilder.js_query(pathAndQuery)+")";
     }
+    public String js_post(String path,FormQueryBuilder formQueryBuilder)
+    {
+        return js_post(new PathAndQuery(path),formQueryBuilder);
+    }
     /*
     public String generateOneGet(PathAndQuery pathAndQuery,FormQueryBuilder formQueryBuilder)
     {

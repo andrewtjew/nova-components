@@ -96,6 +96,10 @@ public abstract class StyleComponent<ELEMENT extends StyleComponent<ELEMENT>> ex
     {
         return addClass("form-control");
     }
+    public ELEMENT form_text()
+    {
+        return addClass("form-text");
+    }
 
 /*
     protected StyleColor color()

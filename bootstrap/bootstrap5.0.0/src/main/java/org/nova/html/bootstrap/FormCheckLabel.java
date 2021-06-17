@@ -28,7 +28,7 @@ public class FormCheckLabel extends StyleComponent<FormCheckLabel>
 {
     public FormCheckLabel()
     {
-        super("label","form-check-label");
+        super("label",null);
     }
     public FormCheckLabel for_(String element_id)
     {
@@ -36,7 +36,7 @@ public class FormCheckLabel extends StyleComponent<FormCheckLabel>
     }
     public FormCheckLabel for_(TagElement<?> element)
     {
-        return attr("for",element);
+        return attr("for",element.id());
     }
     
 }

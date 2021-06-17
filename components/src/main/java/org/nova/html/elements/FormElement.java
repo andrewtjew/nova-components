@@ -81,4 +81,9 @@ public class FormElement<ELEMENT extends FormElement<ELEMENT>> extends GlobalEve
     {
         return attr("target",framename);
     }
+    public ELEMENT onsubmit(String script)
+    {
+        return attr("onsubmit",script);
+    }
+    
 }

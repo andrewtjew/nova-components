@@ -25,6 +25,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 import org.nova.concurrent.Lock;
 import org.nova.http.server.Context;
 import org.nova.http.server.Filter;
@@ -148,36 +150,36 @@ public class SessionFilter extends Filter
         String token=getToken(context);
         Session session=this.sessionManager.getSessionByToken(token);
 
+        Method method=context.getRequestHandler().getMethod();
+        if (method.getAnnotation(AllowNoSession.class)!=null)
+        {
+            if (session!=null)
+            {
+                context.setState(session);
+            }
+            return filterChain.next(parent, context);
+        }
         if (session==null)
         {
-            Method method=context.getRequestHandler().getMethod();
-            if (method.getAnnotation(AllowNullSession.class)!=null)
+            if (this.debugSession==null)
             {
-                return filterChain.next(parent, context);
+                Response<?> response=getAbnormalSessionRequestHandler(context).handleNoSessionRequest(parent,this, context);
+                if (response!=null)
+                {
+                    return response;
+                }
+                // handleNoSessionRequest() can create a valid session, so we check again.
+                session=this.sessionManager.getSessionByToken(token);
+                if (session==null)
+                {
+                    return null;
+                }
             }
             else
             {
-                if (this.debugSession==null)
-                {
-                    Response<?> response=getAbnormalSessionRequestHandler(context).handleNoSessionRequest(parent,this, context);
-                    if (response!=null)
-                    {
-                        return response;
-                    }
-                    // handleNoSessionRequest() can create a valid session, so we check again.
-                    session=this.sessionManager.getSessionByToken(token);
-                    if (session==null)
-                    {
-                        return null;
-                    }
-                }
-                else
-                {
-                    session=this.debugSession;
-                }
+                session=this.debugSession;
             }
         }
-        
         Lock<String> lock=sessionManager.waitForLock(parent,session.getToken());
         if (lock==null)
         {
@@ -196,6 +198,10 @@ public class SessionFilter extends Filter
         finally
         {
             session.endSessionProcessing();
+            HttpServletResponse response=context.getHttpServletResponse();
+            response.setHeader("Cache-Control","no-store, no-cache, must-revalidate, max-age=0");
+            response.setHeader("Pragma", "no-cache");
+            response.setHeader("Expires", "0");
         }
         
     }

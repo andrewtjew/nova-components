@@ -178,10 +178,10 @@ public interface Styling<ELEMENT>
     {
         return addClass("rounded");
     }
-    public default ELEMENT rounded(int value)
-    {
-        return addClass("rounded",value);
-    }
+//    public default ELEMENT rounded(int value)
+//    {
+//        return addClass("rounded",value);
+//    }
     public default ELEMENT rounded(Rounded value)
     {
         return addClass("rounded",value);

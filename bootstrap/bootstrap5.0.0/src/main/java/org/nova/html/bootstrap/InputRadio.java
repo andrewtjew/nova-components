@@ -53,5 +53,10 @@ public class InputRadio extends InputComponent<InputRadio>
         }
         return attr("value",value.toString());
     }
+    public InputRadio form_check_input()
+    {
+        addClass("form-check-input");
+        return this;
+    }
 }
 

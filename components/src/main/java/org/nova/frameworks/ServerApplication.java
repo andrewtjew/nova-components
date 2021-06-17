@@ -27,7 +27,7 @@ import org.nova.collections.FileCache;
 import org.nova.collections.FileCacheConfiguration;
 import org.nova.concurrent.Synchronization;
 import org.nova.configuration.Configuration;
-import org.nova.html.ExtionsionToTypeMappings;
+import org.nova.html.ExtionsionToContentTypeMappings;
 import org.nova.html.elements.Element;
 import org.nova.html.elements.HtmlElementWriter;
 import org.nova.html.operator.MenuBar;
@@ -64,7 +64,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
 	final private OperatorVariableManager operatorVariableManager;
 	final private FileCache fileCache;
 	final private String baseDirectory;
-	final private ExtionsionToTypeMappings typeMappings;
+	final private ExtionsionToContentTypeMappings typeMappings;
 	final private DisruptorManager disruptorManager;
 	private long startTime;
 	final private MenuBar menuBar;
@@ -97,7 +97,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
         this.localHostName=configuration.getValue("ServerApplication.localHostNameOverride",Utils.getLocalHostName());
         
         this.operatorVariableManager=new OperatorVariableManager();
-		this.typeMappings=ExtionsionToTypeMappings.fromDefault();
+		this.typeMappings=ExtionsionToContentTypeMappings.fromDefault();
 
         int operatorPort=this.operatorTransport.getPorts()[0];
  
@@ -368,7 +368,7 @@ public abstract class ServerApplication extends CoreEnvironmentApplication
 		return this.fileCache;
 	}
 
-	public ExtionsionToTypeMappings getContentTypeMappings()
+	public ExtionsionToContentTypeMappings getContentTypeMappings()
 	{
 		return this.typeMappings;
 	}

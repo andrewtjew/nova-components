@@ -128,8 +128,17 @@ public class ResourceController
     @Log(responseContent=false)
     public void resource(@PathParam(PathParam.AT_LEAST_ONE_SEGMENT) String file, Context context, Trace parent) throws Throwable
     {
-        Trace trace=new Trace(parent,"ResourceController.resource");
-        try
+        HttpServletResponse response = context.getHttpServletResponse();
+        if (file!=null)
+        {
+            if (file.contains(".."))
+            {
+                response.setStatus(HttpStatus.NOT_FOUND_404);
+                return;
+            }
+        }
+//        System.out.println(file);
+        try (Trace trace=new Trace(parent,"ResourceController.resource"))
         {
             trace.setDetails(file);
             context.setCaptured(true);
@@ -148,7 +157,6 @@ public class ResourceController
                 }
             }
             file=FileUtils.toNativePath(file);
-            HttpServletResponse response = context.getHttpServletResponse();
             byte[] bytes;
             try
             {
@@ -185,7 +193,7 @@ public class ResourceController
                 trace.close(t);
                 if (TEST)
                 {
-                    Testing.printf("Resource: "+file + " not found");
+                    Testing.printf("Resource: "+file + " not found\r\n");
                 }
                 response.setHeader("Cache-Control","no-store, no-cache, must-revalidate, max-age=0");
                 response.setStatus(HttpStatus.NOT_FOUND_404);
@@ -195,6 +203,10 @@ public class ResourceController
             if (contentType != null)
             {
                 response.setContentType(contentType);
+            }
+            if (file.endsWith(".gz"))
+            {
+                response.setHeader("Content-Encoding", "gzip");
             }
 //            response.setContentLength(bytes.length);
             
@@ -227,10 +239,6 @@ public class ResourceController
             
             response.setStatus(HttpStatus.OK_200);
             response.getOutputStream().write(bytes);
-        }
-        finally
-        {
-            trace.close();
         }
     }
 }

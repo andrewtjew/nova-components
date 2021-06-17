@@ -19,46 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.nova.html.bootstrap;
+package org.nova.services;
 
-import org.nova.html.elements.InputType;
-import org.nova.html.enums.autocomplete;
-import org.nova.html.tags.input_checkbox;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class FormCheckbox extends InputComponent<FormCheckbox>
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD,ElementType.TYPE})
+public @interface AllowNoSession
 {
-    public FormCheckbox()
-    {
-        super(InputType.checkbox,"form-check-input");
-        
-    }
-    public FormCheckbox checked() //checkbox or radio
-    {
-        return attr("checked");
-    }
-    public FormCheckbox checked(boolean checked)
-    {
-        if (checked)
-        {
-            attr("checked");
-        }
-        return this;
-    }
-    public FormCheckbox required()  //text, search, url, tel, email, password, date pickers, number, checkbox, radio, and file.
-    {
-        return attr("required");
-    }
-    public FormCheckbox required(boolean required)
-    {
-        if (required)
-        {
-            attr("required");
-        }
-        return this;
-    }
-    public FormCheckbox value(Object text) //button, reset, submit, text, password, hidden, checkbox, radio, image
-    {
-        return attr("value",text);
-    }
 }
-

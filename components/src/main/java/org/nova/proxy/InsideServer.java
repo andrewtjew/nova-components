@@ -85,7 +85,7 @@ public class InsideServer
 
     public void start() throws IOException
     {
-        this.scheduler.schedule(null, "run", (trace)->{run(trace);});
+        this.scheduler.schedule(null, "Proxy", (trace)->{run(trace);});
         
     }
     

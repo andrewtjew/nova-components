@@ -82,8 +82,8 @@ public class JettyServerFactory
 
         
         sslContextFactory.setKeyManagerPassword(keyManagerPassword);
-  //      sslContextFactory.setTrustAll(true);
-        sslContextFactory.setRenegotiationAllowed(false);
+//        sslContextFactory.setTrustAll(true);
+//        sslContextFactory.setRenegotiationAllowed(true);
         ServerConnector sslConnector = new ServerConnector(server, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(config));
         sslConnector.setPort(config.getSecurePort());
         server.setConnectors(new Connector[]{sslConnector});

@@ -80,17 +80,18 @@ class ProxyConnection implements TraceRunnable
                 socket.setReceiveBufferSize(configuration.insideReceiveBufferSize);
                 socket.setSendBufferSize(configuration.insideSendBufferSize);
                 socket.setTcpNoDelay(true);
+                this.inputStream=socket.getInputStream();
+                this.outputStream=socket.getOutputStream();
+
+                byte[] lengthBytes=new byte[4];
+                Packet.read(this.inputStream, lengthBytes, 0, 4);
+                int length=TypeUtils.bigEndianBytesToInt(lengthBytes);
+                byte[] bytes=new byte[length];
+                Packet.read(this.inputStream, bytes,0,length);
+                String text=new String(bytes);
+
                 synchronized(this)
                 {
-                    this.inputStream=socket.getInputStream();
-                    this.outputStream=socket.getOutputStream();
-
-                    byte[] lengthBytes=new byte[4];
-                    Packet.read(this.inputStream, lengthBytes, 0, 4);
-                    int length=TypeUtils.bigEndianBytesToInt(lengthBytes);
-                    byte[] bytes=new byte[length];
-                    Packet.read(this.inputStream, bytes,0,length);
-                    String text=new String(bytes);
                     this.proxyConfiguration=ObjectMapper.readObject(text, ProxyConfiguration.class);
                 }
                 this.server.getMultiTaskSheduler().schedule(null, "handleOutsideConnections", (trace)->{handleOutsideConnections(trace);});
@@ -185,9 +186,15 @@ class ProxyConnection implements TraceRunnable
         private void handleOutsideConnections(Trace parent) throws Throwable
         {
             OutsideConfiguration configuration=this.server.getConfiguration();
+            int outsideListenPort;
+            synchronized(this.proxyConfiguration)
+            {
+                outsideListenPort=this.proxyConfiguration.outsideListenPort;
+            }
             try
             {
-                try (ServerSocket serverSocket=new ServerSocket(this.proxyConfiguration.outsideListenPort,configuration.outsideBacklog))
+                
+                try (ServerSocket serverSocket=new ServerSocket(outsideListenPort,configuration.outsideBacklog))
                 {
                     synchronized(this)
                     {
@@ -211,6 +218,10 @@ class ProxyConnection implements TraceRunnable
                        this.server.getMultiTaskSheduler().schedule(parent, "OutsideConnection", connection);
                     }
                 }
+            }
+            catch (Throwable t)
+            {
+                throw new Throwable("outsideListenPort="+outsideListenPort,t);
             }
             finally
             {

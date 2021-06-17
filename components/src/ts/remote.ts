@@ -15,12 +15,22 @@ namespace nova.remote
 
     function getInputElement(parent:Document|Element,input:Input):HTMLInputElement
     {
-        return parent.querySelector("[name='"+input.name+"']") as HTMLInputElement;
+        var element=parent.querySelector("[name='"+input.name+"']") as HTMLInputElement;
+        if (element==null)
+        {
+            console.log("Element not in scope: name="+input.name);
+        }
+        return element;
     }
 
     function getSelectElement(parent:Document|Element,input:Input):HTMLSelectElement
     {
-        return parent.querySelector("[name='"+input.name+"']") as HTMLSelectElement;
+        var element=parent.querySelector("[name='"+input.name+"']") as HTMLSelectElement;
+        if (element==null)
+        {
+            console.log("Element not in scope: name="+input.name);
+        }
+        return element;
     }
 
     function toData(formID:string,text:string):object

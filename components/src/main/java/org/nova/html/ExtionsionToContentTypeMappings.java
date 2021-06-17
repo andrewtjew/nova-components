@@ -23,25 +23,36 @@ package org.nova.html;
 
 import java.util.HashMap;
 
-public class ExtionsionToTypeMappings
+public class ExtionsionToContentTypeMappings
 {
-    public static ExtionsionToTypeMappings fromDefault()
+    public static ExtionsionToContentTypeMappings fromDefault()
     {
-        ExtionsionToTypeMappings mappings=new ExtionsionToTypeMappings();
+        ExtionsionToContentTypeMappings mappings=new ExtionsionToContentTypeMappings();
+        mappings.addMappings("audio/aac", "aac");
+        mappings.addMappings("audio/mpeg", "mp3","mpeg");
+        mappings.addMappings("audio/mp4", "mp4");
         mappings.addMappings("text/plain", "txt","text");
+        mappings.addMappings("text/csv", "csv");
+        mappings.addMappings("text/css", "css");
         mappings.addMappings("text/javascript", "js");
         mappings.addMappings("text/css", "css");
         mappings.addMappings("text/html", "htm","html");
+        mappings.addMappings("image/gif", "gif");
         mappings.addMappings("image/x-icon", "ico");
         mappings.addMappings("image/jpeg", "jpeg","jpg","jpe");
         mappings.addMappings("image/png", "png");
         mappings.addMappings("image/bmp", "bmp","bm");
+        mappings.addMappings("application/json", "json");
+        mappings.addMappings("application/pdf", "pdf");
+        mappings.addMappings("application/vnd.ms-excel", "xls");
+        mappings.addMappings("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx");
+        mappings.addMappings("application/xml", "xml");
         return mappings;
     }
     
     final private HashMap<String,String> typeMappings;
 
-	public ExtionsionToTypeMappings()
+	public ExtionsionToContentTypeMappings()
 	{
 		this.typeMappings=new HashMap<>();
 	}

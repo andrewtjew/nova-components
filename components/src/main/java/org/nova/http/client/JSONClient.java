@@ -181,9 +181,9 @@ public class JSONClient
        int statusCode=response.getStatusLine().getStatusCode();
        if (statusCode>=300)
        {
-           return new JSONResponse<TYPE>(statusCode, null);
+           return new JSONResponse<TYPE>(statusCode, null,response);
        }
-       return new JSONResponse<TYPE>(statusCode,ObjectMapper.readObject(json, responseContentType));
+       return new JSONResponse<TYPE>(statusCode,ObjectMapper.readObject(json, responseContentType),response);
     }
     
     public <TYPE> JSONResponse<TYPE> getJSON(Trace parent,String traceCategoryOverride,String pathAndQuery,Class<TYPE> responseContentType,Header...headers) throws Throwable
@@ -432,6 +432,7 @@ public class JSONClient
 			if (content!=null)
 			{
 			    String jsonContent=ObjectMapper.writeObjectToString(content);
+//			    System.out.println(jsonContent);
                 context.addLogItem(new Item("request",jsonContent));
 				StringEntity entity=new StringEntity(jsonContent);
 				post.setEntity(entity);

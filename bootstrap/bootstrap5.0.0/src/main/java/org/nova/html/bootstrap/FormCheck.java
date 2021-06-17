@@ -37,12 +37,29 @@ public class FormCheck extends StyleComponent<FormCheck>
         return this;
     }
 
-    public FormCheck add(String labelText,FormCheckbox element)
+//    public FormCheck add(FormCheckbox element,String labelText)
+//    {
+//        returnAddInner(element);
+//        FormCheckLabel label=returnAddInner(new FormCheckLabel()).addInner(labelText).form_control();
+//        label.for_(element);
+//        return this;
+//    }
+
+    public InputCheckbox addInputCheckbox(String labelText)
     {
+        InputCheckbox element=new InputCheckbox().form_check_input();
         returnAddInner(element);
-        label label=returnAddInner(new label()).addInner(labelText);
+        FormCheckLabel label=returnAddInner(new FormCheckLabel()).addInner(labelText);
         label.for_(element);
-        return this;
+        return element;
+    }
+    public InputRadio addInputRadio(String labelText)
+    {
+        InputRadio element=new InputRadio().form_check_input();
+        returnAddInner(element);
+        FormCheckLabel label=returnAddInner(new FormCheckLabel()).addInner(labelText);
+        label.for_(element);
+        return element;
     }
     
 }
