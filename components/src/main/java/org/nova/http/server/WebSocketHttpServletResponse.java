@@ -28,9 +28,9 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.eclipse.jetty.websocket.api.Session;
+import org.nova.utils.Utils;
 
 class WebSocketHttpServletResponse implements HttpServletResponse
 {
@@ -321,7 +321,7 @@ class WebSocketHttpServletResponse implements HttpServletResponse
         {
             return null;
         }
-        String[] values=StringUtils.split(value,';');
+        String[] values=Utils.split(value,';');
         ArrayList<String> list=new ArrayList<>();
         for (String v:values)
         {
